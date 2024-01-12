@@ -50,7 +50,48 @@ const createNewShipment = async (fields, values) => {
     return await utils.insert(pool, table, fields, values);
 }
 
+const updateShipment = async (order_ids, shipment_id) => {
+    //update to Journey
+    const ordersTable = "orders";
+    const currentTime = new Date();
+    const formattedTime = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
+    const statusMessage = "Đóng lô thành công!";
+
+    for (const order_id of order_ids) {
+        const updateJourneyQuery = `
+            UPDATE ${ordersTable}
+            SET journey = JSON_ARRAY_APPEND(
+                COALESCE(journey, '[]'),
+                '$',
+                JSON_OBJECT(
+                    'shipment_id', ?,
+                    'status', ?,
+                    'date', ?
+                )
+            )
+            WHERE order_id = ?
+        `;
+        await pool.query(updateJourneyQuery, [shipment_id, statusMessage, formattedTime, order_id]);
+        
+
+        const updateShipmentQuery = `
+            UPDATE ${table}
+            SET mass = mass + (
+                SELECT mass
+                FROM ${ordersTable}
+                WHERE order_id = ?
+            )
+            WHERE shipment_id = ?
+        `;
+
+        await pool.query(updateShipmentQuery, [order_id, shipment_id]);
+    }
+
+     
+}
+
 module.exports = {
     createNewShipment,
     getDataForShipmentCode,
+    updateShipment,
 };

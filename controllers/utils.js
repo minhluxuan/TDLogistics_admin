@@ -15,6 +15,13 @@ class ShipmentValidation {
         
         return schema.validate(this._data);
     }
+
+    validateUpdateShipment = () => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().alphanum().required(),
+        });
+        return schema.validate(this._data);
+    }
     
 }
 

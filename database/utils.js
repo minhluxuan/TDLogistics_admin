@@ -76,19 +76,10 @@ const getLastRow = async (pool, table) => {
     }
 }
 
-const deleteOne = async (pool, table, fields, values, currentTime = null) =>
+const deleteOne = async (pool, table, fields, values) =>
 {
-    let query;
-    const fieldCondition =  fields.map(field => `${field} = ? `).join(' AND ');
-    if (currentTime !== null) 
-    {
-        const timeCondition = `order_time < = ${currentTime}`; 
-        query = `DELETE FROM ${table} WHERE ${fieldCondition} AND ${timeCondition}  LIMIT 1`;
-    }
-    else
-    {
-        query = `DELETE FROM ${table} WHERE ${fieldCondition} LIMIT 1`;
-    }
+    const whereClause =  fields.map(field => `${field} = ? `).join(' AND ');
+    const query = `DELETE FROM ${table} WHERE ${whereClause} LIMIT 1`;
 
     try {
         const result = await pool.query(query, values);
@@ -103,9 +94,9 @@ const deleteOne = async (pool, table, fields, values, currentTime = null) =>
 
 const deleteMany = async  (pool, table, fields = null, values = null) => {
     let query;
-    if (fields !== null && values !== null) {
-      const conditions =  fields.map(field => `${field} = ? `).join(' AND ');
-      query = `DELETE FROM ${table} WHERE ${conditions}`;
+    if (fields.length > 0 && values.length > 0) {
+        const whereClause =  fields.map(field => `${field} = ?`).join(' AND ');
+        query = `DELETE FROM ${table} WHERE ${whereClause}`;
     }
     else {
         query = `DELETE FROM ${table}`;
@@ -114,7 +105,7 @@ const deleteMany = async  (pool, table, fields = null, values = null) => {
     try {
         const result = await pool.query(query, values);
         console.log("Success!");
-        return result.affectedRows;
+        return result;
     } catch (error) {
         console.log("Error: ", error);
         throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";

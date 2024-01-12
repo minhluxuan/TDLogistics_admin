@@ -17,3 +17,12 @@ Content-Type: application/json
     "transport_partner_id": "TB001",
     "route": "TP.HCM-HANOI"
 }
+
+###
+
+POST http://localhost:5000/api/v1/shipment/update?order_id=DN001&order_id=QN002&order_id=DN002
+Content-Type: application/json
+
+{
+    "shipment_id": "TD202405036131"
+}
