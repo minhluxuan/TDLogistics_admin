@@ -1,0 +1,112 @@
+POST https://tdlogistics.onrender.com/api/v1/otp/send_otp
+content-type: application/json
+
+{
+    "phone_number": "0981430418",
+    "email": "minh.luxuanhcmut@hcmut.edu.vn"
+}
+
+###
+
+POST https://tdlogistics.onrender.com/api/v1/otp/verify_otp
+content-type: application/json
+
+{
+    "phone_number": "0981430418",
+    "email": "minh.luxuanhcmut@hcmut.edu.vn",
+    "otp": 123456
+}
+
+###
+
+GET https://tdlogistics.onrender.com/api/v1/users
+content-type: application/json
+
+###
+
+GET https://tdlogistics.onrender.com/api/v1/users/search?email=minh.luxuancsk22@hcmut.edu.vn
+content-type: application/json
+
+###
+
+POST https://tdlogistics.onrender.com/api/v1/users/check
+content-type: application/json
+
+{
+    "phone_number": "0981430418"
+}
+
+###
+
+POST https://tdlogistics.onrender.com/api/v1/users/create
+content-type: application/json
+
+{
+    "email": "minh.luxuanhcmut@hcmut.edu.vn",
+    "phone_number": "0981430418",
+    "fullname": "Lữ Xuân Minh"
+}
+
+###
+
+PATCH https://tdlogistics.onrender.com/api/v1/users/update
+content-type: application/json
+
+{
+    "phone_number": "0981430418",
+    "email": "minh.luxuancsk22@hcmut.edu.vn"
+}
+
+
+###
+
+POST https://tdlogistics.onrender.com/api/v1/orders/create
+content-type: application/json
+
+{
+    "mass": 24,
+    "height": 30,
+    "width": 25,
+    "length": 60,
+    "long_source": 107.271526,
+    "lat_source": 10.477041,
+    "long_destination": 107.15671211,
+    "lat_destination": 10.525991
+}
+
+###
+
+GET https://tdlogistics.onrender.com/get_session
+content-type: application/json
+
+###
+
+GET https://tdlogistics.onrender.com/destroy_session
+content-type: application/json
+
+###
+
+POST https://tdlogistics.onrender.com/api/v1/orders/search?order_id=TD20240216101781
+content-type: application/json
+
+{
+    "start_order_time": "2024-01-04 00:00:00",
+    "end_order_time": "2024-01-10 00:00:00"
+}
+
+###
+
+PATCH https://tdlogistics.onrender.com/api/v1/orders/update?order_id=TD20240216101781
+content-type: application/json
+
+{
+    "mass": 76
+}
+
+###
+
+DELETE https://tdlogistics.onrender.com/api/v1/orders/cancel?order_id=TD20240216101781
+
+###
+
+GET https://tdlogistics.onrender.com/api/v1/orders/check?order_id=TD20240216101781
