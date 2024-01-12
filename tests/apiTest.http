@@ -1,86 +1,19 @@
-POST http://localhost:5000/api/v1/otp/send_otp
-content-type: application/json
+
+POST http://localhost:5000/api/v1/shipment/create
+Content-Type: application/json
 
 {
-    "phone_number": "0981430418",
-    "email": "minh.luxuanhcmut@hcmut.edu.vn"
+    "staff_id": "HCM_NVT_001",
+    "route": "TP.HCM-HANOI"
 }
 
 ###
 
-POST http://localhost:5000/api/v1/otp/verify_otp
-content-type: application/json
+POST http://localhost:5000/api/v1/shipment/create
+Content-Type: application/json
 
 {
-    "phone_number": "0981430418",
-    "email": "minh.luxuanhcmut@hcmut.edu.vn",
-    "otp": 123456
+    "staff_id": "HCM_DVMH_001",
+    "transport_partner_id": "TB001",
+    "route": "TP.HCM-HANOI"
 }
-
-###
-
-GET http://localhost:5000/api/v1/users
-content-type: application/json
-
-###
-
-GET http://localhost:5000/api/v1/users/search?email=minh.luxuancsk22@hcmut.edu.vn
-content-type: application/json
-
-###
-
-POST http://localhost:5000/api/v1/users/check
-content-type: application/json
-
-{
-    "phone_number": "0981430418"
-}
-
-###
-
-POST http://localhost:5000/api/v1/users/create
-content-type: application/json
-
-{
-    "email": "minh.luxuanhcmut@hcmut.edu.vn",
-    "phone_number": "0981430418",
-    "fullname": "Lữ Xuân Minh"
-}
-
-###
-
-PATCH http://localhost:5000/api/v1/users/update
-content-type: application/json
-
-{
-    "phone_number": "0981430418",
-    "email": "minh.luxuancsk22@hcmut.edu.vn"
-}
-
-
-###
-
-POST http://localhost:5000/api/v1/orders/create
-content-type: application/json
-
-{
-    "order_id": "TD1254",
-    "mass": 24,
-    "height": 30,
-    "width": 25,
-    "length": 60,
-    "long_source": 103.44,
-    "lat_source": 72.4535,
-    "long_destination": 80.343,
-    "lat_destination": 34.55345
-}
-
-###
-
-GET http://localhost:5000/get_session
-content-type: application/json
-
-###
-
-GET http://localhost:5000/destroy_session
-content-type: application/json
