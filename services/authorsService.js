@@ -21,8 +21,8 @@ const updateStaff = async (fields, values, conditionFields, conditionValues) =>{
   return await Users.updateStaff (fields, values, conditionFields, conditionValues) ;
 }
 
-const deleteStaff = async(staffId, agencyId)=>{
-  return await Users.deleteStaff(staffId, agencyId);
+const deleteStaff = async(fields, values)=>{
+  return await Users.deleteStaff(fields, values);
 }
 
 module.exports={
