@@ -12,8 +12,13 @@ const updateShipment = async(order_ids, shipment_id) => {
     await Shipment.updateShipment(order_ids, shipment_id);
 }
 
+const getShipment = async (shipment_id) => {
+    return await Shipment.getShipment(shipment_id);
+}
+
 module.exports = {
     createNewShipment,
     getDataForShipmentCode,
     updateShipment,
+    getShipment,
 };

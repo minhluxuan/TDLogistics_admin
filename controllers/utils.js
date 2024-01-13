@@ -23,6 +23,13 @@ class ShipmentValidation {
         return schema.validate(this._data);
     }
     
+    validateGetShipment = () => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().alphanum().required(),
+        });
+        return schema.validate(this._data);
+    }
+
 }
 
 const getNameLetter = async (fullname) => {

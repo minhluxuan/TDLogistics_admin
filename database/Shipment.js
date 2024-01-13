@@ -51,29 +51,33 @@ const createNewShipment = async (fields, values) => {
 }
 
 const updateShipment = async (order_ids, shipment_id) => {
-    //update to Journey
+    
     const ordersTable = "orders";
     const currentTime = new Date();
     const formattedTime = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
     const statusMessage = "Đóng lô thành công!";
 
-    for (const order_id of order_ids) {
+    for (const order_id of order_ids) { 
+        //append to Journey and update parent of orders
         const updateJourneyQuery = `
             UPDATE ${ordersTable}
-            SET journey = JSON_ARRAY_APPEND(
-                COALESCE(journey, '[]'),
-                '$',
-                JSON_OBJECT(
-                    'shipment_id', ?,
-                    'status', ?,
-                    'date', ?
-                )
-            )
+            SET 
+                journey = JSON_ARRAY_APPEND(
+                    COALESCE(journey, '[]'),
+                    '$',
+                    JSON_OBJECT(
+                        'shipment_id', ?,
+                        'status', ?,
+                        'date', ?
+                    )
+                ),
+                parent = ?
             WHERE order_id = ?
         `;
-        await pool.query(updateJourneyQuery, [shipment_id, statusMessage, formattedTime, order_id]);
-        
 
+        await pool.query(updateJourneyQuery, [shipment_id, statusMessage, formattedTime, shipment_id, order_id]);
+
+        //update shipment
         const updateShipmentQuery = `
             UPDATE ${table}
             SET mass = mass + (
@@ -85,13 +89,21 @@ const updateShipment = async (order_ids, shipment_id) => {
         `;
 
         await pool.query(updateShipmentQuery, [order_id, shipment_id]);
-    }
+    }   
+}
 
-     
+const getShipment = async (shipment_id) => {
+    //get all the order_id that have parent is shipment_id
+    const ordersTable = "orders";
+    const getShipmentQuery = `SELECT order_id FROM ${ordersTable} WHERE parent = ?`;
+    const [rows] = await pool.query(getShipmentQuery, [shipment_id]);
+    const result = rows.map(row => row.order_id);
+    return result;
 }
 
 module.exports = {
     createNewShipment,
     getDataForShipmentCode,
     updateShipment,
+    getShipment,
 };

@@ -26,3 +26,12 @@ Content-Type: application/json
 {
     "shipment_id": "TD202405036131"
 }
+
+###
+
+GET http://localhost:5000/api/v1/shipment/search
+Content-Type: application/json
+
+{
+    "shipment_id": "TD202405036131"
+}
