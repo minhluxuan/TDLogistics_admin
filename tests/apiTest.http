@@ -39,3 +39,13 @@ Content-Type: application/json
 {
     "shipment_id": "TD202405036131"
 }
+
+###
+
+POST http://localhost:5000/api/v1/shipment/decompose
+
+Content-Type: application/json
+
+{
+    "shipment_id": "TD202405036131"
+}

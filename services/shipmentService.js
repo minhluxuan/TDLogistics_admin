@@ -16,9 +16,14 @@ const getShipment = async (fields, values) => {
     return await Shipment.getShipment(fields, values);
 }
 
+const decompseShipment = async (shipment_id) => {
+    return await Shipment.decompseShipment(shipment_id);
+}
+
 module.exports = {
     createNewShipment,
     getDataForShipmentCode,
     updateShipment,
     getShipment,
+    decompseShipment,
 };

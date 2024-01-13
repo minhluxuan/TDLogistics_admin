@@ -111,9 +111,29 @@ const getShipment = async (fields, values) => {
     return result;
 }
 
+const decompseShipment = async (shipment_id) => {
+    const field = "status";
+    const conditionField = "shipment_id";
+    const query = `
+        UPDATE ${table}
+        SET ${field} = CASE
+            WHEN ${field} = 0 THEN 1
+            WHEN ${field} = 1 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Đơn hàng được rã từ trước!';
+            ELSE ${field}
+        END
+        WHERE ${conditionField} = ?;
+    `;
+
+    const result = await pool.query(query, [shipment_id]);
+    return result[0];
+}
+
 module.exports = {
     createNewShipment,
     getDataForShipmentCode,
     updateShipment,
     getShipment,
+    decompseShipment,
 };

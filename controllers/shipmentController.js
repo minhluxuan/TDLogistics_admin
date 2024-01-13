@@ -197,8 +197,46 @@ const getShipment = async (req, res) => {
 
 }
 
+const decompseShipment = async (req, res) => {
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
+
+    
+    try {
+        const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
+        const { error } = shipmentRequestValidation.validateDecomposingShipment();
+
+        if(error) {
+            return res.status(400).json({
+                error: true,
+                message: "Thông tin không hợp lệ!",
+            });
+        }
+
+        const shipmentID = req.body.shipment_id;
+        const result = await shipmentService.decompseShipment(shipmentID);
+        return res.status(200).json({
+            error: false,
+            data: result,
+            message: "Rã lô hàng thành công!",
+        });
+
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error,
+        });
+    }
+    
+}
+
 module.exports = {
     createNewShipment,
     updateShipment,
     getShipment,
+    decompseShipment,
 };
