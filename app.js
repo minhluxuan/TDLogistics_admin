@@ -14,6 +14,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const indexRouter = require('./routes/index');
+const authorsRouter = require("./routes/authorsRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -72,6 +73,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', indexRouter);
+app.use("/api/v1/authors", authorsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
