@@ -15,15 +15,19 @@ Content-Type: application/json
 {
     "staff_id": "HCM_DVMH_001",
     "transport_partner_id": "TB001",
-    "route": "TP.HCM-HANOI"
+    "lat_source": 103.44532323,
+    "long_source": 72.45353343,
+    "lat_destination": 80.34342321,
+    "long_destination": 34.553453453,
 }
 
 ###
 
-POST http://localhost:5000/api/v1/shipment/update?order_id=DN001&order_id=QN002&order_id=DN002
+POST http://localhost:5000/api/v1/shipment/update
 Content-Type: application/json
 
 {
+    "mass": 123,
     "shipment_id": "TD202405036131"
 }
 

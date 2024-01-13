@@ -10,20 +10,25 @@ class ShipmentValidation {
         const schema = Joi.object({
             staff_id: Joi.string().required(),
             transport_partner_id: Joi.string().alphanum(),
+            long_source: Joi.number().min(-180).max(180).required(),
+            lat_source: Joi.number().min(-90).max(90).required(),
+            long_destination: Joi.number().min(-180).max(180).required(),
+            lat_destination: Joi.number().min(-90).max(90).required(),
             route: Joi.string().required(),
         });
         
         return schema.validate(this._data);
     }
 
-    validateUpdateShipment = () => {
+    validateUpdatingShipment = () => {
         const schema = Joi.object({
             shipment_id: Joi.string().alphanum().required(),
+            mass: Joi.number().precision(2).min(0).required(),
         });
         return schema.validate(this._data);
     }
     
-    validateGetShipment = () => {
+    validateFindingShipment = () => {
         const schema = Joi.object({
             shipment_id: Joi.string().alphanum().required(),
         });
@@ -32,7 +37,7 @@ class ShipmentValidation {
 
 }
 
-const getNameLetter = async (fullname) => {
+const shortenName = async (fullname) => {
     const words = fullname.split(' ');
     const initials = words.map(word => word.charAt(0).toUpperCase());
     return initials.join('');
@@ -40,5 +45,5 @@ const getNameLetter = async (fullname) => {
 
 module.exports = {
     ShipmentValidation,
-    getNameLetter,
+    shortenName,
 };

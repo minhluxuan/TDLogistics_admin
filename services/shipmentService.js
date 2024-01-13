@@ -8,12 +8,12 @@ const getDataForShipmentCode = async(staff_id, transport_partner_id = null) => {
     return await Shipment.getDataForShipmentCode(staff_id, transport_partner_id);
 }
 
-const updateShipment = async(order_ids, shipment_id) => {
-    await Shipment.updateShipment(order_ids, shipment_id);
+const updateShipment = async(fields, values, conditionFields, conditionValues) => {
+    return await Shipment.updateShipment(fields, values, conditionFields, conditionValues);
 }
 
-const getShipment = async (shipment_id) => {
-    return await Shipment.getShipment(shipment_id);
+const getShipment = async (fields, values) => {
+    return await Shipment.getShipment(fields, values);
 }
 
 module.exports = {
