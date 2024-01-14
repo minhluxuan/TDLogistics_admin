@@ -43,9 +43,60 @@ Content-Type: application/json
 ###
 
 POST http://localhost:5000/api/v1/shipment/decompose
-
 Content-Type: application/json
 
 {
     "shipment_id": "TD202405036131"
+}
+
+###
+
+POST http://localhost:5000/api/v1/container/create
+Content-Type: application/json
+
+{
+    "type" : "plane",
+    "shipment_id": "TD202405188565",
+    "container_id": "VNAIR3004"
+}
+
+###
+
+POST http://localhost:5000/api/v1/container/update
+Content-Type: application/json
+
+{
+    "choice" : "out",
+    "shipment_id": "TD20240511925",
+    "container_id": "50A-B1-56789"
+}
+
+###
+
+POST http://localhost:5000/api/v1/container/update
+Content-Type: application/json
+
+{
+    "choice" : "in",
+    "shipment_id": "TD202405036131",
+    "container_id": "50A-B1-56789"
+}
+
+###
+GET http://localhost:5000/api/v1/container/search
+Content-Type: application/json
+
+{
+    "container_id": "50A-B1-56789"
+}
+
+###
+
+POST http://localhost:5000/api/v1/container/create
+Content-Type: application/json
+
+{
+    "type" : "truck",
+    "shipment_id": "TD202405188565",
+    "container_id": "VNAIR3004"
 }

@@ -93,41 +93,46 @@ const createNewShipment = async (fields, values) => {
 // }
 
 const updateShipment = async (fields, values, conditionFields, conditionValues) => {
-    const setClause = `${fields} = ${fields} + ?`;
-    const whereClause = `${conditionFields} = ?`;
+    try {
+        const setClause = `${fields} = ${fields} + ?`;
+        const whereClause = `${conditionFields} = ?`;
 
-    const query = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
+        const query = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
 
-    const result = await pool.query(query, [values, conditionValues]);
-    return result[0];
+        const result = await pool.query(query, [values, conditionValues]);
+        return result[0];
+    } catch (error) {
+        console.log("Error: ", error);
+        throw error;
+    }
+    
 };
 
 const getShipment = async (fields, values) => {
-    //get all the order_id that have parent is shipment_id
-    const ordersTable = "orders";
-    const getShipmentQuery = `SELECT order_id FROM ${ordersTable} WHERE ${fields} = ?`;
-    const [rows] = await pool.query(getShipmentQuery, [values]);
-    const result = rows.map(row => row.order_id);
-    return result;
+    try {
+        //get all the order_id that have parent is shipment_id
+        const ordersTable = "orders";
+        const getShipmentQuery = `SELECT order_id FROM ${ordersTable} WHERE ${fields} = ?`;
+        const [rows] = await pool.query(getShipmentQuery, [values]);
+        const result = rows.map(row => row.order_id);
+        return result;
+    } catch (error) {
+        console.log("Error: ", error);
+        throw error;
+    }
 }
 
 const decompseShipment = async (shipment_id) => {
-    const field = "status";
-    const conditionField = "shipment_id";
-    const query = `
-        UPDATE ${table}
-        SET ${field} = CASE
-            WHEN ${field} = 0 THEN 1
-            WHEN ${field} = 1 THEN
-                SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Đơn hàng được rã từ trước!';
-            ELSE ${field}
-        END
-        WHERE ${conditionField} = ?;
-    `;
-
-    const result = await pool.query(query, [shipment_id]);
-    return result[0];
+    try {
+        const field = "status";
+        const conditionField = "shipment_id";
+        const query = `UPDATE ${table} SET ${field} = 1 WHERE ${conditionField} = ? `;
+        const result = await pool.query(query, [shipment_id]);
+        return result[0];
+    } catch (error) {
+        console.log("Error: ", error);
+        throw error;
+    }
 }
 
 module.exports = {

@@ -44,6 +44,41 @@ class ShipmentValidation {
 
 }
 
+
+class ContainerValidation {
+    constructor(data) {
+        this._data = data;
+    }
+
+    validateCreatingConatiner = () => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().required(),
+            container_id: Joi.string().required(),
+            type: Joi.string().required(),
+        });
+        
+        return schema.validate(this._data);
+    }
+
+    validateUpdatingConatiner = () => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().required(),
+            container_id: Joi.string().required(),
+            choice: Joi.string().required(),
+        });
+        
+        return schema.validate(this._data);
+    }
+
+    validateFindingConatiner = () => {
+        const schema = Joi.object({
+            container_id: Joi.string().required(),
+        });
+        
+        return schema.validate(this._data);
+    }
+}
+
 const shortenName = async (fullname) => {
     const words = fullname.split(' ');
     const initials = words.map(word => word.charAt(0).toUpperCase());
@@ -52,5 +87,6 @@ const shortenName = async (fullname) => {
 
 module.exports = {
     ShipmentValidation,
+    ContainerValidation,
     shortenName,
 };
