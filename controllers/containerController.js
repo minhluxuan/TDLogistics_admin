@@ -49,7 +49,7 @@ const createContainer = async (req, res) => {
 }
 
 const updateContainer = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission < 3) {
+    // if (!req.isAuthenticated() || req.user.permission < 2) {
     //     return res.status(401).json({
     //         error: true,
     //         message: "Bạn không được phép truy cập tài nguyên này.",
@@ -81,6 +81,12 @@ const updateContainer = async (req, res) => {
             });
         }
         else if(choice === "out") {
+            // if (req.user.permission < 3) {
+            //     return res.status(401).json({
+            //         error: true,
+            //         message: "Bạn không được phép truy cập tài nguyên này.",
+            //     });
+            // }
             const result = await containerService.updateOutContainer(shipmentID, containerID);
             return res.status(200).json({
                 error: false,

@@ -31,10 +31,12 @@ const updateInContainer = async (shipment_id, container_id) => {
     try {
         const vehicleTable = "vehicle";
 
-        const getMassQuery = `SELECT mass FROM ${table} WHERE shipment_id = ?`;
-        const [shipmentRows] = await pool.query(getMassQuery, [shipment_id]);
-        const { mass: shipmentMass } = shipmentRows[0];
-
+        const getShipmentQuery = `SELECT mass, parent FROM ${table} WHERE shipment_id = ?`;
+        const [shipmentRows] = await pool.query(getShipmentQuery, [shipment_id]);
+        const { mass: shipmentMass, parent: shipmentParent } = shipmentRows[0];
+        if(shipmentParent !== null) {
+            throw new Error("Lô hàng đã được quét lên từ trước!");
+        }
         const vehicleQuery = `SELECT mass, max_load FROM ${vehicleTable} WHERE vehicle_id = ?`;
         const [vehicleRows] = await pool.query(vehicleQuery, [container_id]);
         if(vehicleRows.length === 0) {
