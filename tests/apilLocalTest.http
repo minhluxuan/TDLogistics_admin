@@ -1,78 +1,35 @@
-POST http://localhost:5000/api/v1/otp/send_otp
+POST http://localhost:5000/api/v1/staffs/login
 content-type: application/json
 
 {
-    "phone_number": "0981430418",
-    "email": "minh.luxuanhcmut@hcmut.edu.vn"
+    "cccd": "077204005692",
+    "password": "123456"
 }
 
 ###
 
-POST http://localhost:5000/api/v1/otp/verify_otp
+POST http://localhost:5000/api/v1/staffs/create
 content-type: application/json
 
 {
+    "fullname": "Lữ Xuân Minh",
+    "username": "minhluxuan",
+    "password": "qpk978",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005692",
     "phone_number": "0981430418",
     "email": "minh.luxuanhcmut@hcmut.edu.vn",
-    "otp": 123456
+    "role": "Giám đốc",
+    "salary": 25000000,
+    "paid_salary": 50000000,
+    "address": "Thị trấn Đất Đỏ, Huyện Đất Đỏ, tỉnh Bà Rịa - Vũng Tàu",
+    "agency_id": 72000
 }
 
 ###
 
-GET http://localhost:5000/api/v1/users
+GET http://localhost:5000/api/v1/staffs/search?staff_id=000000001
 content-type: application/json
-
-###
-
-GET http://localhost:5000/api/v1/users/search?email=minh.luxuancsk22@hcmut.edu.vn
-content-type: application/json
-
-###
-
-POST http://localhost:5000/api/v1/users/check
-content-type: application/json
-
-{
-    "phone_number": "0981430418"
-}
-
-###
-
-POST http://localhost:5000/api/v1/users/create
-content-type: application/json
-
-{
-    "email": "minh.luxuanhcmut@hcmut.edu.vn",
-    "phone_number": "0981430418",
-    "fullname": "Lữ Xuân Minh"
-}
-
-###
-
-PATCH http://localhost:5000/api/v1/users/update
-content-type: application/json
-
-{
-    "phone_number": "0981430418",
-    "email": "minh.luxuancsk22@hcmut.edu.vn"
-}
-
-
-###
-
-POST http://localhost:5000/api/v1/orders/create
-content-type: application/json
-
-{
-    "mass": 24,
-    "height": 30,
-    "width": 25,
-    "length": 60,
-    "long_source": 107.271526,
-    "lat_source": 10.477041,
-    "long_destination": 107.15671211,
-    "lat_destination": 10.525991
-}
 
 ###
 
@@ -81,40 +38,15 @@ content-type: application/json
 
 ###
 
-GET http://localhost:5000/destroy_session
-content-type: application/json
-
-###
-
-DELETE http://localhost:5000/api/v1/orders/cancel
+PATCH http://localhost:5000/api/v1/staffs/update?staff_id=000000001
 content-type: application/json
 
 {
-    "order_id": "TD1254"
-}
-
-###
-POST http://localhost:5000/api/v1/orders/search?order_id=TD20240217499622
-content-type: application/json
-
-{
-    "start_order_time": "2024-01-04 00:00:00",
-    "end_order_time": "2024-01-10 00:00:00"
+    "role": "Nhân viên giao dịch",
+    "paid_salary": 25000000
 }
 
 ###
 
-PATCH http://localhost:5000/api/v1/orders/update?order_id=TD20240217499622
+DELETE http://localhost:5000/api/v1/staffs/delete?staff_id=000000001
 content-type: application/json
-
-{
-    "mass": 76
-}
-
-###
-
-DELETE http://localhost:5000/api/v1/orders/cancel?order_id=TD20240217499622
-
-###
-
-GET http://localhost:5000/api/v1/orders/check?order_id=TD20240217499622

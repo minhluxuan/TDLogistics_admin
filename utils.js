@@ -1,20 +1,19 @@
-const setSession = (user, done) => {
-    done(null, { user_id: user.user_id, phone_number: user.phone_number, permission: user.permission });
+const setStaffSession = (staff, done) => {
+    done(null, { staff_id: staff.staff_id, agency_id: staff.agency_id, permission: staff.permission });
 }
 
-const verifyPermission = (user, done) => {
-    if (user.permission > 0) {
+const verifyStaffPermission = (staff, done) => {
+    if (staff.permission === 3) {
         return done(null, {
-            user_id: user.user_id,
-            phone_number: user.phone_number,
-            permission: user.permission,
-            active: true,
+            staff_id: staff.staff_id,
+            agency_id: staff.agency_id,
+            permission: staff.permission,
         });
     }
     done(null, false);
 }
 
 module.exports = {
-    setSession,
-    verifyPermission,
+    setStaffSession,
+    verifyStaffPermission,
 }

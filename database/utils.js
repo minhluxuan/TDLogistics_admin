@@ -1,5 +1,5 @@
 const findOne = async (pool, table, fields, values) => {
-    const query = `SELECT * FROM ${table} WHERE ${fields.map(field => `${field} = ?`)} LIMIT 1`;
+    const query = `SELECT * FROM ${table} WHERE ${fields.map(field => `${field} = ?`).join(" AND ")} LIMIT 1`;
 
     try {
         const result = await pool.query(query, values);
@@ -7,7 +7,7 @@ const findOne = async (pool, table, fields, values) => {
         return result[0];
     } catch (error) {
         console.log("Error: ", error);
-        throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
     }
 }
 
@@ -28,7 +28,7 @@ const find = async (pool, table, fields = null, values = null) => {
         return result[0];
     } catch (error) {
         console.log("Error: ", error);
-        throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
     }
 }
 
@@ -40,7 +40,7 @@ const insert = async (pool, table, fields, values) => {
         return result;
     } catch (error) {
         console.log("Error: ", error);
-        throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
     }
 }
 
@@ -49,13 +49,13 @@ const update = async (pool, table, fields, values, conditionFields, conditionVal
     const whereClause = conditionFields.map(conditionField => `${conditionField} = ?`).join(" AND ");
     
     const query = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
-    
+
     try {
         const result = await pool.query(query, [...values, ...conditionValues]);
         return result;
     } catch (error) {
         console.log("Error: ", error);
-        throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
     }
 }
 
@@ -72,7 +72,7 @@ const getLastRow = async (pool, table) => {
         return null;
     } catch (error) {
         console.log("Error: ", error);
-        throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
     }
 }
 
@@ -97,7 +97,7 @@ const deleteOne = async (pool, table, fields, values, currentTime = null) =>
     } 
     catch (error) {
         console.log("Error: ", error);
-        throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
     }
 }
 
@@ -117,7 +117,7 @@ const deleteMany = async  (pool, table, fields = null, values = null) => {
         return result.affectedRows;
     } catch (error) {
         console.log("Error: ", error);
-        throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
     }
 }
 
