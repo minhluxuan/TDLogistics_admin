@@ -20,7 +20,7 @@ const sessionStrategy = new LocalStrategy({
     const staff_id = result[0]["staff_id"];
     const agency_id = result[0]["agency_id"];
 
-    const permission = 3;
+    const permission = 2;
 
     return done(null, {
         staff_id,
