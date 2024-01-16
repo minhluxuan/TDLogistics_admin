@@ -1,6 +1,8 @@
 const express = require("express");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const multer = require("multer");
+const bcrypt = require("bcrypt");
 const staffsController = require("../controllers/staffsController");
 const utils = require("../utils");
 const Staffs = require("../database/Staffs");
@@ -11,15 +13,21 @@ const sessionStrategy = new LocalStrategy({
     usernameField: "cccd",
     passwordField: "password",
 }, async (cccd, password, done) => {
-    const result = await Staffs.getOneStaff(["cccd", "password"], [cccd, password]);
+    const staff = await Staffs.getOneStaff(["cccd"], [cccd]);
 
-    if (result.length <= 0) {
-        done(null, false);
+    if (staff.length <= 0) {
+        return done(null, false);
     }
 
-    const staff_id = result[0]["staff_id"];
-    const agency_id = result[0]["agency_id"];
+    const passwordFromDatabase = staff[0]["password"];
+    const match = bcrypt.compareSync(password, passwordFromDatabase);
 
+    if (!match) {
+        return done(null, false);
+    }
+
+    const staff_id = staff[0]["staff_id"];
+    const agency_id = staff[0]["agency_id"];
     const permission = 2;
 
     return done(null, {
@@ -29,19 +37,45 @@ const sessionStrategy = new LocalStrategy({
     });
 });
 
-passport.use(sessionStrategy);
+passport.use("normalLogin", sessionStrategy);
 
-router.post("/login", passport.authenticate("local", {
+const storage = multer.diskStorage({
+    destination: function (req, file, done) {
+        if (!file) {
+            return done(new Error("Hình ảnh không hợp lệ."), false);
+        }
+
+        if (file.fieldname.length > 20) {
+            return done(new Error("Tên file quá dài."), false); 
+        }
+
+        if (file.mimetype === "image/jpg" || file.mimetype === "image/jpeg" || file.mimetype === "image/png") { 
+            return done(null, 'img/avatar');
+        }
+
+        done(new Error("Hình ảnh không hợp lệ"), false);
+    },
+
+    filename: function (req, file, done) {
+        done(null, file.fieldname + '-' + Date.now() + ".jpg");
+    }
+});
+   
+const upload = multer({ storage: storage });
+
+router.post("/login", passport.authenticate("normalLogin", {
     successRedirect: "/api/v1/staffs/login_success",
     failureRedirect: "/api/v1/staffs/login_fail",
     failureFlash: true,
 }), staffsController.verifyStaffSuccess);
-router.post("/create", staffsController.createNewStaff);
+router.post("/create", upload.single("avatar"), staffsController.createNewStaff);
 router.get("/search", staffsController.getStaffs);
 router.delete("/delete",staffsController.deleteStaff);
-router.patch("/update",staffsController.updateStaffInfo);
-router.get("/login_success", staffsController.verifyStaffSuccess);
-router.get("/login_fail", staffsController.verifyStaffFail);
+router.patch("/update", staffsController.updateStaffInfo);
+router.post("/login_success", staffsController.verifyStaffSuccess);
+router.post("/login_fail", staffsController.verifyStaffFail);
+router.patch("/update_password", staffsController.updatePassword);
+router.patch("/update_avatar", utils.isAuthenticated(2), upload.single("avatar"), staffsController.updateAvatar);
 
 passport.serializeUser(utils.setStaffSession);
 passport.deserializeUser((staff, done) => {

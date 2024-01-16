@@ -24,11 +24,20 @@ const deleteStaff = async(fields, values) => {
   	return await Staffs.deleteStaff(fields, values);
 }
 
+const createAccount = async(cccd ,account, password)=>{
+    await Staffs.createAccount(cccd ,account, password);
+}
+
+const updatePassword = async (fields, values, conditionFields, conditionValues) => {
+   return await Staffs.updatePassword(fields, values, conditionFields, conditionValues);
+}
+
 module.exports = {
     checkExistStaff,
     createNewStaff,
     getOneStaff,
     getManyStaffs,
     updateStaff,
-    deleteStaff
+    deleteStaff,
+    updatePassword,
 }

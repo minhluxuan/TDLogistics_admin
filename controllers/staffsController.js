@@ -1,7 +1,10 @@
 const staffsService = require ("../services/staffsService");
-const utils = require("./utils");
+const utils = require("../utils");
+const controllerUtils = require("./utils");
+const fs = require("fs");
+const path = require('path');
 
-const staffValidation = new utils.StaffValidation();
+const staffValidation = new controllerUtils.StaffValidation();
 
 const verifyStaffSuccess = (req, res) => {
 	return res.status(200).json({
@@ -121,7 +124,7 @@ const getStaffs = async (req, res) => {
 };
 
 const createNewStaff = async (req, res) => {
-	if (!req.isAuthenticated() || req.user.permission < 3) {
+	if (!req.isAuthenticated() || req.user.permission < 2) {
 		return res.status(401).json({
 			error: true,
 			message: "Bạn không được phép truy cập tài nguyên này.",
@@ -129,7 +132,7 @@ const createNewStaff = async (req, res) => {
 	}
 
 	try {
-		const userRequestValidation = new utils.StaffValidation();
+		const userRequestValidation = new controllerUtils.StaffValidation();
 
 		const { error } = userRequestValidation.validateCreatingStaff(req.body);
 
@@ -140,17 +143,24 @@ const createNewStaff = async (req, res) => {
 			});
 		}
 
-		const result = await staffsService.checkExistStaff( ["cccd"] , [req.body.cccd]);
-		console.log(result);
-		if (!result) {
+		const result = await staffsService.checkExistStaff(["cccd"] , [req.body.cccd]);
+
+		if (result) {
 			return res.status(400).json({
 				error: true,
 				message: "Nhân viên đã tồn tại.",
 			});
 		}
 
+		req.body.password = utils.hash(req.body.password);
+
 		const keys = Object.keys(req.body);
 		const values = Object.values(req.body);
+
+		if (req.file) {
+			keys.push("avatar");
+			values.push(req.file.filename);
+		}
 
 		await staffsService.createNewStaff(keys, values);
 		return res.status(200).json({
@@ -171,7 +181,7 @@ const updateStaffInfo = async (req, res) => {
 			error: true,
 			message: "Bạn không được phép truy cập tài nguyên này.",
 		});
-	}console.log(req.query);
+	}
 
 	const { error } = staffValidation.validateFindingStaffByStaff(req.query) || staffValidation.validateUpdatingStaff(req.body);
 
@@ -190,6 +200,8 @@ const updateStaffInfo = async (req, res) => {
 		req.body["paid_salary"] += parseInt(staff["paid_salary"]);
 	}
 
+	req.body.status = true;
+
 	const keys = Object.keys(req.body);
 	const values = Object.values(req.body);
 
@@ -199,7 +211,7 @@ const updateStaffInfo = async (req, res) => {
 
 	try {
 		const result = await staffsService.updateStaff(keys, values, conditionFields, conditionValues);
-		console.log(result);
+
 		if (result[0].affectedRows <= 0) {
 			return res.status(404).json({
 				error: true,
@@ -227,7 +239,7 @@ const deleteStaff = async (req,res)=>{
 		});
 	}
 
-	const userRequestValidation = new utils.StaffValidation();
+	const userRequestValidation = new controllerUtils.StaffValidation();
 	const { error } = userRequestValidation.validateDeletingStaff(req.query);
 
 	if (error) {
@@ -260,6 +272,84 @@ const deleteStaff = async (req,res)=>{
 	}
 };
 
+const updatePassword = async (req, res) => {
+	if (!req.isAuthenticated() || req.user.permission !== 2) {
+		return res.status(401).json({
+			error: true,
+			message: "Bạn không có quyền truy cập tài nguyên này!",
+		});
+	}
+
+	const { error } = staffValidation.validateUpdatePassword(req.body);
+
+	if (error) {
+		return res.status(400).json({
+			error: true,
+			message: "Thông tin không hợp lệ.",
+		});
+	}
+	
+	const hashedNewPassword = utils.hash(req.body.new_password);
+
+	try {
+		await staffsService.updatePassword(["password", "status"], [hashedNewPassword, 1], ["staff_id"], [req.user.staff_id]) ;
+		
+		return res.status(200).json({
+			error: false,
+			message: "Cập nhật mật khẩu thành công.",
+		});
+	} catch (error) {
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
+const updateAvatar = async (req, res) => {
+	if (!req.file) {
+		return res.status(400).json({
+			error: true,
+			message: "Thông tin không hợp lệ.",
+		});
+	}
+
+	try {
+		const staff = await staffsService.getOneStaff(["staff_id"], [req.user.staff_id]);
+		
+		if (staff.length <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: "Bạn không được phép truy cập tài nguyên này.",
+			});
+		}
+
+		console.log(staff[0]["avatar"]);
+		const oldAvatarPath = path.join(__dirname, '..', 'img', 'avatar', staff[0]["avatar"]);
+
+		fs.unlinkSync(oldAvatarPath);
+
+		const result = await staffsService.updateStaff(["avatar"], [req.file.filename], ["staff_id"], [req.user.staff_id]);
+
+		if (result[0].affectedRows <= 0) {
+			return res.status(403).json({
+				error: true,
+				message: "Bạn không có quyền truy cập tài nguyên này.",
+			});
+		}
+
+		res.status(201).json({
+			error: false,
+			message: "Cập nhật thành công.",
+		});	
+	} catch (error) {
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
 module.exports = {
 	checkExistStaff,
 	createNewStaff,
@@ -268,4 +358,6 @@ module.exports = {
 	deleteStaff,
 	verifyStaffSuccess,
 	verifyStaffFail,
+	updatePassword,
+	updateAvatar,
 };

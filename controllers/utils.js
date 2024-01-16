@@ -1,4 +1,6 @@
 const Joi = require("joi");
+const { joiPasswordExtendCore } = require('joi-password') 
+const joiPassword = Joi.extend(joiPasswordExtendCore);
   
 class StaffValidation {
     validateLoginStaff = (data) => {
@@ -22,7 +24,15 @@ class StaffValidation {
         const schema = Joi.object({
             fullname: Joi.string().lowercase().pattern(new RegExp(process.env.REGEX_NAME)).required(),
             username: Joi.string().required(),
-            password: Joi.string().required(),
+            password: joiPassword
+            .string()
+            .min(8)
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(0)
+            .noWhiteSpaces()
+            .required(),
             date_of_birth: Joi.string().pattern(new RegExp(process.env.REGEX_BIRTHDAY)).required(), 
             cccd: Joi.string().alphanum().required(),
             email: Joi.string().pattern(new RegExp(process.env.REGEX_EMAIL)).required(),
@@ -30,7 +40,7 @@ class StaffValidation {
             role: Joi.string().required(),
             salary: Joi.number().precision(3).min(0).required(), 
             paid_salary: Joi.number().precision(3).min(0).required(), 
-            address: Joi.string().required(), 
+            address: Joi.string().required(),
             agency_id: Joi.number().max(99999).required(),
         });
 
@@ -67,7 +77,6 @@ class StaffValidation {
         const schema = Joi.object({
             fullname: Joi.string().lowercase().pattern(new RegExp(process.env.REGEX_NAME)),
             username: Joi.string(),
-            password: Joi.string(),
             date_of_birth: Joi.string().pattern(new RegExp(process.env.REGEX_BIRTHDAY)), 
             cccd: Joi.string().alphanum(),
             email: Joi.string().pattern(new RegExp(process.env.REGEX_EMAIL)),
@@ -83,10 +92,26 @@ class StaffValidation {
     }
 
     validateDeletingStaff = (data) => {
-        const schema=Joi.object({
+        const schema = Joi.object({
             staff_id: Joi.string().alphanum().min(9).max(9).required(),
         });
 
+        return schema.validate(data);
+    }
+
+    validateUpdatePassword=(data)=>{
+        const schema = Joi.object({
+            new_password: joiPassword
+            .string()
+            .min(8)
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(0)
+            .noWhiteSpaces()
+            .required(),
+            confirm_password: Joi.string().valid(Joi.ref('new_password')).required()
+        }).strict();
         return schema.validate(data);
     }
 }

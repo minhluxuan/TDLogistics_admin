@@ -14,6 +14,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const indexRouter = require('./routes/index');
+const otpRouter = require("./routes/otpRoute");
 const staffsRouter = require("./routes/staffsRoute");
 
 const dbOptions = {
@@ -74,13 +75,23 @@ app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use("/api/v1/staffs", staffsRouter);
+app.use("/api/v1/otp", otpRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({
 		error: false,
 		message: "Lấy phiên đăng nhập thành công.",
 	});
-})
+});
+app.get("/destroy_session", (req, res) => {
+	req.logout(() => {
+		req.session.destroy();
+	});
+	return res.status(200).json({
+		error: false,
+		message: "Hủy phiên hoạt động thành công.",
+	});
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

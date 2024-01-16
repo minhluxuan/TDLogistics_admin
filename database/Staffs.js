@@ -42,15 +42,15 @@ const getOneStaff = async (fields, values) => {
 };
 
 const updateStaff = async (fields, values, conditionFields, conditionValues) => {
-	console.log(fields);
-	console.log(values);
-	console.log(conditionFields);
-	console.log(conditionValues);
   	return await utils.update(pool, table, fields, values,conditionFields,conditionValues);
 };
 
 const deleteStaff= async(fields, values) => {
   	return await utils.deleteOne(pool, table, fields, values);
+};
+
+const updatePassword = async (fields, values, conditionFields, conditionValues) => {
+	await utils.update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
 module.exports = {
@@ -59,5 +59,6 @@ module.exports = {
     getOneStaff,
     getManyStaffs,
     updateStaff,
-    deleteStaff
+    deleteStaff,
+	updatePassword,
 };
