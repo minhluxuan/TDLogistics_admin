@@ -1,14 +1,4 @@
-
-POST http://localhost:5000/api/v1/shipment/create
-Content-Type: application/json
-
-{
-    "staff_id": "HCM_NVT_001",
-    "route": "TP.HCM-HANOI"
-}
-
 ###
-
 POST http://localhost:5000/api/v1/shipment/create
 Content-Type: application/json
 
@@ -23,13 +13,12 @@ Content-Type: application/json
 }
 
 ###
-
 POST http://localhost:5000/api/v1/shipment/update
 Content-Type: application/json
 
 {
     "mass": 123,
-    "shipment_id": "TD20240421487560"
+    "shipment_id": "TD20240423370236"
 }
 
 ###
@@ -42,16 +31,38 @@ Content-Type: application/json
 }
 
 ###
+POST http://localhost:5000/api/v1/shipment/confirm
+Content-Type: application/json 
 
+{
+    "shipment_id": "TD20240423370236"
+}
+
+###
+DELETE http://localhost:5000/api/v1/shipment/delete
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240421161296"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/updatedb
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240423370236"
+}
+
+###
 POST http://localhost:5000/api/v1/shipment/decompose
 Content-Type: application/json
 
 {
-    "shipment_id": "TD20240421487560"
+    "shipment_id": "TD20240423370236"
 }
 
 ###
-
 POST http://localhost:5000/api/v1/container/create
 Content-Type: application/json
 
@@ -103,25 +114,3 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:5000/api/v1/shipment/confirm
-Content-Type: application/json 
-
-{
-    "shipment_id": "TD20240421487560"
-}
-
-###
-DELETE http://localhost:5000/api/v1/shipment/delete
-Content-Type: application/json 
-
-{
-    "shipment_id": "TD20240421161296"
-}
-
-###
-POST http://localhost:5000/api/v1/shipment/updatedb
-Content-Type: application/json 
-
-{
-    "shipment_id": "TD20240421487560"
-}
