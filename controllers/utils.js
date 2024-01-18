@@ -115,7 +115,64 @@ class StaffValidation {
         return schema.validate(data);
     }
 }
- 
+
+
+class BusinessValidation{
+    validateCreateBusiness = (data) => {
+        const schema = Joi.object({
+            businessName: Joi.string().lowercase().pattern(new RegExp(process.env.REGEX_NAME)).required(),
+            username: Joi.string().required(),
+            password: joiPassword
+            .string()
+            .min(8)
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(0)
+            .noWhiteSpaces()
+            .required(),
+            tax_number: Joi.string().pattern(new RegExp("^[0-9]{1,10}$")).required(), 
+            email: Joi.string().email().required(),
+            phone_number: Joi.string().pattern(new RegExp(process.env.REGEX_PHONE_NUMBER)).required(), 
+            address: Joi.string().required(),
+            postalCode:Joi.string().pattern(new RegExp("^[0-9]+$")).required()
+        });
+        return schema.validate(data);
+    }
+    validateFindingBusinessByBusiness = (data) => {
+        const schema = Joi.object({
+            business_id: Joi.string().pattern(new RegExp("^[0-9]+$")).required(),
+        });
+
+        return schema.validate(data);
+    }
+
+    validateFindingBusinessByAdmin = (data) => {
+        const schema = Joi.object({
+            businessName: Joi.string().alphanum(),
+            tax_number: Joi.string().pattern(new RegExp("^[0-9]{1,10}$")), 
+            email: Joi.string().email(),
+            phone_number: Joi.string().pattern(new RegExp("^[0-9]{1,10}$")),
+            address: Joi.string(),
+            postal_code: Joi.string().pattern(new RegExp("^[0-9]+$")),
+            business_id: Joi.string().pattern(new RegExp("^[0-9]+$")),
+            debit: Joi.number()
+        });
+
+        return schema.validate(data);
+    }
+
+    validateCheckingExistBusiness = (data) => {
+        const schema = Joi.object({
+            tax_number: Joi.string().pattern(new RegExp("^[0-9]{1,10}$")).required(),
+        });
+
+        return schema.validate(data);
+    }
+
+}
+
 module.exports = {
     StaffValidation,
+    BusinessValidation
 }
