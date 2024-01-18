@@ -11,9 +11,17 @@ const dbOptions = {
     password: process.env.PASSWORD,
     database: process.env.DATABASE,
 };
+const dbOptionsAgency = {
+    host: process.env.HOST,
+    port: process.env.DBPOST,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.AGENCYDATABASE,
+}
 
 const table = "shipment";
 const pool = mysql.createPool(dbOptions).promise();
+const agencyPool = mysql.createPool(dbOptionsAgency).promise();
 
 const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => {
     try {
@@ -53,7 +61,24 @@ const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => 
 
 const createNewShipment = async (fields, values) => {
     console.log(fields);
-    return await utils.insert(pool, table, fields, values);
+    return await utils.insert(agencyPool, table, fields, values);
+}
+
+
+//trường hợp thêm vào nếu thêm trên database tổng bị lỗi thì nhân viên bưu cục tự xóa trong db bưu cục
+//nếu xóa ở createShipment thất bại
+const deleteShipment = async (shipment_id) => {
+    const field = "shipment_id";
+    const query = `DELETE FROM ${table} WHERE ${field} = ? LIMIT 1`;
+    try {
+        const result = await agencyPool.query(query, shipment_id);
+        console.log("Success!");
+        return result;
+    } 
+    catch (error) {
+        console.log("Error: ", error);
+        throw new Error("Đã xảy ra lỗi xóa lô hàng. Vui lòng thử lại sau ít phút!");
+    }
 }
 
 // const updateShipment = async (order_ids, shipment_id) => {
@@ -105,7 +130,7 @@ const updateShipment = async (fields, values, conditionFields, conditionValues) 
 
         const query = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
 
-        const result = await pool.query(query, [values, conditionValues]);
+        const result = await agencyPool.query(query, [values, conditionValues]);
         return result[0];
     } catch (error) {
         console.log("Error: ", error);
@@ -114,7 +139,21 @@ const updateShipment = async (fields, values, conditionFields, conditionValues) 
     
 };
 
-const getShipment = async (fields, values) => {
+const getShipmentForAgency = async (fields, values) => {
+    try {
+        //get all the order_id that have parent is shipment_id
+        const ordersTable = "orders";
+        const getShipmentQuery = `SELECT order_id FROM ${ordersTable} WHERE ${fields} = ?`;
+        const [rows] = await agencyPool.query(getShipmentQuery, [values]);
+        const result = rows.map(row => row.order_id);
+        return result;
+    } catch (error) {
+        console.log("Error: ", error);
+        throw error;
+    }
+}
+
+const getShipmentForAdmin = async (fields, values) => {
     try {
         //get all the order_id that have parent is shipment_id
         const ordersTable = "orders";
@@ -128,13 +167,46 @@ const getShipment = async (fields, values) => {
     }
 }
 
+const getInfoShipment = async (shipment_id) => {
+    try {
+        const query = `SELECT * FROM ${table} WHERE shipment_id = ?`;
+        const [rows] = await agencyPool.query(query, shipment_id);
+        if (rows.length > 0) {
+            const result = rows[0];
+
+            console.log('Fields:', Object.keys(result));
+            console.log('Values:', Object.values(result));
+
+            return { fields: Object.keys(result), values: Object.values(result) };
+        }
+        else {
+            throw new Error("Thông tin không hợp lệ!");
+        }
+    }
+    catch (error) {
+        console.log("Error: ", error);
+        throw error;
+    }
+}
+
+const confirmCreateShipment = async (fields, values) => {
+    console.log(fields);
+    return await utils.insert(pool, table, fields, values);
+}
+
+const updateShipmentToDatabase = async (fields, values, shipment_id) => {
+    const conditionFields = ["shipment_id"];
+    const conditionValues = [shipment_id];
+    return await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+} 
+
+
 const decompseShipment = async (shipment_id) => {
     try {
         const field = "status";
         const conditionField = "shipment_id";
         const query = `UPDATE ${table} SET ${field} = 1 WHERE ${conditionField} = ? `;
-        const result = await pool.query(query, [shipment_id]);
-        return result[0];
+        return await agencyPool.query(query, [shipment_id]);
     } catch (error) {
         console.log("Error: ", error);
         throw error;
@@ -143,8 +215,13 @@ const decompseShipment = async (shipment_id) => {
 
 module.exports = {
     createNewShipment,
+    confirmCreateShipment,
     getDataForShipmentCode,
     updateShipment,
-    getShipment,
+    getInfoShipment,
+    getShipmentForAdmin,
+    getShipmentForAgency,
     decompseShipment,
+    updateShipmentToDatabase,
+    deleteShipment,
 };

@@ -15,10 +15,11 @@ Content-Type: application/json
 {
     "staff_id": "HCM_DVMH_001",
     "transport_partner_id": "TB001",
-    "lat_source": 103.44532323,
-    "long_source": 72.45353343,
-    "lat_destination": 80.34342321,
-    "long_destination": 34.553453453,
+    "long_source": 103.44532323,
+    "lat_source": 72.45353343,
+    "long_destination": 80.34342321,
+    "lat_destination": 34.553453453,
+    "route": "HANOI-TP.HCM"
 }
 
 ###
@@ -28,7 +29,7 @@ Content-Type: application/json
 
 {
     "mass": 123,
-    "shipment_id": "TD202405036131"
+    "shipment_id": "TD20240421487560"
 }
 
 ###
@@ -46,7 +47,7 @@ POST http://localhost:5000/api/v1/shipment/decompose
 Content-Type: application/json
 
 {
-    "shipment_id": "TD202405036131"
+    "shipment_id": "TD20240421487560"
 }
 
 ###
@@ -99,4 +100,28 @@ Content-Type: application/json
     "type" : "truck",
     "shipment_id": "TD202405188565",
     "container_id": "VNAIR3004"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/confirm
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240421487560"
+}
+
+###
+DELETE http://localhost:5000/api/v1/shipment/delete
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240421161296"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/updatedb
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240421487560"
 }
