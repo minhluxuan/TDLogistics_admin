@@ -4,7 +4,7 @@ const controllerUtils = require("./utils");
 const fs = require("fs");
 const path = require("path");
 
-vehicleValidation = new utils.VehicleValidation();
+vehicleValidation = new controllerUtils.VehicleValidation();
 
 const checkExistVehicle = async (req, res) => {
     const { error } = vehicleValidation.validateCheckingExistVehicle(req.query);
@@ -81,3 +81,5 @@ const createNewVehicle = async (req, res) => {
         });
     }
 };
+
+module.exports = { checkExistVehicle, createNewVehicle };
