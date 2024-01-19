@@ -21,10 +21,10 @@ const checkExistStaff = async (fields, values) => {
 const createNewStaff = async (fields, values) => {
 	const lastUser = await utils.getLastRow(pool, table);
 
-	let staffId = "000000";
+	let staffId = "0000000";
 
 	if (lastUser) {
-		staffId = (parseInt(lastUser["staff_id"]) + 1).toString().padStart(6, "0");
+		staffId = (parseInt(lastUser["staff_id"]) + 1).toString().padStart(7, "0");
 	}
 
 	fields.push("staff_id");

@@ -24,7 +24,7 @@ const verifyStaffPermission = (staff, done) => {
 
 const isAuthenticated = (permission) => {
     return (req, res, next) => {
-        if (!req.user || req.user.permission !== permission) {
+        if (!req.isAuthenticated() || req.user.permission !== permission) {
             return res.status(403).json({
                 error: true,
                 message: "Bạn không được phép truy cập tài nguyên này."
@@ -40,5 +40,5 @@ module.exports = {
     hash,
     setStaffSession,
     verifyStaffPermission,
-    isAuthenticated,
+    isAuthenticated
 }

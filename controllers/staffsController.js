@@ -324,7 +324,6 @@ const updateAvatar = async (req, res) => {
 			});
 		}
 
-		console.log(staff[0]["avatar"]);
 		const oldAvatarPath = path.join(__dirname, '..', 'img', 'avatar', staff[0]["avatar"]);
 
 		fs.unlinkSync(oldAvatarPath);
