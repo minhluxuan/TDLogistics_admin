@@ -11,6 +11,12 @@ const setStaffSession = (staff, done) => {
     done(null, { staff_id: staff.staff_id, agency_id: staff.agency_id, permission: staff.permission });
 }
 
+const setBusinessSession = (business, done) => {
+    done(null, { business_id: business.business_id, permission: business.permission });
+}
+
+
+
 const verifyStaffPermission = (staff, done) => {
     if (staff.permission === 2) {
     if (staff.permission === 2) {
@@ -22,6 +28,20 @@ const verifyStaffPermission = (staff, done) => {
     }
     done(null, false);
 }
+}
+const verifyBusinessPermission = (business, done) => {
+    if (business.permission === 1) {
+    if (business.permission === 1) {
+        return done(null, {
+            staff_id: staff.staff_id,
+            agency_id: staff.agency_id,
+            permission: staff.permission,
+        });
+    }
+    done(null, false);
+}
+}
+
 
 const isAuthenticated = (permission) => {
     return (req, res, next) => {
@@ -42,4 +62,6 @@ module.exports = {
     setStaffSession,
     verifyStaffPermission,
     isAuthenticated,
+    setBusinessSession,
+    verifyBusinessPermission
 }

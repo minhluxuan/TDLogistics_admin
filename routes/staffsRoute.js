@@ -37,7 +37,7 @@ const sessionStrategy = new LocalStrategy({
     });
 });
 
-passport.use("normalLogin", sessionStrategy);
+passport.use("staffLogin", sessionStrategy);
 
 const storage = multer.diskStorage({
     destination: function (req, file, done) {

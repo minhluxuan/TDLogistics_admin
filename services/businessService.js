@@ -16,6 +16,11 @@ const getManyBusinessUsers = async (fields, values) => {
   	return await Business.getManyBussinessUsers(fields, values) ;
 }
 
+
+
+
+
+
 module.exports={
   checkExistBusiness,
   createNewBusinessUser,
