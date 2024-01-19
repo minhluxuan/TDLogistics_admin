@@ -129,7 +129,7 @@ class VehicleValidation {
             transport_partner_id: Joi.string().required(), //not check
             staff_id: Joi.string().pattern(new RegExp("^[0-9]+$")).required(),
             vehicle_id: Joi.string().required(), //not
-            type: Joi.string().max(15).required(),
+            type: Joi.string().required(),
             license_plate: Joi.string()
                 .regex(new RegExp("^(1[124-9]|2[0-9]|[3-9][0-9])[ABCEFGHKLMNPSTUVXYZ]-d{1,2}.d{2}$"))
                 .required(),
@@ -138,8 +138,23 @@ class VehicleValidation {
         return schema.validate(data);
     };
 }
+function ErrorMessage(error) {
+    const details = error.details;
 
+    for (let i = 0; i < details.length; i++) {
+        if (details[i].type === "any.required") {
+            return "Missing field: " + details[i].context.key;
+        } else if (details[i].type === "string.pattern.base") {
+            return "Invalid value in field: " + details[i].context.key;
+        } else if (details[i].type === "object.unknown") {
+            return "Unexpected field: " + details[i].context.key;
+        }
+    }
+
+    return "Validation error";
+}
 module.exports = {
     StaffValidation,
     VehicleValidation,
+    ErrorMessage,
 };

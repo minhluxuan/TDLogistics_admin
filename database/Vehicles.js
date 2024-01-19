@@ -25,6 +25,9 @@ const createNewVehicle = async (fields, values) => {
     const allValues = [...values, ...defaultValues];
     return await utils.insert(pool, table, allFields, allValues);
 };
+const updateVehicle = async (fields, values, conditionFields, conditionValues) => {
+    return await update(pool, table, fields, values, conditionFields, conditionValues);
+};
 
 // const query = "SELECT * FROM orders";
 // const result = pool.query(query).then((result) => {

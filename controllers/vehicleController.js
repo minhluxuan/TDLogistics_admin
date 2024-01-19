@@ -32,12 +32,12 @@ const checkExistVehicle = async (req, res) => {
 };
 const createNewVehicle = async (req, res) => {
     //check here
-    if (!req.isAuthenticated() || req.user.permission < 2) {
-        return res.status(401).json({
-            error: true,
-            message: "You are not authorized to access this resource.",
-        });
-    }
+    // if (!req.isAuthenticated() || req.user.permission < 2) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "You are not authorized to access this resource.",
+    //     });
+    // }
     //end check
 
     try {
