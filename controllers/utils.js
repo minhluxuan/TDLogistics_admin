@@ -117,10 +117,6 @@ class StaffValidation {
 }
  
 class ShipmentValidation {
-    constructor() {
-        this._data = data;
-    }
-
     validateCreatingShipment = (data) => {
         const schema = Joi.object({
             staff_id: Joi.string().required(),
@@ -166,38 +162,33 @@ class ShipmentValidation {
 
 }
 
-
 class ContainerValidation {
-    constructor(data) {
-        this._data = data;
-    }
-
-    validateCreatingConatiner = () => {
+    validateCreatingContainer = (data) => {
         const schema = Joi.object({
             shipment_id: Joi.string().required(),
             container_id: Joi.string().required(),
             type: Joi.string().required(),
         });
         
-        return schema.validate(this._data);
+        return schema.validate(data);
     }
 
-    validateUpdatingConatiner = () => {
+    validateUpdatingContainer = (data) => {
         const schema = Joi.object({
             shipment_id: Joi.string().required(),
             container_id: Joi.string().required(),
             choice: Joi.string().required(),
         });
         
-        return schema.validate(this._data);
+        return schema.validate(data);
     }
 
-    validateFindingConatiner = () => {
+    validateFindingContainer = (data) => {
         const schema = Joi.object({
             container_id: Joi.string().required(),
         });
         
-        return schema.validate(this._data);
+        return schema.validate(data);
     }
 }
 
