@@ -114,7 +114,6 @@ const getStaffs = async (req, res) => {
 				message: "Lấy thông tin thành công.",
 			});
 		} catch (error) {
-			console.error("Error: ", error);
 			res.status(500).json({
 				error: true,
 				message: error,
