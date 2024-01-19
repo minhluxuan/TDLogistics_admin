@@ -6,14 +6,15 @@ const servicesUtils = require("../services/utils");
 const shipmentRequestValidation = new utils.ShipmentValidation();
 
 const createNewShipment = async (req, res) => {
-    if(!req.isAuthenticated() || req.user.permisson !== 3) {
-        return res.status(401).json({
-            error: true,
-            message: "Bạn không được phép truy cập tài nguyên này.",
-        });
-    }
+    // if(!req.isAuthenticated() || req.user.permisson !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
 
-    const agency_id = req.user.agency_id;
+    //const agency_id = req.user.agency_id;
+    const agency_id = "7400";
 
     try {
         const { error } = shipmentRequestValidation.validateCreatingShipment(req.body);
@@ -103,13 +104,14 @@ const createNewShipment = async (req, res) => {
 }
 
 const updateShipment = async (req, res) => {
-    if (!req.isAuthenticated() || req.user.permission !== 3) {
-        return res.status(401).json({
-            error: true,
-            message: "Bạn không được phép truy cập tài nguyên này.",
-        });
-    }
-    const agency_id = req.user.agency_id;
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
+    // const agency_id = req.user.agency_id;
+    const agency_id = "7400";
 
     try {
         const { error } = shipmentRequestValidation.validateUpdatingShipment(req.body);
@@ -150,14 +152,14 @@ const updateShipment = async (req, res) => {
 }
 
 const getShipmentForAgency = async (req, res) => {
-    if (!req.isAuthenticated() || req.user.permission !== 3) {
-        return res.status(401).json({
-            error: true,
-            message: "Bạn không được phép truy cập tài nguyên này.",
-        });
-    }
-
-    const agency_id = req.user.agency_id;
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
+    // const agency_id = req.user.agency_id;
+    const agency_id = "7400";
     
     try {
         const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
@@ -188,12 +190,12 @@ const getShipmentForAgency = async (req, res) => {
 
 
 const getShipmentForAdmin = async (req, res) => {
-    if (!req.isAuthenticated() || req.user.permission !== 4) {
-        return res.status(401).json({
-            error: true,
-            message: "Bạn không được phép truy cập tài nguyên này.",
-        });
-    }
+    // if (!req.isAuthenticated() || req.user.permission !== 4) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
     
     try {
         const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
@@ -344,18 +346,20 @@ const decompseShipment = async (req, res) => {
     const agency_id = "7400";
     
     try {
-        const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
-        const { error } = shipmentRequestValidation.validateDecomposingShipment();
+        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
+        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
 
-        if(error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
-            });
-        }
+        // if(error) {
+        //     return res.status(400).json({
+        //         error: true,
+        //         message: "Thông tin không hợp lệ!",
+        //     });
+        // }
 
         const shipmentID = req.body.shipment_id;
-        const result = await shipmentService.decompseShipment(shipmentID, agency_id);
+        const order_ids = req.body.order_ids; 
+        console.log(order_ids);
+        const result = await shipmentService.decompseShipment(shipmentID, order_ids, agency_id);
         return res.status(200).json({
             error: false,
             data: result,
@@ -365,10 +369,123 @@ const decompseShipment = async (req, res) => {
     } catch(error) {
         return res.status(500).json({
             error: true,
-            message: error,
+            message: error.message,
         });
     }
     
+}
+
+const recieveShipment = async (req, res) => {
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
+    // const agency_id = req.session.agency_id;
+    const agency_id = "7400";
+
+    try {
+        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
+        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
+
+        // if(error) {
+        //     return res.status(400).json({
+        //         error: true,
+        //         message: "Thông tin không hợp lệ!",
+        //     });
+        // }
+
+        const shipmentID = req.body.shipment_id;
+        const result = await shipmentService.recieveShipment(shipmentID, agency_id);
+        return res.status(200).json({
+            error: false,
+            data: result,
+            message: "Nhập lô hàng thành công!",
+        });
+
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const addOrderToShipment = async (req, res) => {
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
+    // const agency_id = req.session.agency_id;
+    const agency_id = "7400";
+
+    try {
+        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
+        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
+
+        // if(error) {
+        //     return res.status(400).json({
+        //         error: true,
+        //         message: "Thông tin không hợp lệ!",
+        //     });
+        // }
+
+        const shipmentID = req.body.shipment_id;
+        const orderID = req.body.order_id;
+        const result = await shipmentService.addOrderToShipment(shipmentID, orderID, agency_id);
+        return res.status(200).json({
+            error: false,
+            data: result,
+            message: "Thêm đơn hàng vào lô hàng thành công!",
+        });
+
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const deleteOrderFromShipment = async (req, res) => {
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
+    // const agency_id = req.session.agency_id;
+    const agency_id = "7400";
+
+    try {
+        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
+        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
+
+        // if(error) {
+        //     return res.status(400).json({
+        //         error: true,
+        //         message: "Thông tin không hợp lệ!",
+        //     });
+        // }
+
+        const shipmentID = req.body.shipment_id;
+        const orderID = req.body.order_id;
+        const result = await shipmentService.deleteOrderFromShipment(shipmentID, orderID, agency_id);
+        return res.status(200).json({
+            error: false,
+            data: result,
+            message: "Xóa đơn hàng vào lô hàng thành công!",
+        });
+
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
 }
 
 module.exports = {
@@ -376,6 +493,9 @@ module.exports = {
     updateShipment,
     getShipmentForAgency,
     getShipmentForAdmin,
+    recieveShipment,
+    addOrderToShipment,
+    deleteOrderFromShipment,
     confirmCreateShipment,
     deleteShipment,
     updateShipmentToDatabase,

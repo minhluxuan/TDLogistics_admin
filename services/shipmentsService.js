@@ -32,12 +32,24 @@ const deleteShipment = async (shipment_id, agency_id) => {
     return await Shipment.deleteShipment(shipment_id, agency_id);
 }
 
-const decompseShipment = async (shipment_id, agency_id) => {
-    return await Shipment.decompseShipment(shipment_id, agency_id);
+const decompseShipment = async (shipment_id, order_ids, agency_id) => {
+    return await Shipment.decompseShipment(shipment_id, order_ids, agency_id);
 }
 
 const updateShipmentToDatabase = async (fields, values, shipment_id) => {
     return await Shipment.updateShipmentToDatabase(fields, values, shipment_id);
+}
+
+const recieveShipment = async (shipment_id, agency_id) => {
+    return await Shipment.recieveShipment(shipment_id, agency_id);
+}
+
+const addOrderToShipment = async (shipment_id, order_id, agency_id) => {
+    return await Shipment.addOrderToShipment(shipment_id, order_id, agency_id);
+}
+
+const deleteOrderFromShipment = async (shipment_id, order_id, agency_id) => {
+    return await Shipment.deleteOrderFromShipment(shipment_id, order_id, agency_id);
 }
 
 module.exports = {
@@ -48,6 +60,9 @@ module.exports = {
     getShipmentForAgency,
     getInfoShipment,
     confirmCreateShipment,
+    recieveShipment,
+    addOrderToShipment,
+    deleteOrderFromShipment,
     deleteShipment,
     updateShipmentToDatabase,
     decompseShipment,

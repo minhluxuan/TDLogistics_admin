@@ -1,0 +1,92 @@
+###
+POST http://localhost:5000/api/v1/shipment/create
+Content-Type: application/json
+
+{
+    "staff_id": "HCM_DVMH_001",
+    "transport_partner_id": "TB001",
+    "long_source": 103.44532323,
+    "lat_source": 72.45353343,
+    "long_destination": 80.34342321,
+    "lat_destination": 34.553453453,
+    "route": "HANOI-TP.HCM"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/update
+Content-Type: application/json
+
+{
+    "mass": 123,
+    "shipment_id": "TD20240522616352"
+}
+
+###
+
+GET http://localhost:5000/api/v1/shipment/search
+Content-Type: application/json
+
+{
+    "shipment_id": "TD20240522616352"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/confirm
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240522616352"
+}
+
+###
+DELETE http://localhost:5000/api/v1/shipment/delete
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240522616352"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/updatedb
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240522616352"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/decompose
+Content-Type: application/json
+
+{
+    "shipment_id": "TD20240522616352",
+    "order_ids": ["DN001", "QN002"]
+}
+
+###
+
+POST http://localhost:5000/api/v1/shipment/add
+Content-Type: application/json
+
+{
+    "shipment_id": "TD20240522616352",
+    "order_id": "QN002"
+}
+
+### DN001 DN002 QN002
+POST http://localhost:5000/api/v1/shipment/remove
+Content-Type: application/json
+
+{
+    "shipment_id": "TD20240522616352",
+    "order_id": "DN002"
+}
+
+###
+
+POST http://localhost:5000/api/v1/shipment/recieve
+Content-Type: application/json
+
+{
+    "shipment_id": "TD20240423370236"
+}
