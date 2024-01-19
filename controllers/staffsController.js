@@ -114,7 +114,6 @@ const getStaffs = async (req, res) => {
 				message: "Lấy thông tin thành công.",
 			});
 		} catch (error) {
-			console.error("Error: ", error);
 			res.status(500).json({
 				error: true,
 				message: error,
@@ -324,7 +323,6 @@ const updateAvatar = async (req, res) => {
 			});
 		}
 
-		console.log(staff[0]["avatar"]);
 		const oldAvatarPath = path.join(__dirname, '..', 'img', 'avatar', staff[0]["avatar"]);
 
 		fs.unlinkSync(oldAvatarPath);

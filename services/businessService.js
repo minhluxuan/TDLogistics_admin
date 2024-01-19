@@ -1,7 +1,8 @@
 const Business = require("../database/Business");
 
 const checkExistBusiness = async (fields, values) => {
-    return Business.checkExistBusiness(fields, values);
+
+    return await Business.checkExistBusiness(fields, values);
 }
 
 const createNewBusinessUser = async (fields, values) => {
@@ -15,10 +16,6 @@ const getOneBusinessUser = async (fields, values) => {
 const getManyBusinessUsers = async (fields, values) => {
   	return await Business.getManyBussinessUsers(fields, values) ;
 }
-
-
-
-
 
 
 module.exports={

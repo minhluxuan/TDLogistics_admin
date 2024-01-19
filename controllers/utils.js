@@ -7,7 +7,7 @@ class StaffValidation {
         const schema = Joi.object({
             cccd: Joi.string().pattern(new RegExp(process.env.REGEX_CCCD)).min(10).max(15).required(),
             password: Joi.string().required(),
-        });
+        }).strict();
 
         return schema.validate(data);
     }
@@ -15,7 +15,7 @@ class StaffValidation {
     validateCheckingExistStaff = (data) => {
         const schema = Joi.object({
             cccd: Joi.string().pattern(new RegExp(process.env.REGEX_CCCD)).required(),
-        });
+        }).strict();
 
         return schema.validate(data);
     }
@@ -42,7 +42,7 @@ class StaffValidation {
             paid_salary: Joi.number().precision(3).min(0).required(), 
             address: Joi.string().required(),
             agency_id: Joi.number().max(99999).required(),
-        });
+        }).strict();
 
         return schema.validate(data);
     }
@@ -50,7 +50,7 @@ class StaffValidation {
     validateFindingStaffByStaff = (data) => {
         const schema = Joi.object({
             staff_id: Joi.string().pattern(new RegExp("^[0-9]+$")).required(),
-        });
+        }).strict();
 
         return schema.validate(data);
     }
@@ -68,7 +68,7 @@ class StaffValidation {
             address: Joi.string(),
             agency_id: Joi.string().alphanum(),
             staff_id: Joi.string().alphanum().min(9).max(9),
-        });
+        }).strict();
 
         return schema.validate(data);
     }
@@ -86,7 +86,7 @@ class StaffValidation {
             paid_salary: Joi.number().precision(3).min(0), 
             address: Joi.string(), 
             agency_id: Joi.number().max(99999),
-        });
+        }).strict();
 
         return schema.validate(data);
     }
@@ -94,7 +94,7 @@ class StaffValidation {
     validateDeletingStaff = (data) => {
         const schema = Joi.object({
             staff_id: Joi.string().alphanum().min(9).max(9).required(),
-        });
+        }).strict();
 
         return schema.validate(data);
     }
@@ -116,11 +116,88 @@ class StaffValidation {
     }
 }
 
+ 
+class ShipmentValidation {
+    validateCreatingShipment = (data) => {
+        const schema = Joi.object({
+            staff_id: Joi.string().required(),
+            transport_partner_id: Joi.string().alphanum(),
+            long_source: Joi.number().min(-180).max(180).required(),
+            lat_source: Joi.number().min(-90).max(90).required(),
+            long_destination: Joi.number().min(-180).max(180).required(),
+            lat_destination: Joi.number().min(-90).max(90).required(),
+            route: Joi.string().required(),
+        }).strict();
+        
+        return schema.validate(data);
+    }
+
+    validateUpdatingShipment = (data) => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().alphanum().required(),
+            mass: Joi.number().precision(2).min(0).required(),
+        }).strict();
+        return schema.validate(data);
+    }
+    
+    validateFindingShipment = (data) => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().alphanum().required(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateDecomposingShipment = (data) => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().alphanum().required(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateShipmentID = (data) => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().alphanum().required(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+}
+
+class ContainerValidation {
+    validateCreatingContainer = (data) => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().required(),
+            container_id: Joi.string().required(),
+            type: Joi.string().required(),
+        }).strict();
+        
+        return schema.validate(data);
+    }
+
+    validateUpdatingContainer = (data) => {
+        const schema = Joi.object({
+            shipment_id: Joi.string().required(),
+            container_id: Joi.string().required(),
+            choice: Joi.string().required(),
+        }).strict();
+        
+        return schema.validate(data);
+    }
+
+    validateFindingContainer = (data) => {
+        const schema = Joi.object({
+            container_id: Joi.string().required(),
+        }).strict();
+        
+        return schema.validate(data);
+    }
+}
 
 class BusinessValidation{
     validateCreateBusiness = (data) => {
         const schema = Joi.object({
-            business_name: Joi.string().alphanum().required(),
+
+            business_name: Joi.string().lowercase().pattern(new RegExp(process.env.REGEX_NAME)).required(),
             username: Joi.string().required(),
             password: joiPassword
             .string()
@@ -144,6 +221,8 @@ class BusinessValidation{
             business_id: Joi.string().pattern(new RegExp("^[0-9]+$")).required(),
         });
 
+            postal_code:Joi.string().pattern(new RegExp("^[0-9]+$")).required()
+        }).strict();
         return schema.validate(data);
     }
 
@@ -158,6 +237,7 @@ class BusinessValidation{
             business_id: Joi.string().pattern(new RegExp("^[0-9]+$")),
             debit: Joi.number(),
             status:Joi.boolean()
+            debit: Joi.number()
         }).strict();
 
         return schema.validate(data);
@@ -197,5 +277,7 @@ class BusinessValidation{
 
 module.exports = {
     StaffValidation,
-    BusinessValidation
+    ShipmentValidation,
+    ContainerValidation,
+    BusinessValidation,
 }

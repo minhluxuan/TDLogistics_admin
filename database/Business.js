@@ -42,8 +42,8 @@ const getOneBusinessUser = async (fields, values) => {
 };
 
 module.exports={
-  checkExistBusiness,
-  createNewBusinessUser,
-  getManyBussinessUsers,
-  getOneBusinessUser
+	checkExistBusiness,
+	createNewBusinessUser,
+	getManyBussinessUsers,
+	getOneBusinessUser,
 }
