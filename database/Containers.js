@@ -3,6 +3,7 @@ const moment = require("moment");
 const utils = require("./utils");
 require("dotenv").config();
 
+
 const dbOptions = {
     host: process.env.HOST,
     port: process.env.DBPOST,
@@ -11,129 +12,413 @@ const dbOptions = {
     database: process.env.DATABASE,
 };
 
+const table = "shipment";
+const suffix = "_" + table;
+
 const pool = mysql.createPool(dbOptions).promise();
 
-const table = "shipment";
-const vehicleTable = "vehicle";
-const shipmentTable = "shipment";
-
-const createContainer = async (shipment_id, container_id) => {
-    //chỉ dành cho trường hợp máy bay và tàu hỏa 
-    const query = `UPDATE ${table} SET parent = ? WHERE shipment_id = ?`;
+const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => {
     try {
-        const result = await pool.query(query, [container_id, shipment_id]);
+        const staffTable = "staff";
+        const transportPartnerTable = "transport_partner";
+        const vehicleTable = "vehicle";
+        
+        if(transport_partner_id !== null) {
+            const transportPartnerQuery = `SELECT name FROM ${transportPartnerTable} WHERE transport_partner_id = ? LIMIT 1`;
+            const vehicleQuery = `SELECT vehicle_id FROM ${vehicleTable} WHERE staff_id = ? LIMIT 1`;
+            const [transportPartnerResult] = await pool.query(transportPartnerQuery, transport_partner_id);
+            const [vehicleResult] = await pool.query(vehicleQuery, staff_id);
+
+            if (!transportPartnerResult || transportPartnerResult.length <= 0) {
+                console.log("Transport partner does not exist.");
+                throw new Error("Đối tác vận tải không tồn tại.");
+            }
+
+            if (!vehicleResult || vehicleResult.length <= 0) {
+                console.log("Vehicle does not exist.");
+                throw new Error("Phương tiện không tồn tại.");
+            }
+
+            const result = {
+                partnerName: transportPartnerResult[0].name,
+                vehicleID: vehicleResult[0].vehicle_id,
+            }
+
+            return result;
+        }
+        else {
+            const staffQuery = `SELECT fullname FROM ${staffTable} WHERE staff_id = ?`;
+            const transportPartnerQuery = `SELECT vehicle_id FROM ${vehicleTable} WHERE staff_id = ?`;
+            const [staffResult] = await pool.query(staffQuery, staff_id);
+            const [transportPartnerResult] = await pool.query(transportPartnerQuery, staff_id);
+
+            if (!transportPartnerResult || transportPartnerResult.length <= 0) {
+                console.log("Transport partner does not exist.");
+                throw new Error("Đối tác vận tải không tồn tại.");
+            }
+
+            if (!staffResult || staffResult.length <= 0) {
+                console.log("Staff does not exist.");
+                throw new Error("Nhân viên không tồn tại.");
+            }
+
+            const result = {
+                fullname: staffResult[0].fullname,
+                vehicleID: transportPartnerResult[0].vehicle_id,
+            }
+
+            return result;
+        }
+    } catch (error) {
+        console.log("Error: ", error);
+        throw new Error(error.message);
+    } 
+    
+}
+
+const createNewShipment = async (fields, values, agency_id) => {
+    const agencyTable = agency_id + suffix;
+    return await utils.insert(pool, agencyTable, fields, values);
+}
+
+const recieveShipment = async (shipment_id, agency_id) => {
+
+    const agencyOrdersTable = agency_id + "_orders";
+
+    try {
+        const getOrderIDsQuery = `SELECT order_ids FROM ${table} WHERE shipment_id = ?`;
+        const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
+        if(rows.length > 0) {
+            const order_ids = JSON.parse(rows[0].order_ids);
+            let result;
+            for(const order_id of order_ids) {
+                const orderData = await getInfoOrder(order_id);
+                result = await utils.insert(pool, agencyOrdersTable, orderData.fields, orderData.values);
+            }
+            return result[0];
+        } else {
+            console.log("Shipment does not exist");
+            throw new Error("Thông tin lô hàng không hợp lệ!");
+        }
+
+    } catch (error) {
+        console.log("Error: ", error);
+        throw new Error(error.message);
+    } 
+    
+}
+
+const addOrderToShipment = async (shipment_id, order_id, agency_id) => {
+    const agencyShipmentsTable = agency_id + suffix;
+    const agencyOrdersTable = agency_id + "_orders";
+
+    try {
+        const getOrderQuery = `SELECT parent, mass FROM ${agencyOrdersTable} WHERE order_id = ?`;
+        const [orderRow] = await pool.query(getOrderQuery, order_id);
+        const { parent: orderParent, mass: orderMass } = orderRow[0];
+        if(!orderRow.length) {
+            console.log("Order is not exist");
+            throw new Error("Đơn hàng không tồn tại!");
+        }
+        if(orderParent !== null) {
+            console.log(orderParent);
+            console.log("Order already exist in shipment");
+            throw new Error("Đơn hàng đã được quét lên từ trước!");
+        }
+        //append order_ids, cong mass
+        //UPDATE `shipment` SET `order_ids` = JSON_ARRAY_APPEND(COALESCE(order_ids, '[]'), '$', "1");
+        const updateShipmentQuery = `
+            UPDATE ${agencyShipmentsTable}
+            SET 
+                order_ids = JSON_ARRAY_APPEND(COALESCE(order_ids, '[]'), '$', ?),
+                mass = mass + ?
+            WHERE shipment_id = ?
+        `;
+        const result = await pool.query(updateShipmentQuery,[order_id, orderMass, shipment_id]);
+
+        //cap nhat parent cua order trong bang agency
+        const updateOrderQuery = `UPDATE ${agencyOrdersTable} SET parent = ? WHERE order_id = ?`;
+        await pool.query(updateOrderQuery, [shipment_id, order_id]);
+        return result[0];
+
+    } catch (error) {
+        console.log("Error: ", error);
+        throw new Error(error.message);
+    } 
+    
+
+}
+
+const deleteOrderFromShipment = async (shipment_id, order_id, agency_id) => {
+    const agencyShipmentsTable = agency_id + suffix;
+    const agencyOrdersTable = agency_id + "_orders";
+
+    try {
+        const getOrderQuery = `SELECT parent, mass FROM ${agencyOrdersTable} WHERE order_id = ?`;
+        const [orderRow] = await pool.query(getOrderQuery, order_id);
+        const { parent: orderParent, mass: orderMass } = orderRow[0];
+        if(!orderRow.length) {
+            console.log("Order is not exist");
+            throw new Error("Đơn hàng không tồn tại!");
+        }
+        if(orderParent === "") {
+            console.log("Order does not exist in shipment");
+            throw new Error("Đơn hàng không tồn tại trong lô hàng!");
+        }
+        // UPDATE `shipment`
+        // SET order_ids = JSON_REMOVE(order_ids, JSON_UNQUOTE(JSON_SEARCH(order_ids, 'one', '2')))
+        // WHERE shipment_id = 'TD20240423370236';
+
+        const updateShipmentQuery = `
+                UPDATE ${agencyShipmentsTable}
+                SET 
+                    order_ids = JSON_REMOVE(order_ids, JSON_UNQUOTE(JSON_SEARCH(order_ids, 'one', ?))),
+                    mass = mass - ?
+                WHERE shipment_id = ?;
+        `;
+
+        const result = await pool.query(updateShipmentQuery, [order_id, orderMass ,shipment_id]);
+        const updateOrderQuery = `UPDATE ${agencyOrdersTable} SET parent = null WHERE order_id = ?`;
+        await pool.query(updateOrderQuery, order_id);
+        return result[0];
+        
+    } catch (error) {
+        console.log("Error: ", error);
+        throw new Error(error.message);
+    } 
+    
+}
+
+//trường hợp thêm vào nếu thêm trên database tổng bị lỗi thì nhân viên bưu cục tự xóa trong db bưu cục
+//nếu xóa ở createShipment thất bại
+const deleteShipment = async (shipment_id, agency_id) => {
+    const agencyTable = agency_id + suffix;
+    const field = "shipment_id";
+    const query = `DELETE FROM ${agencyTable} WHERE ${field} = ? LIMIT 1`;
+    try {
+        const result = await pool.query(query, shipment_id);
+        console.log("Success!");
+        return result;
+    } 
+    catch (error) {
+        console.log("Error: ", error);
+        throw new Error("Đã xảy ra lỗi xóa lô hàng. Vui lòng thử lại sau ít phút!");
+    }
+}
+
+// const updateShipment = async (order_ids, shipment_id) => {
+    
+//     const ordersTable = "orders";
+//     const currentTime = new Date();
+//     const formattedTime = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
+//     const statusMessage = "Đóng lô thành công!";
+
+//     for (const order_id of order_ids) { 
+//         //append to Journey and update parent of orders
+//         const updateJourneyQuery = `
+//             UPDATE ${ordersTable}
+//             SET 
+//                 journey = JSON_ARRAY_APPEND(
+//                     COALESCE(journey, '[]'),
+//                     '$',
+//                     JSON_OBJECT(
+//                         'shipment_id', ?,
+//                         'status', ?,
+//                         'date', ?
+//                     )
+//                 ),
+//                 parent = ?
+//             WHERE order_id = ?
+//         `;
+
+//         await pool.query(updateJourneyQuery, [shipment_id, statusMessage, formattedTime, shipment_id, order_id]);
+
+//         //update shipment
+//         const updateShipmentQuery = `
+//             UPDATE ${table}
+//             SET mass = mass + (
+//                 SELECT mass
+//                 FROM ${ordersTable}
+//                 WHERE order_id = ?
+//             )
+//             WHERE shipment_id = ?
+//         `;
+
+//         await pool.query(updateShipmentQuery, [order_id, shipment_id]);
+//     }   
+// }
+
+const updateShipment = async (fields, values, conditionFields, conditionValues, agency_id) => {
+    try {
+        const agencyTable = agency_id + suffix;
+        const setClause = `${fields} = ${fields} + ?`;
+        const whereClause = `${conditionFields} = ?`;
+        const query = `UPDATE ${agencyTable} SET ${setClause} WHERE ${whereClause}`;
+
+        const result = await pool.query(query, [values, conditionValues]);
+        return result[0];
+    } catch (error) {
+        console.log("Error: ", error);
+        throw error;
+    }
+    
+};
+
+const getShipmentForAgency = async (fields, values, agency_id) => {
+    try {
+        //get all the order_id that have parent is shipment_id
+        const ordersTable = agency_id + "_orders";
+        const getShipmentQuery = `SELECT order_id FROM ${ordersTable} WHERE ${fields} = ?`;
+        const [rows] = await pool.query(getShipmentQuery, [values]);
+        const result = rows.map(row => row.order_id);
         return result;
     } catch (error) {
         console.log("Error: ", error);
         throw error;
     }
-};
+}
 
-const updateInContainer = async (shipment_id, container_id) => {
+const getShipmentForAdmin = async (fields, values) => {
     try {
-        const getShipmentQuery = `SELECT mass, parent FROM ${table} WHERE shipment_id = ?`;
-        const [shipmentRows] = await pool.query(getShipmentQuery, [shipment_id]);
-
-        if (shipmentRows.length <= 0) {
-            throw new Error("Lô hàng không tồn tại.");
-        }
-
-        const { mass: shipmentMass, parent: shipmentParent } = shipmentRows[0];
-        
-        if (shipmentParent === container_id) {
-            throw new Error("Lô hàng đã được quét lên từ trước!");
-        }
-
-        const vehicleQuery = `SELECT mass, max_load FROM ${vehicleTable} WHERE vehicle_id = ?`;
-        const [vehicleRows] = await pool.query(vehicleQuery, [container_id]);
-
-        if(vehicleRows.length <= 0) {
-            throw new Error("Phương tiện không tồn tại.");
-        }
-
-        const { mass: currentMass, max_load: maxLoad } = vehicleRows[0];
-
-        if (currentMass + shipmentMass > maxLoad) {
-            throw new Error("Thêm lô hàng vào phương tiện thất bại. Lô hàng vượt quá tải trọng cho phép.");
-        }
-
-        const shipmentQuery = `UPDATE ${table} SET parent = ? WHERE shipment_id = ?`;
-        const resultUpdatingShipment = await pool.query(shipmentQuery, [container_id, shipment_id]);
-
-        if (resultUpdatingShipment[0].affectedRows <= 0) {
-            throw new Error("Thêm lô hàng vào phương tiện thất bại.");
-        }
-
-        const query = `UPDATE ${vehicleTable} SET mass = mass + ? WHERE vehicle_id = ?`;
-        const result =  await pool.query(query, [shipmentMass, container_id]);
-        return result[0];
-    } catch (error) {
-        console.log("Error: ", error);
-        throw new Error(error);
-    }
-};
-
-const updateOutContainer = async (shipment_id, container_id) => {
-    try {
-        const getShipmentQuery = `SELECT parent, mass FROM ${table} WHERE shipment_id = ?`;
-        const [shipmentRows] = await pool.query(getShipmentQuery, [shipment_id]);
-
-        if (shipmentRows.length <= 0) {
-            throw new Error("Lô hàng không tồn tại.");
-        }
-
-        const { parent: shipmentParent, mass: shipmentMass } = shipmentRows[0];
-        
-        if (shipmentParent !== container_id) {
-            throw new Error("Lô hàng không hợp lệ!");
-        }  
-    
-        const vehicleQuery = `SELECT mass FROM ${vehicleTable} WHERE vehicle_id = ?`;
-        const [vehicleRows] = await pool.query(vehicleQuery, [container_id]);
-
-        if (vehicleRows[0].length <= 0) {
-            throw new Error("Phương tiện không tồn tại.");
-        }
-
-        const { mass: currentMass } = vehicleRows[0];
-
-        if(currentMass - shipmentMass < 0) {
-            throw new Error("Lô hàng không hợp lệ.");
-        }
-        
-        const updateShipmentQuery = `UPDATE ${table} SET parent = NULL WHERE shipment_id = ?`;
-        const resultUpdatingShipment = await pool.query(updateShipmentQuery, [shipment_id]);
-
-        if (resultUpdatingShipment[0].affectedRows <= 0) {
-            throw new Error("Xóa lô hàng khỏi phương tiện thất bại.");
-        }
-
-        const query = `UPDATE ${vehicleTable} SET mass = mass - ? WHERE vehicle_id = ?`;
-        const result = await pool.query(query, [shipmentMass, container_id]);
-        return result[0];
-    } catch (error) {
-        console.log("Error: ", error);
-        throw new Error(error.message);
-    }
-};
-
-
-const getContainer = async (container_id) => {
-    try {
-        //get all the shipment_id that have parent is container_id
-        const getShipmentQuery = `SELECT shipment_id FROM ${shipmentTable} WHERE parent = ?`;
-        const [rows] = await pool.query(getShipmentQuery, [container_id]);
-        const result = rows.map(row => row.shipment_id);
+        //get all the order_id that have parent is shipment_id
+        const ordersTable = "orders";
+        const getShipmentQuery = `SELECT order_id FROM ${ordersTable} WHERE ${fields} = ?`;
+        const [rows] = await pool.query(getShipmentQuery, [values]);
+        const result = rows.map(row => row.order_id);
         return result;
     } catch (error) {
         console.log("Error: ", error);
-        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút.");
+        throw error;
+    }
+}
+
+const getInfoShipment = async (shipment_id, agency_id) => {
+    try {
+        const agencyTable = agency_id + suffix;
+        const query = `SELECT * FROM ${agencyTable} WHERE shipment_id = ?`;
+        const [rows] = await pool.query(query, shipment_id);
+        if (rows.length > 0) {
+            const result = rows[0];
+            return { fields: Object.keys(result), values: Object.values(result) };
+        }
+        else {
+            throw new Error("Thông tin không hợp lệ!");
+        }
+    }
+    catch (error) {
+        console.log("Error: ", error);
+        throw error;
+    }
+}
+
+const getInfoOrder = async (order_id) => {
+    try {
+        console.log(order_id);
+        const ordersTable = "orders";
+        const query = `SELECT * FROM ${ordersTable} WHERE order_id = ?`;
+        const [rows] = await pool.query(query, order_id);
+        console.log(rows);
+        if (rows.length > 0) {
+            const result = rows[0];
+            return { fields: Object.keys(result), values: Object.values(result) };
+        }
+        else {
+            throw new Error("Thông tin không hợp lệ!");
+        }
+    }
+    catch (error) {
+        console.log("Error: ", error);
+        throw error;
+    }
+}
+
+const confirmCreateShipment = async (fields, values) => {
+    return await utils.insert(pool, table, fields, values);
+}
+
+const updateShipmentToDatabase = async (fields, values, shipment_id) => {
+    const conditionFields = ["shipment_id"];
+    const conditionValues = [shipment_id];
+    return await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+} 
+
+const updateOrderToDatabase = async (fields, values, order_id) => {
+    const conditionFields = ["order_id"];
+    const conditionValues = [order_id];
+    return await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+}
+
+const compareOrdersInDatabase = async (shipment_id, ordersFromRequest, agency_id) => {
+    const agencyShipmentsTable = agency_id + suffix;
+    const agencyOrdersTable = agency_id + "_orders";
+
+    try{
+        //console.log(agencyShipmentsTable);
+        const getOrderIDsQuery = `SELECT order_ids FROM ${agencyShipmentsTable} WHERE shipment_id = ?`;
+        const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
+        if(rows.length > 0) {
+            const ordersFromDatabase = JSON.parse(rows[0].order_ids);
+            console.log(ordersFromDatabase);
+
+            const setFromDatabase = new Set(ordersFromDatabase);
+            const setFromRequest = new Set(ordersFromRequest);
+
+            const setEqual =    (setFromDatabase.length === setFromRequest.length) &&
+                                (ordersFromDatabase.every(value => setFromRequest.has(value)));
+            
+            if(setEqual) {
+                return { error: false, message: "Đơn hàng trùng khớp trên hệ thống!" };
+            } else {
+                return { error: true, message: "Đơn hàng không trùng khớp trên hệ thống!" };
+            }
+        } else {
+            console.log("Shipment does not exist");
+            throw new Error("Thông tin lô hàng không hợp lệ!");
+        } 
+    } catch (error) {
+        console.log("Error: ", error);
+        throw new Error(error.message);
+    } 
+
+}
+
+const decompseShipment = async (shipment_id, order_ids , agency_id) => {
+    const agencyShipmentsTable = agency_id + suffix;
+    const agencyOrdersTable = agency_id + "_orders";
+    
+    try {
+        const compareOrders = await compareOrdersInDatabase(shipment_id, order_ids, agency_id);
+        const { error, message } = compareOrders;    
+        if(error) {
+            console.log(message);
+            throw new Error(message);
+        }
+        
+        for(const order_id of order_ids) {
+            const ordersQuery = `UPDATE ${agencyOrdersTable} SET parent = null WHERE order_id = ?`;
+            await pool.query(ordersQuery, [order_id]);
+        }
+        const shipmentsQuery = `UPDATE ${agencyShipmentsTable} SET status = 1 WHERE shipment_id = ? `;
+        return await pool.query(shipmentsQuery, [shipment_id]);
+    } catch (error) {
+        console.log("Error: ", error);
+        throw error;
     }
 }
 
 module.exports = {
-    createContainer,
-    updateInContainer,
-    updateOutContainer,
-    getContainer,
+    createNewShipment,
+    confirmCreateShipment,
+    getDataForShipmentCode,
+    updateShipment,
+    getInfoShipment,
+    recieveShipment,
+    addOrderToShipment,
+    deleteOrderFromShipment,
+    updateOrderToDatabase,
+    getShipmentForAdmin,
+    getShipmentForAgency,
+    decompseShipment,
+    updateShipmentToDatabase,
+    deleteShipment,
 };

@@ -2,6 +2,12 @@ const Joi = require("joi");
 const { joiPasswordExtendCore } = require('joi-password') 
 const joiPassword = Joi.extend(joiPasswordExtendCore);
   
+const shortenName = async (fullname) => {
+    const words = fullname.split(' ');
+    const initials = words.map(word => word.charAt(0).toUpperCase());
+    return initials.join('');
+}
+
 class StaffValidation {
     validateLoginStaff = (data) => {
         const schema = Joi.object({
@@ -192,7 +198,7 @@ class ContainerValidation {
     }
 }
 
-class BusinessValidation{
+class BusinessValidation {
     validateCreateBusiness = (data) => {
         const schema = Joi.object({
             business_name: Joi.string().lowercase().pattern(new RegExp(process.env.REGEX_NAME)).required(),
@@ -245,4 +251,5 @@ module.exports = {
     ShipmentValidation,
     ContainerValidation,
     BusinessValidation,
+    shortenName,
 }

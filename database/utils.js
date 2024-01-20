@@ -44,6 +44,21 @@ const insert = async (pool, table, fields, values) => {
     }
 }
 
+const updateOne = async (pool, table, fields, values, conditionFields, conditionValues) => {
+    const setClause = fields.map(field => `${field} = ?`).join(", ");
+    const whereClause = conditionFields.map(conditionField => `${conditionField} = ?`).join(" AND ");
+    
+    const query = `UPDATE ${table} SET ${setClause} WHERE ${whereClause} LIMIT 1`;
+
+    try {
+        const result = await pool.query(query, [...values, ...conditionValues]);
+        return result;
+    } catch (error) {
+        console.log("Error: ", error);
+        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
+    }
+}
+
 const update = async (pool, table, fields, values, conditionFields, conditionValues) => {
     const setClause = fields.map(field => `${field} = ?`).join(", ");
     const whereClause = conditionFields.map(conditionField => `${conditionField} = ?`).join(" AND ");
@@ -116,6 +131,7 @@ module.exports = {
     findOne,
     find,
     insert,
+    updateOne,
     update,
     getLastRow,
     deleteOne,
