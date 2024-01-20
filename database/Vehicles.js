@@ -29,6 +29,31 @@ const updateVehicle = async (fields, values, conditionFields, conditionValues) =
     return await update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
+const handleOrderIds = async (vehicleId, orderIds) => {
+    const conditionFields = "id";
+    const conditionValues = vehicleId;
+    const fields = "order_id";
+    const arrayName = "record";
+
+    if (orderIds.append) {
+        const newValues = orderIds.append;
+        await utils.append(pool, table, fields, arrayName, newValues, conditionFields, conditionValues);
+    }
+
+    if (orderIds.replace) {
+        for (let [oldOrder, newOrder] of Object.entries(orderIds.replace)) {
+            await utils.replace(pool, table, fields, arrayName, oldOrder, newOrder, conditionFields, conditionValues);
+        }
+    }
+
+    if (orderIds.delete) {
+        for (let order of orderIds.delete) {
+            await utils.delete(pool, table, fields, arrayName, order, conditionFields, conditionValues);
+        }
+    }
+};
+
+
 // const query = "SELECT * FROM orders";
 // const result = pool.query(query).then((result) => {
 //     console.log(result);
