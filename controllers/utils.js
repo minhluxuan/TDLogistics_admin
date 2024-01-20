@@ -28,7 +28,7 @@ class StaffValidation {
 
     validateCreatingStaff = (data) => {
         const schema = Joi.object({
-            fullname: Joi.string().lowercase().pattern(new RegExp(process.env.REGEX_NAME)).required(),
+            fullname: Joi.string().required(),
             username: Joi.string().required(),
             password: joiPassword
             .string()
@@ -201,7 +201,7 @@ class ContainerValidation {
 class BusinessValidation {
     validateCreateBusiness = (data) => {
         const schema = Joi.object({
-            business_name: Joi.string().lowercase().pattern(new RegExp(process.env.REGEX_NAME)).required(),
+            business_name: Joi.string().required(),
             username: Joi.string().required(),
             password: joiPassword
             .string()
@@ -221,6 +221,14 @@ class BusinessValidation {
         return schema.validate(data);
     }
 
+    validateFindingBusinessByBusiness = (data) => {
+        const schema = Joi.object({
+            business_id: Joi.string().pattern(new RegExp("^[0-9]{1,7}$"))
+        });
+
+        return schema.validate(data);
+    }
+
     validateFindingBusinessByAdmin = (data) => {
         const schema = Joi.object({
             business_name: Joi.string().alphanum(),
@@ -230,6 +238,8 @@ class BusinessValidation {
             address: Joi.string(),
             postal_code: Joi.string().pattern(new RegExp("^[0-9]+$")),
             business_id: Joi.string().pattern(new RegExp("^[0-9]+$")),
+            debit: Joi.number(),
+            active: Joi.boolean(),
             debit: Joi.number()
         }).strict();
 
@@ -244,6 +254,28 @@ class BusinessValidation {
         return schema.validate(data);
     }
 
+    validateUpdatingBusiness = (data) => {
+        const schema = Joi.object({
+            business_name: Joi.string().alphanum(),
+            email: Joi.string().pattern(new RegExp(process.env.REGEX_EMAIL)),
+            phone_number: Joi.string().pattern(new RegExp(process.env.REGEX_PHONE_NUMBER)),
+            debit: Joi.number().precision(3).min(0), 
+            address: Joi.string(), 
+            postalCode:Joi.string().pattern(new RegExp("^[0-9]+$")),
+            active: Joi.boolean()
+
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateDeletingBusiness = (data) => {
+        const schema = Joi.object({
+            business_id: Joi.string().alphanum().min(7).max(7).required(),
+        }).strict();
+
+        return schema.validate(data);
+    }
 }
 
 module.exports = {

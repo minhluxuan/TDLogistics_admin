@@ -41,9 +41,19 @@ const getOneBusinessUser = async (fields, values) => {
   	return await utils.findOne(pool, table, fields, values);
 };
 
-module.exports={
+const updateBusinessUser= async (fields, values, conditionFields, conditionValues) => {
+	return await utils.update(pool, table, fields, values,conditionFields,conditionValues);
+};
+
+const deleteBusinessUSer= async(fields, values) => {
+	return await utils.deleteOne(pool, table, fields, values);
+};
+
+module.exports = {
 	checkExistBusiness,
 	createNewBusinessUser,
 	getManyBussinessUsers,
 	getOneBusinessUser,
+	updateBusinessUser,
+	deleteBusinessUSer
 }
