@@ -84,3 +84,45 @@ content-type: application/json
 
 GET http://localhost:5000/destroy_session
 content-type: application/json
+
+###
+
+GET  http://localhost:3000/api/v1/vehicle/search?type=truck
+content-type: application/json
+
+###
+
+POST  http://localhost:3000/api/v1/vehicle/search?type=truck
+content-type: application/json
+
+###
+
+POST  http://localhost:3000/api/v1/vehicle/create
+content-type: application/json
+{
+    "transport_partner_id": "TB003",
+    "staff_id": "HCM_DVMH_002",
+    "vehicle_id": "60B-C2-67890",
+    "type": "van",
+    "license_plate": "73B-678.90",
+    "max_load": 1200
+}
+
+###
+
+DELETE  http://localhost:3000/api/v1/vehicle/delete?vehicle_id=60B-C2-67890
+content-type: application/json
+
+###
+
+PATCH  http://localhost:3000/api/v1/vehicle/update?vehicle_id=vehicle1
+content-type: application/json
+{
+    "transport_partner_id": "TB003",
+    "staff_id": "HCM_DVMH_002",
+    "vehicle_id": "60B-C2-67890",
+    "type": "van",
+    "license_plate": "73B-678.90",
+    "max_load": 1200,
+    "order_id":{"append":["test1","test2"]}
+}

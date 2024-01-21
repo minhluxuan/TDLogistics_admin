@@ -79,7 +79,7 @@ module.exports = { checkExistVehicle, createNewVehicle, updateVehicle, deleteVeh
 //     console.log(res);
 // });
 
-// deleteVehicle(["id"], [6]);
+// deleteVehicle(["vehicle_id"], ["60B-C2-67890"]);
 // updateVehicle(
 //     ["max_load", "order_id"],
 //     [900, { replace: { ABC11: "ABC22", ASE: "CNST" } }],

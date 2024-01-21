@@ -18,17 +18,17 @@ dotenv.config();
 // const staffsRouter = require("./routes/staffsRoute");
 const vehicelRouter = require("./routes/vehicleRoute");
 
-const dbOptions = {
-    host: process.env.HOST,
-    port: process.env.DBPORT,
-    user: process.env.USER,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE,
-};
+// const dbOptions = {
+//     host: process.env.HOST,
+//     port: process.env.DBPORT,
+//     user: process.env.USER,
+//     password: process.env.PASSWORD,
+//     database: process.env.DATABASE,
+// };
 
-const pool = mysql.createPool(dbOptions);
+// const pool = mysql.createPool(dbOptions);
 
-const sessionStore = new MySQLStore({}, pool);
+// const sessionStore = new MySQLStore({}, pool);
 
 const app = express();
 
@@ -111,17 +111,17 @@ app.use(function (err, req, res, next) {
     res.render("error");
 });
 
-const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
-    try {
-        const currentTime = new Date();
-        await sessionStore.clearExpiredSessions(currentTime);
-        console.log("Expired sessions has been cleared successfully!");
-    } catch (err) {
-        console.log("Error cleaning up expired session: ", err);
-    }
-});
+// const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
+//     try {
+//         const currentTime = new Date();
+//         await sessionStore.clearExpiredSessions(currentTime);
+//         console.log("Expired sessions has been cleared successfully!");
+//     } catch (err) {
+//         console.log("Error cleaning up expired session: ", err);
+//     }
+// });
 
-cleanUpExpiredSession.start();
+// cleanUpExpiredSession.start();
 
 app.listen(3000, () => {
     console.log("listening on 3000");

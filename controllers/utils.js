@@ -125,11 +125,10 @@ class VehicleValidation {
     validateCreatingVehicle = (data) => {
         const schema = Joi.object({
             transport_partner_id: Joi.string().required(), //not check
-            staff_id: Joi.string().pattern(new RegExp("^[0-9]+$")).required(),
+            staff_id: Joi.string().required(),
             vehicle_id: Joi.string().required(), //not
             type: Joi.string().required(),
-            license_plate: Joi.string()
-                .regex(new RegExp("^(1[124-9]|2[0-9]|[3-9][0-9])[ABCEFGHKLMNPSTUVXYZ]-d{1,2}.d{2}$"))
+            license_plate: Joi.string() //working on create a regex for this
                 .required(),
             max_load: Joi.number().required(),
         }).unknown(false);
