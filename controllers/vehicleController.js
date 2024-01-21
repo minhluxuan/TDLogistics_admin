@@ -69,7 +69,7 @@ const createNewVehicle = async (req, res) => {
             });
         }
 
-        created = await vehicleService.createNewVehicle(keys, values);
+        const created = await vehicleService.createNewVehicle(keys, values);
         if (created) {
             return res.status(200).json({
                 error: false,
