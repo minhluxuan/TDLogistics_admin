@@ -1,3 +1,5 @@
+const { array } = require("joi");
+
 const findOne = async (pool, table, fields, values) => {
     const query = `SELECT * FROM ${table} WHERE ${fields.map((field) => `${field} = ?`).join(" AND ")} LIMIT 1`;
 
@@ -122,28 +124,66 @@ In the database, the journey has the form of a json:
 }
 */
 //appending a new JSON object to the JSON array at the path $.${arrayName} in the JSON document in the fields column.
-const append = async (pool, table, fields, arrayName, newValues, conditionFields, conditionValues) => {
-    const keyValuePairs = Object.entries(newValues).flat();
-    console.log(keyValuePairs);
-    const placeholders = new Array(keyValuePairs.length).fill("?").join(", ");
-    console.log(placeholders);
-    const query = `UPDATE ?? SET ?? = JSON_ARRAY_APPEND(??, '$.${arrayName}', JSON_OBJECT(${placeholders})) WHERE ?? = ?`;
-    console.log(query);
-    try {
-        const result = await pool.query(query, [
-            table,
-            fields,
-            fields,
-            ...keyValuePairs,
-            conditionFields,
-            conditionValues,
-        ]);
-        return result;
-    } catch (err) {
-        console.log(err);
-        throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
-    }
-};
+class jsonArray {
+    append = async (pool, table, fields, arrayName, newValues, conditionFields, conditionValues) => {
+        const keyValuePairs = Object.entries(newValues).flat();
+        console.log(keyValuePairs);
+        const placeholders = new Array(keyValuePairs.length).fill("?").join(", ");
+        console.log(placeholders);
+        const query = `UPDATE ?? SET ?? = JSON_ARRAY_APPEND(??, '$.${arrayName}', JSON_OBJECT(${placeholders})) WHERE ?? = ?`;
+        console.log(query);
+        try {
+            const result = await pool.query(query, [
+                table,
+                fields,
+                fields,
+                ...keyValuePairs,
+                conditionFields,
+                conditionValues,
+            ]);
+            return result;
+        } catch (err) {
+            console.log(err);
+            throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        }
+    };
+    replace = async (pool, table, fields, arrayName, oldvalue, newvalue, conditionFields, conditionValues) => {
+        const query = `UPDATE ?? SET ?? = JSON_REPLACE(??, '$.${arrayName}[?]', ?) WHERE ?? = ?`;
+        try {
+            const result = await pool.query(query, [
+                table,
+                fields,
+                fields,
+                oldvalue,
+                newvalue,
+                conditionFields,
+                conditionValues,
+            ]);
+            return result;
+        } catch (err) {
+            console.log(err);
+            throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        }
+    };
+    delete = async (pool, table, fields, arrayName, order, conditionFields, conditionValues) => {
+        const query = `UPDATE ?? SET ?? = JSON_REMOVE(??, JSON_UNQUOTE(JSON_SEARCH(??, 'one', ?))) WHERE ?? = ?`;
+        try {
+            const result = await pool.query(query, [
+                table,
+                fields,
+                fields,
+                fields,
+                value,
+                conditionFields,
+                conditionValues,
+            ]);
+            return result;
+        } catch (err) {
+            console.log(err);
+            throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        }
+    };
+}
 module.exports = {
     findOne,
     find,
@@ -152,5 +192,5 @@ module.exports = {
     getLastRow,
     deleteOne,
     deleteMany,
-    append,
+    jsonArray,
 };
