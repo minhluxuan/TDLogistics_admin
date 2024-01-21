@@ -4,7 +4,7 @@ const controllerUtils = require("./utils");
 const fs = require("fs");
 const path = require("path");
 
-vehicleValidation = new controllerUtils.VehicleValidation();
+const vehicleValidation = new controllerUtils.VehicleValidation();
 
 const checkExistVehicle = async (req, res) => {
     const { error } = vehicleValidation.validateCheckingExistVehicle(req.query);
@@ -81,5 +81,70 @@ const createNewVehicle = async (req, res) => {
         });
     }
 };
+const updateVehicle = async (req, res) => {
+    //check here
+    // if (!req.isAuthenticated() || req.user.permission < 2) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "You are not authorized to access this resource.",
+    //     });
+    // }
+    //end check
 
-module.exports = { checkExistVehicle, createNewVehicle };
+    try {
+        // Validate the request body here
+        const { err1 } = vehicleValidation.validateUpdatingVehicle(req.body);
+        if (err1) {
+            return res.status(400).json({
+                error: true,
+                message: "Invalid vehicle information.",
+            });
+        }
+        const { err2 } = vehicleValidation.validateUpdatingVehicle(req.query.vehicle_id);
+        if (err2) {
+            return res.status(400).json({
+                error: true,
+                message: "Invalid vehicle IDs",
+            });
+        }
+        // Update the vehicle
+        let keys = Object.keys(req.body);
+        let values = Object.values(req.body);
+        keys.push("vehicle_id");
+        values.push(req.query.vehicle_id);
+        await vehicleService.updateVehicle(keys, values);
+
+        return res.status(200).json({
+            error: false,
+            message: "Vehicle updated successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+};
+
+const deleteVehicle = async (req, res) => {
+    const { err } = vehicleValidation.validateDeletingVehicle(req.query.vehicle_id);
+    if (err) {
+        return res.status(400).json({
+            error: true,
+            message: "Invalid vehicle IDs",
+        });
+    }
+    try {
+        await vehicleService.deleteVehicle(["vehicle_id"], [req.query.vehicle_id]);
+        return res.status(200).json({
+            error: false,
+            message: "Vehicle deleted successfully",
+        });
+    } catch (err) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+};
+module.exports = { checkExistVehicle, createNewVehicle, updateVehicle };

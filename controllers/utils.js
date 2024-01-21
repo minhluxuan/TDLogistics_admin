@@ -51,7 +51,6 @@ class StaffValidation {
         const schema = Joi.object({
             staff_id: Joi.string().pattern(new RegExp("^[0-9]+$")).required(),
         });
-
         return schema.validate(data);
     };
 
@@ -95,7 +94,6 @@ class StaffValidation {
         const schema = Joi.object({
             staff_id: Joi.string().alphanum().min(9).max(9).required(),
         });
-
         return schema.validate(data);
     };
 
@@ -134,7 +132,32 @@ class VehicleValidation {
                 .regex(new RegExp("^(1[124-9]|2[0-9]|[3-9][0-9])[ABCEFGHKLMNPSTUVXYZ]-d{1,2}.d{2}$"))
                 .required(),
             max_load: Joi.number().required(),
-        });
+        }).unknown(false);
+        return schema.validate(data);
+    };
+
+    validateUpdatingVehicle = (data) => {
+        const schema = Joi.object({
+            vehicle_id: Joi.string(),
+            trans_part_id: Joi.string(),
+            staff_id: Joi.string().pattern(new RegExp("^[0-9]+$")),
+            type: Joi.string(),
+            license: Joi.string().regex(new RegExp("^(1[124-9]|2[0-9]|[3-9][0-9])[ABCEFGHKLMNPSTUVXYZ]-d{1,2}.d{2}$")),
+            mass: Joi.number(),
+            order_ids: Joi.object({
+                append: Joi.array().items(Joi.string()),
+                replace: Joi.object().pattern(Joi.string(), Joi.string()),
+                delete: Joi.array().items(Joi.string()),
+            }),
+        }).unknown(false);
+
+        return schema.validate(data);
+    };
+    validateDeletingVehicle = (data) => {
+        const schema = Joi.object({
+            vehicle_id: Joi.string().required(),
+        }).unknown(false);
+
         return schema.validate(data);
     };
 }
@@ -153,6 +176,7 @@ function ErrorMessage(error) {
 
     return "Validation error";
 }
+
 module.exports = {
     StaffValidation,
     VehicleValidation,

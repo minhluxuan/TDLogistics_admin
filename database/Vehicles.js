@@ -27,6 +27,13 @@ const createNewVehicle = async (fields, values) => {
     const allValues = [...values, ...defaultValues];
     return await utils.insert(pool, table, allFields, allValues);
 };
+const getManyVehicles = async (fields, values) => {
+    return await utils.find(pool, table, fields, values);
+};
+
+const getOneVehicle = async (fields, values) => {
+    return await utils.findOne(pool, table, fields, values);
+};
 const updateVehicle = async (fields, values, conditionFields, conditionValues) => {
     return await update(pool, table, fields, values, conditionFields, conditionValues);
 };
@@ -67,7 +74,18 @@ const handleOrderIds = async (vehicleId, orderIds) => {
         }
     }
 };
-
+const deleteVehicle = async (fields, values) => {
+    return await utils.deleteOne(pool, table, fields, values);
+};
+module.exports = {
+    checkExistVehicle,
+    createNewVehicle,
+    getManyVehicles,
+    getOneVehicle,
+    updateVehicle,
+    handleOrderIds,
+    deleteVehicle,
+};
 // const order_ids = {
 //     replace: { donhang1: "donhang6" },
 //     append: ["donhang1", "donhang2"],
