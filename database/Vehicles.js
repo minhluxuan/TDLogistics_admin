@@ -31,9 +31,13 @@ const updateVehicle = async (fields, values, conditionFields, conditionValues) =
     return await update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
+//based on Vehicle_id and orderIds is a object
 const handleOrderIds = async (vehicleId, orderIds) => {
-    const conditionFields = "id";
-    const conditionValues = vehicleId;
+    if (typeof orderIds !== "object" || orderIds === null || Array.isArray(orderIds)) {
+        throw new Error("orderIds must be a JSON object");
+    }
+    const conditionFields = ["id"];
+    const conditionValues = [vehicleId];
     const fields = "order_id";
     const arrayName = "record";
 
@@ -49,8 +53,8 @@ const handleOrderIds = async (vehicleId, orderIds) => {
                 table,
                 fields,
                 arrayName,
-                oldOrder,
-                newOrder,
+                [oldOrder],
+                [newOrder],
                 conditionFields,
                 conditionValues
             );
@@ -59,19 +63,24 @@ const handleOrderIds = async (vehicleId, orderIds) => {
 
     if (orderIds.delete) {
         for (let order of orderIds.delete) {
-            await jsonArray.delete(pool, table, fields, arrayName, order, conditionFields, conditionValues);
+            await jsonArray.delete(pool, table, fields, arrayName, [order], conditionFields, conditionValues);
         }
     }
 };
 
-const order_ids = {
-    append: ["donhang3"],
-};
+// const order_ids = {
+//     replace: { donhang1: "donhang6" },
+//     append: ["donhang1", "donhang2"],
+//     delete: ["donhang2", "donhang3"],
+// };
 
-const vehicle_id = 4;
+// const vehicle_id = 3;
 
-handleOrderIds(vehicle_id, order_ids);
+// handleOrderIds(vehicle_id, order_ids);
+// const fieldNames = ["transport_partner_id", "staff_id", "type", "vehicle_id", "license_plate", "max_load"];
+// const fieldValues = ["abcd", "efg", "truck", "VH001", "ABC-123", 1000];
 
+//createNewVehicle(fieldNames, fieldValues);
 // const query = "SELECT * FROM orders";
 // const result = pool.query(query).then((result) => {
 //     console.log(result);

@@ -126,61 +126,64 @@ In the database, the journey has the form of a json:
 //appending a new JSON object to the JSON array at the path $.${arrayName} in the JSON document in the fields column.
 class jsonArray {
     append = async (pool, table, fields, arrayName, newValues, conditionFields, conditionValues) => {
-        const keyValuePairs = Object.entries(newValues).flat();
-        console.log(keyValuePairs);
-        const placeholders = new Array(keyValuePairs.length).fill("?").join(", ");
-        console.log(placeholders);
-        const query = `UPDATE ?? SET ?? = JSON_ARRAY_APPEND(??, '$.${arrayName}', JSON_OBJECT(${placeholders})) WHERE ?? = ?`;
-        console.log(query);
-        try {
-            const result = await pool.query(query, [
-                table,
-                fields,
-                fields,
-                ...keyValuePairs,
-                conditionFields,
-                conditionValues,
-            ]);
-            return result;
-        } catch (err) {
-            console.log(err);
-            throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+        for (let i = 0; i < newValues.length; i++) {
+            const query = `UPDATE ?? SET ?? = JSON_ARRAY_APPEND(??, '$.${arrayName}', "${newValues[i]}") WHERE ?? = ?`;
+            try {
+                const result = await pool.query(query, [table, fields, fields, conditionFields, conditionValues]);
+                console.log(result);
+            } catch (err) {
+                console.log(err);
+                throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+            }
         }
     };
-    replace = async (pool, table, fields, arrayName, oldvalue, newvalue, conditionFields, conditionValues) => {
-        const query = `UPDATE ?? SET ?? = JSON_REPLACE(??, '$.${arrayName}[?]', ?) WHERE ?? = ?`;
-        try {
-            const result = await pool.query(query, [
+    replace = async (pool, table, fields, arrayName, oldvalues, newvalues, conditionFields, conditionValues) => {
+        for (let i = 0; i < oldvalues.length; i++) {
+            // Find the path to the value
+            const pathQuery = `SELECT JSON_SEARCH(??, 'one', ?) AS path FROM ?? WHERE ?? = ?`;
+            const [rows] = await pool.query(pathQuery, [fields, oldvalues[i], table, conditionFields, conditionValues]);
+            const path = rows[0].path;
+
+            if (path === null) {
+                console.log(`Value ${oldvalues[i]} not found in JSON array ${arrayName}`);
+                continue;
+            }
+
+            // Replace the value
+            const replaceQuery = `UPDATE ?? SET ?? = JSON_REPLACE(??, ?, ?) WHERE ?? = ?`;
+            const result = await pool.query(replaceQuery, [
                 table,
                 fields,
                 fields,
-                oldvalue,
-                newvalue,
-                conditionFields,
-                conditionValues,
+                path,
+                newvalues[i],
+                ...conditionFields,
+                ...conditionValues,
             ]);
-            return result;
-        } catch (err) {
-            console.log(err);
-            throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
+
+            console.log(result);
         }
     };
-    delete = async (pool, table, fields, arrayName, order, conditionFields, conditionValues) => {
-        const query = `UPDATE ?? SET ?? = JSON_REMOVE(??, JSON_UNQUOTE(JSON_SEARCH(??, 'one', ?))) WHERE ?? = ?`;
-        try {
-            const result = await pool.query(query, [
+    delete = async (pool, table, field, arrayName, order, conditionFields, conditionValues) => {
+        for (let i = 0; i < order.length; i++) {
+            const pathQuery = `SELECT JSON_SEARCH(??, 'one', ?) AS path FROM ?? WHERE ?? = ?`;
+            const [rows] = await pool.query(pathQuery, [field, order[i], table, conditionFields, conditionValues]);
+            const path = rows[0].path;
+
+            if (path === null) {
+                console.log(`Value ${order[i]} not found in JSON array ${arrayName}`);
+                continue;
+            }
+
+            const deleteQuery = `UPDATE ?? SET ?? = JSON_REMOVE(??,?) WHERE ?? = ?`;
+            const result = await pool.query(deleteQuery, [
                 table,
-                fields,
-                fields,
-                fields,
-                value,
-                conditionFields,
-                conditionValues,
+                field,
+                field,
+                path,
+                ...conditionFields,
+                ...conditionValues,
             ]);
-            return result;
-        } catch (err) {
-            console.log(err);
-            throw "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!";
         }
     };
 }
