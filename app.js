@@ -13,22 +13,22 @@ const passport = require("passport");
 const dotenv = require("dotenv");
 dotenv.config();
 
-//const indexRouter = require("./routes/index");
-//const otpRouter = require("./routes/otpRoute");
-// const staffsRouter = require("./routes/staffsRoute");
+const indexRouter = require("./routes/index");
+const otpRouter = require("./routes/otpRoute");
+const staffsRouter = require("./routes/staffsRoute");
 const vehicelRouter = require("./routes/vehicleRoute");
 
-// const dbOptions = {
-//     host: process.env.HOST,
-//     port: process.env.DBPORT,
-//     user: process.env.USER,
-//     password: process.env.PASSWORD,
-//     database: process.env.DATABASE,
-// };
+const dbOptions = {
+    host: process.env.HOST,
+    port: process.env.DBPORT,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE,
+};
 
-// const pool = mysql.createPool(dbOptions);
+const pool = mysql.createPool(dbOptions);
 
-// const sessionStore = new MySQLStore({}, pool);
+const sessionStore = new MySQLStore({}, pool);
 
 const app = express();
 
@@ -41,42 +41,46 @@ app.enable("trust proxy");
 const allowedOrigins = ["https://customer-merchant-web.vercel.app", "https://testwebmerchant.vercel.app"];
 
 // Sử dụng cors middleware với tùy chọn chỉ cho phép các trang web trong danh sách
-// app.use(cors({
-// 	origin: function (origin, callback) {
-// 		if (!origin || allowedOrigins.includes(origin)) {
-// 		callback(null, true);
-// 		} else {
-// 		callback(new Error('Not allowed by CORS'));
-// 		}
-// 	},
-// 	// Thêm các tùy chọn khác nếu cần thiết
-// 	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-// 	credentials: true,
-// }));
+app.use(
+    cors({
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
+        // Thêm các tùy chọn khác nếu cần thiết
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        credentials: true,
+    })
+);
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, 'public')));
-// app.use(session({
-// 	secret: process.env.SESSION_SECRET,
-// 	resave: false,
-// 	saveUninitialized: false,
-// 	store: sessionStore,
-// 	cookie: {
-// 		secure: false,
-// 		sameSite: 'None',
-// 		httpOnly: false,
-// 		maxAge: 60 * 60 * 1000,
-// 	}
-// }));
-// app.use(flash());
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        store: sessionStore,
+        cookie: {
+            secure: false,
+            sameSite: "None",
+            httpOnly: false,
+            maxAge: 60 * 60 * 1000,
+        },
+    })
+);
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
 
-// app.use("/", indexRouter);
-// app.use("/api/v1/staffs", staffsRouter);
-// app.use("/api/v1/otp", otpRouter);
+app.use("/", indexRouter);
+app.use("/api/v1/staffs", staffsRouter);
+app.use("/api/v1/otp", otpRouter);
 app.use("/api/v1/vehicle", vehicelRouter);
 app.use("/get_session", (req, res) => {
     console.log(req.user);
@@ -111,20 +115,20 @@ app.use(function (err, req, res, next) {
     res.render("error");
 });
 
-// const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
-//     try {
-//         const currentTime = new Date();
-//         await sessionStore.clearExpiredSessions(currentTime);
-//         console.log("Expired sessions has been cleared successfully!");
-//     } catch (err) {
-//         console.log("Error cleaning up expired session: ", err);
-//     }
-// });
-
-// cleanUpExpiredSession.start();
-
-app.listen(3000, () => {
-    console.log("listening on 3000");
+const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
+    try {
+        const currentTime = new Date();
+        await sessionStore.clearExpiredSessions(currentTime);
+        console.log("Expired sessions has been cleared successfully!");
+    } catch (err) {
+        console.log("Error cleaning up expired session: ", err);
+    }
 });
 
-// module.exports = app;
+cleanUpExpiredSession.start();
+
+// app.listen(3000, () => {
+//     console.log("listening on 3000");
+// });
+
+module.exports = app;

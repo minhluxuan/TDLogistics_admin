@@ -8,12 +8,12 @@ const vehicleValidation = new controllerUtils.VehicleValidation();
 
 const checkExistVehicle = async (req, res) => {
     //check here
-    // if (!req.isAuthenticated() || req.user.permission < 2) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "You are not authorized to access this resource.",
-    //     });
-    // }
+    if (!req.isAuthenticated() || req.user.permission < 2) {
+        return res.status(401).json({
+            error: true,
+            message: "You are not authorized to access this resource.",
+        });
+    }
     //end check
     const { error } = vehicleValidation.validateCheckingExistVehicle(req.query);
 
@@ -40,12 +40,12 @@ const checkExistVehicle = async (req, res) => {
 };
 const createNewVehicle = async (req, res) => {
     //check here
-    // if (!req.isAuthenticated() || req.user.permission < 2) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "You are not authorized to access this resource.",
-    //     });
-    // }
+    if (!req.isAuthenticated() || req.user.permission < 2) {
+        return res.status(401).json({
+            error: true,
+            message: "You are not authorized to access this resource.",
+        });
+    }
     //end check
 
     try {
@@ -96,12 +96,12 @@ const createNewVehicle = async (req, res) => {
 //UNION with the order table
 const getVehicle = async (req, res) => {
     //check here
-    // if (!req.isAuthenticated() || req.user.permission < 2) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "You are not authorized to access this resource.",
-    //     });
-    // }
+    if (!req.isAuthenticated() || req.user.permission < 2) {
+        return res.status(401).json({
+            error: true,
+            message: "You are not authorized to access this resource.",
+        });
+    }
     //end check
     try {
         const fields = Object.keys(req.query);
@@ -116,12 +116,12 @@ const getVehicle = async (req, res) => {
 
 const getVehicleOrderID = async (req, res) => {
     //check here
-    // if (!req.isAuthenticated() || req.user.permission < 2) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "You are not authorized to access this resource.",
-    //     });
-    // }
+    if (!req.isAuthenticated() || req.user.permission < 2) {
+        return res.status(401).json({
+            error: true,
+            message: "You are not authorized to access this resource.",
+        });
+    }
     //end check
     try {
         const vehicle_id = req.query.vehicle_id;
@@ -138,12 +138,12 @@ const getVehicleOrderID = async (req, res) => {
 
 const updateVehicle = async (req, res) => {
     //check here
-    // if (!req.isAuthenticated() || req.user.permission < 2) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "You are not authorized to access this resource.",
-    //     });
-    // }
+    if (!req.isAuthenticated() || req.user.permission < 2) {
+        return res.status(401).json({
+            error: true,
+            message: "You are not authorized to access this resource.",
+        });
+    }
     //end check
 
     try {
@@ -185,12 +185,12 @@ const updateVehicle = async (req, res) => {
 
 const deleteVehicle = async (req, res) => {
     //check here
-    // if (!req.isAuthenticated() || req.user.permission < 2) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "You are not authorized to access this resource.",
-    //     });
-    // }
+    if (!req.isAuthenticated() || req.user.permission < 2) {
+        return res.status(401).json({
+            error: true,
+            message: "You are not authorized to access this resource.",
+        });
+    }
     //end check
 
     const { err } = vehicleValidation.validateDeletingVehicle(req.query.vehicle_id);
