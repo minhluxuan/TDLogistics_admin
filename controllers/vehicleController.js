@@ -7,6 +7,14 @@ const path = require("path");
 const vehicleValidation = new controllerUtils.VehicleValidation();
 
 const checkExistVehicle = async (req, res) => {
+    //check here
+    // if (!req.isAuthenticated() || req.user.permission < 2) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "You are not authorized to access this resource.",
+    //     });
+    // }
+    //end check
     const { error } = vehicleValidation.validateCheckingExistVehicle(req.query);
 
     if (error) {
@@ -81,6 +89,7 @@ const createNewVehicle = async (req, res) => {
         });
     }
 };
+
 const updateVehicle = async (req, res) => {
     //check here
     // if (!req.isAuthenticated() || req.user.permission < 2) {
@@ -108,11 +117,9 @@ const updateVehicle = async (req, res) => {
             });
         }
         // Update the vehicle
-        let keys = Object.keys(req.body);
-        let values = Object.values(req.body);
-        keys.push("vehicle_id");
-        values.push(req.query.vehicle_id);
-        await vehicleService.updateVehicle(keys, values);
+        const keys = Object.keys(req.body);
+        const values = Object.values(req.body);
+        await vehicleService.updateVehicle(keys, values, ["vehicle_id"], [req.query.vehicle_id]);
 
         return res.status(200).json({
             error: false,
@@ -127,6 +134,15 @@ const updateVehicle = async (req, res) => {
 };
 
 const deleteVehicle = async (req, res) => {
+    //check here
+    // if (!req.isAuthenticated() || req.user.permission < 2) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "You are not authorized to access this resource.",
+    //     });
+    // }
+    //end check
+
     const { err } = vehicleValidation.validateDeletingVehicle(req.query.vehicle_id);
     if (err) {
         return res.status(400).json({
@@ -147,4 +163,4 @@ const deleteVehicle = async (req, res) => {
         });
     }
 };
-module.exports = { checkExistVehicle, createNewVehicle, updateVehicle };
+module.exports = { checkExistVehicle, createNewVehicle, updateVehicle, deleteVehicle };
