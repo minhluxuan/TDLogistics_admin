@@ -20,6 +20,10 @@ const getShipmentForAgency = async (fields, values, agency_id) => {
     return await Shipment.getShipmentForAgency(fields, values, agency_id);
 }
 
+const updateParentForGlobalOrders = async (shipment_id, agency_id) => {
+    await Shipment.updateParentForGlobalOrders(shipment_id, agency_id);
+}
+
 const confirmCreateShipment = async (fields, values) => {
     return await Shipment.confirmCreateShipment(fields, values);
 }
@@ -32,12 +36,28 @@ const deleteShipment = async (shipment_id, agency_id) => {
     return await Shipment.deleteShipment(shipment_id, agency_id);
 }
 
-const decompseShipment = async (shipment_id, order_ids, agency_id) => {
-    return await Shipment.decompseShipment(shipment_id, order_ids, agency_id);
+const deleteGlobalShipment = async (shipment_id) => {
+    return await Shipment.deleteGlobalShipment(shipment_id);
+}
+
+const decomposeShipment = async (shipment_id, order_ids, agency_id) => {
+    return await Shipment.decomposeShipment(shipment_id, order_ids, agency_id);
 }
 
 const updateShipmentToDatabase = async (fields, values, shipment_id) => {
     return await Shipment.updateShipmentToDatabase(fields, values, shipment_id);
+}
+
+const recieveShipment = async (shipment_id, agency_id) => {
+    return await Shipment.recieveShipment(shipment_id, agency_id);
+}
+
+const addOrderToShipment = async (shipment_id, order_id, agency_id) => {
+    return await Shipment.addOrderToShipment(shipment_id, order_id, agency_id);
+}
+
+const deleteOrderFromShipment = async (shipment_id, order_id, agency_id) => {
+    return await Shipment.deleteOrderFromShipment(shipment_id, order_id, agency_id);
 }
 
 const recieveShipment = async (shipment_id, agency_id) => {
@@ -59,11 +79,16 @@ module.exports = {
     getShipmentForAdmin,
     getShipmentForAgency,
     getInfoShipment,
+    updateParentForGlobalOrders,
     confirmCreateShipment,
     recieveShipment,
     addOrderToShipment,
     deleteOrderFromShipment,
+    recieveShipment,
+    addOrderToShipment,
+    deleteOrderFromShipment,
     deleteShipment,
+    deleteGlobalShipment,
     updateShipmentToDatabase,
-    decompseShipment,
+    decomposeShipment,
 };

@@ -20,6 +20,9 @@ const containerRouter = require("./routes/containerRoute");
 
 const otpRouter = require("./routes/otpRoute");
 const staffsRouter = require("./routes/staffsRoute");
+const businessRouter = require("./routes/businessRoute");
+const shipmentsRouter = require("./routes/shipmentsRoute");
+const containersRouter = require("./routes/containersRoute");
 
 
 const dbOptions = {
@@ -85,6 +88,9 @@ app.use("/api/v1/container", containerRouter);
 
 app.use("/api/v1/staffs", staffsRouter);
 app.use("/api/v1/otp", otpRouter);
+app.use("/api/v1/business", businessRouter);
+app.use("/api/v1/shipments", shipmentsRouter);
+app.use("/api/v1/containers", containersRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({
