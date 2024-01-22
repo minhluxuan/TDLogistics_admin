@@ -397,7 +397,126 @@ const decomposeShipment = async (req, res) => {
             message: error.message,
         });
     }
-    
+}
+
+const recieveShipment = async (req, res) => {
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
+    // const agency_id = req.session.agency_id;
+    const agency_id = "7400";
+
+    try {
+        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
+        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
+
+        // if(error) {
+        //     return res.status(400).json({
+        //         error: true,
+        //         message: "Thông tin không hợp lệ!",
+        //     });
+        // }
+
+        const shipmentID = req.body.shipment_id;
+        const result = await shipmentService.recieveShipment(shipmentID, agency_id);
+        return res.status(200).json({
+            error: false,
+            data: result,
+            message: "Nhập lô hàng thành công!",
+        });
+
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const addOrderToShipment = async (req, res) => {
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
+    // const agency_id = req.session.agency_id;
+    const agency_id = "7400";
+
+    try {
+        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
+        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
+
+        // if(error) {
+        //     return res.status(400).json({
+        //         error: true,
+        //         message: "Thông tin không hợp lệ!",
+        //     });
+        // }
+
+        const shipmentID = req.body.shipment_id;
+        const orderID = req.body.order_id;
+        const result = await shipmentService.addOrderToShipment(shipmentID, orderID, agency_id);
+        return res.status(200).json({
+            error: false,
+            data: result,
+            message: "Thêm đơn hàng vào lô hàng thành công!",
+        });
+
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const deleteOrderFromShipment = async (req, res) => {
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
+    // const agency_id = req.session.agency_id;
+    const agency_id = "7400";
+
+    try {
+        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
+        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
+
+        // if(error) {
+        //     return res.status(400).json({
+        //         error: true,
+        //         message: "Thông tin không hợp lệ!",
+        //     });
+        // }
+
+        const shipmentID = req.body.shipment_id;
+        const orderID = req.body.order_id;
+        const result = await shipmentService.deleteOrderFromShipment(shipmentID, orderID, agency_id);
+
+        if (!result || result[0].affectedRows <= 0) {
+            return res.status(404).json({
+                error: true,
+                message: "Đơn hàng không tồn tại trong lô hàng.",
+            });
+        }
+
+        return res.status(200).json({
+            error: false,
+            message: "Xóa đơn hàng vào lô hàng thành công!",
+        });
+
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
 }
 
 module.exports = {
@@ -405,6 +524,9 @@ module.exports = {
     updateShipment,
     getShipmentForAgency,
     getShipmentForAdmin,
+    recieveShipment,
+    addOrderToShipment,
+    deleteOrderFromShipment,
     confirmCreateShipment,
     deleteShipment,
     updateShipmentToDatabase,
