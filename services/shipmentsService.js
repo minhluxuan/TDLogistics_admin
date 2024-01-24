@@ -60,18 +60,6 @@ const deleteOrderFromShipment = async (shipment_id, order_id, agency_id) => {
     return await Shipment.deleteOrderFromShipment(shipment_id, order_id, agency_id);
 }
 
-const recieveShipment = async (shipment_id, agency_id) => {
-    return await Shipment.recieveShipment(shipment_id, agency_id);
-}
-
-const addOrderToShipment = async (shipment_id, order_id, agency_id) => {
-    return await Shipment.addOrderToShipment(shipment_id, order_id, agency_id);
-}
-
-const deleteOrderFromShipment = async (shipment_id, order_id, agency_id) => {
-    return await Shipment.deleteOrderFromShipment(shipment_id, order_id, agency_id);
-}
-
 module.exports = {
     createNewShipment,
     getDataForShipmentCode,
@@ -81,9 +69,6 @@ module.exports = {
     getInfoShipment,
     updateParentForGlobalOrders,
     confirmCreateShipment,
-    recieveShipment,
-    addOrderToShipment,
-    deleteOrderFromShipment,
     recieveShipment,
     addOrderToShipment,
     deleteOrderFromShipment,

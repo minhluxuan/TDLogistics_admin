@@ -15,8 +15,6 @@ dotenv.config();
 
 const indexRouter = require('./routes/index');
 
-const shipmentsRouter = require("./routes/shipmentsRoute");
-const containerRouter = require("./routes/containerRoute");
 
 const otpRouter = require("./routes/otpRoute");
 const staffsRouter = require("./routes/staffsRoute");
@@ -83,8 +81,6 @@ app.use(passport.session());
 
 app.use('/', indexRouter);
 
-app.use("/api/v1/shipment", shipmentsRouter);
-app.use("/api/v1/container", containerRouter);
 
 app.use("/api/v1/staffs", staffsRouter);
 app.use("/api/v1/otp", otpRouter);

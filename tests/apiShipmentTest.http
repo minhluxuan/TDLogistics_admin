@@ -1,5 +1,5 @@
 ###
-POST http://localhost:5000/api/v1/shipment/create
+POST http://localhost:5000/api/v1/shipments/create
 Content-Type: application/json
 
 {
@@ -13,49 +13,49 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:5000/api/v1/shipment/update
+POST http://localhost:5000/api/v1/shipments/update
 Content-Type: application/json
 
 {
-    "mass": 123,
-    "shipment_id": "TD20240522616352"
+    "mass": -123,
+    "shipment_id": "TD202403141437852"
 }
 
 ###
 
-GET http://localhost:5000/api/v1/shipment/search
+GET http://localhost:5000/api/v1/shipments/search
 Content-Type: application/json
 
 {
-    "shipment_id": "TD20240522616352"
+    "shipment_id": "TD202403141437852"
 }
 
 ###
-POST http://localhost:5000/api/v1/shipment/confirm
+POST http://localhost:5000/api/v1/shipments/confirm
 Content-Type: application/json 
 
 {
-    "shipment_id": "TD20240522616352"
+    "shipment_id": "TD202403141437852"
 }
 
 ###
-DELETE http://localhost:5000/api/v1/shipment/delete
+DELETE http://localhost:5000/api/v1/shipments/delete
 Content-Type: application/json 
 
 {
-    "shipment_id": "TD20240522616352"
+    "shipment_id": "TD202403141437852"
 }
 
 ###
-POST http://localhost:5000/api/v1/shipment/updatedb
+POST http://localhost:5000/api/v1/shipments/updatedb
 Content-Type: application/json 
 
 {
-    "shipment_id": "TD20240522616352"
+    "shipment_id": "TD202403141437852"
 }
 
 ###
-POST http://localhost:5000/api/v1/shipment/decompose
+POST http://localhost:5000/api/v1/shipments/decompose
 Content-Type: application/json
 
 {
@@ -65,26 +65,26 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:5000/api/v1/shipment/add
+POST http://localhost:5000/api/v1/shipments/add
 Content-Type: application/json
 
 {
-    "shipment_id": "TD20240522616352",
-    "order_id": "QN002"
+    "shipment_id": "TD202403141437852",
+    "order_id": "DN002"
 }
 
 ### DN001 DN002 QN002
-POST http://localhost:5000/api/v1/shipment/remove
+POST http://localhost:5000/api/v1/shipments/remove
 Content-Type: application/json
 
 {
-    "shipment_id": "TD20240522616352",
+    "shipment_id": "TD202403141437852",
     "order_id": "DN002"
 }
 
 ###
 
-POST http://localhost:5000/api/v1/shipment/recieve
+POST http://localhost:5000/api/v1/shipments/recieve
 Content-Type: application/json
 
 {

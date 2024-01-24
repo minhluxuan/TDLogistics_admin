@@ -141,7 +141,7 @@ class ShipmentValidation {
     validateUpdatingShipment = (data) => {
         const schema = Joi.object({
             shipment_id: Joi.string().alphanum().required(),
-            mass: Joi.number().precision(2).min(0).required(),
+            mass: Joi.number().precision(2).required(),
         }).strict();
         return schema.validate(data);
     }
