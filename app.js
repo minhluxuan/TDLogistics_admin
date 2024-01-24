@@ -19,7 +19,7 @@ const staffsRouter = require("./routes/staffsRoute");
 const businessRouter = require("./routes/businessRoute");
 const shipmentsRouter = require("./routes/shipmentsRoute");
 const containersRouter = require("./routes/containersRoute");
-
+const transportPartnerRouter = require("./routes/transportPartnerRoute");
 // const dbOptions = {
 //     host: process.env.HOST,
 //     port: process.env.DBPORT,
@@ -84,6 +84,7 @@ app.use("/api/v1/otp", otpRouter);
 app.use("/api/v1/business", businessRouter);
 app.use("/api/v1/shipments", shipmentsRouter);
 app.use("/api/v1/containers", containersRouter);
+app.use("/api/v1/oke", transportPartnerRouter);
 app.use("/get_session", (req, res) => {
     console.log(req.user);
     res.status(200).json({
@@ -129,4 +130,8 @@ const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
 
 cleanUpExpiredSession.start();
 
-module.exports = app;
+app.listen(3000, () => {
+    console.log("listening");
+});
+
+//module.exports = app;
