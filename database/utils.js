@@ -66,7 +66,7 @@ const update = async (pool, table, fields, values, conditionFields, conditionVal
     const query = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
 
     try {
-        const [result] = await pool.query(query, [...values, ...conditionValues]);
+        const result = await pool.query(query, [...values, ...conditionValues]);
         return result;
     } catch (error) {
         console.log("Error: ", error);

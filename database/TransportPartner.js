@@ -23,7 +23,7 @@ process.on("SIGINT", () => {
             process.exit(1);
         });
 });
-const createPartner = async (fields, values) => {
+const createNewPartner = async (fields, values) => {
     const prefix = values[fields.indexOf("transport_partner_id")];
     const [rows] = await pool.query(
         `SELECT transport_partner_id FROM ${table} WHERE transport_partner_id LIKE ? ORDER BY transport_partner_id DESC LIMIT 1`,
@@ -94,4 +94,13 @@ const deletePartner = async (fields, values) => {
 // );
 // deletePartner(["id"], [2]);
 // updatePartner(["tax_code"], ["taxipda2t"], ["transport_partner_id"], ["TC00001"]);
-console.log("here");
+//console.log("here");
+
+module.exports = {
+    checkExistPartner,
+    createNewPartner,
+    getOnePartner,
+    getManyPartners,
+    updatePartner,
+    deletePartner,
+};
