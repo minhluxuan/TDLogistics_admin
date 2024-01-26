@@ -39,10 +39,12 @@ const upload = multer({
     fileFilter: fileFilter,
 });
 
-router.post("/create", upload.single("contract"), businessController.createNewBusinessUser);
-router.get("/search", businessController.getBusiness);
-router.delete("/delete",businessController.deleteBusinessUser);
-router.patch("/update", businessController.updateBusinessInfo);
-router.patch("/update_contract", utils.isAuthenticated(2), upload.single("contract"), businessController.updateContract);
+const user =  new utils.User();
+
+router.post("/create", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 11), upload.single("contract"), businessController.createNewBusinessUser);
+router.get("/search", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 12), businessController.getBusiness);
+router.patch("/update", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 13), businessController.updateBusinessInfo);
+router.patch("/update_contract", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 13), upload.single("contract"), businessController.updateContract);
+router.delete("/delete", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 14), businessController.deleteBusinessUser);
 
 module.exports = router;

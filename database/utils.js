@@ -127,6 +127,54 @@ const deleteMany = async  (pool, table, fields = null, values = null) => {
     }
 }
 
+const getPostalCode = (personnel_id) => {
+    return personnel_id.split("_")[2];
+}
+
+const getInfo = (personnel_id) => {
+    let table, conditionField;
+    const postalCode = personnel_id.split("_")[2];
+    switch (personnel_id.slice(0, 2)) {
+        case "SG":
+            table = "staff";
+            conditionField = "staff_id";
+            break;
+        case "AP":
+            table = postalCode + '_' + suffixAgencyTable;
+            conditionField = "agency_id";
+            break;
+        case "SP":
+            table = postalCode + '_' + suffixStaffTable;
+            conditionField = "staff_id";
+            break;
+        case "AD":
+            table = postalCode + '_' + suffixAgencyTable;
+            conditionField = "agency_id";
+            break;
+        case "SD":
+            table = postalCode + '_' + suffixStaffTable;
+            conditionField = "staff_id";
+            break;
+        case "AT": 
+            table = postalCode + '_' + suffixAgencyTable;
+            conditionField = "agency_id";
+            break;
+        case "ST":
+            table = postalCode + '_' + suffixStaffTable;
+            conditionField = "staff_id";
+            break;
+        default:
+            table = undefined;
+            conditionField = undefined;
+            break;
+    }
+
+    return {
+        table: table,
+        conditionField: conditionField,
+    }
+}
+
 module.exports = {
     findOne,
     find,
@@ -136,4 +184,6 @@ module.exports = {
     getLastRow,
     deleteOne,
     deleteMany,
+    getPostalCode,
+    getInfo,
 }

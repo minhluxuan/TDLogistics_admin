@@ -10,6 +10,7 @@ const cron = require("cron");
 const cors = require("cors");
 const flash = require("express-flash");
 const passport = require("passport");
+const utils = require("./utils");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -19,6 +20,8 @@ const staffsRouter = require("./routes/staffsRoute");
 const businessRouter = require("./routes/businessRoute");
 const shipmentsRouter = require("./routes/shipmentsRoute");
 const containersRouter = require("./routes/containersRoute");
+const vehicleRouter = require("./routes/vehicleRoute");
+const authorizationRouter = require("./routes/authorizationRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -46,13 +49,13 @@ const allowedOrigins = ['https://customer-merchant-web.vercel.app', 'https://tes
 app.use(cors({
 	origin: function (origin, callback) {
 		if (!origin || allowedOrigins.includes(origin)) {
-		callback(null, true);
+			callback(null, true);
 		} else {
-		callback(new Error('Not allowed by CORS'));
+			callback(new Error('Not allowed by CORS'));
 		}
 	},
 	// Thêm các tùy chọn khác nếu cần thiết
-	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+	methods: 'GET, HEAD, PUT, PATCH, POST, DELETE',
 	credentials: true,
 }));
 app.use(logger('dev'));
@@ -82,6 +85,8 @@ app.use("/api/v1/otp", otpRouter);
 app.use("/api/v1/business", businessRouter);
 app.use("/api/v1/shipments", shipmentsRouter);
 app.use("/api/v1/containers", containersRouter);
+app.use("/api/v1/vehicles", vehicleRouter);
+app.use("/api/v1/authorization", authorizationRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({
@@ -97,6 +102,11 @@ app.get("/destroy_session", (req, res) => {
 		error: false,
 		message: "Hủy phiên hoạt động thành công.",
 	});
+});
+
+passport.serializeUser(utils.setSession);
+passport.deserializeUser((user, done) => {
+	utils.verifyPermission(user, done);
 });
 
 // catch 404 and forward to error handler

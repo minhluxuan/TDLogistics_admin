@@ -1,0 +1,125 @@
+POST http://localhost:5000/api/v1/otp/verify_otp
+Content-Type: application/json
+
+{
+    "phone_number": "0981430418",
+    "otp": 123456
+}
+
+###
+
+GET http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": 
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+content-type: application/json
+
+{
+    "fullname": "Lữ Xuân Minh",
+    "username": "minhluxuan",
+    "password": "LUXUANMINH@2k4",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005692",
+    "email": "minh.luxuanhcmut@hcmut.edu.vn",
+    "phone_number": "0981430418",
+    "role": "Giám đốc",
+    "salary": 25000000,
+    "paid_salary": 0,
+    "address": "TPHCM",
+    "agency_id": "SG_HCM_70000_12345"
+}
+
+###
+
+GET http://localhost:5000/api/v1/authorization/search?personnel_id=SG_HCM_70000_12345
+Content-Type: application/json
+
+###
+
+PUT http://localhost:5000/api/v1/authorization/update
+Content-Type: application/json
+
+{
+    "personnel_id": "SG_HCM_70000_12345",
+    "permissions": [2]
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/authorization/delete
+Content-Type: application/json
+
+{
+    "personnel_id": "SG_HCM_70000_12345",
+    "permissions": [2]
+}
+
+###
+
+POST http://localhost:5000/api/v1/vehicles/create
+Content-Type: application/json
+
+{
+    "transport_partner_id": "TC00000",
+    "staff_id": "PS_HCM_70000_00000",
+    "type": "truck",
+    "license_plate": "63-H1 64953",
+    "max_load": 10000
+}
+
+###
+
+GET http://localhost:5000/api/v1/vehicles/search
+Content-Type: application/json
+
+{
+    "license_plate": "63-H1 64953"
+}
+
+###
+
+GET http://localhost:5000/api/v1/vehicles/search_order_ids?vehicle_id=0000000
+Content-Type: application/json
+
+###
+
+PATCH http://localhost:5000/api/v1/vehicles/add_orders?vehicle_id=0000000
+Content-Type: application/json
+
+{
+    "order_ids": ["TD202402225629673"]
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/vehicles/delete_orders?vehicle_id=0000000
+Content-Type: application/json
+
+{
+    "order_ids": ["TD202402225629673"]
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/vehicles/update?vehicle_id=0000000
+Content-Type: application/json
+
+{
+    "max_load": 20000
+}
+
+###
+
+GET http://localhost:5000/get_session
+Content-Type: application/json
+
+###
+
+GET http://localhost:5000/destroy_session
+Content-Type: application/json

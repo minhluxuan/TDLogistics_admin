@@ -28,7 +28,7 @@ const sessionStrategy = new LocalStrategy({
 
     const staff_id = staff[0]["staff_id"];
     const agency_id = staff[0]["agency_id"];
-    const permission = 2;
+    const permission = JSON.parse(staff[0]["permission"]);
 
     return done(null, {
         staff_id,
@@ -63,23 +63,20 @@ const storage = multer.diskStorage({
    
 const upload = multer({ storage: storage });
 
+const user =  new utils.User();
+
 router.post("/login", passport.authenticate("normalLogin", {
     successRedirect: "/api/v1/staffs/login_success",
     failureRedirect: "/api/v1/staffs/login_fail",
     failureFlash: true,
 }), staffsController.verifyStaffSuccess);
-router.post("/create", upload.single("avatar"), staffsController.createNewStaff);
-router.get("/search", staffsController.getStaffs);
-router.delete("/delete",staffsController.deleteStaff);
-router.patch("/update", staffsController.updateStaffInfo);
+router.get("/search", user.isAuthenticated(), user.isAuthorized(2, 3, 4, 5, 6, 7, 8, 9, 10, 15), staffsController.getStaffs);
+router.post("/create", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 10, 16), upload.single("avatar"), staffsController.createNewStaff);
+router.patch("/update", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 10, 17), staffsController.updateStaffInfo);
+router.patch("/update_password", user.isAuthenticated(), user.isAuthorized(2, 3, 4, 5, 6, 7, 8, 9, 10, 17), staffsController.updatePassword);
+router.patch("/update_avatar", user.isAuthenticated(), user.isAuthorized(2, 3, 4, 5, 6, 7, 8, 9, 10, 17), user.isAuthenticated(), user.isAuthorized(2), upload.single("avatar"), staffsController.updateAvatar);
+router.delete("/delete", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 10, 18), staffsController.deleteStaff);
 router.post("/login_success", staffsController.verifyStaffSuccess);
 router.post("/login_fail", staffsController.verifyStaffFail);
-router.patch("/update_password", staffsController.updatePassword);
-router.patch("/update_avatar", utils.isAuthenticated(2), upload.single("avatar"), staffsController.updateAvatar);
-
-passport.serializeUser(utils.setStaffSession);
-passport.deserializeUser((staff, done) => {
-    utils.verifyStaffPermission(staff, done);
-});
 
 module.exports = router;

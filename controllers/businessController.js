@@ -68,13 +68,6 @@ const getBusiness = async (req, res) => {
 };
 
 const createNewBusinessUser = async (req, res) => {
-	if (!req.isAuthenticated() || req.user.permission !== 2) {
-		return res.status(401).json({
-			error: true,
-			message: "Bạn không được phép truy cập tài nguyên này.",
-		});
-	}
-
 	try {
 		const { error } = businessValidation.validateCreateBusiness(req.body);
 

@@ -6,39 +6,47 @@ const hash = (password) => {
     return hashPassword;
 }
 
-
-const setStaffSession = (staff, done) => {
-    done(null, { staff_id: staff.staff_id, agency_id: staff.agency_id, permission: staff.permission });
+const setSession = (user, done) => {
+    done(null, user);
 }
 
-const verifyStaffPermission = (staff, done) => {
-    if (staff.permission === 2) {
-        return done(null, {
-            staff_id: staff.staff_id,
-            agency_id: staff.agency_id,
-            permission: staff.permission,
-        });
+const verifyPermission = (user, done) => {
+    return done(null, user);
+}
+
+class User {
+    isAuthenticated = () => {
+        return (req, res, next) => {
+            if (!req.isAuthenticated()) {
+                return res.status(403).json({
+                    error: true,
+                    message: "Bạn không được phép truy cập tài nguyên này."
+                });
+            }
+    
+            next();
+        }
     }
-    done(null, false);
-}
 
-const isAuthenticated = (permission) => {
-    return (req, res, next) => {
-        if (!req.isAuthenticated() || req.user.permission !== permission) {
+    isAuthorized = (...args) => {
+        return (req, res, next) => {
+            for (const arg of args) {
+                if (req.user.permission.primary.includes(arg) || req.user.permission.privilege.includes(arg)) {
+                    return next();
+                }
+            }
+    
             return res.status(403).json({
                 error: true,
-                message: "Bạn không được phép truy cập tài nguyên này."
+                message: "Bạn không được phép truy cập tài nguyên này.",
             });
         }
-
-        next();
     }
 }
-
 
 module.exports = {
     hash,
-    setStaffSession,
-    verifyStaffPermission,
-    isAuthenticated
+    setSession,
+    verifyPermission,
+    User,
 }

@@ -47,7 +47,7 @@ class StaffValidation {
             salary: Joi.number().precision(3).min(0).required(), 
             paid_salary: Joi.number().precision(3).min(0).required(), 
             address: Joi.string().required(),
-            agency_id: Joi.number().max(99999).required(),
+            agency_id: Joi.string().regex(new RegExp(process.env.REGEX_PERSONNEL)),
         }).strict();
 
         return schema.validate(data);
@@ -278,10 +278,193 @@ class BusinessValidation {
     }
 }
 
+class VehicleValidation {
+    validateCheckingExistVehicle = (data) => {
+        const schema = Joi.object({
+            vehicle_id: Joi.string().required(),
+        });
+        return schema.validate(data);
+    };
+
+    validateFindingVehicle = (data) => {
+        const schema = Joi.object({
+            vehicle_id: Joi.string(),
+            transport_partner_id: Joi.string(),
+            staff_id: Joi.string().regex(new RegExp(process.env.REGEX_PERSONNEL)),
+            type: Joi.string(),
+            license_plate: Joi.string().regex(new RegExp(process.env.REGEX_LICENSE_PLATE)),
+            mass: Joi.number(),
+        }).unknown(false);
+
+        return schema.validate(data);
+    }
+
+    validateGettingOrderIds = (data) => {
+        const schema = Joi.object({
+            vehicle_id: Joi.string(),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateCreatingVehicle = (data) => {
+        const schema = Joi.object({
+            transport_partner_id: Joi.string().required(), //not check
+            staff_id: Joi.string().regex(new RegExp(process.env.REGEX_PERSONNEL)).required(),
+            type: Joi.string().required(),
+            license_plate: Joi.string().regex(new RegExp(process.env.REGEX_LICENSE_PLATE)).required(),
+            max_load: Joi.number().required(),
+        }).unknown(false);
+        
+        return schema.validate(data);
+    };
+
+    validateUpdatingVehicle = (data) => {
+        const schema = Joi.object({
+            transport_partner_id: Joi.string(),
+            staff_id: Joi.string().regex(new RegExp(process.env.REGEX_PERSONNEL)),
+            type: Joi.string(),
+            license: Joi.string().regex(new RegExp(process.env.REGEX_LICENSE_PLATE)),
+            max_load: Joi.number(),
+            mass: Joi.number()
+        }).unknown(false);
+
+        return schema.validate(data);
+    };
+
+    validateOrderIds = (data) => {
+        const schema = Joi.object({
+            order_ids: Joi.array().items(Joi.string()),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateDeletingVehicle = (data) => {
+        const schema = Joi.object({
+            vehicle_id: Joi.string().required(),
+        }).unknown(false);
+
+        return schema.validate(data);
+    };
+}
+
+const ErrorMessage = (error) => {
+    const details = error.details;
+
+    for (let i = 0; i < details.length; i++) {
+        if (details[i].type === "any.required") {
+            return "Missing field: " + details[i].context.key;
+        } else if (details[i].type === "string.pattern.base") {
+            return "Invalid value in field: " + details[i].context.key;
+        } else if (details[i].type === "object.unknown") {
+            return "Unexpected field: " + details[i].context.key;
+        }
+    }
+
+    return "Validation error";
+}
+
+class AuthorizationValidation {
+    validateUpdatingAuthorization = (data) => {
+        const schema = Joi.object({
+            personnel_id: Joi.string().regex(new RegExp(process.env.REGEX_PERSONNEL)),
+            permissions: Joi.array(),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateDeletingAuthorization = (data) => {
+        const schema = Joi.object({
+            personnel_id: Joi.string().regex(new RegExp(process.env.REGEX_PERSONNEL)),
+            permissions: Joi.array(),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateFindingAuthorization = (data) => {
+        const schema = Joi.object({
+            personnel_id: Joi.string().regex(new RegExp(process.env.REGEX_PERSONNEL)),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    isAllowedToGrant = (granter_id, receiver_id, primaryPermissionsOfGranter, grantedPermissions) => {
+        for (const permission of grantedPermissions) {
+            if (!primaryPermissionsOfGranter.includes(permission)) {
+                console.log("Action is not allowed.");
+                return false;
+            }
+        }
+
+        const orders = ["GB", "SG", "AP", "SP", "AD", "SD","AT", "ST"];
+
+        const granterArray = granter_id.split('_');
+        const receiverArray = receiver_id.split('_');
+
+        if (orders.indexOf(granterArray[0]) > orders.indexOf(receiverArray[0])
+            || orders.indexOf(granterArray[0]) > 0 && granterArray[1] !== receiverArray[1]
+            || orders.indexOf(granterArray[0]) > 1 && granterArray[2] !== receiverArray[2]
+            || orders.indexOf(granterArray[0]) > 2 && granterArray[3] !== receiverArray[3]) {
+            console.log("Operation is not allowed.");
+            return false;
+        }
+
+        return true;
+    }
+
+    isAllowedToRevoke = (revoker_id, loser_id, primaryPermissionOfRevoker, revokedPermissions) => {
+        for (const permission of revokedPermissions) {
+            if (!primaryPermissionOfRevoker.includes(permission)) {
+                console.log("Action is not allowed.");
+                return false;
+            }
+        }
+
+        const orders = ["GB", "SG", "AP", "SP", "AD", "SD","AT", "ST"];
+
+        const revokerArray = revoker_id.split('_');
+        const loserArray = loser_id.split('_');
+
+        if (orders.indexOf(revokerArray[0]) > orders.indexOf(loserArray[0])
+            || orders.indexOf(revokerArray[0]) > 1 && revokerArray[1] !== loserArray[1]
+            || orders.indexOf(revokerArray[0]) > 3 && revokerArray[2] !== loserArray[2]
+            || orders.indexOf(revokerArray[0]) > 5 && revokerArray[3] !== loserArray[3]) {
+            console.log("Action is not allowed.");
+            return false;
+        }
+
+        return true;
+    }
+
+    isAllowedToRead = (reader_id, read_object_id, primaryPermissionOfReader) => {
+        const orders = ["GB", "SG", "AP", "SP", "AD", "SD","AT", "ST"];
+
+        const readerArray = reader_id.split('_');
+        const readObjectArray = read_object_id.split('_');
+
+        if (orders.indexOf(readerArray[0]) > orders.indexOf(readObjectArray[0])
+            || orders.indexOf(readerArray[0]) > 1 && readerArray[1] !== readObjectArray[1]
+            || orders.indexOf(readObjectArray[0]) > 3 && readerArray[2] !== readObjectArray[2]
+            ||  orders.indexOf(readObjectArray[0]) > 5 && readerArray[3] !== readObjectArray[3]) {
+                console.log("Action is not allowed.");
+                return false;
+        }
+
+        return true;
+    }
+}
+
 module.exports = {
     StaffValidation,
     ShipmentValidation,
     ContainerValidation,
     BusinessValidation,
+    VehicleValidation,
+    AuthorizationValidation,
     shortenName,
+    ErrorMessage,
 }
