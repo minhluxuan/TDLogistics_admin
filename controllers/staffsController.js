@@ -249,20 +249,20 @@ const deleteStaff = async (req,res)=>{
 	}
 
 	try {
-	// kiểm tra staffId có thuộc quyền quản lý của agencyId của admin hay không
-	const result = await staffsService.deleteStaff(["agency_id", "staff_id"], [req.user.agency_id, req.query.staff_id]);
+		// kiểm tra staffId có thuộc quyền quản lý của agencyId của admin hay không
+		const result = await staffsService.deleteStaff(["agency_id", "staff_id"], [req.user.agency_id, req.query.staff_id]);
 
-	if (result[0].affectedRows <= 0) {
+		if (result[0].affectedRows <= 0) {
+			return res.status(200).json({
+				error: true,
+				message: "Bạn không có quyền truy cập tài nguyên này. ",
+			});
+		}
+		
 		return res.status(200).json({
-			error: true,
-			message: "Bạn không có quyền truy cập tài nguyên này. ",
+			error: false,
+			message: `Xóa nhân viên ${req.query.staff_id} thành công.`,
 		});
-	}
-	
-	return res.status(200).json({
-		error: false,
-		message: `Xóa nhân viên ${req.query.staff_id} thành công.`,
-	});
 	} catch (error) {
 		res.status(500).json({
 			status: "error",

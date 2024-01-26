@@ -39,7 +39,7 @@ const insert = async (pool, table, fields, values) => {
         const result = await pool.query(query, values);
         return result;
     } catch (error) {
-        console.log("Error: ", error);
+        console.log("Error: ", error.message);
         throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
     }
 }

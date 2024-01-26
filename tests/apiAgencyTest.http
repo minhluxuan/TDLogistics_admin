@@ -1,0 +1,53 @@
+
+POST http://localhost:5000/api/v1/agencies/create
+Content-Type: application/json
+
+{
+    "agency_id": "AD7310054321",
+    "agency_name": "Bưu cục TD Logistics Quận 6",
+    "lat_source": 50,
+    "long_source": 50.5,
+    "address": "123 Kinh Dương Vương",
+    "district": "Quận 6",
+    "province": "Thành phố Hồ Chí Minh",
+    "email": "tdlogquan6@gmail.com",
+    "password": "TDlogquan6@",
+    "commission_rate": 0.4,
+    "revenue": 0,
+    "bank_number": "012345678",
+    "bank_name": "MB"
+}
+
+###
+GET http://localhost:5000/api/v1/agencies/search
+Content-Type: application/json
+
+{
+    "province": "Thành phố Hồ Chí Minh"
+}
+
+###
+POST http://localhost:5000/api/v1/agencies/update
+Content-Type: application/json
+
+{
+    "agency_id": "AD7100012345",
+    "lat_source": 60
+}
+
+###
+POST http://localhost:5000/api/v1/agencies/login
+Content-Type: application/json
+
+{
+    "agency_id": "AD7310054321",
+    "email": "tdlogquan6@gmail.com",
+    "password": "TDlogquan6@"
+}
+
+###
+
+GET http://localhost:5000/get_session
+content-type: application/json
+
+###

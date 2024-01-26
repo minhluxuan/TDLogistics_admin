@@ -11,6 +11,20 @@ const setStaffSession = (staff, done) => {
     done(null, { staff_id: staff.staff_id, agency_id: staff.agency_id, permission: staff.permission });
 }
 
+const setAgencySession = (agency, done) => {
+    done(null, { agency_id: agency.agency_id,  permission: agency.permission });
+}
+
+const verifyAgencyPermission = (agency, done) => {
+    if (agency.permission === 2) {
+        return done(null, {
+            agency_id: agency.agency_id,
+            permission: agency.permission,
+        });
+    }
+    done(null, false);
+}
+
 const verifyStaffPermission = (staff, done) => {
     if (staff.permission === 2) {
         return done(null, {
@@ -39,6 +53,8 @@ const isAuthenticated = (permission) => {
 module.exports = {
     hash,
     setStaffSession,
+    setAgencySession,
     verifyStaffPermission,
+    verifyAgencyPermission,
     isAuthenticated
 }

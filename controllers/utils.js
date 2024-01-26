@@ -279,11 +279,91 @@ class BusinessValidation {
     }
 }
 
+class AgencyValidation {
+
+    validateCheckingExistAgency = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().alphanum().required(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateCreatingAgency = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().alphanum().required(),
+            agency_name: Joi.string().required(),
+            lat_source: Joi.number().min(-90).max(90).required(),
+            long_source: Joi.number().min(-180).max(180).required(),
+            address: Joi.string().required(),
+            district: Joi.string().required(),
+            province: Joi.string().required(),
+            email: Joi.string().pattern(new RegExp(process.env.REGEX_EMAIL)).required(),  
+            password: joiPassword
+            .string()
+            .min(8)
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(0)
+            .noWhiteSpaces(),
+            commission_rate: Joi.number().min(0).max(1),
+            revenue: Joi.number().min(0),
+            bank_number: Joi.string(),
+            bank_name: Joi.string(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateFindingByAgency = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().alphanum().required(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateFindingAgencyByAdmin = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().alphanum(),
+            agency_name: Joi.string(),
+            address: Joi.string(),
+            district: Joi.string(),
+            province: Joi.string(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateUpdatingAgency = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().required(),
+            agency_name: Joi.string(),
+            lat_source: Joi.number().min(-90).max(90),
+            long_source: Joi.number().min(-180).max(180),
+            address: Joi.string(),
+            district: Joi.string(),
+            province: Joi.string(),
+            email: Joi.string().pattern(new RegExp(process.env.REGEX_EMAIL)),
+            password: joiPassword
+            .string()
+            .min(8)
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(0)
+            .noWhiteSpaces(),
+            commission_rate: Joi.number().min(0).max(1),
+            revenue: Joi.number().min(0),
+            bank_number: Joi.string().alphanum(),
+            bank_name: Joi.string(),
+        }).strict();
+        return schema.validate(data);
+    }
+}
 
 module.exports = {
     StaffValidation,
     ShipmentValidation,
     ContainerValidation,
     BusinessValidation,
+    AgencyValidation,
     shortenName,
 }
