@@ -147,12 +147,20 @@ const createNewAgency = async (req, res) => {
 			});
 		}
 
+		const data = await agenciesService.generateAgencyID(req.body.level, req.body.province, req.body.district);
+
 		req.body.password = utils.hash(req.body.password);
 
 		const keys = Object.keys(req.body);
 		const values = Object.values(req.body);
 
+		keys.push("agency_id");
+		values.push(data.agency_id);
+
 		const result = await agenciesService.createNewAgency(keys, values);
+
+		await agenciesService.createTableForAgency(data.postal_code);
+		await agenciesService.locateAgencyInArea(1, data.agency_id);
 
 		return res.status(200).json({
 			error: false,
@@ -243,7 +251,13 @@ const deleteAgency = async (req, res) => {
 				message: "Bưu cục không tồn tại.",
 			});
 		}
-		
+		let agencyID = req.body.agency_id;
+		agencyID = agencyID.split('_');
+		const postalCode = agencyID[2];
+
+		await agenciesService.dropTableForAgency(postalCode);
+		await agenciesService.locateAgencyInArea(0, req.body.agency_id);
+
 		return res.status(200).json({
 			error: false,
 			message: `Xóa bưu cục ${req.body.agency_id} thành công.`,

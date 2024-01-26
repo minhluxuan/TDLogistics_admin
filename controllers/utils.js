@@ -290,7 +290,7 @@ class AgencyValidation {
 
     validateCreatingAgency = (data) => {
         const schema = Joi.object({
-            agency_id: Joi.string().alphanum().required(),
+            level: Joi.number().min(1).max(4).required(),
             agency_name: Joi.string().required(),
             lat_source: Joi.number().min(-90).max(90).required(),
             long_source: Joi.number().min(-180).max(180).required(),
@@ -316,15 +316,16 @@ class AgencyValidation {
 
     validateFindingByAgency = (data) => {
         const schema = Joi.object({
-            agency_id: Joi.string().alphanum().required(),
+            agency_id: Joi.string().pattern(new RegExp(process.env.REGEX_AGENCY_ID)).required(),
         }).strict();
         return schema.validate(data);
     }
 
     validateFindingAgencyByAdmin = (data) => {
         const schema = Joi.object({
-            agency_id: Joi.string().alphanum(),
+            agency_id: Joi.string().pattern(new RegExp(process.env.REGEX_AGENCY_ID)),
             agency_name: Joi.string(),
+            level: Joi.number().min(1).max(4),
             address: Joi.string(),
             district: Joi.string(),
             province: Joi.string(),
@@ -334,8 +335,9 @@ class AgencyValidation {
 
     validateUpdatingAgency = (data) => {
         const schema = Joi.object({
-            agency_id: Joi.string().required(),
+            agency_id: Joi.string().pattern(new RegExp(process.env.REGEX_AGENCY_ID)).required(),
             agency_name: Joi.string(),
+            level: Joi.number().min(1).max(4),
             lat_source: Joi.number().min(-90).max(90),
             long_source: Joi.number().min(-180).max(180),
             address: Joi.string(),
@@ -354,6 +356,13 @@ class AgencyValidation {
             revenue: Joi.number().min(0),
             bank_number: Joi.string().alphanum(),
             bank_name: Joi.string(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateDeletingAgency = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().pattern(new RegExp(process.env.REGEX_AGENCY_ID)).required(),
         }).strict();
         return schema.validate(data);
     }

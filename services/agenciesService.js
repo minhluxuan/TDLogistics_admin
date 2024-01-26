@@ -4,6 +4,22 @@ const checkExistAgency = async (fields, values) => {
     return await Agencies.checkExistAgency(fields, values);
 }
 
+const createTableForAgency = async (postal_code) => {
+    return await Agencies.createTableForAgency(postal_code);
+}
+
+const dropTableForAgency = async (postal_code) => {
+    return await Agencies.dropTableForAgency(postal_code);
+}
+
+const generateAgencyID = async (level, province, district) => {
+    return await Agencies.generateAgencyID(level, province, district);
+}
+
+const locateAgencyInArea = async (choice, agency_id) => {
+    return await Agencies.locateAgencyInArea(choice, agency_id);
+}
+
 const getOneAgency = async (fields, values) => {
     return await Agencies.getOneAgency(fields, values);
 }
@@ -29,6 +45,10 @@ const createNewAgency = async (fields, values) => {
 }
 
 module.exports = {
+    createTableForAgency,
+    dropTableForAgency,
+    generateAgencyID,
+    locateAgencyInArea,
     checkExistAgency,
     getOneAgency,
     getManyAgencies,
