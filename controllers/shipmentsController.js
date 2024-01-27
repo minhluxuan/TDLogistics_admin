@@ -129,7 +129,7 @@ const updateShipment = async (req, res) => {
 
         const result = await shipmentService.updateShipment(fields, values, conditionFields, conditionValues, agency_id);
         
-        if (!result || result[0].affectedRows <= 0) {
+        if (!result || result.affectedRows <= 0) {
             return res.status(404).json({
                 error: true,
                 message: "Lô hàng không tồn tại.",
@@ -143,7 +143,7 @@ const updateShipment = async (req, res) => {
     } catch(error) {
         return res.status(500).json({
             error: true,
-            message: error,
+            message: error.message,
         });
     }
 }

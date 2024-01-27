@@ -22,6 +22,8 @@ const shipmentsRouter = require("./routes/shipmentsRoute");
 const containersRouter = require("./routes/containersRoute");
 const vehicleRouter = require("./routes/vehicleRoute");
 const authorizationRouter = require("./routes/authorizationRoute");
+const partnerStaffsRouter = require("./routes/partnerStaffsRoute");
+const otpPartnerStaffRouter = require("./routes/otpPartnerStaffRoute")
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -86,6 +88,8 @@ app.use("/api/v1/business", businessRouter);
 app.use("/api/v1/shipments", shipmentsRouter);
 app.use("/api/v1/containers", containersRouter);
 app.use("/api/v1/vehicles", vehicleRouter);
+app.use("/api/v1/partner_staff", partnerStaffsRouter);
+app.use("/api/v1/otp_partner_staff", otpPartnerStaffRouter);
 app.use("/api/v1/authorization", authorizationRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);

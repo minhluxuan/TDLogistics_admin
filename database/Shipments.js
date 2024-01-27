@@ -151,7 +151,8 @@ const deleteOrderFromShipment = async (shipment_id, order_id, agency_id) => {
     const agencyOrdersTable = agency_id + "_orders";
 
     try {
-        const getOrderQuery = `SELECT parent, mass FROM ${agencyOrdersTable} WHERE order_id = ?`;
+        
+        const getOrderQuery = `SELECT mass FROM ${agencyOrdersTable} WHERE order_id = ?`;
         const [orderRow] = await pool.query(getOrderQuery, order_id);
 
         if (!orderRow || orderRow.length <= 0) {
@@ -159,12 +160,27 @@ const deleteOrderFromShipment = async (shipment_id, order_id, agency_id) => {
             throw new Error("Đơn hàng không tồn tại!");
         }
 
-        const { parent: orderParent, mass: orderMass } = orderRow[0];
+        const { mass: orderMass } = orderRow[0];
 
-        if (orderParent !== shipment_id) {
-            console.log("Order does not exist in shipment");
-            throw new Error("Đơn hàng không tồn tại trong lô hàng!");
-        }
+        const getBucketQuery = `SELECT order_ids FROM ${agencyShipmentsTable} WHERE shipment_id = ?`;
+        const [bucket] = await pool.query(getBucketQuery, shipment_id);
+
+        if (bucket.length > 0) {
+            const ordersFromDatabase = JSON.parse(bucket[0].order_ids);
+            const setFromDatabase = new Set(ordersFromDatabase);
+            console.log(setFromDatabase);
+            
+
+            if(!setFromDatabase.has(order_id)) {
+                console.log("Order is not contained in shipment!");
+                throw new Error("Đơn hàng không tồn tại trong lô hàng!");
+            }
+            
+        } else {
+            console.log("Shipment does not exist");
+            throw new Error("Thông tin lô hàng không hợp lệ!");
+        } 
+        
         // UPDATE `shipment`
         // SET order_ids = JSON_REMOVE(order_ids, JSON_UNQUOTE(JSON_SEARCH(order_ids, 'one', '2')))
         // WHERE shipment_id = 'TD20240423370236';
@@ -448,6 +464,10 @@ module.exports = {
     getDataForShipmentCode,
     updateShipment,
     getInfoShipment,
+    recieveShipment,
+    addOrderToShipment,
+    deleteOrderFromShipment,
+    updateOrderToDatabase,
     recieveShipment,
     addOrderToShipment,
     deleteOrderFromShipment,

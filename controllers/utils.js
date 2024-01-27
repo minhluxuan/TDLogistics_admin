@@ -458,6 +458,110 @@ class AuthorizationValidation {
     }
 }
 
+class PartnerStaffValidation {
+    validateLoginPartnerStaff = (data) => {
+        const schema = Joi.object({
+            cccd: Joi.string().pattern(new RegExp(process.env.REGEX_CCCD)).min(10).max(15).required(),
+            password: Joi.string().required(),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateCheckingExistPartnerStaff = (data) => {
+        const schema = Joi.object({
+            cccd: Joi.string().pattern(new RegExp(process.env.REGEX_CCCD)).required(),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateCreatingPartnerStaff = (data) => {
+        const schema = Joi.object({
+            fullname: Joi.string().required(),
+            username: Joi.string().required(),
+            password: joiPassword
+            .string()
+            .min(8)
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(0)
+            .noWhiteSpaces()
+            .required(),
+            date_of_birth: Joi.string().pattern(new RegExp(process.env.REGEX_BIRTHDAY)).required(), 
+            cccd: Joi.string().alphanum().required(),
+            email: Joi.string().email().required(),
+            phone_number: Joi.string().pattern(new RegExp(process.env.REGEX_PHONE_NUMBER)).required(),
+            partner_id: Joi.string().alphanum().required(),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateFindingPartnerStaffByPartnerStaff = (data) => {
+        const schema = Joi.object({
+            staff_id: Joi.string().pattern(new RegExp("^[0-9]+$")).required(),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateFindingPartnerStaffByAdmin = (data) => {
+        const schema = Joi.object({
+            fullname: Joi.string().alphanum(),
+            date_of_birth: Joi.string().pattern(new RegExp(process.env.REGEX_BIRTHDAY)), 
+            cccd: Joi.string().alphanum(), 
+            email: Joi.string().email(),
+            phone_number: Joi.string().pattern(new RegExp("^[0-9]{1,10}$")),
+            address: Joi.string(),
+            agency_id: Joi.string().alphanum(),
+            staff_id: Joi.string().alphanum().min(9).max(9),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateUpdatingPartnerStaff = (data) => {
+        const schema = Joi.object({
+            fullname: Joi.string().lowercase().pattern(new RegExp(process.env.REGEX_NAME)),
+            username: Joi.string(),
+            date_of_birth: Joi.string().pattern(new RegExp(process.env.REGEX_BIRTHDAY)), 
+            cccd: Joi.string().alphanum(),
+            email: Joi.string().pattern(new RegExp(process.env.REGEX_EMAIL)),
+            phone_number: Joi.string().pattern(new RegExp(process.env.REGEX_PHONE_NUMBER)),
+            address: Joi.string(), 
+            partner_id: Joi.string().alphanum(),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateDeletingPartnerStaff = (data) => {
+        const schema = Joi.object({
+            staff_id: Joi.string().alphanum().min(9).max(9).required(),
+        }).strict();
+
+        return schema.validate(data);
+    }
+
+    validateUpdatePartnerPassword = (data)=>{
+        const schema = Joi.object({
+            new_password: joiPassword
+            .string()
+            .min(8)
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(0)
+            .noWhiteSpaces()
+            .required(),
+            confirm_password: Joi.string().valid(Joi.ref('new_password')).required()
+        }).strict();
+        return schema.validate(data);
+    }
+}
+
 module.exports = {
     StaffValidation,
     ShipmentValidation,
@@ -465,6 +569,7 @@ module.exports = {
     BusinessValidation,
     VehicleValidation,
     AuthorizationValidation,
+    PartnerStaffValidation,
     shortenName,
     ErrorMessage,
 }
