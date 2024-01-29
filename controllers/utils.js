@@ -1,6 +1,7 @@
 const Joi = require("joi");
 const { joiPasswordExtendCore } = require('joi-password') 
 const joiPassword = Joi.extend(joiPasswordExtendCore);
+const logger = require("../lib/logger");
   
 const shortenName = async (fullname) => {
     const words = fullname.split(' ');
@@ -562,6 +563,207 @@ class PartnerStaffValidation {
     }
 }
 
+class TransportPartnerValidation {
+    validateCreatingPartner = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().pattern(new RegExp("^(AG|AP|AD|AT)_[a-zA-Z]{2,3}_[1-9]{5}_[1-9]{5}$")).required(),
+            transport_partner_id: Joi.string().pattern(new RegExp("^(DL|TC)$")).required(),
+            tax_code: Joi.string().pattern(new RegExp("^[0-9]{10}$|^[0-9]{13}$")).required(),
+            name: Joi.string().pattern(new RegExp(process.env.REGEX_NAME)).required(),
+            email: Joi.string().email(),
+            phone_number: Joi.string().pattern(new RegExp(process.env.REGEX_PHONE_NUMBER)).required(),
+            debit: Joi.number().min(0),
+        }).unknown(false);
+        return schema.validate(data);
+    };
+
+    validateFindingPartner = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().pattern(new RegExp("^(AG|AP|AD|AT)_[1-9]{5}_[1-9]{5}$")),
+            transport_partner_id: Joi.string().pattern(new RegExp("^(DL|TC)[0-9]{5}$")),
+            tax_code: Joi.string().pattern(new RegExp("^[0-9]{10}$|^[0-9]{13}$")),
+            name: Joi.string().pattern(new RegExp(process.env.REGEX_NAME)),
+            email: Joi.string().email(),
+            phone_number: Joi.string().pattern(new RegExp(process.env.REGEX_PHONE_NUMBER)),
+            debit: Joi.number().min(0),
+        }).unknown(false);
+        return schema.validate(data);
+    };
+
+    validateUpdatePartner = (data) => {
+        const schema = Joi.object({
+            tax_code: Joi.string().pattern(new RegExp("^[0-9]{10}$|^[0-9]{13}$")),
+            name: Joi.string().pattern(new RegExp(process.env.REGEX_NAME)),
+            email: Joi.string().email(),
+            phone_number: Joi.string().pattern(new RegExp(process.env.REGEX_PHONE_NUMBER)),
+            debit: Joi.number(),
+        }).unknown(false);
+        return schema.validate(data);
+    };
+    
+    validateDeletingPartner = (data) => {
+        const schema = Joi.object({
+            transport_partner_id: Joi.string().pattern(new RegExp("^(DL|TC)[0-9]{5}$")),
+        });
+        return schema.validate(data);
+    };
+}
+
+class AgencyValidation {
+    validateCheckingExistAgency = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().alphanum().required(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateCreatingAgency = (data) => {
+        const schema = Joi.object({
+            // Head officer information
+            username: Joi.string().required(),
+            user_password: joiPassword
+            .string()
+            .min(8)
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(0)
+            .noWhiteSpaces()
+            .required(),
+            user_fullname: Joi.string().regex(new RegExp(process.env.REGEX_NAME)).required(),
+            user_phone_number: Joi.string().regex(new RegExp(process.env.REGEX_PHONE_NUMBER)).required(),
+            user_email: Joi.string().pattern(new RegExp(process.env.REGEX_EMAIL)).required(),
+            user_date_of_birth: Joi.string().regex(new RegExp(process.env.REGEX_BIRTHDAY)).required(),
+            user_cccd: Joi.string().regex(new RegExp(process.env.REGEX_CCCD)).required(),
+            user_address: Joi.string().required(),
+            user_position: Joi.string(),
+            user_deposit: Joi.number().min(0),
+            user_salary: Joi.number().min(0),
+
+            // Agency information
+            level: Joi.number().min(1).max(5).required(),
+            postal_code: Joi.string().regex(new RegExp(process.env.REGEX_POSTAL_CODE)).required(),
+            agency_name: Joi.string().required(),
+            address: Joi.string().required(),
+            district: Joi.string().required(),
+            province: Joi.string().required(),
+            latitude: Joi.number().min(-90).max(90).required(),
+            longitude: Joi.number().min(-180).max(180).required(),
+            email: Joi.string().pattern(new RegExp(process.env.REGEX_EMAIL)).required(),  
+            commission_rate: Joi.number().min(0).max(1),
+            bin: Joi.string().regex(new RegExp(process.env.REGEX_BIN)),
+            bank: Joi.string(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateFindingByAgency = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().pattern(new RegExp(process.env.REGEX_AGENCY_ID)).required(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateFindingAgencyByAdmin = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().pattern(new RegExp(process.env.REGEX_AGENCY_ID)),
+            agency_name: Joi.string(),
+            level: Joi.number().min(1).max(4),
+            address: Joi.string(),
+            district: Joi.string(),
+            province: Joi.string(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateUpdatingAgency = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().pattern(new RegExp(process.env.REGEX_AGENCY_ID)).required(),
+            agency_name: Joi.string(),
+            level: Joi.number().min(2).max(5),
+            lat_source: Joi.number().min(-90).max(90),
+            long_source: Joi.number().min(-180).max(180),
+            address: Joi.string(),
+            district: Joi.string(),
+            province: Joi.string(),
+            email: Joi.string().pattern(new RegExp(process.env.REGEX_EMAIL)),
+            password: joiPassword
+            .string()
+            .min(8)
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(0)
+            .noWhiteSpaces(),
+            commission_rate: Joi.number().min(0).max(1),
+            revenue: Joi.number().min(0),
+            bank_number: Joi.string().alphanum(),
+            bank_name: Joi.string(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    validateDeletingAgency = (data) => {
+        const schema = Joi.object({
+            agency_id: Joi.string().pattern(new RegExp(process.env.REGEX_AGENCY_ID)).required(),
+        }).strict();
+        return schema.validate(data);
+    }
+
+    isAllowedToCreate = (creatorId, agency) => {
+        const levels = ["AU", "AG", "AC", "AP", "AD", "AT"];
+        const creatorIdArray = creatorId.split('_');
+        const creatorLevel = levels.indexOf(creatorIdArray[1]);
+
+        if (creatorIdArray[0] !== "TD") {
+            logger.info(`User ${creatorId} is not permitted to create an agency with level: ${agency.level}, postal code: ${agency.postal_code}`);
+            return {
+                allowed: false,
+                message: "Hành động không được cho phép. Người dùng không được phép truy cập tài nguyên này.",
+            }
+        }
+
+        if (creatorLevel > agency.level) {
+            logger.info(`User ${creatorId} is not permitted to create an agency with level: ${agency.level}, postal code: ${agency.postal_code}`);
+            return {
+                allowed: false,
+                message: "Hành động không được cho phép. Cấp độ đại lý phải nhỏ hơn cấp độ người dùng hiện tại.",
+            }
+        }
+
+        if (creatorLevel === 3 && creatorIdArray[2].slice(0, 2) !== agency.postal_code.slice(0, 2)
+        || creatorLevel === 4 && creatorIdArray[2].slice(0, 4) !== agency.postal_code.slice(0, 4)
+        || creatorLevel === 5 && creatorIdArray[2].slice(0, 5) !== agency.postal_code.slice(0, 5)) {
+            logger.info(`User ${creatorId} is not permitted to create an agency with level: ${agency.level}, postal code: ${agency.postal_code}`);
+            return {
+                allowed: false,
+                message: "Hành động không được cho phép. Địa phương của đại lý không thuộc quyền kiểm soát của người dùng.",
+            }
+        }
+
+        logger.info(`User ${creatorId} is permitted to create an agency with level: ${agency.level}, postal code: ${agency.postal_code}`);
+        return {
+            allowed: true,
+            message: "Hành động được cho phép.",
+        }
+    }
+
+    getRoleFromLevel = (level) => {
+        switch (level) {
+            case 1:
+                return "AGENCY_GLOBAL";
+            case 2:
+                return "AGENCY_COUNTRY";
+            case 3:
+                return "AGENCY_PROVINCE";
+            case 4:
+                return "AGENCY_DISTRICT";
+            case 5:
+                return "AGENCY_TOWN";
+        }
+    }
+}
+
 module.exports = {
     StaffValidation,
     ShipmentValidation,
@@ -570,6 +772,8 @@ module.exports = {
     VehicleValidation,
     AuthorizationValidation,
     PartnerStaffValidation,
+    TransportPartnerValidation,
+    AgencyValidation,
     shortenName,
     ErrorMessage,
 }

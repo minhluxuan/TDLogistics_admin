@@ -10,10 +10,10 @@ const Staffs = require("../database/Staffs");
 const router = express.Router();
 
 const sessionStrategy = new LocalStrategy({
-    usernameField: "cccd",
+    usernameField: "username",
     passwordField: "password",
-}, async (cccd, password, done) => {
-    const staff = await Staffs.getOneStaff(["cccd"], [cccd]);
+}, async (username, password, done) => {
+    const staff = await Staffs.getOneStaff(["username"], [username]);
 
     if (staff.length <= 0) {
         return done(null, false);
@@ -26,14 +26,18 @@ const sessionStrategy = new LocalStrategy({
         return done(null, false);
     }
 
-    const staff_id = staff[0]["staff_id"];
-    const agency_id = staff[0]["agency_id"];
-    const permission = JSON.parse(staff[0]["permission"]);
+    const staff_id = staff[0].staff_id;
+    const agency_id = staff[0].agency_id;
+    const role = staff[0].role;
+    const privileges = JSON.parse(staff[0].privileges);
+    const active = staff[0].active;
 
     return done(null, {
         staff_id,
         agency_id,
-        permission,
+        role,
+        privileges,
+        active,
     });
 });
 
@@ -46,7 +50,7 @@ const storage = multer.diskStorage({
         }
 
         if (file.fieldname.length > 20) {
-            return done(new Error("Tên file quá dài."), false); 
+            return done(new Error("Tên file quá dài."), false);
         }
 
         if (file.mimetype === "image/jpg" || file.mimetype === "image/jpeg" || file.mimetype === "image/png") { 

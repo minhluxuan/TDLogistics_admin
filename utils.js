@@ -28,17 +28,23 @@ class User {
         }
     }
 
-    isAuthorized = (...args) => {
+    isAuthorized = (roles, privileges) => {
         return (req, res, next) => {
-            for (const arg of args) {
-                if (req.user.permission.primary.includes(arg) || req.user.permission.privilege.includes(arg)) {
+            for (const role of roles) {
+                if (req.user.role === role) {
+                    return next();
+                }
+            }
+
+            for (const privilege of privileges) {
+                if (req.user.privileges.includes(privilege)) {
                     return next();
                 }
             }
     
             return res.status(403).json({
                 error: true,
-                message: "Bạn không được phép truy cập tài nguyên này.",
+                message: "Người dùng không được phép truy cập tài nguyên này.",
             });
         }
     }

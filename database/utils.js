@@ -1,5 +1,5 @@
 const findOne = async (pool, table, fields, values) => {
-    const query = `SELECT * FROM ${table} WHERE ${fields.map(field => `${field} = ?`).join(" AND ")} LIMIT 1`;
+    const query = `SELECT * FROM ${table} WHERE ${fields.map(field => `${field} = ?`).join(" OR ")} LIMIT 1`;
 
     try {
         const result = await pool.query(query, values);
@@ -127,6 +127,11 @@ const deleteMany = async  (pool, table, fields = null, values = null) => {
     }
 }
 
+const showTables = async (pool, table) => {
+    const query = "SHOW TABLES LIKE ?";
+    return (await pool.query(query, [`%${table}%`]))[0];
+}
+
 const getPostalCode = (personnel_id) => {
     return personnel_id.split("_")[2];
 }
@@ -184,6 +189,7 @@ module.exports = {
     getLastRow,
     deleteOne,
     deleteMany,
+    showTables,
     getPostalCode,
     getInfo,
 }

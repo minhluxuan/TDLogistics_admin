@@ -8,11 +8,12 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:5000/api/v1/staffs/login
+POST http://localhost:5000/api/v1/staffs/login
 Content-Type: application/json
 
 {
-    "username": 
+    "username": "ntdung@tdlogistics",
+    "password": "NTDung@tdlogistics2k24"
 }
 
 ###
@@ -113,6 +114,42 @@ Content-Type: application/json
 {
     "max_load": 20000
 }
+
+###
+
+POST http://localhost:5000/api/v1/agencies/create
+Content-Type: application/json
+
+{
+    "username": "tongcucquan1",
+    "user_password": "Tongcucquan1@tdlogistics",
+    "user_fullname": "Lữ Xuân Minh",
+    "user_phone_number": "0981430418",
+    "user_email": "minh.luxuanhcmut@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-03",
+    "user_cccd": "077204005692",
+    "user_address": "Ký túc xá khu A, ĐHQG TP.HCM",
+    "user_position": "Quản lý bưu cục",
+    "user_salary": 25000000,
+    "level": 1,
+    "postal_code": "70000",
+    "agency_name": "Bưu cục Thành phố Hồ Chí Minh",
+    "address": "63, Phạm Ngũ Lão, phường Phạm Ngũ Lão, quận 1, Thành phố Hồ Chí Minh",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "latitude": 10.7540931,
+    "longitude": 106.0342813,
+    "phone_number": "0981430418",
+    "email": "tongcucquan1@tdlogistics.com",
+    "commission_rate": 0.4,
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/agencies/delete?agency_id=TD_AG_70000_00000
 
 ###
 
