@@ -164,7 +164,6 @@ const deleteTransportPartner = async (req, res) => {
 module.exports = {
     createNewTransportPartner,
     getTransportPartner,
-
     updateTransportPartner,
     deleteTransportPartner,
 };
