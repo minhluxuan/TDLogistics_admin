@@ -26,7 +26,10 @@ const sessionStrategy = new LocalStrategy({
     const staff_id = staff[0]["staff_id"];
     const agency_id = staff[0]["agency_id"];
 
-    const permission = 2;
+    const permission = {
+        primary: [2],
+        privilege: []
+    };
 
     return done(null, {
         staff_id,
@@ -45,10 +48,5 @@ router.post("/verify_otp", passport.authenticate("otpLogin", {
 }), otpController.verifyOTPSuccess);
 router.get("/otp_fail", otpController.verifyOTPFail);
 router.get("/otp_success", otpController.verifyOTPSuccess);
-
-passport.serializeUser(utils.setStaffSession);
-passport.deserializeUser((staff, done) => {
-    utils.verifyStaffPermission(staff, done);
-});
 
 module.exports = router;

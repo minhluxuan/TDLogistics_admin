@@ -123,22 +123,14 @@ const getStaffs = async (req, res) => {
 };
 
 const createNewStaff = async (req, res) => {
-	if (!req.isAuthenticated() || req.user.permission < 2) {
-		return res.status(401).json({
-			error: true,
-			message: "Bạn không được phép truy cập tài nguyên này.",
-		});
-	}
-
 	try {
-		const userRequestValidation = new controllerUtils.StaffValidation();
-
-		const { error } = userRequestValidation.validateCreatingStaff(req.body);
+		const { error } = staffValidation.validateCreatingStaff(req.body);
 
 		if (error) {
 			return res.status(400).json({
 				error: true,
-				message: "Thông tin không hợp lệ.",
+				// message: "Thông tin không hợp lệ.",
+				message: error.message,
 			});
 		}
 
@@ -152,6 +144,10 @@ const createNewStaff = async (req, res) => {
 		}
 
 		req.body.password = utils.hash(req.body.password);
+		req.body.permission = JSON.stringify({
+			primary: [2],
+			privilege: [],
+		});
 
 		const keys = Object.keys(req.body);
 		const values = Object.values(req.body);

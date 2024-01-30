@@ -4,16 +4,24 @@ const checkExistAgency = async (fields, values) => {
     return await Agencies.checkExistAgency(fields, values);
 }
 
-const createTableForAgency = async (postal_code) => {
-    return await Agencies.createTableForAgency(postal_code);
+const checkPostalCode = async (level, province, district, postal_code) => {
+    return await Agencies.checkPostalCode(level, province, district, postal_code);
+}
+
+const createNewAgency = async (info) => {
+    return await Agencies.createNewAgency(info);
+}
+
+const createTablesForAgency = async (postal_code) => {
+    return await Agencies.createTablesForAgency(postal_code);
 }
 
 const dropTableForAgency = async (postal_code) => {
     return await Agencies.dropTableForAgency(postal_code);
 }
 
-const generateAgencyID = async (level, province, district) => {
-    return await Agencies.generateAgencyID(level, province, district);
+const generateAgencyID = async (prefix, level, postal_code) => {
+    return await Agencies.generateAgencyID(prefix, level, postal_code);
 }
 
 const locateAgencyInArea = async (choice, agency_id) => {
@@ -28,24 +36,21 @@ const getManyAgencies = async (fields, values) => {
     return await Agencies.getManyAgencies(fields, values);
 }
 
-const updateAgency = async (fields, values, conditionFields, conditionValues) => {
-    return await Agencies.updateAgency(fields, values, conditionFields, conditionValues);
+const updateAgency = async (info, conditions) => {
+    return await Agencies.updateAgency(info, conditions);
 }
 
-const deleteAgency = async (fields, values) => {
-    return await Agencies.deleteAgency(fields, values);
+const deleteAgency = async (info) => {
+    return await Agencies.deleteAgency(info);
 }
 
 const updatePassword = async (fields, values, conditionFields, conditionValues) => {
     return await Agencies.updatePassword(fields, values, conditionFields, conditionValues);
 }
 
-const createNewAgency = async (fields, values) => {
-    return await Agencies.createNewAgency(fields, values);
-}
-
 module.exports = {
-    createTableForAgency,
+    checkPostalCode,
+    createTablesForAgency,
     dropTableForAgency,
     generateAgencyID,
     locateAgencyInArea,

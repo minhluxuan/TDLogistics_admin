@@ -6,55 +6,53 @@ const hash = (password) => {
     return hashPassword;
 }
 
-
-const setStaffSession = (staff, done) => {
-    done(null, { staff_id: staff.staff_id, agency_id: staff.agency_id, permission: staff.permission });
+const setSession = (user, done) => {
+    done(null, user);
 }
 
-const setAgencySession = (agency, done) => {
-    done(null, { agency_id: agency.agency_id,  permission: agency.permission });
+const verifyPermission = (user, done) => {
+    return done(null, user);
 }
 
-const verifyAgencyPermission = (agency, done) => {
-    if (agency.permission === 2) {
-        return done(null, {
-            agency_id: agency.agency_id,
-            permission: agency.permission,
-        });
+class User {
+    isAuthenticated = () => {
+        return (req, res, next) => {
+            if (!req.isAuthenticated()) {
+                return res.status(403).json({
+                    error: true,
+                    message: "Bạn không được phép truy cập tài nguyên này."
+                });
+            }
+    
+            next();
+        }
     }
-    done(null, false);
-}
 
-const verifyStaffPermission = (staff, done) => {
-    if (staff.permission === 2) {
-        return done(null, {
-            staff_id: staff.staff_id,
-            agency_id: staff.agency_id,
-            permission: staff.permission,
-        });
-    }
-    done(null, false);
-}
+    isAuthorized = (roles, privileges) => {
+        return (req, res, next) => {
+            for (const role of roles) {
+                if (req.user.role === role) {
+                    return next();
+                }
+            }
 
-const isAuthenticated = (permission) => {
-    return (req, res, next) => {
-        if (!req.isAuthenticated() || req.user.permission !== permission) {
+            for (const privilege of privileges) {
+                if (req.user.privileges.includes(privilege)) {
+                    return next();
+                }
+            }
+    
             return res.status(403).json({
                 error: true,
-                message: "Bạn không được phép truy cập tài nguyên này."
+                message: "Người dùng không được phép truy cập tài nguyên này.",
             });
         }
-
-        next();
     }
 }
-
 
 module.exports = {
     hash,
-    setStaffSession,
-    setAgencySession,
-    verifyStaffPermission,
-    verifyAgencyPermission,
-    isAuthenticated
+    setSession,
+    verifyPermission,
+    User,
 }

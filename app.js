@@ -2,7 +2,8 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const morgan = require("morgan");
+const logger = require("./lib/logger");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
 const mysql = require("mysql2");
@@ -10,6 +11,7 @@ const cron = require("cron");
 const cors = require("cors");
 const flash = require("express-flash");
 const passport = require("passport");
+const auth = require("./lib/auth");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -21,8 +23,11 @@ const staffsRouter = require("./routes/staffsRoute");
 const businessRouter = require("./routes/businessRoute");
 const shipmentsRouter = require("./routes/shipmentsRoute");
 const containersRouter = require("./routes/containersRoute");
+const vehicleRouter = require("./routes/vehicleRoute");
+const authorizationRouter = require("./routes/authorizationRoute");
+const partnerStaffsRouter = require("./routes/partnerStaffsRoute");
+const otpPartnerStaffRouter = require("./routes/otpPartnerStaffRoute");
 const agenciesRouter = require("./routes/agenciesRoute");
-
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -50,18 +55,19 @@ const allowedOrigins = ['https://customer-merchant-web.vercel.app', 'https://tes
 app.use(cors({
 	origin: function (origin, callback) {
 		if (!origin || allowedOrigins.includes(origin)) {
-		callback(null, true);
+			callback(null, true);
 		} else {
-		callback(new Error('Not allowed by CORS'));
+			callback(new Error('Not allowed by CORS'));
 		}
 	},
 	// Thêm các tùy chọn khác nếu cần thiết
-	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+	methods: 'GET, HEAD, PUT, PATCH, POST, DELETE',
 	credentials: true,
 }));
-app.use(logger('dev'));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(morgan("combined"));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
@@ -88,7 +94,11 @@ app.use("/api/v1/otp", otpRouter);
 app.use("/api/v1/business", businessRouter);
 app.use("/api/v1/shipments", shipmentsRouter);
 app.use("/api/v1/containers", containersRouter);
+app.use("/api/v1/vehicles", vehicleRouter);
+app.use("/api/v1/partner_staff", partnerStaffsRouter);
+app.use("/api/v1/otp_partner_staff", otpPartnerStaffRouter);
 app.use("/api/v1/agencies", agenciesRouter);
+app.use("/api/v1/authorization", authorizationRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({
@@ -106,21 +116,25 @@ app.get("/destroy_session", (req, res) => {
 	});
 });
 
+passport.serializeUser(auth.setSession);
+passport.deserializeUser((user, done) => {
+	auth.verifyPermission(user, done);
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+  	next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+	// set locals, only providing error in development
+	res.locals.message = err.message;
+	res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+	// render the error page
+	res.status(err.status || 500);
+	res.render('error');
 });
 
 const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
