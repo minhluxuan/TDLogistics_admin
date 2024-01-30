@@ -1,13 +1,13 @@
 const agenciesService = require ("../services/agenciesService");
 const staffsService = require("../services/staffsService");
-const utils = require("../utils");
 const logger = require("../lib/logger");
+const utils = require("../lib/utils");
 const validation = require("../lib/validation");
 
 const agencyValidation = new validation.AgencyValidation();
 
 const checkExistAgency = async (req, res) => {
-	const { error } = agencyValidation.validateCheckingExistAgency(req.body);
+	const { error } = agencyValidation.validateCheckingExistAgency(req.query);
 
 	if (error) {
 		return res.status(400).json({
@@ -17,7 +17,7 @@ const checkExistAgency = async (req, res) => {
 	}
 
 	try {
-		const existed = await agenciesService.checkExistAgency(Object.keys(req.body), Object.values(req.body));
+		const existed = await agenciesService.checkExistAgency(req.query);
 		return res.status(200).json({
 			error: false,
 			existed: existed,
@@ -32,68 +32,33 @@ const checkExistAgency = async (req, res) => {
 }
 
 const getAgencies = async (req, res) => {
-	const permission = 4;
-	if (permission == 3) {
-		try {
-			const { error } = agencyValidation.validateFindingByAgency(req.body);
-
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: "Mã nhân viên không hợp lệ.",
-				});
-			}
-
-			// if (req.user.agency_id !== req.body.agency_id) {
-			// 	return res.status(401).json({
-			// 		error: true,
-			// 		message: "Bạn không được phép truy cập tài nguyên này.",
-			// 	});
-			// }
-
-			const keys = Object.keys(req.body);
-			const values = Object.values(req.body);
-
-			const result = await agenciesService.getOneAgency(keys, values); 
-			return res.status(200).json({
-				error: false,
-				data: result,
-				message: "Lấy thông tin thành công.",
-			});
-		} catch (error) {
-			return res.status(500).json({
-				error: true,
-				message: error.message,
-			});
-		}
-	}
-
-	if (permission === 4) {
-		const { error } = agencyValidation.validateFindingAgencyByAdmin(req.body);
+	try {
+		const { error } = agencyValidation.validateFindingAgency(req.body);
 
 		if (error) {
 			return res.status(400).json({
 				error: true,
-				message: "Thông tin không hợp lệ.",
-			});
-		}
-
-		const keys = Object.keys(req.body);
-		const values = Object.values(req.body);
-
-		try {
-			const result = await agenciesService.getManyAgencies(keys, values);
-			return res.status(200).json({
-				error: false,
-				data: result,
-				message: "Lấy thông tin thành công.",
-			});
-		} catch (error) {
-			res.status(500).json({
-				error: true,
 				message: error.message,
 			});
 		}
+
+		const result = await agenciesService.getAgencies(req.body);
+
+		if (!result) {
+			throw new Error("Đã xảy ra lỗi. Lấy thông tin đại lý không thành công. Vui lòng thử lại.");
+		}
+
+		return res.status(200).json({
+			error: false,
+			data: result,
+			message: "Lấy thông tin đại lý thành công.",
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
 	}
 }
 
@@ -190,6 +155,7 @@ const createNewAgency = async (req, res) => {
 			town: req.body.town,
 			latitude: req.body.latitude,
 			longitude: req.body.longitude,
+			managed_areas: req.body.managed_areas ? JSON.stringify(req.body.managed_areas) : JSON.stringify(new Array()),
 			phone_number: req.body.phone_number,
 			email: req.body.email,
 			commission_rate: req.body.commission_rate,
@@ -215,7 +181,16 @@ const createNewAgency = async (req, res) => {
 			throw new Error(`Đã xảy ra lỗi. Tạo một nhân viên trong bưu cục có mã bưu chính ${req.body.postal_code} không thành công. Vui lòng thử lại.`);
 		}
 
-		// await agenciesService.locateAgencyInArea(1, data.agency_id);
+		if (req.body.level === 4) {
+			const result = await agenciesService.locateAgencyInArea(0, req.body.postal_code.slice(0, 2), resultCreatingAgencyId.agency_id);
+
+			if (!result || result[0].affectedRows <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Tỉnh/thành phố có mã bưu chính bắt đầu với ${req.body.postal_code.slice(0, 2)} không tồn tại.`,
+				});
+			}
+		}
 
 		return res.status(200).json({
 			error: false,
@@ -235,7 +210,7 @@ const createNewAgency = async (req, res) => {
 
 const updateAgency = async (req, res) => {
 	try {
-		const { error } = agencyValidation.validateFindingAgencyByAgency(req.query) || agencyValidation.validateUpdatingAgency(req.body);
+		const { error } = agencyValidation.validateFindingAgencyByAgencyId(req.query) || agencyValidation.validateUpdatingAgency(req.body);
 
 		if (error) {
 			return res.status(400).json({
@@ -277,6 +252,16 @@ const deleteAgency = async (req, res) => {
 			});
 		}
 
+		const deletorId = req.user.staff_id;
+		const action = agencyValidation.isAllowedToDelete(deletorId, req.body);
+
+		if (!action.allowed) {
+			return res.status(400).json({
+				error: true,
+				message: action.message,
+			});
+		}
+
 		const resultDeletingAgency = await agenciesService.deleteAgency(req.query);
 
 		if (resultDeletingAgency[0].affectedRows <= 0) {
@@ -305,7 +290,16 @@ const deleteAgency = async (req, res) => {
 			throw new Error(resultDroppingTableForAgency.message);
 		}
 
-		// await agenciesService.locateAgencyInArea(0, req.body.agency_id);
+		if (agencyIdSubParts[1] === "AD") {
+			const result = await agenciesService.locateAgencyInArea(1, postalCode.slice(0, 2), agencyId);
+
+			if (!result || result[0].affectedRows <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Tỉnh/thành phố có mã bưu chính bắt đầu với ${req.body.postal_code.slice(0, 2)} không tồn tại.`,
+				});
+			}
+		}
 
 		return res.status(200).json({
 			error: false,

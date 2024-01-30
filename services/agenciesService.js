@@ -1,7 +1,7 @@
 const Agencies = require("../database/Agencies");
 
-const checkExistAgency = async (fields, values) => {
-    return await Agencies.checkExistAgency(fields, values);
+const checkExistAgency = async (info) => {
+    return await Agencies.checkExistAgency(info);
 }
 
 const checkPostalCode = async (level, province, district, postal_code) => {
@@ -24,16 +24,16 @@ const generateAgencyID = async (prefix, level, postal_code) => {
     return await Agencies.generateAgencyID(prefix, level, postal_code);
 }
 
-const locateAgencyInArea = async (choice, agency_id) => {
-    return await Agencies.locateAgencyInArea(choice, agency_id);
+const locateAgencyInArea = async (choice, first2CharPostalCode, agency_id) => {
+    return await Agencies.locateAgencyInArea(choice, first2CharPostalCode, agency_id);
 }
 
 const getOneAgency = async (fields, values) => {
     return await Agencies.getOneAgency(fields, values);
 }
 
-const getManyAgencies = async (fields, values) => {
-    return await Agencies.getManyAgencies(fields, values);
+const getAgencies = async (info) => {
+    return await Agencies.getManyAgencies(info);
 }
 
 const updateAgency = async (info, conditions) => {
@@ -56,7 +56,7 @@ module.exports = {
     locateAgencyInArea,
     checkExistAgency,
     getOneAgency,
-    getManyAgencies,
+    getAgencies,
     updateAgency,
     updatePassword,
     deleteAgency,

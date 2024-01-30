@@ -14,13 +14,16 @@ const table = "agency";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-const checkExistAgency = async (fields, values) => {
+const checkExistAgency = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+	
 	const result = await dbUtils.findOne(pool, table, fields , values);
 	return result.length > 0;
 }
 
 const checkPostalCode = async (level, province, district, postal_code) => {
-	const successPostalCode = await checkExistAgency(["postal_code"], [postal_code]);
+	const successPostalCode = await checkExistAgency({ postal_code: postal_code });console.log(successPostalCode);
 	if (successPostalCode) {
 		return new Object({
 			success: false,
@@ -71,7 +74,6 @@ const checkPostalCode = async (level, province, district, postal_code) => {
 
 	if (level === 4 || level === 5) {
 		const result = await dbUtils.findOne(pool, "district", ["district"], [district]);
-
 		if (!result || result.length < 0) {
 			return new Object({
 				success: false,
@@ -79,7 +81,7 @@ const checkPostalCode = async (level, province, district, postal_code) => {
 			});
 		}
 
-		const postalCodeFromDatabase = result[0].postal_code;
+		const postalCodeFromDatabase = result[0].postal_code;console.log(result[0]);
 
 		if (postalCodeFromDatabase.slice(0, 4) !== postal_code.slice(0, 4)) {
 			return new Object({
@@ -214,39 +216,40 @@ const dropTableForAgency = async (postal_code) => {
 	});
 }
 
-const locateAgencyInArea = async (choice, agency_id) => {
-	let locateTable;
-	const agencyID = agency_id.split('_');
-	const level = agencyID[0];
-	const location = agencyID[2];
-	try {
-		if(level === "AG" || level === "AP") {
-			locateTable = "province";
-		} else if(level === "AD" || level === "AT") {
-			locateTable = "district";
-		} else {
-			throw new Error ("Cấp bậc bưu cục không hợp lệ!");
+const locateAgencyInArea = async (choice, postal_code, agency_id) => {
+	if (choice === 0) {
+		const selectQuery = `SELECT ?? FROM ?? WHERE postal_code LIKE ? LIMIT 1`;
+		const resultSelect = await pool.query(selectQuery, ["agencies", "province", `${postal_code}%`]);
+
+		if (!resultSelect || resultSelect[0].length <= 0) {
+			throw new Error("Đã xảy ra lỗi.");
 		}
 
-		if(choice === 0) {
-			// choice = 0 means delete agency
-			// then free the location of agency
-			const query = `UPDATE ${locateTable} SET agency_id = null WHERE postalcode = ?`;
-			const result = await pool.query(query, location);
-			return result[0];
-		} else if(choice === 1) {
-			// chioce = 1 mmeans create new agency
-			// then set location of agency
-			const query = `UPDATE ${locateTable} SET agency_id = ? WHERE postalcode = ?`;
-			const result = await pool.query(query, [agency_id, location]);
-			return result[0];
-		} else {
-			throw new Error("Lựa chọn không hợp lệ!");
+		const agencies = resultSelect[0][0].agencies ? JSON.parse(resultSelect[0][0].agencies) : new Array();
+
+		if (!agencies.includes(agency_id)) {
+			agencies.push(agency_id);
 		}
 
-	} catch (error) {
-		console.log("Error: ", error);
-		throw new Error(error.message);
+		const updateQuery = `UPDATE ?? SET ?? = ? WHERE ?? LIKE ?`;
+		const resultUpdate = await pool.query(updateQuery, ["province", "agencies", JSON.stringify(agencies), "postal_code", `${postal_code}%`]);
+
+		return resultUpdate;
+	}
+
+	if (choice === 1) {
+		const selectQuery = `SELECT ?? FROM ?? WHERE postal_code LIKE ? LIMIT 1`;
+		const resultSelect = await pool.query(selectQuery, ["agencies", "province", `${postal_code}%`]);
+
+		if (!resultSelect || resultSelect[0].length <= 0) {
+			throw new Error("Đã xảy ra lỗi.");
+		}
+
+		const agencies = resultSelect[0][0].agencies ? JSON.parse(resultSelect[0][0].agencies).filter(item => item !== agency_id) : new Array();
+		const updateQuery = `UPDATE ?? SET ?? = ? WHERE ?? LIKE ?`;
+		const resultUpdate = await pool.query(updateQuery, ["province", "agencies", JSON.stringify(agencies), "postal_code", `${postal_code}%`]);
+
+		return resultUpdate;
 	}
 }
 
@@ -254,8 +257,18 @@ const getOneAgency = async (fields, values) => {
     return await dbUtils.findOne(pool, table, fields, values);
 };
 
-const getManyAgencies = async (fields, values) => {
-	return await dbUtils.find(pool, table, fields, values);
+const getManyAgencies = async (info) => {
+	const fields = Object.keys(info) || new Array();
+	const values = Object.values(info) || new Array();
+	const result = await dbUtils.find(pool, table, fields, values);
+
+	for (const agency of result) {
+		if (agency.hasOwnProperty("managed_areas")) {
+			agency.managed_areas = JSON.parse(agency.managed_areas);
+		}
+	}
+	
+	return result;
 };
 
 const createNewAgency = async (info) => {
