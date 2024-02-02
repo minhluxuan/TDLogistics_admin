@@ -14,7 +14,6 @@ const sessionStrategy = new LocalStrategy({
     passwordField: "password",
 }, async (username, password, done) => {
     const staff = await Staffs.getOneStaff(["username"], [username]);
-
     if (staff.length <= 0) {
         return done(null, false);
     }

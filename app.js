@@ -132,7 +132,7 @@ app.use(function(err, req, res, next) {
 	res.status(err.status || 500);
 	res.render('error');
 });
-
+// console.log(require("./lib/utils").hash("NTDung@tdlogistics2k24"));
 const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
 	try {
 		const currentTime = new Date();

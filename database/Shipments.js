@@ -72,8 +72,7 @@ const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => 
     } catch (error) {
         console.log("Error: ", error);
         throw new Error(error.message);
-    } 
-    
+    }
 }
 
 const createNewShipment = async (fields, values, agency_id) => {

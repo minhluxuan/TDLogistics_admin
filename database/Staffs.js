@@ -64,10 +64,6 @@ const createNewStaff = async (info, postal_code = null) => {
 	return await utils.insert(pool, table, fields, values);
 };
 
-const createNewStaffInAgency = async (info) => {
-
-}
-
 const getManyStaffs = async (fields, values) => {
   	return await utils.find(pool, table, fields, values);
 };

@@ -22,8 +22,8 @@ const checkExistAgency = async (info) => {
 	return result.length > 0;
 }
 
-const checkPostalCode = async (level, province, district, postal_code) => {
-	const successPostalCode = await checkExistAgency({ postal_code: postal_code });console.log(successPostalCode);
+const checkPostalCode = async (province, district, postal_code) => {
+	const successPostalCode = await checkExistAgency({ postal_code: postal_code });
 	if (successPostalCode) {
 		return new Object({
 			success: false,
@@ -40,108 +40,79 @@ const checkPostalCode = async (level, province, district, postal_code) => {
 		});
 	}
 
-	if (level === 0 || level === 1) {
+	const resultFindingProvince = await dbUtils.findOne(pool, "province", ["province"], [province]);
+
+	if (!resultFindingProvince || resultFindingProvince.length <= 0) {
 		return new Object({
-			success: true,
-			message: "Mã bưu chính hợp lệ.",
+			success: false,
+			message: "Tên tỉnh/thành phố không tồn tại.",
 		});
 	}
 
-	if (level === 3) {
-		const result = await dbUtils.findOne(pool, "province", ["province"], [province]);
+	const postalCodeOfProvinceFromDatabase = resultFindingProvince[0].postal_code;
 
-		if (!result || result.length < 0) {
-			return new Object({
-				success: false,
-				message: "Tên tỉnh/thành phố không tồn tại.",
-			});
-		}
-
-		const postalCodeFromDatabase = result[0].postal_code;
-
-		if (postalCodeFromDatabase.slice(0, 2) !== postal_code.slice(0, 2)) {
-			return new Object({
-				success: false,
-				message: "Tên tỉnh/thành phố không khớp với mã bưu chính.",
-			});
-		}
-
+	if (!postalCodeOfProvinceFromDatabase || postalCodeOfProvinceFromDatabase.slice(0, 2) !== postal_code.slice(0, 2)) {
 		return new Object({
-			success: true,
-			message: "Mã bưu chính hợp lệ.",
+			success: false,
+			message: "Tên tỉnh/thành phố không khớp với mã bưu chính.",
 		});
 	}
 
-	if (level === 4 || level === 5) {
-		const result = await dbUtils.findOne(pool, "district", ["district"], [district]);
-		if (!result || result.length < 0) {
-			return new Object({
-				success: false,
-				message: "Tên quận/huyện không tồn tại.",
-			});
-		}
-
-		const postalCodeFromDatabase = result[0].postal_code;console.log(result[0]);
-
-		if (postalCodeFromDatabase.slice(0, 4) !== postal_code.slice(0, 4)) {
-			return new Object({
-				success: false,
-				message: "Tên quận/huyện không khớp với mã bưu chính.",
-			});
-		}
-
+	const resultFindingDistrict = await dbUtils.findOne(pool, "district", ["province", "district"], [province, district]);
+	if (!resultFindingDistrict || resultFindingDistrict.length <= 0) {
 		return new Object({
-			success: true,
-			message: "Mã bưu chính hợp lệ.",
+			success: false,
+			message: "Tên quận/huyện không tồn tại.",
 		});
 	}
 
-	return new Object({
-		success: false,
-		message: "Cấp bưu cục/đại lý không hợp lệ.",
-	});
-}
+	const postalCodeOfDistrictFromDatabase = resultFindingDistrict[0].postal_code;
 
-const generateAgencyID = async (prefix, level, postal_code) => {
-	let shortenRole;
-	switch (level) {
-		case 1:
-			shortenRole = "AG";
-			break;
-		case 2:
-			shortenRole = "AC";
-			break;
-		case 3:
-			shortenRole = "AP";
-			break;
-		case 4:
-			shortenRole = "AD";
-			break;
-		case 5:
-			shortenRole = "AT";
-			break;
-		default:
-			return new Object({
-				success: false,
-				message: "Cấp bưu cục/đại lý không hợp lệ."
-			});
+	if (!postalCodeOfDistrictFromDatabase || postalCodeOfDistrictFromDatabase.slice(0, 4) !== postalCodeOfDistrictFromDatabase.slice(0, 4)) {
+		return new Object({
+			success: false,
+			message: "Tên quận/huyện không khớp với mã bưu chính.",
+		});
 	}
-
-	const agencyId = prefix + "_" + shortenRole + "_" + postal_code + "_" + "00000";
 
 	return new Object({
 		success: true,
-		agency_id: agencyId,
-		message: "Tạo mã bưu cục thành công.",
+		message: "Mã bưu chính hợp lệ.",
 	});
 }
 
+const checkWardsOccupation = async (province, district, wards) => {
+	for (const ward of wards) {
+		const resultFindingWard = await dbUtils.findOne(pool, "ward", ["province", "district", "ward"], [province, district, ward]);
+		if (!resultFindingWard || resultFindingWard.length <= 0) {
+			return new Object({
+				success: false,
+				message: `Phường/xã/thị trấn ${ward} không tồn tại.`
+			});
+		}
+
+		const occupierAgencyId = resultFindingWard[0].agency_id;
+		if (occupierAgencyId && (new RegExp(process.env.REGEX_PERSONNEL)).test(occupierAgencyId)) {
+			return new Object({
+				success: false,
+				message: `Phường/xã/thị trấn ${ward} đã được quản lý bởi đại lý/bưu cục có mã đại lý ${occupierAgencyId}.`,
+			});
+		}
+	}
+
+	return new Object({
+		success: true,
+		message: "Tất cả các phường xã chưa được quản lý bởi bưu cục/đại lý nào.",
+	});
+}
+
+
 const createTablesForAgency = async (postal_code) => {
-	const staffsTable = postal_code + "_staff";
+	const staffTable = postal_code + "_staff";
 	const ordersTable = postal_code + "_orders";
 	const shipmentTable = postal_code + "_shipment";
 
-	const createStaffsTable = `CREATE TABLE ${staffsTable} AS SELECT * FROM staff WHERE 1 = 0`;
+	const createStaffsTable = `CREATE TABLE ${staffTable} AS SELECT * FROM staff WHERE 1 = 0`;
 	const createOrdersTable = `CREATE TABLE ${ordersTable} AS SELECT * FROM orders WHERE 1 = 0`;
 	const createShipmentTable = `CREATE TABLE ${shipmentTable} AS SELECT * FROM shipment WHERE 1 = 0`;
 
@@ -149,14 +120,15 @@ const createTablesForAgency = async (postal_code) => {
 	await pool.query(createOrdersTable);
 	await pool.query(createShipmentTable);
 
-	const checkingExistStaffTable = await dbUtils.checkExistTable(pool, staffsTable);
+	const checkingExistStaffTable = await dbUtils.checkExistTable(pool, staffTable);
 	const checkingExistOrdersTable = await dbUtils.checkExistTable(pool, ordersTable);
 	const checkingExistShipmentTable = await dbUtils.checkExistTable(pool, shipmentTable);
 
+	const neccessaryTable = [staffTable, ordersTable, shipmentTable];
 	const successCreatedTable = new Array();
 
 	if (checkingExistStaffTable.existed) {
-		successCreatedTable.push(staffsTable);
+		successCreatedTable.push(staffTable);
 	}
 
 	if (checkingExistOrdersTable.existed) {
@@ -168,15 +140,19 @@ const createTablesForAgency = async (postal_code) => {
 	}
 
 	if (successCreatedTable.length !== 3) {
+		const missedTable = neccessaryTable.filter(table => !successCreatedTable.includes(table));
+
 		return new Object({
 			success: false,
-			message: `Tạo tất cả bảng cần thiết cho một bưu cục/đại lý không thành công. Các bảng đã được tạo là: ${successCreatedTable.join(", ")}`,
+			message: `
+			Tạo tất cả bảng cần thiết cho một bưu cục/đại lý không thành công. Các bảng đã được tạo là: ${successCreatedTable.join(", ")}.\n
+			Vui lòng tạo trong cơ sở dữ liệu tổng một cách thủ công các bảng: ${missedTable.join(", ")}.`,
 		});
 	}
 
 	return new Object({
 		success: true,
-		message: `Tạo tất cả bảng cần thiết cho một bưu cục/đại lý thành công. Các bảng đã được tạo là: ${successCreatedTable.join(", ")}`,
+		message: `Tạo tất cả bảng cần thiết cho một bưu cục/đại lý thành công. Các bảng đã được tạo là: ${successCreatedTable.join(", ")}.`,
 	});
 }
 
@@ -189,6 +165,7 @@ const dropTableForAgency = async (postal_code) => {
 	const resultDroppingOrdersTable = await dbUtils.dropTable(pool, ordersTable);
 	const resultDroppingShipmentTable = await dbUtils.dropTable(pool, shipmentTable);
 
+	const neccessaryToDropTable = [staffTable, ordersTable, shipmentTable];
 	const successDroppedTable = new Array();
 
 	if (resultDroppingStaffTable.success) {
@@ -204,56 +181,117 @@ const dropTableForAgency = async (postal_code) => {
 	}
 
 	if (successDroppedTable.length !== 3) {
+		const missedTable = neccessaryToDropTable.filter(table => !successDroppedTable.includes(table));
 		return new Object({
 			success: false,
-			message: `Không thể xóa tất cả các bảng của một bưu cục. Các bảng đã được xóa là ${successDroppedTable.join(", ")}`, 
+			message: `
+			Không thể xóa tất cả các bảng của bưu cục/đại lý. Các bảng đã được xóa là ${successDroppedTable.join(", ")}.\n
+			Vui lòng xóa thủ công các bảng ${missedTable.join(", ")}.`, 
 		});
 	}
 
 	return new Object({
 		success: true,
-		message: `Xóa tất cả các bảng của một bưu cục thành công. Các bảng đã được xóa là ${successDroppedTable.join(", ")}`, 
+		message: `Xóa tất cả các bảng của một bưu cục thành công. Các bảng đã được xóa là ${successDroppedTable.join(", ")}.`, 
 	});
 }
 
-const locateAgencyInArea = async (choice, postal_code, agency_id) => {
+const locateAgencyInArea = async (choice, province, district, wards, agency_id, postal_code) => {
 	if (choice === 0) {
-		const selectQuery = `SELECT ?? FROM ?? WHERE postal_code LIKE ? LIMIT 1`;
-		const resultSelect = await pool.query(selectQuery, ["agencies", "province", `${postal_code}%`]);
+		const provinceSelectQuery = `SELECT ?? FROM ?? WHERE ?? = ? LIMIT 1`;
+		const provinceResultSelect = await pool.query(provinceSelectQuery, ["agency_ids", "province", "province", province]);
 
-		if (!resultSelect || resultSelect[0].length <= 0) {
-			throw new Error("Đã xảy ra lỗi.");
+		const agenciesOfProvince = provinceResultSelect[0][0] ? (provinceResultSelect[0][0].agency_ids ? JSON.parse(provinceResultSelect[0][0].agency_ids) : new Array()) : new Array();
+
+		if (!agenciesOfProvince.includes(agency_id)) {
+			agenciesOfProvince.push(agency_id);
 		}
 
-		const agencies = resultSelect[0][0].agencies ? JSON.parse(resultSelect[0][0].agencies) : new Array();
+		const districtSelectQuery = `SELECT ?? FROM ?? WHERE ?? = ? AND ?? = ? LIMIT 1`;
+		const districtResultSelect = await pool.query(districtSelectQuery, ["agency_ids", "district", "province", province, "district", district]);
 
-		if (!agencies.includes(agency_id)) {
-			agencies.push(agency_id);
+		const agenciesOfDistrict = districtResultSelect[0][0] ? (districtResultSelect[0][0].agency_ids ? JSON.parse(districtResultSelect[0][0].agency_ids) : new Array()) : new Array();
+
+		if (!agenciesOfDistrict.includes(agency_id)) {
+			agenciesOfDistrict.push(agency_id);
 		}
 
-		const updateQuery = `UPDATE ?? SET ?? = ? WHERE ?? LIKE ?`;
-		const resultUpdate = await pool.query(updateQuery, ["province", "agencies", JSON.stringify(agencies), "postal_code", `${postal_code}%`]);
+		const provinceUpdateQuery = `UPDATE ?? SET ?? = ? WHERE ?? = ?`;
+		const provinceResultUpdate = await pool.query(provinceUpdateQuery, ["province", "agency_ids", JSON.stringify(agenciesOfProvince), "province", province]);
 
-		return resultUpdate;
+		if (!provinceResultUpdate || provinceResultUpdate[0].affectedRows <= 0) {
+			return new Object({
+				success: false,
+				message: `Tỉnh thành ${province} không tồn tại.`,
+			});
+		}
+
+		const districtUpdateQuery = `UPDATE ?? SET ?? = ? WHERE ?? = ? AND ?? = ?`;
+		const districtResultUpdate = await pool.query(districtUpdateQuery, ["district", "agency_ids", JSON.stringify(agenciesOfDistrict), "province", province, "district", district]);
+
+		if (!districtResultUpdate || districtResultUpdate[0].affectedRows <= 0) {
+			return new Object({
+				success: false,
+				message: `Quận/huyện ${district} không tồn tại.`,
+			});
+		}
+
+		for (const ward of wards) {
+			const wardUpdateQuery = `UPDATE ?? SET ?? = ?, ?? = ? WHERE ?? = ? AND ?? = ? AND ?? = ?`;
+			const wardResultUpdate = await pool.query(wardUpdateQuery, ["ward", "agency_id", agency_id, "postal_code", postal_code, "province", province, "district", district, "ward", ward]);
+
+			if (!wardResultUpdate || wardResultUpdate[0].affectedRows <= 0) {
+				return new Object({
+					success: false,
+					message: `Phường/xã/thị trấn ${ward} không tồn tại.`,
+				});
+			}
+		}
 	}
 
 	if (choice === 1) {
-		const selectQuery = `SELECT ?? FROM ?? WHERE postal_code LIKE ? LIMIT 1`;
-		const resultSelect = await pool.query(selectQuery, ["agencies", "province", `${postal_code}%`]);
+		const provinceSelectQuery = `SELECT ?? FROM ?? WHERE ?? = ? LIMIT 1`;
+		const provinceResultSelect = await pool.query(provinceSelectQuery, ["agency_ids", "province", "province", province]);
 
-		if (!resultSelect || resultSelect[0].length <= 0) {
-			throw new Error("Đã xảy ra lỗi.");
+		const agenciesOfProvince = provinceResultSelect[0][0] ? (provinceResultSelect[0][0].agency_ids ? JSON.parse(provinceResultSelect[0][0].agency_ids) : new Array()) : new Array();
+		
+		if (agenciesOfProvince.includes(agency_id)) {
+			const deletedIndex = agenciesOfProvince.indexOf(agency_id);
+			agenciesOfProvince.splice(deletedIndex, 1);
 		}
 
-		const agencies = resultSelect[0][0].agencies ? JSON.parse(resultSelect[0][0].agencies).filter(item => item !== agency_id) : new Array();
-		const updateQuery = `UPDATE ?? SET ?? = ? WHERE ?? LIKE ?`;
-		const resultUpdate = await pool.query(updateQuery, ["province", "agencies", JSON.stringify(agencies), "postal_code", `${postal_code}%`]);
+		const districtSelectQuery = `SELECT ?? FROM ?? WHERE ?? = ? AND ?? = ? LIMIT 1`;
+		const districtResultSelect = await pool.query(districtSelectQuery, ["agency_ids", "district", "province", province, "district", district]);
 
-		return resultUpdate;
+		const agenciesOfDistrict = districtResultSelect[0][0] ? (districtResultSelect[0][0].agency_ids ? JSON.parse(districtResultSelect[0][0].agency_ids) : new Array()) : new Array();
+
+		if (agenciesOfDistrict.includes(agency_id)) {
+			const deletedIndex = agenciesOfProvince.indexOf(agency_id);
+			agenciesOfDistrict.splice(deletedIndex, 1);
+		}
+
+		const provinceUpdateQuery = `UPDATE ?? SET ?? = ? WHERE ?? = ?`;
+		await pool.query(provinceUpdateQuery, ["province", "agency_ids", JSON.stringify(agenciesOfProvince), "province", province]);
+
+		const districtUpdateQuery = `UPDATE ?? SET ?? = ? WHERE ?? = ? AND ?? = ?`;
+		await pool.query(districtUpdateQuery, ["district", "agency_ids", JSON.stringify(agenciesOfDistrict), "province", province, "district", district]);
+		console.log(wards);
+		for (const ward of wards) {
+			const wardUpdateQuery = `UPDATE ?? SET ?? = ?, ?? = ? WHERE ?? = ? AND ?? = ? AND ?? = ?`;
+			await pool.query(wardUpdateQuery, ["ward", "agency_id", null, "postal_code", null, "province", province, "district", district, "ward", ward]);
+		}
 	}
+
+	return new Object({
+		success: true,
+		message: "Cập nhật thành công.",
+	});
 }
 
-const getOneAgency = async (fields, values) => {
+const getOneAgency = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+
     return await dbUtils.findOne(pool, table, fields, values);
 };
 
@@ -301,7 +339,7 @@ const updatePassword = async (fields, values, conditionFields, conditionValues) 
 module.exports = { 
 	checkExistAgency,
 	checkPostalCode,
-	generateAgencyID,
+	checkWardsOccupation,
 	createTablesForAgency,
 	dropTableForAgency,
 	locateAgencyInArea,
