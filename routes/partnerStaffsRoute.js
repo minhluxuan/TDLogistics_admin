@@ -102,7 +102,7 @@ const fileFilter = (req, file, done) => {
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
- });
+});
 
 const user = new utils.User();
 
@@ -111,7 +111,7 @@ router.post("/login", passport.authenticate("partnerStaffLogin", {
     failureRedirect: "/api/v1/partner_staff/login_fail",
     failureFlash: true,
     }), partnerStaffsController.verifyStaffSuccess);
-router.post("/create", user.isAuthenticated(), user.isAuthorized(2), 
+router.post("/create", user.isAuthenticated(), user.isAuthorized([], []), 
     upload.fields([{
             name: 'avatar', maxCount: 1
         }, {

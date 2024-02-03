@@ -471,10 +471,8 @@ const updatePartnerLicenseImg = async (req, res) => {
 		});
 	}
 
-
 	try {
 		const partnerStaff = await partnerStaffsService.getOnePartnerStaff(["staff_id"], [req.query.staff_id]);
-		console.log(partnerStaff);
 		if (!partnerStaff || partnerStaff.length <= 0) {
 			return res.status(404).json({
 				error: true,

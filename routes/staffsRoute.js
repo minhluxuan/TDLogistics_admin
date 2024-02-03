@@ -14,7 +14,6 @@ const sessionStrategy = new LocalStrategy({
     passwordField: "password",
 }, async (username, password, done) => {
     const staff = await Staffs.getOneStaff(["username"], [username]);
-
     if (staff.length <= 0) {
         return done(null, false);
     }
@@ -29,7 +28,7 @@ const sessionStrategy = new LocalStrategy({
     const staff_id = staff[0].staff_id;
     const agency_id = staff[0].agency_id;
     const role = staff[0].role;
-    const privileges = JSON.parse(staff[0].privileges);
+    const privileges = staff[0].privileges ? JSON.parse(staff[0].privileges) : new Array();
     const active = staff[0].active;
 
     return done(null, {

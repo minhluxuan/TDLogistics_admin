@@ -1,11 +1,15 @@
 const Agencies = require("../database/Agencies");
 
-const checkExistAgency = async (fields, values) => {
-    return await Agencies.checkExistAgency(fields, values);
+const checkExistAgency = async (info) => {
+    return await Agencies.checkExistAgency(info);
 }
 
-const checkPostalCode = async (level, province, district, postal_code) => {
-    return await Agencies.checkPostalCode(level, province, district, postal_code);
+const checkPostalCode = async (province, district, postal_code) => {
+    return await Agencies.checkPostalCode(province, district, postal_code);
+}
+
+const checkWardsOccupation = async (province, district, wards) => {
+    return await Agencies.checkWardsOccupation(province, district, wards);
 }
 
 const createNewAgency = async (info) => {
@@ -20,20 +24,20 @@ const dropTableForAgency = async (postal_code) => {
     return await Agencies.dropTableForAgency(postal_code);
 }
 
-const generateAgencyID = async (prefix, level, postal_code) => {
-    return await Agencies.generateAgencyID(prefix, level, postal_code);
+const generateAgencyID = async (type, level, postal_code) => {
+    return await Agencies.generateAgencyID(type, level, postal_code);
 }
 
-const locateAgencyInArea = async (choice, agency_id) => {
-    return await Agencies.locateAgencyInArea(choice, agency_id);
+const locateAgencyInArea = async (choice, province, district, wards, agency_id, postal_code) => {
+    return await Agencies.locateAgencyInArea(choice, province, district, wards, agency_id, postal_code);
 }
 
-const getOneAgency = async (fields, values) => {
-    return await Agencies.getOneAgency(fields, values);
+const getOneAgency = async (info) => {
+    return await Agencies.getOneAgency(info);
 }
 
-const getManyAgencies = async (fields, values) => {
-    return await Agencies.getManyAgencies(fields, values);
+const getAgencies = async (info) => {
+    return await Agencies.getManyAgencies(info);
 }
 
 const updateAgency = async (info, conditions) => {
@@ -50,13 +54,14 @@ const updatePassword = async (fields, values, conditionFields, conditionValues) 
 
 module.exports = {
     checkPostalCode,
+    checkWardsOccupation,
     createTablesForAgency,
     dropTableForAgency,
     generateAgencyID,
     locateAgencyInArea,
     checkExistAgency,
     getOneAgency,
-    getManyAgencies,
+    getAgencies,
     updateAgency,
     updatePassword,
     deleteAgency,
