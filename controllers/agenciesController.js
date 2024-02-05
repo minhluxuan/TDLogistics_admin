@@ -21,7 +21,7 @@ const checkExistAgency = async (req, res) => {
 		return res.status(200).json({
 			error: false,
 			existed: existed,
-			message: existed ? "Bưu cục đã tồn tại." : "Bưu cục chưa tồn tại.",
+			message: existed ? `Bưu cục có mã bưu cục ${req.query.agency_id} đã tồn tại.` : `Bưu cục có mã bưu cục ${req.query.agency_id} chưa tồn tại.`,
 		});
 	} catch (error) {
 		res.status(500).json({
@@ -135,7 +135,7 @@ const createNewAgency = async (req, res) => {
 		const resultCreatingNewStaff = await staffsService.createNewStaff(newStaff);
 		
 		let textResultCreatingNewStaff;
-		if (!resultCreatingNewStaff || resultCreatingNewStaff[0].affectedRows <= 0) {
+		if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
 			textResultCreatingNewStaff = `
 			Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu tổng thất bại.\n
 			Vui lòng tạo thủ công tài khoản nhân viên quản lý bưu cục với mã nhân viên ${agencyId} và thông tin đã cung cấp trước đó.`;
@@ -166,7 +166,7 @@ const createNewAgency = async (req, res) => {
 		const resultCreatingNewAgency = await agenciesService.createNewAgency(newAgency);
 
 		let textResultCreatingNewAgency;
-		if (!resultCreatingNewAgency || resultCreatingNewAgency[0].affectedRows <= 0) {
+		if (!resultCreatingNewAgency || resultCreatingNewAgency.affectedRows <= 0) {
 			textResultCreatingNewAgency = `
 			Tạo bưu cục có mã bưu cục ${agencyId} trong cơ sở dữ liệu tổng thất bại.\n
 			Vui lòng tạo thủ công bưu cục với mã bưu cục ${agencyId} và thông tin đã cung cấp trước đó.`;
@@ -181,9 +181,9 @@ const createNewAgency = async (req, res) => {
 		const resultCreatingNewStaffInAgency = await staffsService.createNewStaff(newStaff, req.body.postal_code);
 
 		let textResultCreatingNewStaffInAgency;
-		if (!resultCreatingNewStaffInAgency || resultCreatingNewStaffInAgency[0].affectedRows <= 0) {
+		if (!resultCreatingNewStaffInAgency || resultCreatingNewStaffInAgency.affectedRows <= 0) {
 			textResultCreatingNewStaffInAgency = `
-			Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu bưu cục không thành công.
+			Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu bưu cục thất bại.
 			Vui lòng tạo thủ công tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong bảng ${req.body.postal_code + '_' + "staff"}.`;
 		}
 		else {

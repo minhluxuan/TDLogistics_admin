@@ -80,11 +80,11 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, done) => {
     if (!file) {
-        return done(new Error("File hợp đồng không tồn tại."));
+        return done(new Error("File không tồn tại."));
     }
 
     if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype && "image/png") { 
-       return done(new Error("Hình ảnh không hợp lệ"));
+       return done(new Error("Hình ảnh không hợp lệ."));
     }
 
     const maxFileSize = 5 * 1024 * 1024;

@@ -186,7 +186,7 @@ Content-Type: application/json
     "user_detail_address": "326, ĐT44A",
     "user_position": "Quản lý bưu cục",
     "user_salary": 25000000,
-    "type": "TD",
+    "type": "BC",
     "level": 3,
     "postal_code": "70001",
     "agency_name": "Bưu cục quận 1",
@@ -213,6 +213,76 @@ DELETE http://localhost:5000/api/v1/agencies/delete?agency_id=TD_70000_00000
 ###
 
 DELETE http://localhost:5000/api/v1/agencies/delete?agency_id=TD_70001_00000
+
+###
+
+GET http://localhost:5000/api/v1/staffs/search
+Content-Type: application/json
+
+###
+
+GET http://localhost:5000/api/v1/staffs/search
+Content-Type: application/json
+
+{
+    "fullname": "Nguyễn Tiến Dũng"
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "username": "minhluxuan",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430418",
+    "email": "minh.luxuanhcmc@hcmut.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005692",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Quản trị nhân sự",
+    "role": "HUMAN_RESOURCE_MANAGER",
+    "salary": 25000000
+}
+
+###
+
+PUT http://localhost:5000/api/v1/staffs/update?staff_id=BC_70001_00000&agency_id=BC_70001_00000
+Content-Type: application/json
+
+{
+    "email": "minh.luxuanhcmut@hcmut.edu.vn"
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/staffs/delete?staff_id=BC_70001_00000&agency_id=BC_70001_00000
+Content-Type: application/json
+
+###
+
+PATCH http://localhost:5000/api/v1/staffs/update_password?staff_id=TD_00000_00000
+Content-Type: application/json
+
+{
+    "new_password": "NTDung@TDlogistics2k24",
+    "confirm_password": "NTDung@TDlogistics2k24"
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/staffs/update_password?staff_id=TD_00000_00000
+Content-Type: application/json
+
+{
+    "new_password": "NTDung@tdlogistics2k24",
+    "confirm_password": "NTDung@tdlogistics2k24"
+}
 
 ###
 

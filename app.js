@@ -44,10 +44,10 @@ const app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-app.enable('trust proxy');
+// app.enable('trust proxy');
 
 // Chỉ định danh sách các trang web được phép truy cập
-const allowedOrigins = ['https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app'];
+const allowedOrigins = ['https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', 'https://www.thunderclient.com'];
 
 // Sử dụng cors middleware với tùy chọn chỉ cho phép các trang web trong danh sách
 app.use(cors({

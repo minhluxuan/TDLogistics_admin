@@ -18,7 +18,7 @@ const checkExistAgency = async (info) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 	
-	const result = await dbUtils.findOne(pool, table, fields , values);
+	const result = await dbUtils.findOneUnion(pool, table, fields , values);
 	return result.length > 0;
 }
 
@@ -40,7 +40,7 @@ const checkPostalCode = async (province, district, postal_code) => {
 		});
 	}
 
-	const resultFindingProvince = await dbUtils.findOne(pool, "province", ["province"], [province]);
+	const resultFindingProvince = await dbUtils.findOneIntersect(pool, "province", ["province"], [province]);
 
 	if (!resultFindingProvince || resultFindingProvince.length <= 0) {
 		return new Object({
@@ -58,7 +58,7 @@ const checkPostalCode = async (province, district, postal_code) => {
 		});
 	}
 
-	const resultFindingDistrict = await dbUtils.findOne(pool, "district", ["province", "district"], [province, district]);
+	const resultFindingDistrict = await dbUtils.findOneIntersect(pool, "district", ["province", "district"], [province, district]);
 	if (!resultFindingDistrict || resultFindingDistrict.length <= 0) {
 		return new Object({
 			success: false,
@@ -83,7 +83,7 @@ const checkPostalCode = async (province, district, postal_code) => {
 
 const checkWardsOccupation = async (province, district, wards) => {
 	for (const ward of wards) {
-		const resultFindingWard = await dbUtils.findOne(pool, "ward", ["province", "district", "ward"], [province, district, ward]);
+		const resultFindingWard = await dbUtils.findOneIntersect(pool, "ward", ["province", "district", "ward"], [province, district, ward]);
 		if (!resultFindingWard || resultFindingWard.length <= 0) {
 			return new Object({
 				success: false,
@@ -292,7 +292,7 @@ const getOneAgency = async (info) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
-    return await dbUtils.findOne(pool, table, fields, values);
+    return await dbUtils.findOneIntersect(pool, table, fields, values);
 };
 
 const getManyAgencies = async (info) => {

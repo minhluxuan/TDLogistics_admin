@@ -20,7 +20,7 @@ class User {
             if (!req.isAuthenticated()) {
                 return res.status(403).json({
                     error: true,
-                    message: "Bạn không được phép truy cập tài nguyên này."
+                    message: "Người dùng không được phép truy cập tài nguyên này."
                 });
             }
     

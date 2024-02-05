@@ -1,9 +1,20 @@
-const findOne = async (pool, table, fields, values) => {
+const findOneUnion = async (pool, table, fields, values) => {
     const query = `SELECT * FROM ${table} WHERE ${fields.map(field => `${field} = ?`).join(" OR ")} LIMIT 1`;
 
     try {
         const result = await pool.query(query, values);
-        console.log("Success!");
+        return result[0];
+    } catch (error) {
+        console.log("Error: ", error);
+        throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút!");
+    }
+}
+
+const findOneIntersect = async (pool, table, fields, values) => {
+    const query = `SELECT * FROM ${table} WHERE ${fields.map(field => `${field} = ?`).join(" OR ")} LIMIT 1`;
+
+    try {
+        const result = await pool.query(query, values);
         return result[0];
     } catch (error) {
         console.log("Error: ", error);
@@ -181,7 +192,8 @@ const getInfo = (personnel_id) => {
 }
 
 module.exports = {
-    findOne,
+    findOneUnion,
+    findOneIntersect,
     find,
     insert,
     updateOne,

@@ -2,9 +2,10 @@ const express = require("express");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const multer = require("multer");
-const bcrypt = require("bcrypt");
+const fs = require("fs");
+const path = require("path");
 const staffsController = require("../controllers/staffsController");
-const utils = require("../utils");
+const auth = require("../lib/auth");
 const Staffs = require("../database/Staffs");
 
 const router = express.Router();
@@ -44,41 +45,61 @@ passport.use("normalLogin", sessionStrategy);
 
 const storage = multer.diskStorage({
     destination: function (req, file, done) {
-        if (!file) {
-            return done(new Error("Hình ảnh không hợp lệ."), false);
+        if (file.fieldname !== "avatar") {
+            return done(new Error('Yêu cầu tên trường phải là "avatar".'));
         }
 
-        if (file.fieldname.length > 20) {
-            return done(new Error("Tên file quá dài."), false);
+        const folderPath = path.join("storage", "staff", "img", "avatar_temp");
+
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
         }
 
-        if (file.mimetype === "image/jpg" || file.mimetype === "image/jpeg" || file.mimetype === "image/png") { 
-            return done(null, 'img/avatar');
-        }
-
-        done(new Error("Hình ảnh không hợp lệ"), false);
+        return done(null, folderPath);
     },
 
     filename: function (req, file, done) {
-        done(null, file.fieldname + '-' + Date.now() + ".jpg");
+        done(null,  Date.now() + "_" + file.originalname);
     }
 });
    
-const upload = multer({ storage: storage });
+const fileFilter = (req, file, done) => {
+    if (!file) {
+        return done(new Error("File không tồn tại."));
+    }
 
-const user =  new utils.User();
+    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype && "image/png") { 
+       return done(new Error("Hình ảnh không hợp lệ. Chỉ các file .jpg, .jpeg, .png được cho phép."));
+    }
+
+    const maxFileSize = 5 * 1024 * 1024;
+    if (file.size > maxFileSize) {
+        done(new Error("File có kích thước quá lớn. Tối đa 5MB được cho phép."));
+    }
+
+    if (file.originalname.length > 100) {
+        done(new Error("Tên file quá dài. Tối đa 100 ký tự được cho phép."));
+    }
+
+    return done(null, true);
+};
+
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+});
 
 router.post("/login", passport.authenticate("normalLogin", {
     successRedirect: "/api/v1/staffs/login_success",
     failureRedirect: "/api/v1/staffs/login_fail",
     failureFlash: true,
 }), staffsController.verifyStaffSuccess);
-router.get("/search", user.isAuthenticated(), user.isAuthorized(2, 3, 4, 5, 6, 7, 8, 9, 10, 15), staffsController.getStaffs);
-router.post("/create", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 10, 16), upload.single("avatar"), staffsController.createNewStaff);
-router.patch("/update", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 10, 17), staffsController.updateStaffInfo);
-router.patch("/update_password", user.isAuthenticated(), user.isAuthorized(2, 3, 4, 5, 6, 7, 8, 9, 10, 17), staffsController.updatePassword);
-router.patch("/update_avatar", user.isAuthenticated(), user.isAuthorized(2, 3, 4, 5, 6, 7, 8, 9, 10, 17), user.isAuthenticated(), user.isAuthorized(2), upload.single("avatar"), staffsController.updateAvatar);
-router.delete("/delete", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 10, 18), staffsController.deleteStaff);
+router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], []), staffsController.getStaffs);
+router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), upload.single("avatar"), staffsController.createNewStaff);
+router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), staffsController.updateStaffInfo);
+router.patch("/update_password", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], []), staffsController.updatePassword);
+router.patch("/update_avatar", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], []), upload.single("avatar"), staffsController.updateAvatar);
+router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), staffsController.deleteStaff);
 router.post("/login_success", staffsController.verifyStaffSuccess);
 router.post("/login_fail", staffsController.verifyStaffFail);
 
