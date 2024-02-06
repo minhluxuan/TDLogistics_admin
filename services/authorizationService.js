@@ -1,19 +1,19 @@
 const Authorization = require("../database/Authorization");
 
-const getAuthorization = async (personnel_id) => {
-    return await Authorization.getAuthorization(personnel_id);
+const getPermissionByRole = async (role) => {
+    return await Authorization.getPermissionByRole(role);
 }
 
-const updateAuthorization = async (personnel_id, givenPermissions) => {
-    return await Authorization.updateAuthorization(personnel_id, givenPermissions);
+const grantPermissions = async (staffId, privileges, postalCode) => {
+    return await Authorization.grantPermissions(staffId, privileges, postalCode);
 }
 
-const deleteAuthorization = async (personnel_id, revokedPermissions) => {
-    return await Authorization.deleteAuthorization(personnel_id, revokedPermissions);
+const revokePermissions = async (staffId, privileges, postalCode) => {
+    return await Authorization.revokePermissions(staffId, privileges, postalCode);
 }
 
 module.exports = {
-    getAuthorization,
-    updateAuthorization,
-    deleteAuthorization,
+    getPermissionByRole,
+    grantPermissions,
+    revokePermissions,
 }
