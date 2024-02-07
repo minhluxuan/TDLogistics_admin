@@ -106,7 +106,7 @@ const createNewAgency = async (req, res) => {
 			});
 		}
 
-		const agencyId = req.body.type + '_' + req.body.postal_code + '_' + "00000";
+		const agencyId = req.body.type + '_' + req.body.postal_code + '_' + req.body.cccd;
 
 		req.body.user_password = utils.hash(req.body.user_password);
 

@@ -1,11 +1,11 @@
 const transportPartnerService = require("../services/transportPartnerService");
-const controllerUtils = require("./utils");
+const validation = require("../lib/validation");
 
-const transportPartnerValidation = new controllerUtils.TransportPartnerValidation();
+const transportPartnerValidation = new validation.TransportPartnerValidation();
 
 const getTransportPartner = async (req, res) => {
-    const { error } = transportPartnerValidation.validateFindingPartner(req.query);
     try {
+        const { error } = transportPartnerValidation.validateFindingPartner(req.query);
         if (error) {
             return res.status(400).json({
                 error: true,

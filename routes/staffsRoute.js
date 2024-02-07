@@ -95,7 +95,7 @@ router.post("/login", passport.authenticate("normalLogin", {
     failureRedirect: "/api/v1/staffs/login_fail",
     failureFlash: true,
 }), staffsController.verifyStaffSuccess);
-router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], []), staffsController.getStaffs);
+router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "AGENCY_STAFF", "AGENCY_COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], []), staffsController.getStaffs);
 router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), upload.single("avatar"), staffsController.createNewStaff);
 router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), staffsController.updateStaffInfo);
 router.patch("/update_password", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], []), staffsController.updatePassword);
