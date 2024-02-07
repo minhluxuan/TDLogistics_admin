@@ -1,7 +1,7 @@
 const containerService = require("../services/containersService");
-const utils = require("./utils");
+const validation = require("../lib/validation");
 
-const containerRequestValidation = new utils.ContainerValidation();
+const containerRequestValidation = new validation.ContainerValidation();
 
 const createContainer = async (req, res) => {
     if(!req.isAuthenticated() || req.user.permisson !== 3) {

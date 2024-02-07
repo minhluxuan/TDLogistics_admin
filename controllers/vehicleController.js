@@ -1,10 +1,9 @@
 const vehicleService = require("../services/vehicleService");
-const utils = require("../utils");
-const controllerUtils = require("./utils");
+const validation = require("../lib/validation");
 const fs = require("fs");
 const path = require("path");
 
-const vehicleValidation = new controllerUtils.VehicleValidation();
+const vehicleValidation = new validation.VehicleValidation();
 
 const checkExistVehicle = async (req, res) => {
     const { error } = vehicleValidation.validateCheckingExistVehicle(req.query);

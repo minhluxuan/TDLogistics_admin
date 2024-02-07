@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 const moment = require("moment");
-const utils = require("./utils");
+const dbUtils = require("../lib/dbUtils");
 require("dotenv").config();
 
 
@@ -78,7 +78,7 @@ const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => 
 
 const createNewShipment = async (fields, values, agency_id) => {
     const agencyTable = agency_id + suffix;
-    return await utils.insert(pool, agencyTable, fields, values);
+    return await dbUtils.insert(pool, agencyTable, fields, values);
 }
 
 const recieveShipment = async (shipment_id, agency_id) => {
@@ -93,7 +93,7 @@ const recieveShipment = async (shipment_id, agency_id) => {
             let result;
             for(const order_id of order_ids) {
                 const orderData = await getInfoOrder(order_id);
-                result = await utils.insert(pool, agencyOrdersTable, orderData.fields, orderData.values);
+                result = await dbUtils.insert(pool, agencyOrdersTable, orderData.fields, orderData.values);
             }
             return result[0];
         } else {
@@ -333,19 +333,19 @@ const getInfoOrder = async (order_id) => {
 }
 
 const confirmCreateShipment = async (fields, values) => {
-    return await utils.insert(pool, table, fields, values);
+    return await dbUtils.insert(pool, table, fields, values);
 }
 
 const updateShipmentToDatabase = async (fields, values, shipment_id) => {
     const conditionFields = ["shipment_id"];
     const conditionValues = [shipment_id];
-    return await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+    return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 } 
 
 const updateOrderToDatabase = async (fields, values, order_id) => {
     const conditionFields = ["order_id"];
     const conditionValues = [order_id];
-    return await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+    return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 }
 
 const compareOrdersInDatabase = async (shipment_id, ordersFromRequest, agency_id) => {

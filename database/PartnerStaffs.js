@@ -1,5 +1,5 @@
 const mysql = require("mysql2");
-const utils = require("./utils");
+const dbUtils = require("../lib/dbUtils");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -20,7 +20,7 @@ const checkExistPartnerStaff = async (fields, values) => {
 };
 
 const createNewPartnerStaff = async (fields, values) => {
-	const lastUser = await utils.getLastRow(pool, table);
+	const lastUser = await dbUtils.getLastRow(pool, table);
 
 	let partnerStaffId = "0000000";
 
@@ -31,27 +31,27 @@ const createNewPartnerStaff = async (fields, values) => {
 	fields.push("staff_id");
 	values.push(partnerStaffId);
 
-	await utils.insert(pool, table, fields, values);
+	await dbUtils.insert(pool, table, fields, values);
 };
 
 const getManyPartnerStaffs = async (fields, values) => {
-  	return await utils.find(pool, table, fields, values);
+  	return await dbUtils.find(pool, table, fields, values);
 };
 
 const getOnePartnerStaff = async (fields, values) => {
-  	return await utils.findOne(pool, table, fields, values);
+  	return await dbUtils.findOne(pool, table, fields, values);
 };
 
 const updatePartnerStaff = async (fields, values, conditionFields, conditionValues) => {
-  	return await utils.update(pool, table, fields, values, conditionFields,conditionValues);
+  	return await dbUtils.update(pool, table, fields, values, conditionFields,conditionValues);
 };
 
 const deletePartnerStaff= async(fields, values) => {
-  	return await utils.deleteOne(pool, table, fields, values);
+  	return await dbUtils.deleteOne(pool, table, fields, values);
 };
 
 const updatePartnerPassword = async (fields, values, conditionFields, conditionValues) => {
-	await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+	await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
 module.exports = {

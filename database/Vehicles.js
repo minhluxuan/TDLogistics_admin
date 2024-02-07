@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 const moment = require("moment");
-const utils = require("./utils");
+const dbUtils = require("../lib/dbUtils");
 const Orders = require("./Orders");
 
 const dbOptions = {
@@ -16,12 +16,12 @@ const table = "vehicle";
 const pool = mysql.createPool(dbOptions).promise();
 
 const checkExistVehicle = async (field, value) => {
-    const result = await utils.findOne(pool, table, field, value);
+    const result = await dbUtils.findOne(pool, table, field, value);
     return result.length > 0;
 };
 
 const createNewVehicle = async (fields, values) => {
-    const lastVehicle = await utils.getLastRow(pool, table);
+    const lastVehicle = await dbUtils.getLastRow(pool, table);
 
 	let vehicleId = "0000000";
 
@@ -34,15 +34,15 @@ const createNewVehicle = async (fields, values) => {
     const defaultValues = [vehicleId, 0, JSON.stringify([]), false];
     const allFields = [...fields, ...defaultFields];
     const allValues = [...values, ...defaultValues];
-    return await utils.insert(pool, table, allFields, allValues);
+    return await dbUtils.insert(pool, table, allFields, allValues);
 };
 
 const getManyVehicles = async (fields, values) => {
-    return await utils.find(pool, table, fields, values);
+    return await dbUtils.find(pool, table, fields, values);
 };
 
 const getOneVehicle = async (fields, values) => {
-    return await utils.findOne(pool, table, fields, values);
+    return await dbUtils.findOne(pool, table, fields, values);
 };
 
 const getVehicleOrderIds = async (fields, values) => {
@@ -78,12 +78,12 @@ const getVehicleOrderIds = async (fields, values) => {
 }
 
 const updateVehicle = async (fields, values, conditionFields, conditionValues) => {
-    return await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+    return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
 const addOrders = async (vehicle_id, order_ids) => {
     try {
-        const vehicle = await utils.findOne(pool, table, ["vehicle_id"], [vehicle_id]);
+        const vehicle = await dbUtils.findOne(pool, table, ["vehicle_id"], [vehicle_id]);
 
         if (!vehicle || vehicle.length <= 0) {
             console.log("Vehicle does not exist.");
@@ -116,7 +116,7 @@ const addOrders = async (vehicle_id, order_ids) => {
             jsonOrderIds = JSON.stringify(order_ids);
         }
 
-        const result = await utils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle_id]);
+        const result = await dbUtils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle_id]);
 
         return new Object({
             affectedRows: result ? result.affectedRows : 0,
@@ -133,7 +133,7 @@ const addOrders = async (vehicle_id, order_ids) => {
 
 const deleteOrders = async (vehicle_id, order_ids) => {
     try {
-        const vehicle = await utils.findOne(pool, table, ["vehicle_id"], [vehicle_id]);
+        const vehicle = await dbUtils.findOne(pool, table, ["vehicle_id"], [vehicle_id]);
 
         if (!vehicle || vehicle.length <= 0) {
             console.log("Vehicle does not exist.");
@@ -167,7 +167,7 @@ const deleteOrders = async (vehicle_id, order_ids) => {
             jsonOrderIds = JSON.stringify(new Array());
         }
 
-        const result = await utils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle_id]);
+        const result = await dbUtils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle_id]);
 
         return new Object({
             affectedRows: result ? result.affectedRows : 0,
@@ -183,7 +183,7 @@ const deleteOrders = async (vehicle_id, order_ids) => {
 }
 
 const increaseMass = async (vehicle_id, order_id) => {
-    const order = await utils.findOne(pool, "orders", ["order_id"], [order_id]);
+    const order = await dbUtils.findOne(pool, "orders", ["order_id"], [order_id]);
 
     if (!order || order.length <= 0) {
         console.log("Order does not exist.");
@@ -204,7 +204,7 @@ const increaseMass = async (vehicle_id, order_id) => {
 }
 
 const decreaseMass = async (vehicle_id, order_id) => {
-    const order = await utils.findOne(pool, "orders", ["order_id"], [order_id]);
+    const order = await dbUtils.findOne(pool, "orders", ["order_id"], [order_id]);
 
     if (!order || order.length <= 0) {
         console.log("Order does not exist.");
@@ -225,7 +225,7 @@ const decreaseMass = async (vehicle_id, order_id) => {
 }
 
 const deleteVehicle = async (fields, values) => {
-    return await utils.deleteOne(pool, table, fields, values);
+    return await dbUtils.deleteOne(pool, table, fields, values);
 };
 
 module.exports = {

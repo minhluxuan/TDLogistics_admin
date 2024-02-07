@@ -1,12 +1,15 @@
 const Business = require("../database/Business");
 
 const checkExistBusiness = async (fields, values) => {
-
     return await Business.checkExistBusiness(fields, values);
 }
 
 const createNewBusinessUser = async (fields, values) => {
-    await Business.createNewBusinessUser(fields, values);
+    return await Business.createNewBusinessUser(fields, values);
+}
+
+const createNewRepresentor = async (info) => {
+    return await Business.createNewRepresentor(info);
 }
 
 const getOneBusinessUser = async (fields, values) => {
@@ -28,6 +31,7 @@ const deleteBusinessUser = async(fields, values) => {
 module.exports = {
     checkExistBusiness,
     createNewBusinessUser,
+    createNewRepresentor,
     getOneBusinessUser,
     getManyBusinessUsers,
     updateBusinessUser,

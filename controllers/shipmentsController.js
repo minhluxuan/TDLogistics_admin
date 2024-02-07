@@ -1,9 +1,9 @@
 const moment = require("moment");
 const shipmentService = require("../services/shipmentsService");
-const utils = require("./utils");
-const servicesUtils = require("../services/utils");
+const validation = require("../lib/validation");
+// const servicesUtils = require("../services/utils");
 
-const shipmentRequestValidation = new utils.ShipmentValidation();
+const shipmentRequestValidation = new validation.ShipmentValidation();
 
 const createNewShipment = async (req, res) => {
     // if(!req.isAuthenticated() || req.user.permisson !== 3) {
@@ -34,7 +34,7 @@ const createNewShipment = async (req, res) => {
         const shipmentId = "TD" + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDay().toString() + createdTime.getHours().toString() + createdTime.getMinutes().toString() + createdTime.getSeconds().toString() + createdTime.getMilliseconds().toString();
 
         //get address throught coordinate
-        const map = new servicesUtils.Map();
+        // const map = new servicesUtils.Map();
 
         const source = {
             lat: req.body.lat_source,

@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 const moment = require("moment");
-const utils = require("./utils");
+const dbUtils = require("../lib/dbUtils");
 
 const dbOptions = {
     host: process.env.HOST,
@@ -20,7 +20,7 @@ const createOTP = async (phonenumber, otp) => {
     expires = moment(expires).format("YYYY-MM-DD HH:mm:ss");
 
     try {
-        await utils.insert(pool, table, ["phone_number", "otp", "expires"], [phonenumber ,otp, expires]);
+        await dbUtils.insert(pool, table, ["phone_number", "otp", "expires"], [phonenumber ,otp, expires]);
     } catch (error) {
         console.error("Error: ", error);
         throw "Lỗi cơ sở dữ liệu. Vui lòng thử lại!";

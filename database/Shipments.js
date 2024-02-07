@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 const moment = require("moment");
-const utils = require("./utils");
+const dbUtils = require("../lib/dbUtils");
 require("dotenv").config();
 
 
@@ -77,7 +77,7 @@ const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => 
 
 const createNewShipment = async (fields, values, agency_id) => {
     const agencyTable = agency_id + suffix;
-    return await utils.insert(pool, agencyTable, fields, values);
+    return await dbUtils.insert(pool, agencyTable, fields, values);
 }
 
 const recieveShipment = async (shipment_id, agency_id) => {
@@ -93,7 +93,7 @@ const recieveShipment = async (shipment_id, agency_id) => {
             let result;
             for (const order_id of order_ids) {
                 const orderData = await getInfoOrder(order_id);
-                result = await utils.insert(pool, agencyOrdersTable, orderData.fields, orderData.values);
+                result = await dbUtils.insert(pool, agencyOrdersTable, orderData.fields, orderData.values);
             }
             return result[0];
         } else {
@@ -222,7 +222,7 @@ const deleteShipment = async (shipment_id, agency_id) => {
 }
 
 const deleteGlobalShipment = async (shipment_id) => {
-    return await utils.deleteOne(pool, table, ["shipment_id"], [shipment_id]);
+    return await dbUtils.deleteOne(pool, table, ["shipment_id"], [shipment_id]);
 }
 
 // const updateShipment = async (order_ids, shipment_id) => {
@@ -354,7 +354,7 @@ const getInfoOrder = async (order_id) => {
 const updateParentForGlobalOrders = async (shipment_id, agency_id) => {
     const agencyShipmentsTable = agency_id + suffix;
     const agencyOrdersTable = agency_id + "_orders";
-    const result = await utils.findOne(pool, agencyShipmentsTable, ["shipment_id"], [shipment_id]);
+    const result = await dbUtils.findOne(pool, agencyShipmentsTable, ["shipment_id"], [shipment_id]);
 
     if (!result || result[0].length <= 0) {
         console.log("Shipment does not exist.");
@@ -364,14 +364,14 @@ const updateParentForGlobalOrders = async (shipment_id, agency_id) => {
     const order_ids = JSON.parse(result.order_ids);
 
     for (const order_id of order_ids) {
-        const localUpdatingResult = await utils.updateOne(pool, agencyOrdersTable, ["parent"], [shipment_id], ["order_id"], [order_id]);
+        const localUpdatingResult = await dbUtils.updateOne(pool, agencyOrdersTable, ["parent"], [shipment_id], ["order_id"], [order_id]);
         
         if (!localUpdatingResult || localUpdatingResult.length <= 0) {
             console.log("Order does not exist in agency.");
             throw new Error("Đơn hàng không tồn tại trong cơ sở dữ liệu của bưu cục.");
         }
 
-        const globalUpdatingResult = await utils.updateOne(pool, "orders", ["parent"], [shipment_id], ["order_id"], [order_id]);
+        const globalUpdatingResult = await dbUtils.updateOne(pool, "orders", ["parent"], [shipment_id], ["order_id"], [order_id]);
 
         if (!globalUpdatingResult || globalUpdatingResult.length <= 0) {
             console.log("Order does not exist in global.");
@@ -381,19 +381,19 @@ const updateParentForGlobalOrders = async (shipment_id, agency_id) => {
 }
 
 const confirmCreateShipment = async (fields, values) => {
-    return await utils.insert(pool, table, fields, values);
+    return await dbUtils.insert(pool, table, fields, values);
 }
 
 const updateShipmentToDatabase = async (fields, values, shipment_id) => {
     const conditionFields = ["shipment_id"];
     const conditionValues = [shipment_id];
-    return await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+    return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 } 
 
 const updateOrderToDatabase = async (fields, values, order_id) => {
     const conditionFields = ["order_id"];
     const conditionValues = [order_id];
-    return await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+    return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 }
 
 const compareOrdersInDatabase = async (shipment_id, ordersFromRequest, agency_id) => {

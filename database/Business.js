@@ -1,5 +1,5 @@
 const mysql = require("mysql2");
-const utils = require("./utils");
+const dbUtils = require("../lib/dbUtils");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -13,45 +13,51 @@ const table = "business_user";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-const checkExistBusiness = async (fields, values) => {
-  	const result = await utils.findOne(pool, table, fields , values);
+const checkExistBusiness = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+
+  	const result = await dbUtils.findOneUnion(pool, table, fields , values);
 	return result.length > 0;
 };
 
-const createNewBusinessUser = async (fields, values) => {
-	const lastUser = await utils.getLastRow(pool, table);
+const createNewBusinessUser = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
 
-	let businessID = "0000000";
-
-	if (lastUser) {
-		businessID = (parseInt(lastUser["business_id"]) + 1).toString().padStart(7, "0");
-	}
-
-	fields.push("business_id");
-	values.push(businessID);
-
-	await utils.insert(pool, table, fields, values);
+	return await dbUtils.insert(pool, table, fields, values);
 };
 
-const getManyBussinessUsers = async (fields, values) => {
-  	return await utils.find(pool, table, fields, values);
+const createNewRepresentor = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+
+	return await dbUtils.insert(pool, "business_representor", fields, values);
+};
+
+const getManyBussinessUsers = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+
+  	return await dbUtils.find(pool, table, fields, values);
 };
 
 const getOneBusinessUser = async (fields, values) => {
-  	return await utils.findOne(pool, table, fields, values);
+  	return await dbUtils.findOne(pool, table, fields, values);
 };
 
 const updateBusinessUser= async (fields, values, conditionFields, conditionValues) => {
-	return await utils.update(pool, table, fields, values,conditionFields,conditionValues);
+	return await dbUtils.update(pool, table, fields, values,conditionFields,conditionValues);
 };
 
 const deleteBusinessUSer= async(fields, values) => {
-	return await utils.deleteOne(pool, table, fields, values);
+	return await dbUtils.deleteOne(pool, table, fields, values);
 };
 
 module.exports = {
 	checkExistBusiness,
 	createNewBusinessUser,
+	createNewRepresentor,
 	getManyBussinessUsers,
 	getOneBusinessUser,
 	updateBusinessUser,
