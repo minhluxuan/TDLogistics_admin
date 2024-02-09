@@ -1,27 +1,27 @@
 const Partner = require("../database/TransportPartner");
 
-const checkExistPartner = async (fields, values) => {
-    return await Partner.checkExistPartner(fields, values);
+const checkExistPartner = async (info) => {
+    return await Partner.checkExistPartner(info);
 };
 
-const createNewPartner = async (fields, values, personnel_id) => {
-    await Partner.createNewPartner(fields, values, personnel_id);
+const createNewPartner = async (info, staff_id) => {
+    await Partner.createNewPartner(info, staff_id);
 };
 
-const getOnePartner = async (fields, values) => {
-    return await Partner.getOnePartner(fields, values);
+const getOnePartner = async (info) => {
+    return await Partner.getOnePartner(info);
 };
 
-const getManyPartners = async (fields, values) => {
-    return await Partner.getManyPartners(fields, values);
+const getManyPartners = async (info) => {
+    return await Partner.getManyPartners(info);
 };
 
-const updatePartner = async (fields, values, conditionFields, conditionValues) => {
-    return await Partner.updatePartner(fields, values, conditionFields, conditionValues);
+const updatePartner = async (info, conditions) => {
+    return await Partner.updatePartner(info, conditions);
 };
 
-const deletePartner = async (fields, values) => {
-    return await Partner.deletePartner(fields, values);
+const deletePartner = async (info) => {
+    return await Partner.deletePartner(info);
 };
 
 module.exports = {

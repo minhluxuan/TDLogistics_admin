@@ -13,10 +13,10 @@ const getTransportPartner = async (req, res) => {
             });
         }
 
-        const keys = Object.keys(req.query);
-        const values = Object.values(req.query);
-
-        const result = await transportPartnerService.getManyPartners(keys, values);
+        const result = await transportPartnerService.getManyPartners(req.body);
+        if (!result) {
+            throw new Error("Đã xảy ra lỗi. Lấy thông tin đối tác vận chuyển không thành công. Vui lòng thử lại.");
+        }
         return res.status(200).json({
             error: false,
             data: result,
@@ -41,10 +41,7 @@ const createNewTransportPartner = async (req, res) => {
             });
         }
 
-        const existed = await transportPartnerService.checkExistPartner(
-            ["transport_partner_id"],
-            [req.body.transport_partner_id]
-        );
+        const existed = await transportPartnerService.checkExistPartner(req.body);
 
         if (existed) {
             return res.status(400).json({
@@ -53,12 +50,32 @@ const createNewTransportPartner = async (req, res) => {
             });
         }
 
-        const keys = Object.keys(req.body);
-        const values = Object.values(req.body);
-
         const personnel_id = req.user.staff_id || req.user.agency_id;
-
-        const result = await transportPartnerService.createNewPartner(keys, values, personnel_id);
+        const info = {
+            username: req.body.username,
+            user_password: req.body.user_password,
+            user_fullname: req.body.user_fullname,
+            user_phone_number: req.body.user_phone_number,
+            user_email: req.body.user_email,
+            user_date_of_birth: req.body.user_date_of_birth,
+            user_cccd: req.body.user_cccd,
+            user_province: req.body.user_province,
+            user_district: req.body.user_district,
+            user_town: req.body.user_town,
+            user_detail_address: req.body.user_detail_address,
+            user_position: req.body.user_position,
+            bin: req.body.bin,
+            bank: req.body.bank,
+            tax_code: req.body.tax_code,
+            transport_partner_name: req.body.transport_partner_name,
+            province: req.body.province,
+            district: req.body.district,
+            town: req.body.town,
+            detail_address: req.body.detail_address,
+            phone_number: req.body.phone_number,
+            email: req.body.email,
+        };
+        const result = await transportPartnerService.createNewPartner(info, personnel_id);
         console.log(result);
         return res.status(200).json({
             error: false,
@@ -72,9 +89,6 @@ const createNewTransportPartner = async (req, res) => {
     }
 };
 const updateTransportPartner = async (req, res) => {
-    //authorization
-
-    //end of authorization
     try {
         const { error } =
             transportPartnerValidation.validateFindingPartner(req.query) ||
@@ -87,13 +101,7 @@ const updateTransportPartner = async (req, res) => {
             });
         }
 
-        const keys = Object.keys(req.body);
-        const values = Object.values(req.body);
-
-        const conditionFields = Object.keys(req.query);
-        const conditionValues = Object.values(req.query);
-
-        const result = await transportPartnerService.updatePartner(keys, values, conditionFields, conditionValues);
+        const result = await transportPartnerService.updatePartner(req.body, req.query);
 
         if (result[0].affectedRows <= 0) {
             return res.status(404).json({
@@ -115,9 +123,6 @@ const updateTransportPartner = async (req, res) => {
 };
 
 const deleteTransportPartner = async (req, res) => {
-    //authorization
-
-    //end of authorization
     try {
         const { error } = transportPartnerValidation.validateDeletingPartner(req.query);
 
@@ -127,10 +132,7 @@ const deleteTransportPartner = async (req, res) => {
                 message: "Thông tin không hợp lệ.",
             });
         }
-        const result = await transportPartnerService.deletePartner(
-            ["transport_partner_id"],
-            [req.query.transport_partner_id]
-        );
+        const result = await transportPartnerService.deletePartner(req.query);
 
         if (result[0].affectedRows <= 0) {
             return res.status(200).json({

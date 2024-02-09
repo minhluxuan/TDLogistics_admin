@@ -1,12 +1,15 @@
 const mysql = require("mysql2");
-const dbUtils = require("./dbUtils");
+const dbUtils = require("../lib/dbUtils");
+const { object } = require("joi");
+const { initialize } = require("passport");
+const { findOneIntersect } = require("../lib/dbUtils");
 
 const dbOptions = {
-	host: process.env.HOST,
-	port: process.env.DBPORT,
-	user: process.env.USER,
-	password: process.env.PASSWORD,
-	database: process.env.DATABASE,
+    host: process.env.HOST,
+    port: process.env.DBPORT,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE,
 };
 
 const table = "transport_partner";
@@ -25,56 +28,64 @@ process.on("SIGINT", () => {
         });
 });
 
-const createNewPartner = async (fields, values, personnel_id) => {
-    const prefix = personnel_id.split('_')[0];
-    const lastPartner = await dbUtils.getLastRow(pool, table);
+const createNewPartner = async (info, staff_id) => {
+    const prefix = staff_id.split("_").slice(0, 2).join("_");
+    const transportPartnerId = prefix + "_" + info.user_cccd;
 
-	let transportPartnerId = prefix + "_00000";
-
-	if (lastPartner) {
-        const lastPartnerId = lastPartner["transport_partner_id"];
-		transportPartnerId = prefix + (parseInt(lastPartnerId.split('_')[1]) + 1).toString();
-	}
-
-	fields.push("transport_partner_id");
-	values.push(transportPartnerId);
+    const fields = Object.keys(info);
+    const values = Object.values(info);
+    fields.push("transport_partner_id");
+    values.push(transportPartnerId);
 
     return await dbUtils.insert(pool, table, fields, values);
 };
 
-const checkExistPartner = async (fields, values) => {
+const checkExistPartner = async (info) => {
+    const fields = Object.keys(info);
+    const values = object.value(info);
     const result = await dbUtils.findOne(pool, table, fields, values);
     return result.length > 0;
 };
 
-const getManyPartners = async (fields, values) => {
+const getManyPartners = async (info) => {
+    const fields = Object.keys(info);
+    const values = object.value(info);
     return await dbUtils.find(pool, table, fields, values);
 };
 
-const getOnePartner = async (fields, values) => {
+const getOnePartner = async (info) => {
+    const fields = Object.keys(info);
+    const values = object.value(info);
     return await dbUtils.findOne(pool, table, fields, values);
 };
 
-const updatePartner = async (fields, values, conditionFields, conditionValues) => {
-    const debitIndex = fields.indexOf("debit");
-
-    if (debitIndex !== -1) {
+const updatePartner = async (info, conditions) => {
+    const conditionFields = Object.keys(conditions);
+    const conditionValues = Object.values(conditions);
+    if (info.debit) {
+        const fields = Object.keys(info);
+        const values = Object.values(info);
+        const index = fields.indexOf("debit");
+        if (!index) {
+            return "there is a error while update with debit";
+        }
+        fields.splice(index, 1);
+        values.splice(index, 1);
+        await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
         await pool.query(`UPDATE ${table} SET debit = debit + ? WHERE ${conditionFields.join(" = ? AND ")} = ?`, [
-            values[debitIndex],
+            info.debit,
             ...conditionValues,
         ]);
-
-        fields = fields.filter((field) => field !== "debit");
-        values = values.filter((value, index) => index !== debitIndex);
-    }
-
-    if (fields.length > 0) {
+        return findOneIntersect(pool, table, conditionFields, conditionValues);
+    } else {
         result = await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
         return result;
     }
 };
 
-const deletePartner = async (fields, values) => {
+const deletePartner = async (info) => {
+    const fields = Object.keys(info);
+    const values = Object.values(info);
     return await dbUtils.deleteOne(pool, table, fields, values);
 };
 
