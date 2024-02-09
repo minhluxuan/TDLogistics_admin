@@ -1,6 +1,6 @@
 const transportPartnerService = require("../services/transportPartnerService");
 const validation = require("../lib/validation");
-
+const staffsService = require("../services/staffsService");
 const transportPartnerValidation = new validation.TransportPartnerValidation();
 
 const getTransportPartner = async (req, res) => {
@@ -41,12 +41,18 @@ const createNewTransportPartner = async (req, res) => {
             });
         }
 
-        const existed = await transportPartnerService.checkExistPartner(req.body);
+        const tempUser = new Object({
+            username: req.body.username,
+            cccd: req.body.cccd,
+            phone_number: req.body.phone_number,
+            email: req.body.phone_number,
+        });
 
-        if (existed) {
-            return res.status(400).json({
+        const resultCheckingExistStaff = await staffsService.checkExistStaff(tempUser);
+        if (resultCheckingExistStaff.existed) {
+            return res.status(409).json({
                 error: true,
-                message: "Đối tác vận chuyển đã tồn tại.",
+                message: resultCheckingExistStaff.message,
             });
         }
 
@@ -66,7 +72,57 @@ const createNewTransportPartner = async (req, res) => {
             email: req.body.email,
             transport_partner_id: transportPartnerId,
         };
+
+        req.body.user_password = utils.hash(req.body.user_password);
+
+        const newStaff = new Object({
+            transport_partner_id: transportPartnerId,
+            staff_id: transportPartnerId,
+            username: req.body.username,
+            password: req.body.user_password,
+            fullname: req.body.user_fullname || null,
+            phone_number: req.body.user_phone_number || null,
+            email: req.body.user_email || null,
+            date_of_birth: req.body.user_date_of_birth || null,
+            cccd: req.body.user_cccd || null,
+            province: req.body.user_province || null,
+            district: req.body.user_district || null,
+            town: req.body.town || null,
+            detail_address: req.body.user_detail_address || null,
+            role: "AGENCY_MANAGER",
+            position: req.body.user_position || null,
+            bin: req.body.user_bin || null,
+            bank: req.body.user_bank || null,
+            salary: req.body.salary || null,
+            active: false,
+        });
+
+        const resultCreatingNewStaff = await staffsService.createNewStaff(newStaff);
+
+        let textResultCreatingNewStaff;
+        if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
+            textResultCreatingNewStaff = `
+			Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu tổng thất bại.\n
+			Vui lòng tạo thủ công tài khoản nhân viên quản lý bưu cục với mã nhân viên ${agencyId} và thông tin đã cung cấp trước đó.`;
+        } else {
+            textResultCreatingNewStaff = `Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu tổng thành công.`;
+        }
+
+        const existed = await transportPartnerService.checkExistPartner(info);
+
+        if (existed) {
+            return res.status(400).json({
+                error: true,
+                message: "Đối tác vận chuyển đã tồn tại.",
+            });
+        }
         const result = await transportPartnerService.createNewPartner(info, personnel_id);
+        let textResultCreatingNewTransportPartner;
+        if (!result || result.affectedRows <= 0) {
+            textResultCreatingNewTransportPartner = `Tạo Transportparner ${transportPartnerId} thất bại`;
+        } else {
+            textResultCreatingNewTransportPartner = `Tạo Transportparner ${transportPartnerId} thành công`;
+        }
         if (req.file) {
             const tempFolderPath = path.join("storage", "transport_partner", "document", "contract_temp");
             if (!fs.existsSync(tempFolderPath)) {
@@ -86,7 +142,10 @@ const createNewTransportPartner = async (req, res) => {
         console.log(result);
         return res.status(200).json({
             error: false,
-            message: "Thêm thành công!",
+            message: `
+			Kết quả:\n
+			${textResultCreatingNewStaff}\n
+			${textResultCreatingNewTransportPartner}\n`,
         });
     } catch (error) {
         return res.status(500).json({
@@ -163,7 +222,6 @@ const deleteTransportPartner = async (req, res) => {
 module.exports = {
     createNewTransportPartner,
     getTransportPartner,
-
     updateTransportPartner,
     deleteTransportPartner,
 };
