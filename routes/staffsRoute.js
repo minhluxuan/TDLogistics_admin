@@ -15,23 +15,30 @@ const sessionStrategy = new LocalStrategy({
     usernameField: "username",
     passwordField: "password",
 }, async (username, password, done) => {
-    const staff = await Staffs.getOneStaff(["username"], [username]);
-    if (staff.length <= 0) {
+    const resultGettingOneStaff = await Staffs.getOneStaff({ username: username });
+
+    if (resultGettingOneStaff.length <= 0) {
+        done(null, false);
+    }
+
+    const staff = resultGettingOneStaff[0];
+
+    if (!staff) {
         return done(null, false);
     }
 
-    const passwordFromDatabase = staff[0]["password"];
+    const passwordFromDatabase = staff.password;
     const match = bcrypt.compareSync(password, passwordFromDatabase);
 
     if (!match) {
         return done(null, false);
     }
 
-    const staff_id = staff[0].staff_id;
-    const agency_id = staff[0].agency_id;
-    const role = staff[0].role;
-    const privileges = staff[0].privileges ? JSON.parse(staff[0].privileges) : new Array();
-    const active = staff[0].active;
+    const staff_id = staff.staff_id;
+    const agency_id = staff.agency_id;
+    const role = staff.role;
+    const privileges = staff.privileges ? JSON.parse(staff.privileges) : new Array();
+    const active = staff.active;
 
     return done(null, {
         staff_id,
@@ -90,18 +97,23 @@ const upload = multer({
     fileFilter: fileFilter,
 });
 
-router.post("/login", passport.authenticate("normalLogin", {
-    successRedirect: "/api/v1/staffs/login_success",
-    failureRedirect: "/api/v1/staffs/login_fail",
-    failureFlash: true,
-}), staffsController.verifyStaffSuccess);
-router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "AGENCY_STAFF", "AGENCY_COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], []), staffsController.getStaffs);
-router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), upload.single("avatar"), staffsController.createNewStaff);
-router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), staffsController.updateStaffInfo);
-router.patch("/update_password", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], []), staffsController.updatePassword);
-router.patch("/update_avatar", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], []), upload.single("avatar"), staffsController.updateAvatar);
-router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), staffsController.deleteStaff);
-router.post("/login_success", staffsController.verifyStaffSuccess);
-router.post("/login_fail", staffsController.verifyStaffFail);
+router.post("/login", passport.authenticate("normalLogin"), (req, res, next) => {
+    passport.authenticate("normalLogin", (err, user, info) => {
+        if (err) {
+            return next(err);
+        }
+        if (!user) {
+            return res.status(401).json({ error: true, message: "Xác thực thất bại." });
+        }
+
+        return res.status(200).json({ error: false, message: "Xác thực thành công." });
+    })(req, res, next);
+});
+router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "COMPLAINTS_SOLVER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER"], [13, 14, 15]), staffsController.getStaffs);
+router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [11, 12]), upload.single("avatar"), staffsController.createNewStaff);
+router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [16, 17]), staffsController.updateStaffInfo);
+router.patch("/update_password", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "COMPLAINTS_SOLVER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER"], [18]), staffsController.updatePassword);
+router.patch("/update_avatar", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER", "COMPLAINTS_SOLVER", "DRIVER", "SHIPPER"], [19]), upload.single("avatar"), staffsController.updateAvatar);
+router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [20, 21]), staffsController.deleteStaff);
 
 module.exports = router;

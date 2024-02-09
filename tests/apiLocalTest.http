@@ -335,6 +335,104 @@ Content-Type: application/json
 
 ###
 
+PATCH http://localhost:5000/api/v1/business/update_business_representor?business_id=TD_00000_077204005692
+Content-Type: application/json
+
+{
+    "bin": "0981430418",
+    "bank": "MB Bank"
+}
+
+###
+
+PUT http://localhost:5000/api/v1/business/update?business_id=TD_00000_077204005692
+Content-Type: application/json
+
+{
+    "bin": "0981430418",
+    "bank": "MB Bank",
+    "debit": 240
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/business/delete?business_id=TD_00000_077204005692
+Content-Type: application/json
+
+###
+
+GET http://localhost:5000/api/v1/business/search
+Content-Type: application/json
+
+{
+    "business_id": "TD_00000_077204005692"
+}
+
+###
+
+GET http://localhost:5000/api/v1/business/check?tax_number=1234567890
+Content-Type: application/json
+
+###
+
+POST http://localhost:5000/api/v1/vehicles/create
+Content-Type: application/json
+
+{
+    "staff_id": "TD_00000_077204005692",
+    "type": "motorbike",
+    "license_plate": "72-H1 24768",
+    "max_load": 50
+}
+
+###
+
+GET http://localhost:5000/api/v1/vehicles/search
+Content-Type: application/json
+
+{
+    "license_plate": "72-H1 24768"
+}
+
+###
+
+PUT http://localhost:5000/api/v1/vehicles/update?vehicle_id=TD_00000_72H124768
+Content-Type: application/json
+
+{
+    "max_load": 60
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=TD_00000_72H124768
+Content-Type: application/json
+
+###
+
+PATCH http://localhost:5000/api/v1/vehicles/add_orders?vehicle_id=TD_00000_72H124768
+Content-Type: application/json
+
+{
+    "order_ids": ["TD202402225629673"]
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/vehicles/delete_orders?vehicle_id=TD_00000_72H124768
+Content-Type: application/json
+
+{
+    "order_ids": ["TD202402225629673"]
+}
+
+###
+
+GET http://localhost:5000/api/v1/vehicles/search_order_ids?vehicle_id=TD_00000_72H124768
+Content-Type: application/json
+
+###
+
 GET http://localhost:5000/get_session
 Content-Type: application/json
 

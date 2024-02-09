@@ -1,39 +1,54 @@
 const Business = require("../database/Business");
 
-const checkExistBusiness = async (fields, values) => {
-    return await Business.checkExistBusiness(fields, values);
+const checkExistBusiness = async (conditions) => {
+    return await Business.checkExistBusiness(conditions);
 }
 
-const createNewBusinessUser = async (fields, values) => {
-    return await Business.createNewBusinessUser(fields, values);
+const checkExistBusinessRepresentor = async (conditions) => {
+    return await Business.checkExistBusinessRepresentor(conditions);
+}
+
+const createNewBusinessUser = async (info) => {
+    return await Business.createNewBusinessUser(info);
 }
 
 const createNewRepresentor = async (info) => {
     return await Business.createNewRepresentor(info);
 }
 
-const getOneBusinessUser = async (fields, values) => {
-    return await Business.getOneBusinessUser(fields, values);
+const getOneBusinessUser = async (conditions) => {
+    return await Business.getOneBusinessUser(conditions);
 }
 
-const getManyBusinessUsers = async (fields, values) => {
-  	return await Business.getManyBussinessUsers(fields, values) ;
+const getManyBusinessUsers = async (conditions) => {
+  	return await Business.getManyBussinessUsers(conditions);
 }
 
-const updateBusinessUser = async (fields, values, conditionFields, conditionValues) => {
-    return await Business.updateBusinessUser (fields, values, conditionFields, conditionValues) ;
+const getRepresentor = async (conditions) => {
+    return await Business.getRepresentor(conditions);
 }
 
-const deleteBusinessUser = async(fields, values) => {
-    return await Business.deleteBusinessUSer(fields, values);
+const updateBusinessUser = async (info, conditions) => {
+    return await Business.updateBusinessUser(info, conditions) ;
+}
+
+const updateBusinessRepresentor = async (info, conditions) => {
+    return await Business.updateBusinessRepresentor(info, conditions);
+}
+
+const deleteBusinessUser = async(info) => {
+    return await Business.deleteBusinessUSer(info);
 }
 
 module.exports = {
     checkExistBusiness,
+    checkExistBusinessRepresentor,
     createNewBusinessUser,
     createNewRepresentor,
     getOneBusinessUser,
     getManyBusinessUsers,
+    getRepresentor,
     updateBusinessUser,
+    updateBusinessRepresentor,
     deleteBusinessUser
 }

@@ -48,10 +48,13 @@ const upload = multer({
     fileFilter: fileFilter,
 });
 
-router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "AGENCY_TELLER"], []), upload.single("contract"), businessController.createNewBusinessUser);
-router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER", "AGENCY_TELLER", "BUSINESS_USER"], []), businessController.getBusiness);
-router.patch("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), businessController.updateBusinessInfo);
-router.patch("/update_contract", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), upload.single("contract"), businessController.updateContract);
-router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), businessController.deleteBusinessUser);
+router.get("/check", businessController.checkExistBusiness);
+router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [29, 30]), upload.single("contract"), businessController.createNewBusinessUser);
+router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"], [26, 27, 28]), businessController.getBusiness);
+router.get("/search_representor", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"], [39]), businessController.getRepresentor);
+router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [31, 33]), businessController.updateBusinessInfo);
+router.patch("/update_business_representor", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [32, 34]), businessController.updateBusinessRepresentor);
+router.patch("/update_contract", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [35, 36]), upload.single("contract"), businessController.updateContract);
+router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [37, 38]), businessController.deleteBusinessUser);
 
 module.exports = router;

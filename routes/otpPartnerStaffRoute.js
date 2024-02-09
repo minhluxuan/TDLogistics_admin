@@ -40,8 +40,6 @@ router.post("/verify_otp", passport.authenticate("otpPartnerStaffLogin", {
     failureRedirect: "/api/v1/otp_partner_staff/otp_fail",
     successRedirect: "/api/v1/otp_partner_staff/otp_success",
     failureFlash: true,
-}), otpController.verifyOTPSuccess);
-router.get("/otp_fail", otpController.verifyOTPFail);
-router.get("/otp_success", otpController.verifyOTPSuccess);
+}));
 
 module.exports = router;

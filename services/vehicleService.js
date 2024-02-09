@@ -1,36 +1,40 @@
 const { retryOptions } = require("@google/maps/lib/internal/convert");
 const Vehicle = require("../database/Vehicles");
 
-const checkExistVehicle = async (fields, values) => {
-    return await Vehicle.checkExistVehicle(fields, values);
+const checkExistVehicle = async (conditions) => {
+    return await Vehicle.checkExistVehicle(conditions);
 };
 
-const createNewVehicle = async (fields, values) => {
-    return await Vehicle.createNewVehicle(fields, values);
+const createNewVehicle = async (info) => {
+    return await Vehicle.createNewVehicle(info);
 };
 
-const getVehicle = async (fields, values) => {
-    return await Vehicle.getManyVehicles(fields, values);
-};
-
-const getVehicleOrderIds = async (fields, values) => {
-    return await Vehicle.getVehicleOrderIds(fields, values);
-};
-
-const addOrders = async (vehicle_id, order_ids) => {
-    return await Vehicle.addOrders(vehicle_id, order_ids);
+const getOneVehicle = async (conditions) => {
+    return await Vehicle.getOneVehicle(conditions);
 }
 
-const deleteOrders = async (vehicle_id, order_ids) => {
-    return await Vehicle.deleteOrders(vehicle_id, order_ids);
-}
-
-const updateVehicle = async (fields, values, conditionFields, conditionValues) => {
-    return await Vehicle.updateVehicle(fields, values, conditionFields, conditionValues);
+const getVehicle = async (conditions) => {
+    return await Vehicle.getManyVehicles(conditions);
 };
 
-const deleteVehicle = async (fields, values) => {
-    return await Vehicle.deleteVehicle(fields, values);
+const getVehicleOrderIds = async (vehicle) => {
+    return await Vehicle.getVehicleOrderIds(vehicle);
+};
+
+const addOrders = async (vehicle, order_ids) => {
+    return await Vehicle.addOrders(vehicle, order_ids);
+}
+
+const deleteOrders = async (vehicle, order_ids) => {
+    return await Vehicle.deleteOrders(vehicle, order_ids);
+}
+
+const updateVehicle = async (info, conditions) => {
+    return await Vehicle.updateVehicle(info, conditions);
+};
+
+const deleteVehicle = async (conditions) => {
+    return await Vehicle.deleteVehicle(conditions);
 };
 
 module.exports = {
@@ -41,5 +45,6 @@ module.exports = {
     deleteOrders,
     deleteVehicle,
     getVehicle,
+    getOneVehicle,
     getVehicleOrderIds,
 };

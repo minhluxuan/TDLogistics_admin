@@ -19,8 +19,11 @@ const checkExistOrder = async (order_id) => {
     return result.length > 0;
 };
 
-const getOneOrder = async (fields, values) => {
-    return await dbUtils.findOne(pool, table, fields, values);
+const getOneOrder = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+    
+    return await dbUtils.findOneIntersect(pool, table, fields, values);
 }
 
 const getAllOrders = async () => {
