@@ -51,19 +51,9 @@ const createNewTransportPartner = async (req, res) => {
         }
 
         const personnel_id = req.user.staff_id || req.user.agency_id;
+        const prefix = personnel_id.split("_").slice(0, 2).join("_");
+        const transportPartnerId = prefix + "_" + req.body.user_cccd;
         const info = {
-            username: req.body.username,
-            user_password: req.body.user_password,
-            user_fullname: req.body.user_fullname,
-            user_phone_number: req.body.user_phone_number,
-            user_email: req.body.user_email,
-            user_date_of_birth: req.body.user_date_of_birth,
-            user_cccd: req.body.user_cccd,
-            user_province: req.body.user_province,
-            user_district: req.body.user_district,
-            user_town: req.body.user_town,
-            user_detail_address: req.body.user_detail_address,
-            user_position: req.body.user_position,
             bin: req.body.bin,
             bank: req.body.bank,
             tax_code: req.body.tax_code,
@@ -74,8 +64,25 @@ const createNewTransportPartner = async (req, res) => {
             detail_address: req.body.detail_address,
             phone_number: req.body.phone_number,
             email: req.body.email,
+            transport_partner_id: transportPartnerId,
         };
         const result = await transportPartnerService.createNewPartner(info, personnel_id);
+        if (req.file) {
+            const tempFolderPath = path.join("storage", "transport_partner", "document", "contract_temp");
+            if (!fs.existsSync(tempFolderPath)) {
+                fs.mkdirSync(tempFolderPath, { recursive: true });
+            }
+
+            const officialFolderPath = path.join("storage", "transport_partner", "document", "contract");
+            if (!fs.existsSync(officialFolderPath)) {
+                fs.mkdirSync(officialFolderPath, { recursive: true });
+            }
+
+            const tempFilePath = path.join(tempFolderPath, req.file.filename);
+            const officialFilePath = path.join(officialFolderPath, req.file.filename);
+
+            fs.renameSync(tempFilePath, officialFilePath);
+        }
         console.log(result);
         return res.status(200).json({
             error: false,

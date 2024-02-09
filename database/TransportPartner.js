@@ -29,9 +29,6 @@ process.on("SIGINT", () => {
 });
 
 const createNewPartner = async (info, staff_id) => {
-    const prefix = staff_id.split("_").slice(0, 2).join("_");
-    const transportPartnerId = prefix + "_" + info.user_cccd;
-
     const fields = Object.keys(info);
     const values = Object.values(info);
     fields.push("transport_partner_id");
