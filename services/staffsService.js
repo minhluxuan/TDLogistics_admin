@@ -4,6 +4,10 @@ const checkExistStaff = async (info) => {
     return await Staffs.checkExistStaff(info);
 }
 
+const checkExistStaffIntersect = async (info) => {
+    return await Staffs.checkExistStaffIntersect(info);
+}
+
 const createNewStaff = async (info, postal_code) => {
     return await Staffs.createNewStaff(info, postal_code);
 }
@@ -34,6 +38,7 @@ const updatePassword = async (info, conditions) => {
 
 module.exports = {
     checkExistStaff,
+    checkExistStaffIntersect,
     createNewStaff,
     getOneStaff,
     getManyStaffs,

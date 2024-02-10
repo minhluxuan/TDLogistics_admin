@@ -39,6 +39,32 @@ const checkExistStaff = async (info) => {
 	}
 };
 
+const checkExistStaffIntersect = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+	const result = await dbUtils.findOneIntersect(pool, table, fields, values);
+
+	if (!result) {
+		throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút.");
+	}
+
+	if (result.length <= 0) {
+		return new Object({
+			existed: false,
+			message: "Người dùng chưa tồn tại.",
+		});
+	}
+
+	for (let i = 0; i < fields.length; i++) {
+		if (result[0][fields[i]] === values[i]) {
+			return new Object({
+				existed: true,
+				message: `Người dùng có ${fields[i]}: ${values[i]} đã tồn tại.`,
+			});
+		}
+	}
+};
+
 const createNewStaff = async (info, postal_code = null) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
@@ -125,6 +151,7 @@ const updatePassword = async (info, conditions) => {
 
 module.exports = {
     checkExistStaff,
+	checkExistStaffIntersect,
     createNewStaff,
     getOneStaff,
     getManyStaffs,

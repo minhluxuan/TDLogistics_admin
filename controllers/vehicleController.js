@@ -1,5 +1,6 @@
 const vehicleService = require("../services/vehicleService");
 const partnerStaffService = require("../services/partnerStaffsService");
+const agenciesService = require("../services/agenciesService");
 const staffsService = require("../services/staffsService");
 const validation = require("../lib/validation");
 const fs = require("fs");
@@ -36,28 +37,56 @@ const checkExistVehicle = async (req, res) => {
 
 const createNewVehicle = async (req, res) => {
     try {
-        const { error } = vehicleValidation.validateCreatingVehicle(req.body);
+        if (["ADMIN", "MANAGER"].includes(req.user.role) || req.user.privileges.includes(46)) {
+			const { error } = vehicleValidation.validateCreatingVehicleByAdmin(req.body);
 
-        if (error) {
-            return res.status(400).json({
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			if (!(await agenciesService.checkExistAgency({ agency_id: req.body.agency_id }))) {
+				return res.status(404).json({
+					error: true,
+					message: `Bưu cục có mã bưu cục ${req.body.agency_id} không tồn tại.`,
+				});
+			}
+		}
+		else if (["AGENCY_MANAGER"].includes(req.user.role) || req.user.privileges.includes(45)) {
+			const { error } = businessValidation.validateCreatingVehicleByAgency(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			req.body.agency_id = req.user.agency_id;
+		}
+
+        const resultCheckingExistAgencyAndStaff = await staffsService.checkExistStaffIntersect({ agency_id: req.body.agency_id, staff_id: req.body.staff_id });
+        if (!resultCheckingExistAgencyAndStaff.existed) {
+            return res.status(404).json({
                 error: true,
-                message: error.message,
+                message: `Nhân viên có mã nhân viên ${req.body.staff_id} không tồn tại trong bưu cục có mã bưu cục ${req.body.agency_id}.`,
             });
         }
 
         const existed = await vehicleService.checkExistVehicle({ license_plate: req.body.license_plate });
 
         if (existed) {
-            return res.status(400).json({
+            return res.status(409).json({
                 error: true,
                 message: `Phương tiện có mã hiệu ${req.body.license_plate} đã tồn tại.`,
             });
         }
 
-        const creatorIdSubParts = req.user.staff_id.split('_');
+        const agencyIdSubParts = req.body.agency_id.split('_');
         const modifiedLicensePlate = req.body.license_plate.replace(new RegExp("[-\\s]", 'g'), '');
-        req.body.vehicle_id = creatorIdSubParts[0] + '_' + creatorIdSubParts[1] + '_' + modifiedLicensePlate;
-        req.body.agency_id = req.user.agency_id;
+        req.body.vehicle_id = agencyIdSubParts[0] + '_' + agencyIdSubParts[1] + '_' + modifiedLicensePlate;
 
         if (req.body.hasOwnProperty("transport_partner_id")) {
             const existed = await partnerStaffService.checkExistPartnerStaff({ staff_id: req.body.staff_id });
@@ -68,46 +97,20 @@ const createNewVehicle = async (req, res) => {
                     message: `Nhân viên có mã nhân viên ${req.body.staff_id} của đối tác vận tải có mã đối tác ${req.body.transport_partner_id} không tồn tại.`,
                 });
             }
+        }
 
-            const resultCreatingNewVehicle = await vehicleService.createNewVehicle(req.body);
+        const resultCreatingNewVehicle = await vehicleService.createNewVehicle(req.body);
             
-            let textResultCreatingNewVehicle;
-            if (!resultCreatingNewVehicle || resultCreatingNewVehicle.affectedRows <= 0) {
-                textResultCreatingNewVehicle = `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} không thành công.`;
-            }
-            else {
-                textResultCreatingNewVehicle = `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thành công.`;
-            }
-
-            return res.status(201).json({
+        if (!resultCreatingNewVehicle || resultCreatingNewVehicle.affectedRows <= 0) {
+            return res.status(409).json({
                 error: false,
-                message: "Thêm phương tiện thành công.",
+                message: `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thất bại.`,
             });
         }
         else {
-            const existed = await staffsService.checkExistStaff({ staff_id: req.body.staff_id });
-
-            if (!existed) {
-                return res.status(404).json({
-                    error: true,
-                    message: `Nhân viên có mã nhân viên ${req.body.staff_id} chưa tồn tại.`,
-                });
-            }
-
-            const resultCreatingNewVehicle = await vehicleService.createNewVehicle(req.body);
-
-            let textResultCreatingNewVehicle;
-            if (!resultCreatingNewVehicle || resultCreatingNewVehicle.affectedRows <= 0) {
-                textResultCreatingNewVehicle = `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} không thành công.`;
-            }
-            else {
-                textResultCreatingNewVehicle = `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thành công.`;
-            }
-
             return res.status(201).json({
                 error: false,
-                message: `Kết quả:\n
-                ${textResultCreatingNewVehicle}`,
+                message: `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thành công.`,
             });
         }
     } catch (error) {
@@ -121,8 +124,8 @@ const createNewVehicle = async (req, res) => {
 
 const getVehicle = async (req, res) => {
     try {
-        if (req.user.role === "PARTNER_STAFF_DRIVER" || req.user.role === "PARTNER_STAFF_SHIPPER"
-        || req.user.role === "DRIVER" || req.user.role === "SHIPPER") {
+        if (["DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER", "PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)
+            || req.user.privileges.includes(41)) {
             const { error } = vehicleValidation.validateFindingVehicleByStaff(req.query);
 
             if (error) {
@@ -132,7 +135,7 @@ const getVehicle = async (req, res) => {
                 });
             }
 
-            const vehicle = await vehicleService.getOneVehicle(req.query);
+            const vehicle = await vehicleService.getOneVehicle(req.body);
             
             return res.status(200).json({
                 error: false,
@@ -141,7 +144,7 @@ const getVehicle = async (req, res) => {
             });
         }
 
-        if (req.user.role === "TRANSPORT_PARTNER") {
+        if (req.user.role === "TRANSPORT_PARTNER" || req.user.privileges.includes(42)) {
             const { error } = vehicleValidation.validateFindingVehicle(req.body);
 
             if (error) {
@@ -162,7 +165,7 @@ const getVehicle = async (req, res) => {
             });
         }
 
-        if (req.user.role === "AGENCY_MANAGER" || req.user.role === "AGENCY_TELLER") {
+        if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(43)) {
             const { error } = vehicleValidation.validateFindingVehicle(req.body);
 
             if (error) {
@@ -183,7 +186,7 @@ const getVehicle = async (req, res) => {
             });
         }
 
-        if (req.user.role === "ADMIN") {
+        if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(44)) {
             const { error } = vehicleValidation.validateFindingVehicle(req.body);
 
             if (error) {
@@ -256,6 +259,17 @@ const addOrders = async (req, res) => {
             });
         }
 
+        const updatorIdSubParts = req.user.staff_id.split('_');
+		const vehicleIdSubParts = req.query.vehicle_id.split('_');
+
+		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role) || req.user.privileges.includes(50))
+		&& (updatorIdSubParts[1] !== vehicleIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
+
         const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.query.vehicle_id });
 
         if (!resultGettingOneVehicle || resultGettingOneVehicle.length <= 0) {
@@ -299,6 +313,17 @@ const deleteOrders = async (req, res) => {
             });
         }
 
+        const deletorIdSubParts = req.user.staff_id.split('_');
+		const vehicleIdSubParts = req.query.vehicle_id.split('_');
+
+		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role) || req.user.privileges.includes(52))
+		&& (deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
+
         const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.query.vehicle_id });
 
         if (!resultGettingOneVehicle || resultGettingOneVehicle.length <= 0) {
@@ -320,7 +345,7 @@ const deleteOrders = async (req, res) => {
         res.status(201).json({
             error: false,
             info: result,
-            message: "Thêm thành công.",
+            message: "Xóa thành công.",
         });
     } catch (error) {
         console.log(error);
@@ -342,9 +367,16 @@ const updateVehicle = async (req, res) => {
             });
         }
 
-        if (req.user.role === "AGENCY_MANAGER" || req.user.role === "AGENCY_TELLER") {
-            req.body.agency_id = req.user.agency_id;
-        }
+        const updatorIdSubParts = req.user.staff_id.split('_');
+		const vehicleIdSubParts = req.query.vehicle_id.split('_');
+
+		if ((req.user.role === "AGENCY_MANAGER" || req.user.privileges.includes(47))
+		&& (updatorIdSubParts[1] !== vehicleIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
 
         const result = await vehicleService.updateVehicle(req.body, req.query);
 
@@ -378,9 +410,16 @@ const deleteVehicle = async (req, res) => {
             });
         }
 
-        if (req.user.role === "AGENCY_MANAGER" || req.user.role === "AGENCY_TELLER") {
-            req.body.agency_id = req.user.agency_id;
-        }
+        const deletorIdSubParts = req.user.staff_id.split('_');
+		const vehicleIdSubParts = req.query.vehicle_id.split('_');
+
+		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role) || req.user.privileges.includes(54))
+		&& (deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
 
         const result = await vehicleService.deleteVehicle(req.query);
         
