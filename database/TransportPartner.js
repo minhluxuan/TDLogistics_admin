@@ -1,5 +1,5 @@
 const mysql = require("mysql2");
-const utils = require("./utils");
+const dbUtils = require("./dbUtils");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -27,7 +27,7 @@ process.on("SIGINT", () => {
 
 const createNewPartner = async (fields, values, personnel_id) => {
     const prefix = personnel_id.split('_')[0];
-    const lastPartner = await utils.getLastRow(pool, table);
+    const lastPartner = await dbUtils.getLastRow(pool, table);
 
 	let transportPartnerId = prefix + "_00000";
 
@@ -39,20 +39,20 @@ const createNewPartner = async (fields, values, personnel_id) => {
 	fields.push("transport_partner_id");
 	values.push(transportPartnerId);
 
-    return await utils.insert(pool, table, fields, values);
+    return await dbUtils.insert(pool, table, fields, values);
 };
 
 const checkExistPartner = async (fields, values) => {
-    const result = await utils.findOne(pool, table, fields, values);
+    const result = await dbUtils.findOne(pool, table, fields, values);
     return result.length > 0;
 };
 
 const getManyPartners = async (fields, values) => {
-    return await utils.find(pool, table, fields, values);
+    return await dbUtils.find(pool, table, fields, values);
 };
 
 const getOnePartner = async (fields, values) => {
-    return await utils.findOne(pool, table, fields, values);
+    return await dbUtils.findOne(pool, table, fields, values);
 };
 
 const updatePartner = async (fields, values, conditionFields, conditionValues) => {
@@ -69,13 +69,13 @@ const updatePartner = async (fields, values, conditionFields, conditionValues) =
     }
 
     if (fields.length > 0) {
-        result = await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+        result = await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
         return result;
     }
 };
 
 const deletePartner = async (fields, values) => {
-    return await utils.deleteOne(pool, table, fields, values);
+    return await dbUtils.deleteOne(pool, table, fields, values);
 };
 
 // const result = pool.query("SELECT * FROM transport_partner").then((result) => {

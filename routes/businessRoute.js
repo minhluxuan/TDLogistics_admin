@@ -3,12 +3,13 @@ const multer = require("multer");
 const businessController = require("../controllers/businessController");
 const path = require("path");
 const fs = require("fs");
-const utils = require("../utils");
+const auth = require("../lib/auth");
+
 const router = express.Router();
 
 const storage = multer.diskStorage({
     destination: function (req, file, done) {
-        const folderPath = path.join("storage", "document", "contract_temp");
+        const folderPath = path.join("storage", "business_user", "document", "contract_temp");
         
         if (!fs.existsSync(folderPath)) {
             fs.mkdirSync(folderPath, { recursive: true });
@@ -47,12 +48,13 @@ const upload = multer({
     fileFilter: fileFilter,
 });
 
-const user =  new utils.User();
-
-router.post("/create", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 11), upload.single("contract"), businessController.createNewBusinessUser);
-router.get("/search", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 12), businessController.getBusiness);
-router.patch("/update", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 13), businessController.updateBusinessInfo);
-router.patch("/update_contract", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 13), upload.single("contract"), businessController.updateContract);
-router.delete("/delete", user.isAuthenticated(), user.isAuthorized(3, 5, 7, 9, 14), businessController.deleteBusinessUser);
+router.get("/check", businessController.checkExistBusiness);
+router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [29, 30]), upload.single("contract"), businessController.createNewBusinessUser);
+router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"], [26, 27, 28]), businessController.getBusiness);
+router.get("/search_representor", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"], [39]), businessController.getRepresentor);
+router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [31, 33]), businessController.updateBusinessInfo);
+router.patch("/update_business_representor", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [32, 34]), businessController.updateBusinessRepresentor);
+router.patch("/update_contract", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [35, 36]), upload.single("contract"), businessController.updateContract);
+router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [37, 38]), businessController.deleteBusinessUser);
 
 module.exports = router;

@@ -1,10 +1,10 @@
 const partnerStaffsService = require ("../services/partnerStaffsService");
 const utils = require("../utils");
-const controllerUtils = require("./utils");
+const validation = require("../lib/validation");
 const fs = require("fs");
 const path = require('path');
 
-const partnerStaffValidation = new controllerUtils.PartnerStaffValidation();
+const partnerStaffValidation = new validation.PartnerStaffValidation();
 
 const verifyStaffSuccess = (req, res) => {
 	return res.status(200).json({

@@ -1,13 +1,11 @@
 const express = require("express");
 const authorizationController = require("../controllers/authorizationController");
-const utils = require("../utils");
+const auth = require("../lib/auth");
 
 const router = express.Router();
 
-const user =  new utils.User();
-
-router.get("/search", user.isAuthenticated(), user.isAuthorized(2), authorizationController.getPermission);
-router.put("/update", user.isAuthenticated(), user.isAuthorized(2), authorizationController.updatePermission);
-router.delete("/delete", user.isAuthenticated(), user.isAuthorized(2), authorizationController.deletePermission);
+router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), authorizationController.getPermissionByRole);
+router.patch("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), authorizationController.grantPermissions);
+router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []), authorizationController.revokePermissions);
 
 module.exports = router;

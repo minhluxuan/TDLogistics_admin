@@ -193,3 +193,4 @@ module.exports = {
     getPostalCode,
     getInfo,
 }
+

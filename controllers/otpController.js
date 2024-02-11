@@ -56,26 +56,7 @@ const verifyOTPMiddleware = async (phone_number, otp) => {
     return await otpService.verifyOTP(phone_number, otp);
 }
 
-const verifyOTPFail = (req, res) => {
-    return res.status(200).json({
-        error: false,
-        valid: false,
-        message: "OTP không hợp lệ. Vui lòng thử lại!",
-    });
-}
-
-const verifyOTPSuccess = (req, res) => {
-    return res.status(200).json({
-        error: false,
-        valid: true,
-        message: "Đổi mật khẩu thành công!",
-    });
-}
-
-
 module.exports = {
     createOTP,
     verifyOTPMiddleware,
-    verifyOTPFail,
-    verifyOTPSuccess,
 }

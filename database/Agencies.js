@@ -18,7 +18,7 @@ const checkExistAgency = async (info) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 	
-	const result = await dbUtils.findOne(pool, table, fields , values);
+	const result = await dbUtils.findOneUnion(pool, table, fields , values);
 	return result.length > 0;
 }
 
@@ -40,7 +40,7 @@ const checkPostalCode = async (province, district, postal_code) => {
 		});
 	}
 
-	const resultFindingProvince = await dbUtils.findOne(pool, "province", ["province"], [province]);
+	const resultFindingProvince = await dbUtils.findOneIntersect(pool, "province", ["province"], [province]);
 
 	if (!resultFindingProvince || resultFindingProvince.length <= 0) {
 		return new Object({
@@ -58,7 +58,7 @@ const checkPostalCode = async (province, district, postal_code) => {
 		});
 	}
 
-	const resultFindingDistrict = await dbUtils.findOne(pool, "district", ["province", "district"], [province, district]);
+	const resultFindingDistrict = await dbUtils.findOneIntersect(pool, "district", ["province", "district"], [province, district]);
 	if (!resultFindingDistrict || resultFindingDistrict.length <= 0) {
 		return new Object({
 			success: false,
@@ -83,7 +83,7 @@ const checkPostalCode = async (province, district, postal_code) => {
 
 const checkWardsOccupation = async (province, district, wards) => {
 	for (const ward of wards) {
-		const resultFindingWard = await dbUtils.findOne(pool, "ward", ["province", "district", "ward"], [province, district, ward]);
+		const resultFindingWard = await dbUtils.findOneIntersect(pool, "ward", ["province", "district", "ward"], [province, district, ward]);
 		if (!resultFindingWard || resultFindingWard.length <= 0) {
 			return new Object({
 				success: false,
@@ -108,28 +108,20 @@ const checkWardsOccupation = async (province, district, wards) => {
 
 
 const createTablesForAgency = async (postal_code) => {
-	const staffTable = postal_code + "_staff";
 	const ordersTable = postal_code + "_orders";
 	const shipmentTable = postal_code + "_shipment";
 
-	const createStaffsTable = `CREATE TABLE ${staffTable} AS SELECT * FROM staff WHERE 1 = 0`;
 	const createOrdersTable = `CREATE TABLE ${ordersTable} AS SELECT * FROM orders WHERE 1 = 0`;
 	const createShipmentTable = `CREATE TABLE ${shipmentTable} AS SELECT * FROM shipment WHERE 1 = 0`;
 
-	await pool.query(createStaffsTable);
 	await pool.query(createOrdersTable);
 	await pool.query(createShipmentTable);
 
-	const checkingExistStaffTable = await dbUtils.checkExistTable(pool, staffTable);
 	const checkingExistOrdersTable = await dbUtils.checkExistTable(pool, ordersTable);
 	const checkingExistShipmentTable = await dbUtils.checkExistTable(pool, shipmentTable);
 
-	const neccessaryTable = [staffTable, ordersTable, shipmentTable];
+	const neccessaryTable = [ordersTable, shipmentTable];
 	const successCreatedTable = new Array();
-
-	if (checkingExistStaffTable.existed) {
-		successCreatedTable.push(staffTable);
-	}
 
 	if (checkingExistOrdersTable.existed) {
 		successCreatedTable.push(ordersTable);
@@ -139,7 +131,7 @@ const createTablesForAgency = async (postal_code) => {
 		successCreatedTable.push(shipmentTable);
 	}
 
-	if (successCreatedTable.length !== 3) {
+	if (successCreatedTable.length !== 2) {
 		const missedTable = neccessaryTable.filter(table => !successCreatedTable.includes(table));
 
 		return new Object({
@@ -157,20 +149,14 @@ const createTablesForAgency = async (postal_code) => {
 }
 
 const dropTableForAgency = async (postal_code) => {
-	const staffTable = postal_code + "_staff";
 	const ordersTable = postal_code + "_orders";
 	const shipmentTable = postal_code + "_shipment";
 
-	const resultDroppingStaffTable = await dbUtils.dropTable(pool, staffTable);
 	const resultDroppingOrdersTable = await dbUtils.dropTable(pool, ordersTable);
 	const resultDroppingShipmentTable = await dbUtils.dropTable(pool, shipmentTable);
 
-	const neccessaryToDropTable = [staffTable, ordersTable, shipmentTable];
+	const neccessaryToDropTable = [ordersTable, shipmentTable];
 	const successDroppedTable = new Array();
-
-	if (resultDroppingStaffTable.success) {
-		successDroppedTable.push(staffTable);
-	}
 
 	if (resultDroppingOrdersTable.success) {
 		successDroppedTable.push(ordersTable);
@@ -180,7 +166,7 @@ const dropTableForAgency = async (postal_code) => {
 		successDroppedTable.push(shipmentTable);
 	}
 
-	if (successDroppedTable.length !== 3) {
+	if (successDroppedTable.length !== 2) {
 		const missedTable = neccessaryToDropTable.filter(table => !successDroppedTable.includes(table));
 		return new Object({
 			success: false,
@@ -284,7 +270,7 @@ const locateAgencyInArea = async (choice, province, district, wards, agency_id, 
 
 	return new Object({
 		success: true,
-		message: "Cập nhật thành công.",
+		message: "Cập nhật thông tin địa bàn hoạt động thành công.",
 	});
 }
 
@@ -292,7 +278,7 @@ const getOneAgency = async (info) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
-    return await dbUtils.findOne(pool, table, fields, values);
+    return await dbUtils.findOneIntersect(pool, table, fields, values);
 };
 
 const getManyAgencies = async (info) => {
@@ -321,7 +307,7 @@ const updateAgency = async (info, conditions) => {
 	const conditionFields = Object.keys(conditions);
 	const conditionValues = Object.values(conditions);
 
-	return await dbUtils.update(fields, values, conditionFields, conditionValues);
+	return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
 const deleteAgency= async (info) => {

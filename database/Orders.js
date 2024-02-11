@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 const moment = require("moment");
-const utils = require("./utils");
+const dbUtils = require("../lib/dbUtils");
 
 const dbOptions = {
     host: process.env.HOST,
@@ -15,16 +15,19 @@ const table = "orders";
 const pool = mysql.createPool(dbOptions).promise();
 
 const checkExistOrder = async (order_id) => {
-    const result = await utils.findOne(pool, table, ["order_id"], [order_id]);
+    const result = await dbUtils.findOne(pool, table, ["order_id"], [order_id]);
     return result.length > 0;
 };
 
-const getOneOrder = async (fields, values) => {
-    return await utils.findOne(pool, table, fields, values);
+const getOneOrder = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+    
+    return await dbUtils.findOneIntersect(pool, table, fields, values);
 }
 
 const getAllOrders = async () => {
-    return await utils.find(pool, table);
+    return await dbUtils.find(pool, table);
 };
 
 const getOrder = async (data) => {
@@ -56,7 +59,7 @@ const getOrder = async (data) => {
 
 const createNewOrder = async (fields, values) => {
     console.log(fields);
-    return await utils.insert(pool, table, fields, values);
+    return await dbUtils.insert(pool, table, fields, values);
 }
 
 const updateOrder = async (fields, values, conditionFields, conditionValues) => {

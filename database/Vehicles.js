@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 const moment = require("moment");
-const utils = require("./utils");
+const dbUtils = require("../lib/dbUtils");
 const Orders = require("./Orders");
 
 const dbOptions = {
@@ -15,44 +15,43 @@ const table = "vehicle";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-const checkExistVehicle = async (field, value) => {
-    const result = await utils.findOne(pool, table, field, value);
+const checkExistVehicle = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    const result = await dbUtils.findOneIntersect(pool, table, fields, values);
     return result.length > 0;
 };
 
-const createNewVehicle = async (fields, values) => {
-    const lastVehicle = await utils.getLastRow(pool, table);
+const createNewVehicle = async (info) => {
+    const fields = Object.keys(info);
+    const values = Object.values(info);
 
-	let vehicleId = "0000000";
+    const defaultFields = ["mass", "order_ids", "busy"];
+    const defaultValues = [0, JSON.stringify([]), false];
 
-	if (lastVehicle) {
-		vehicleId = (parseInt(lastVehicle["vehicle_id"]) + 1).toString().padStart(7, "0");
-	}
-
-
-    const defaultFields = ["vehicle_id", "mass", "order_ids", "busy"];
-    const defaultValues = [vehicleId, 0, JSON.stringify([]), false];
     const allFields = [...fields, ...defaultFields];
     const allValues = [...values, ...defaultValues];
-    return await utils.insert(pool, table, allFields, allValues);
+
+    return await dbUtils.insert(pool, table, allFields, allValues);
 };
 
-const getManyVehicles = async (fields, values) => {
-    return await utils.find(pool, table, fields, values);
+const getManyVehicles = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    return await dbUtils.find(pool, table, fields, values);
 };
 
-const getOneVehicle = async (fields, values) => {
-    return await utils.findOne(pool, table, fields, values);
+const getOneVehicle = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    return await dbUtils.findOneIntersect(pool, table, fields, values);
 };
 
-const getVehicleOrderIds = async (fields, values) => {
-    const vehicle = await getOneVehicle(fields, values);
-
-    if (!vehicle || vehicle.length <= 0) {
-        throw new Error("Phương tiện không tồn tại.");
-    }
-
-    let order_ids = vehicle[0].order_ids;
+const getVehicleOrderIds = async (vehicle) => {
+    let order_ids = vehicle.order_ids;
 
     if (!order_ids) {
         return new Array();
@@ -67,7 +66,7 @@ const getVehicleOrderIds = async (fields, values) => {
     const result = new Array();
 
     for (const order_id of order_ids) {
-        const order = await Orders.getOneOrder(["order_id"], [order_id]);
+        const order = await Orders.getOneOrder({ order_id: order_id });
 
         if (order && order.length > 0) {
             result.push(order[0]);
@@ -77,113 +76,95 @@ const getVehicleOrderIds = async (fields, values) => {
     return result;
 }
 
-const updateVehicle = async (fields, values, conditionFields, conditionValues) => {
-    return await utils.update(pool, table, fields, values, conditionFields, conditionValues);
+const updateVehicle = async (info, conditions) => {
+    const fields = Object.keys(info);
+    const values = Object.values(info);
+
+    const conditionFields = Object.keys(conditions);
+    const conditionValues = Object.values(conditions);
+
+    return await dbUtils.updateOne(pool, table, fields, values, conditionFields, conditionValues);
 };
 
-const addOrders = async (vehicle_id, order_ids) => {
-    try {
-        const vehicle = await utils.findOne(pool, table, ["vehicle_id"], [vehicle_id]);
+const addOrders = async (vehicle, order_ids) => {
+    let acceptedNumber = 0;
+    const acceptedArray = new Array();
+    let notAcceptedNumber = 0;
+    const notAcceptedArray = new Array();
+    let jsonOrderIds;
 
-        if (!vehicle || vehicle.length <= 0) {
-            console.log("Vehicle does not exist.");
-            throw new Error("Phương tiện không tồn tại.");
-        }
-
-        let acceptedNumber = 0;
-        const acceptedArray = new Array();
-        let notAcceptedNumber = 0;
-        const notAcceptedArray = new Array();
-        let jsonOrderIds;
-
-        if (vehicle[0].order_ids) {
-            const prevOrderIds = JSON.parse(vehicle[0].order_ids);
-            for (let i = 0; i < order_ids.length; i++) {
-                if (!prevOrderIds.includes(order_ids[i]) && await increaseMass(vehicle_id, order_ids[i])) {
-                    prevOrderIds.push(order_ids[i]);
-                    ++acceptedNumber;
-                    acceptedArray.push(order_ids[i]);
-                }
-                else {
-                    ++notAcceptedNumber;
-                    notAcceptedArray.push(order_ids[i]);
-                }
+    if (vehicle.order_ids) {
+        const prevOrderIds = JSON.parse(vehicle.order_ids);
+        for (let i = 0; i < order_ids.length; i++) {
+            if (!prevOrderIds.includes(order_ids[i]) && await increaseMass(vehicle.vehicle_id, order_ids[i])) {
+                prevOrderIds.push(order_ids[i]);
+                ++acceptedNumber;
+                acceptedArray.push(order_ids[i]);
             }
-
-            jsonOrderIds = JSON.stringify(prevOrderIds);
+            else {
+                ++notAcceptedNumber;
+                notAcceptedArray.push(order_ids[i]);
+            }
         }
-        else {
-            jsonOrderIds = JSON.stringify(order_ids);
-        }
 
-        const result = await utils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle_id]);
-
-        return new Object({
-            affectedRows: result ? result.affectedRows : 0,
-            acceptedNumber: acceptedNumber,
-            acceptedArray: acceptedArray,
-            notAcceptedNumber: notAcceptedNumber,
-            notAcceptedArray: notAcceptedArray,
-        });
-    } catch (error) {
-        console.log(error);
-        throw new Error(error.message);
+        jsonOrderIds = JSON.stringify(prevOrderIds);
     }
+    else {
+        jsonOrderIds = JSON.stringify(order_ids);
+    }
+
+    const result = await dbUtils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle.vehicle_id]);
+
+    return new Object({
+        affectedRows: result ? result.affectedRows : 0,
+        acceptedNumber: acceptedNumber,
+        acceptedArray: acceptedArray,
+        notAcceptedNumber: notAcceptedNumber,
+        notAcceptedArray: notAcceptedArray,
+    });
 }
 
-const deleteOrders = async (vehicle_id, order_ids) => {
-    try {
-        const vehicle = await utils.findOne(pool, table, ["vehicle_id"], [vehicle_id]);
+const deleteOrders = async (vehicle, order_ids) => {
+    let acceptedNumber = 0;
+    const acceptedArray = new Array();
+    let notAcceptedNumber = 0;
+    const notAcceptedArray = new Array();
+    let jsonOrderIds;
 
-        if (!vehicle || vehicle.length <= 0) {
-            console.log("Vehicle does not exist.");
-            throw new Error("Phương tiện không tồn tại.");
-        }
-
-        let acceptedNumber = 0;
-        const acceptedArray = new Array();
-        let notAcceptedNumber = 0;
-        const notAcceptedArray = new Array();
-        let jsonOrderIds;
-
-        if (vehicle[0].order_ids) {
-            const prevOrderIds = JSON.parse(vehicle[0].order_ids);
-            for (let i = 0; i < prevOrderIds.length; i++) {
-                if (order_ids.includes(prevOrderIds[i]) && await decreaseMass(vehicle_id, prevOrderIds[i])) {
-                    ++acceptedNumber;
-                    acceptedArray.push(prevOrderIds[i]);
-                    prevOrderIds.splice(i, 1);
-                    --i;
-                }
-                else {
-                    ++notAcceptedNumber;
-                    notAcceptedArray.push(order_ids[i]);
-                }
+    if (vehicle.order_ids) {
+        const prevOrderIds = JSON.parse(vehicle.order_ids);
+        for (let i = 0; i < prevOrderIds.length; i++) {
+            if (order_ids.includes(prevOrderIds[i]) && await decreaseMass(vehicle.vehicle_id, prevOrderIds[i])) {
+                ++acceptedNumber;
+                acceptedArray.push(prevOrderIds[i]);
+                prevOrderIds.splice(i, 1);
+                --i;
             }
-
-            jsonOrderIds = JSON.stringify(prevOrderIds);
+            else {
+                ++notAcceptedNumber;
+                notAcceptedArray.push(order_ids[i]);
+            }
         }
-        else {
-            jsonOrderIds = JSON.stringify(new Array());
-        }
 
-        const result = await utils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle_id]);
-
-        return new Object({
-            affectedRows: result ? result.affectedRows : 0,
-            acceptedNumber: acceptedNumber,
-            acceptedArray: acceptedArray,
-            notAcceptedNumber: notAcceptedNumber,
-            notAcceptedArray: notAcceptedArray,
-        });
-    } catch (error) {
-        console.log(error);
-        throw new Error(error.message);
+        jsonOrderIds = JSON.stringify(prevOrderIds);
     }
+    else {
+        jsonOrderIds = JSON.stringify(new Array());
+    }
+
+    const result = await dbUtils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle.vehicle_id]);
+
+    return new Object({
+        affectedRows: result ? result.affectedRows : 0,
+        acceptedNumber: acceptedNumber,
+        acceptedArray: acceptedArray,
+        notAcceptedNumber: notAcceptedNumber,
+        notAcceptedArray: notAcceptedArray,
+    });
 }
 
 const increaseMass = async (vehicle_id, order_id) => {
-    const order = await utils.findOne(pool, "orders", ["order_id"], [order_id]);
+    const order = await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [order_id]);
 
     if (!order || order.length <= 0) {
         console.log("Order does not exist.");
@@ -204,7 +185,7 @@ const increaseMass = async (vehicle_id, order_id) => {
 }
 
 const decreaseMass = async (vehicle_id, order_id) => {
-    const order = await utils.findOne(pool, "orders", ["order_id"], [order_id]);
+    const order = await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [order_id]);
 
     if (!order || order.length <= 0) {
         console.log("Order does not exist.");
@@ -224,8 +205,11 @@ const decreaseMass = async (vehicle_id, order_id) => {
     return true;
 }
 
-const deleteVehicle = async (fields, values) => {
-    return await utils.deleteOne(pool, table, fields, values);
+const deleteVehicle = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    return await dbUtils.deleteOne(pool, table, fields, values);
 };
 
 module.exports = {

@@ -1,0 +1,45 @@
+POST http://localhost:5000/api/v1/vehicles/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_70001_077204005691",
+    "staff_id": "BC_70001_077204005691",
+    "type": "motorbike",
+    "license_plate": "72-H1 24767",
+    "max_load": 50
+}
+
+###
+
+PUT http://localhost:5000/api/v1/vehicles/update?vehicle_id=BC_70001_72H124767
+Content-Type: application/json
+
+{
+    "max_load": 60
+}
+
+###
+
+GET http://localhost:5000/api/v1/vehicles/search_order_ids?vehicle_id=BC_70001_72H124767
+
+###
+
+PATCH http://localhost:5000/api/v1/vehicles/add_orders?vehicle_id=BC_70001_72H124767
+Content-Type: application/json
+
+{
+    "order_ids": ["TD202402225629673"]
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/vehicles/delete_orders?vehicle_id=BC_70001_72H124767
+Content-Type: application/json
+
+{
+    "order_ids": ["TD202402225629673"]
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=BC_70001_72H124767

@@ -1,0 +1,72 @@
+GET http://localhost:5000/api/v1/business/search
+Content-Type: application/json
+
+{
+    "bank": "Sacombank"
+}
+
+###
+
+GET http://localhost:5000/api/v1/business/search_representor
+Content-Type: application/json
+
+{
+    "business_id": "BC_70001_077204005692"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_70001_077204005691",
+    "user_fullname": "Lữ Xuân Minh",
+    "user_phone_number": "0981430418",
+    "user_email": "minh.luxuanhcmut@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-03",
+    "user_cccd": "077204005692",
+    "user_province": "Bà Rịa - Vũng Tàu",
+    "user_district": "Đất Đỏ",
+    "user_town": "Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_bin": "050138319579",
+    "user_bank": "Sacombank",
+    "username": "minhluxuan",
+    "password": "AlphaSolutions@alphasolutions2k24",
+    "business_name": "Alpha Solutions",
+    "email": "alphasolutions@alphasolutions.com",
+    "phone_number": "0981430418",
+    "tax_number": "1234567890",
+    "province": "Bà Rịa - Vũng Tàu",
+    "district": "Đất Đỏ",
+    "town": "Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+PUT http://localhost:5000/api/v1/business/update?business_id=BC_70001_077204005692&agency_id=BC_70001_077204005691
+Content-Type: application/json
+
+{
+    "bin": "0981430418",
+    "bank": "MB Bank",
+    "debit": 240
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/business/update_business_representor?business_id=BC_70001_077204005692&agency_id=BC_70001_077204005691
+Content-Type: application/json
+
+{
+    "bin": "0981430418",
+    "bank": "MB Bank"
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/business/delete?business_id=BC_70001_077204005692&agency_id=BC_70001_077204005691
