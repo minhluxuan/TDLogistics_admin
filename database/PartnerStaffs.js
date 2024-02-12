@@ -13,25 +13,20 @@ const table = "partner_staff";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-const checkExistPartnerStaff = async (fields, values) => {
-	const query = `SELECT * FROM ${table} WHERE ${fields.map(field => `${field} = ?`).join(' OR ')}`;
-	const result = await pool.query(query, values);
-	return result[0].length > 0;
+const checkExistPartnerStaff = async (conditions) => {
+	const fields = Object.keys(conditions);
+	const values = Object.values(conditions);console.log(fields, values);
+
+	const result = await dbUtils.findOneUnion(pool, table, fields, values);
+
+	return result.length > 0;
 };
 
-const createNewPartnerStaff = async (fields, values) => {
-	const lastUser = await dbUtils.getLastRow(pool, table);
+const createNewPartnerStaff = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
 
-	let partnerStaffId = "0000000";
-
-	if (lastUser) {
-		partnerStaffId = (parseInt(lastUser["staff_id"]) + 1).toString().padStart(7, "0");
-	}
-
-	fields.push("staff_id");
-	values.push(partnerStaffId);
-
-	await dbUtils.insert(pool, table, fields, values);
+	return await dbUtils.insert(pool, table, fields, values);
 };
 
 const getManyPartnerStaffs = async (fields, values) => {
@@ -42,7 +37,13 @@ const getOnePartnerStaff = async (fields, values) => {
   	return await dbUtils.findOne(pool, table, fields, values);
 };
 
-const updatePartnerStaff = async (fields, values, conditionFields, conditionValues) => {
+const updatePartnerStaff = async (info, conditions) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+	
+	const conditionFields = Object.keys(conditions);
+	const conditionValues = Object.values(conditions);
+
   	return await dbUtils.update(pool, table, fields, values, conditionFields,conditionValues);
 };
 

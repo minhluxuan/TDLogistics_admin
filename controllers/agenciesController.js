@@ -128,11 +128,11 @@ const createNewAgency = async (req, res) => {
 		}
 
 		const tempUser = new Object({
-			username: req.body.username,
-			cccd: req.body.cccd,
-			phone_number: req.body.phone_number,
-			email: req.body.phone_number,
-		});
+            username: req.body.username,
+            cccd: req.body.user_cccd,
+            phone_number: req.body.user_phone_number,
+            email: req.body.user_phone_number,
+        });
 
 		const resultCheckingExistStaff = await staffsService.checkExistStaff(tempUser);
 

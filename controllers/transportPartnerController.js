@@ -1,28 +1,75 @@
+const fs = require("fs");
+const path = require("path");
 const transportPartnerService = require("../services/transportPartnerService");
+const agenciesService = require("../services/agenciesService");
+const partnerStaffsService = require("../services/partnerStaffsService");
 const validation = require("../lib/validation");
+const utils = require("../lib/utils");
 
 const transportPartnerValidation = new validation.TransportPartnerValidation();
 
 const getTransportPartner = async (req, res) => {
     try {
-        const { error } = transportPartnerValidation.validateFindingPartner(req.query);
-        if (error) {
-            return res.status(400).json({
+        if (["TRANSPORT_PARTNER"].includes(req.user.role)) {
+            const { error } = transportPartnerValidation.validateFindingPartnerByPartner(req.body);
+
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
+
+            const result = await transportPartnerService.getOnePartner(req.body);
+
+            return res.status(200).json({
                 error: true,
-                message: "Thông tin không hợp lệ.",
+                data: result,
+                message: "Lấy thông tin thành công.",
             });
         }
 
-        const keys = Object.keys(req.query);
-        const values = Object.values(req.query);
+        if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role)) {
+            const { error } = transportPartnerValidation.validateFindingPartnerByAdmin(req.body);
 
-        const result = await transportPartnerService.getManyPartners(keys, values);
-        return res.status(200).json({
-            error: false,
-            data: result,
-            message: "Lấy thông tin thành công.",
-        });
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
+
+            req.query.agency_id = req.user.agency_id;
+
+            const result = await transportPartnerService.getManyPartners(req.body);
+
+            return res.status(200).json({
+                error: true,
+                data: result,
+                message: "Lấy thông tin thành công.",
+            });
+        }
+
+        if (["ADMIN", "MANAGER", "TELLER", "COMPLAINT_SOLVER"].includes(req.user.role)) {
+            const { error } = transportPartnerValidation.validateFindingPartnerByAdmin(req.body);
+
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
+
+            const result = await transportPartnerService.getManyPartners(req.body);
+
+            return res.status(200).json({
+                error: true,
+                data: result,
+                message: "Lấy thông tin thành công.",
+            });
+        }
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             error: true,
             message: error,
@@ -32,81 +79,196 @@ const getTransportPartner = async (req, res) => {
 
 const createNewTransportPartner = async (req, res) => {
     try {
-        const { error } = transportPartnerValidation.validateCreatingPartner(req.body);
+        if (["ADMIN", "MANAGER"].includes(req.user.role)) {
+			const { error } = transportPartnerValidation.validateCreatingPartnerByAdmin(req.body);
 
-        if (error) {
-            return res.status(400).json({
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			if (!(await agenciesService.checkExistAgency({ agency_id: req.body.agency_id }))) {
+				return res.status(404).json({
+					error: true,
+					message: `Bưu cục có mã bưu cục ${req.body.agency_id} không tồn tại.`,
+				});
+			}
+		}
+		else if (["AGENCY_MANAGER"].includes(req.user.role)) {
+			const { error } = transportPartnerValidation.validateCreatingPartnerByAgency(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			req.body.agency_id = req.user.agency_id;
+		}
+
+        const tempUser = new Object({
+            username: req.body.username,
+            cccd: req.body.user_cccd,
+            phone_number: req.body.user_phone_number,
+            email: req.body.user_phone_number,
+        });
+
+        const resultCheckingExistStaff = await partnerStaffsService.checkExistPartnerStaff(tempUser);
+        if (resultCheckingExistStaff.existed) {
+            return res.status(409).json({
                 error: true,
-                message: "Thông tin không hợp lệ.",
+                message: resultCheckingExistStaff.message,
             });
         }
 
-        const existed = await transportPartnerService.checkExistPartner(
-            ["transport_partner_id"],
-            [req.body.transport_partner_id]
-        );
+        const creatorIdSubParts = req.user.staff_id.split('_');
+        const transportPartnerId = creatorIdSubParts[0] + '_' + creatorIdSubParts[1] + '_' + req.body.user_cccd;
+        
+        const newTransportPartner = {
+            transport_partner_id: transportPartnerId,
+            agency_id: req.user.agency_id,
+            tax_code: req.body.tax_code || null,
+            transport_partner_name: req.body.transport_partner_name,
+            province: req.body.province,
+            district: req.body.district,
+            town: req.body.town,
+            detail_address: req.body.detail_address,
+            phone_number: req.body.phone_number,
+            email: req.body.email,
+            bin: req.body.bin,
+            bank: req.body.bank,
+        };
 
-        if (existed) {
-            return res.status(400).json({
-                error: true,
-                message: "Đối tác vận chuyển đã tồn tại.",
-            });
+        req.body.user_password = utils.hash(req.body.user_password);
+
+        const newStaff = new Object({
+            partner_id: transportPartnerId,
+            staff_id: transportPartnerId,
+            username: req.body.username,
+            password: req.body.user_password,
+            fullname: req.body.user_fullname,
+            phone_number: req.body.user_phone_number || null,
+            email: req.body.user_email || null,
+            date_of_birth: req.body.user_date_of_birth || null,
+            cccd: req.body.user_cccd,
+            province: req.body.user_province || null,
+            district: req.body.user_district || null,
+            town: req.body.town || null,
+            detail_address: req.body.user_detail_address || null,
+            role: "TRANSPORT_PARTNER",
+            position: req.body.user_position || null,
+            bin: req.body.user_bin || null,
+            bank: req.body.user_bank || null,
+            active: false,
+        });
+
+        const resultCreatingNewPartner = await transportPartnerService.createNewPartner(newTransportPartner);
+
+        let textResultCreatingNewTransportPartner;
+        if (!resultCreatingNewPartner || resultCreatingNewPartner.affectedRows <= 0) {
+            textResultCreatingNewTransportPartner = `Tạo đối tác vận tải có mã đối tác ${transportPartnerId} thất bại`;
+        } else {
+            textResultCreatingNewTransportPartner = `Tạo đối tác vận tải có mã đối tác ${transportPartnerId} thành công`;
         }
 
-        const keys = Object.keys(req.body);
-        const values = Object.values(req.body);
+        const resultCreatingNewPartnerStaff = await partnerStaffsService.createNewPartnerStaff(newStaff);
 
-        const personnel_id = req.user.staff_id || req.user.agency_id;
+        let textResultCreatingNewPartnerStaff;
+        if (!resultCreatingNewPartnerStaff || resultCreatingNewPartnerStaff.affectedRows <= 0) {
+            textResultCreatingNewPartnerStaff = `Tạo tài khoản nhân viên quản lý đối tác vận tải có mã nhân viên ${transportPartnerId} thất bại.`;
+        } else {
+            textResultCreatingNewPartnerStaff = `Tạo tài khoản nhân viên quản lý đối tác vận tải có mã nhân viên ${transportPartnerId} thành công.`;
+        }
 
-        const result = await transportPartnerService.createNewPartner(keys, values, personnel_id);
-        console.log(result);
-        return res.status(200).json({
+        if (req.file) {
+            const tempFolderPath = path.join("storage", "transport_partner", "document", "contract_temp");
+            if (!fs.existsSync(tempFolderPath)) {
+                fs.mkdirSync(tempFolderPath, { recursive: true });
+            }
+
+            const officialFolderPath = path.join("storage", "transport_partner", "document", "contract");
+            if (!fs.existsSync(officialFolderPath)) {
+                fs.mkdirSync(officialFolderPath, { recursive: true });
+            }
+
+            const tempFilePath = path.join(tempFolderPath, req.file.filename);
+            const officialFilePath = path.join(officialFolderPath, req.file.filename);
+
+            fs.renameSync(tempFilePath, officialFilePath);
+        }
+
+        return res.status(201).json({
             error: false,
-            message: "Thêm thành công!",
+            message: `
+			Kết quả:\n
+			${textResultCreatingNewTransportPartner}\n
+            ${textResultCreatingNewPartnerStaff}\n`,
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message,
         });
     }
 };
-const updateTransportPartner = async (req, res) => {
-    //authorization
 
-    //end of authorization
+const updateTransportPartner = async (req, res) => {
     try {
         const { error } =
-            transportPartnerValidation.validateFindingPartner(req.query) ||
+            transportPartnerValidation.validateFindingPartnerByPartner(req.query) ||
             transportPartnerValidation.validateUpdatePartner(req.body);
 
         if (error) {
             return res.status(400).json({
                 error: true,
-                message: "Thông tin không hợp lệ.",
+                message: error.message,
             });
         }
 
-        const keys = Object.keys(req.body);
-        const values = Object.values(req.body);
+        const updatorIdSubParts = req.user.staff_id.split('_');
+		const partnerIdSubParts = req.query.transport_partner_id.split('_');
 
-        const conditionFields = Object.keys(req.query);
-        const conditionValues = Object.values(req.query);
+		if (req.user.role === "AGENCY_MANAGER" && updatorIdSubParts[1] !== partnerIdSubParts[1]) {
+			return res.status(404).json({
+				error: true,
+				message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
 
-        const result = await transportPartnerService.updatePartner(keys, values, conditionFields, conditionValues);
+        const resultGettingOneTransportPartner = await transportPartnerService.getOnePartner(req.query);
 
-        if (result[0].affectedRows <= 0) {
+        if (!resultGettingOneTransportPartner || resultGettingOneTransportPartner.length <= 0) {
             return res.status(404).json({
                 error: true,
-                message: "Đối tác vận chuyển không tồn tại.",
+                message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại.`,
             });
         }
 
-        res.status(201).json({
+        const partner = resultGettingOneTransportPartner[0];
+
+        if (req.body.hasOwnProperty("debit")) {
+            req.body.debit += partner.debit || 0;
+        }
+
+        const resultUpdatingTransportPartner = await transportPartnerService.updatePartner(req.body, req.query);
+
+        if (!resultUpdatingTransportPartner || resultUpdatingTransportPartner.affectedRows <= 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại.`,
+            });
+        }
+
+        return res.status(201).json({
             error: false,
-            message: "Cập nhật thành công.",
+            message: `Cập nhật thông tin đối tác vận tải có mã đối tác ${req.query.transport_partner_id} thành công.`,
         });
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             error: true,
             message: error.message,
@@ -114,25 +276,107 @@ const updateTransportPartner = async (req, res) => {
     }
 };
 
-const deleteTransportPartner = async (req, res) => {
-    //authorization
+const updateContract = async (req, res) => {
+    try {
+        const { error } = transportPartnerValidation.validateFindingPartnerByPartner(req.query);
 
-    //end of authorization
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const deletorIdSubParts = req.user.staff_id.split('_');
+        const partnerIdSubParts = req.query.transport_partner_id.split('_');
+
+        if (req.user.role === "AGENCY_MANAGER" && deletorIdSubParts[1] !== partnerIdSubParts[1]) {
+            return res.status(404).json({
+                error: true,
+                message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+            });
+        }
+
+        const resultGettingOneTransportPartner = await transportPartnerService.getOnePartner(req.query);
+
+        if (!resultGettingOneTransportPartner || resultGettingOneTransportPartner <= 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại.`,
+            });
+        }
+
+        const partner = resultGettingOneTransportPartner[0];
+        const contract = partner.contract;
+
+        const resultUpdatingTransportPartner = await transportPartnerService.updatePartner({ contract: req.file.filename }, req.query);
+        if (!resultUpdatingTransportPartner || resultUpdatingTransportPartner.affectedRows <= 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại.`
+            });
+        }
+
+        const tempFolderPath = path.join("storage", "transport_partner", "document", "contract_temp");
+        if (!fs.existsSync(tempFolderPath)) {
+            fs.mkdirSync(tempFolderPath, { recursive: true });
+        }
+
+        const officialFolderPath = path.join("storage", "transport_partner", "document", "contract");
+        if (!fs.existsSync(officialFolderPath)) {
+            fs.mkdirSync(officialFolderPath, { recursive: true });
+        }
+
+        const tempFilePath = path.join(tempFolderPath, req.file.filename);
+        const officialFilePath = path.join(officialFolderPath, req.file.filename);
+
+        if (contract) {
+            const oldFilePath = path.join(officialFolderPath, contract);
+
+            if (fs.existsSync(oldFilePath)) {
+                fs.unlinkSync(oldFilePath);
+            }
+        }
+
+        fs.renameSync(tempFilePath, officialFilePath);
+
+        return res.status(201).json({
+            error: true,
+            message: "Cập nhật thành công.",
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+} 
+
+const deleteTransportPartner = async (req, res) => {
     try {
         const { error } = transportPartnerValidation.validateDeletingPartner(req.query);
 
         if (error) {
             return res.status(400).json({
                 error: true,
-                message: "Thông tin không hợp lệ.",
+                message: error.message,
             });
         }
-        const result = await transportPartnerService.deletePartner(
-            ["transport_partner_id"],
-            [req.query.transport_partner_id]
-        );
 
-        if (result[0].affectedRows <= 0) {
+        const deletorIdSubParts = req.user.staff_id.split('_');
+		const partnerIdSubParts = req.query.transport_partner_id.split('_');
+
+		if (req.user.role === "AGENCY_MANAGER" && deletorIdSubParts[1] !== partnerIdSubParts[1]) {
+			return res.status(404).json({
+				error: true,
+				message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
+
+        const resultDeletingPartner = await transportPartnerService.deletePartner(req.query);
+
+        if (!resultDeletingPartner || resultDeletingPartner.affectedRows <= 0) {
             return res.status(200).json({
                 error: true,
                 message: "Đối tác vận chuyển không tồn tại.",
@@ -154,7 +398,7 @@ const deleteTransportPartner = async (req, res) => {
 module.exports = {
     createNewTransportPartner,
     getTransportPartner,
-
     updateTransportPartner,
+    updateContract,
     deleteTransportPartner,
 };
