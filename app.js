@@ -92,7 +92,7 @@ app.use("/api/v1/business", businessRouter);
 app.use("/api/v1/shipments", shipmentsRouter);
 app.use("/api/v1/containers", containersRouter);
 app.use("/api/v1/vehicles", vehicleRouter);
-app.use("/api/v1/partner_staff", partnerStaffsRouter);
+app.use("/api/v1/partner_staffs", partnerStaffsRouter);
 app.use("/api/v1/transport_partners", transportPartnersRouter);
 app.use("/api/v1/otp_partner_staff", otpPartnerStaffRouter);
 app.use("/api/v1/agencies", agenciesRouter);

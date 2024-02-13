@@ -7,35 +7,40 @@ const partnerStaffsController = require("../controllers/partnerStaffControllers"
 const utils = require("../utils");
 const PartnerStaffs = require("../database/PartnerStaffs");
 const path = require('path');
+const auth = require("../lib/auth");
 const fs = require("fs");
 
 const router = express.Router();
 
 const sessionStrategy = new LocalStrategy({
-    usernameField: "cccd",
+    usernameField: "username",
     passwordField: "password",
-}, async (cccd, password, done) => {
-    const partnerStaff = await PartnerStaffs.getOnePartnerStaff(["cccd"], [cccd]);
+}, async (username, password, done) => {
+    const resultGettingOnePartnerStaff = await PartnerStaffs.getOnePartnerStaff({ username: username });
 
-    if (partnerStaff.length <= 0) {
+    if (resultGettingOnePartnerStaff.length <= 0) {
         return done(null, false);
     }
 
-    const passwordFromDatabase = partnerStaff[0]["password"];
+    const partnerStaff = resultGettingOnePartnerStaff[0];
+
+    const passwordFromDatabase = partnerStaff.password;
     const match = bcrypt.compareSync(password, passwordFromDatabase);
 
     if (!match) {
         return done(null, false);
     }
 
-    const staff_id = partnerStaff[0]["staff_id"];
-    const partner_id = partnerStaff[0]["partner_id"];
-    const permission = 2;
+    const partner_id = partnerStaff.partner_id;
+    const staff_id = partnerStaff.staff_id;
+    const role = partnerStaff.role;
+    const active = partnerStaff.active;
 
     return done(null, {
         staff_id,
         partner_id,
-        permission,
+        role,
+        active,
     });
 });
 
@@ -104,14 +109,20 @@ const upload = multer({
     fileFilter: fileFilter,
 });
 
-const user = new utils.User();
+router.post("/login", passport.authenticate("partnerStaffLogin"), (req, res, next) => {
+    passport.authenticate("partnerStaffLogin", (err, user, info) => {
+        if (err) {
+            return next(err);
+        }
+        if (!user) {
+            return res.status(401).json({ error: true, message: "Xác thực thất bại." });
+        }
 
-router.post("/login", passport.authenticate("partnerStaffLogin", {
-    successRedirect: "/api/v1/partner_staff/login_success",
-    failureRedirect: "/api/v1/partner_staff/login_fail",
-    failureFlash: true,
-    }), partnerStaffsController.verifyStaffSuccess);
-router.post("/create", user.isAuthenticated(), user.isAuthorized([], []), 
+        return res.status(200).json({ error: false, message: "Xác thực thành công." });
+    })(req, res, next);
+});
+router.get("/check", partnerStaffsController.checkExistPartnerStaff);
+router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []), 
     upload.fields([{
             name: 'avatar', maxCount: 1
         }, {
@@ -119,20 +130,24 @@ router.post("/create", user.isAuthenticated(), user.isAuthorized([], []),
         }, {
             name: 'license_after', maxCount: 1
         }]), partnerStaffsController.createNewPartnerStaff);
-router.get("/search", user.isAuthenticated(), user.isAuthorized(2), partnerStaffsController.getPartnerStaffs);
-router.delete("/delete", user.isAuthenticated(), user.isAuthorized(2), partnerStaffsController.deletePartnerStaff);
-router.patch("/update", user.isAuthenticated(), user.isAuthorized(2), partnerStaffsController.updatePartnerStaffInfo);
-router.post("/login_success", user.isAuthenticated(), user.isAuthorized(2), partnerStaffsController.verifyStaffSuccess);
-router.post("/login_fail", user.isAuthenticated(), user.isAuthorized(2), partnerStaffsController.verifyStaffFail);
-router.patch("/update_password", user.isAuthenticated(), user.isAuthorized(2), partnerStaffsController.updatePartnerPassword);
-router.patch("/update_avatar", user.isAuthenticated(), user.isAuthorized(2), upload.single("avatar"), partnerStaffsController.updatePartnerAvatar);
-router.patch("/update_license", user.isAuthenticated(), user.isAuthorized(2),  upload.fields([{
+router.get(
+    "/search",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER",
+    "TRANSPORT_PARTNER", "PARTNER_DRIVER", "PARTNER_SHIPPER"], []),
+    partnerStaffsController.getPartnerStaffs
+);
+router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []), partnerStaffsController.deletePartnerStaff);
+router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []), partnerStaffsController.updatePartnerStaffInfo);
+router.patch("/update_password", auth.isAuthenticated(), auth.isAuthorized(["PARTNER_DRIVER", "PARTNER_SHIPPER"], []), partnerStaffsController.updatePartnerPassword);
+router.patch("/update_avatar", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE"], []), upload.single("avatar"), partnerStaffsController.updatePartnerAvatar);
+router.patch("/update_licenses", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []),  upload.fields([{
     name: 'license_before', maxCount: 1
 }, {
     name: 'license_after', maxCount: 1
 }]), partnerStaffsController.updatePartnerLicenseImg);
-
-router.get("/logout", partnerStaffsController.logout);
-
+router.get("/logout", auth.isAuthenticated(), auth.isAuthorized(["PARTNER_DRIVER", "PARTNER_SHIPPER"], []), partnerStaffsController.logout);
 
 module.exports = router;
+

@@ -1,0 +1,65 @@
+GET http://localhost:5000/api/v1/partner_staffs/check?cccd=077204005692
+
+###
+
+POST http://localhost:5000/api/v1/partner_staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan",
+    "password": "MinhLuXuan@TDlogistics2k24"
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/partner_staffs/update_password
+Content-Type: application/json
+
+{
+    "new_password": "MinhLuXuan@TDlogistics2k24",
+    "confirm_password": "MinhLuXuan@TDlogistics2k24"
+}
+
+###
+
+GET http://localhost:5000/api/v1/partner_staffs/search
+Content-Type: application/json
+
+{
+    "partner_id": "TD_00000_077204005691"
+}
+
+###
+
+POST http://localhost:5000/api/v1/partner_staffs/create
+Content-Type: application/json
+
+{
+    "partner_id": "TD_00000_077204005691",
+    "username": "minhluxuan",
+    "password": "MinhLuXuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "cccd": "077204005692",
+    "role": "PARTNER_DRIVER"
+}
+
+###
+
+PUT http://localhost:5000/api/v1/partner_staffs/update?staff_id=TD_00000_077204005692
+Content-Type: application/json
+
+{
+    "fullname": "Lữ Xuân Sáng"
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/partner_staffs/delete?staff_id=TD_00000_077204005692
+
+###
+
+GET http://localhost:5000/get_session
+
+###
+
+GET http://localhost:5000/api/v1/partner_staffs/logout
