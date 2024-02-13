@@ -22,25 +22,25 @@ const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => 
         const staffTable = "staff";
         const transportPartnerTable = "transport_partner";
         const vehicleTable = "vehicle";
-        
+
         if(transport_partner_id !== null) {
-            const transportPartnerQuery = `SELECT name FROM ${transportPartnerTable} WHERE transport_partner_id = ? LIMIT 1`;
+            const transportPartnerQuery = `SELECT transport_partner_name FROM ${transportPartnerTable} WHERE transport_partner_id = ? LIMIT 1`;
             const vehicleQuery = `SELECT vehicle_id FROM ${vehicleTable} WHERE staff_id = ? LIMIT 1`;
             const [transportPartnerResult] = await pool.query(transportPartnerQuery, transport_partner_id);
             const [vehicleResult] = await pool.query(vehicleQuery, staff_id);
-
+            
             if (!transportPartnerResult || transportPartnerResult.length <= 0) {
                 console.log("Transport partner does not exist.");
                 throw new Error("Đối tác vận tải không tồn tại.");
             }
-
+            
             if (!vehicleResult || vehicleResult.length <= 0) {
                 console.log("Vehicle does not exist.");
                 throw new Error("Phương tiện không tồn tại.");
             }
 
             const result = {
-                partnerName: transportPartnerResult[0].name,
+                partnerName: transportPartnerResult[0].transport_partner_name,
                 vehicleID: vehicleResult[0].vehicle_id,
             }
 
@@ -75,41 +75,15 @@ const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => 
     }
 }
 
-const createNewShipment = async (fields, values, agency_id) => {
-    const agencyTable = agency_id + suffix;
+const createNewShipment = async (fields, values, postal_code) => {
+    const agencyTable = postal_code + suffix;
     return await dbUtils.insert(pool, agencyTable, fields, values);
 }
 
-const recieveShipment = async (shipment_id, agency_id) => {
 
-    const agencyOrdersTable = agency_id + "_orders";
-
-    try {
-        const getOrderIDsQuery = `SELECT order_ids FROM ${table} WHERE shipment_id = ?`;
-        const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
-
-        if (rows.length > 0) {
-            const order_ids = JSON.parse(rows[0].order_ids);
-            let result;
-            for (const order_id of order_ids) {
-                const orderData = await getInfoOrder(order_id);
-                result = await dbUtils.insert(pool, agencyOrdersTable, orderData.fields, orderData.values);
-            }
-            return result[0];
-        } else {
-            console.log("Shipment does not exist");
-            throw new Error("Thông tin lô hàng không hợp lệ!");
-        }
-
-    } catch (error) {
-        console.log("Error: ", error);
-        throw new Error(error.message);
-    }
-}
-
-const addOrderToShipment = async (shipment_id, order_id, agency_id) => {
-    const agencyShipmentsTable = agency_id + suffix;
-    const agencyOrdersTable = agency_id + "_orders";
+const addOrderToShipment = async (shipment_id, order_id, postal_code) => {
+    const agencyShipmentsTable = postal_code + suffix;
+    const agencyOrdersTable = postal_code + "_orders";
 
     try {
         const getOrderQuery = `SELECT parent, mass FROM ${agencyOrdersTable} WHERE order_id = ? LIMIT 1`;
@@ -145,9 +119,9 @@ const addOrderToShipment = async (shipment_id, order_id, agency_id) => {
     }
 }
 
-const deleteOrderFromShipment = async (shipment_id, order_id, agency_id) => {
-    const agencyShipmentsTable = agency_id + suffix;
-    const agencyOrdersTable = agency_id + "_orders";
+const deleteOrderFromShipment = async (shipment_id, order_id, postal_code) => {
+    const agencyShipmentsTable = postal_code + suffix;
+    const agencyOrdersTable = postal_code + "_orders";
 
     try {
         
@@ -205,8 +179,8 @@ const deleteOrderFromShipment = async (shipment_id, order_id, agency_id) => {
 
 //trường hợp thêm vào nếu thêm trên database tổng bị lỗi thì nhân viên bưu cục tự xóa trong db bưu cục
 //nếu xóa ở createShipment thất bại
-const deleteShipment = async (shipment_id, agency_id) => {
-    const agencyTable = agency_id + suffix;
+const deleteShipment = async (shipment_id, postal_code) => {
+    const agencyTable = postal_code + suffix;
     const field = "shipment_id";
     const query = `DELETE FROM ${agencyTable} WHERE ${field} = ? LIMIT 1`;
     
@@ -267,9 +241,9 @@ const deleteGlobalShipment = async (shipment_id) => {
 //     }   
 // }
 
-const updateShipment = async (fields, values, conditionFields, conditionValues, agency_id) => {
+const updateShipment = async (fields, values, conditionFields, conditionValues, postal_code) => {
     try {
-        const agencyTable = agency_id + suffix;
+        const agencyTable = postal_code + suffix;
         const setClause = `${fields} = ${fields} + ?`;
         const whereClause = `${conditionFields} = ?`;
         const query = `UPDATE ${agencyTable} SET ${setClause} WHERE ${whereClause}`;
@@ -283,10 +257,10 @@ const updateShipment = async (fields, values, conditionFields, conditionValues, 
     
 };
 
-const getShipmentForAgency = async (fields, values, agency_id) => {
+const getShipmentForAgency = async (fields, values, postal_code) => {
     try {
         //get all the order_id that have parent is shipment_id
-        const ordersTable = agency_id + "_orders";
+        const ordersTable = postal_code + "_orders";
         const getShipmentQuery = `SELECT order_id FROM ${ordersTable} WHERE ${fields} = ?`;
         const [rows] = await pool.query(getShipmentQuery, [values]);
         const result = rows.map(row => row.order_id);
@@ -311,13 +285,16 @@ const getShipmentForAdmin = async (fields, values) => {
     }
 }
 
-const getInfoShipment = async (shipment_id, agency_id) => {
+const getInfoShipment = async (shipment_id, postal_code) => {
     try {
-        const agencyTable = agency_id + suffix;
+        const agencyTable = postal_code + suffix;
         const query = `SELECT * FROM ${agencyTable} WHERE shipment_id = ?`;
         const [rows] = await pool.query(query, shipment_id);
         if (rows.length > 0) {
             const result = rows[0];
+            if(result.hasOwnProperty("id")) {
+                delete result.id;
+            }
             return { fields: Object.keys(result), values: Object.values(result) };
         }
         else {
@@ -332,13 +309,16 @@ const getInfoShipment = async (shipment_id, agency_id) => {
 
 const getInfoOrder = async (order_id) => {
     try {
-        console.log(order_id);
+        
         const ordersTable = "orders";
         const query = `SELECT * FROM ${ordersTable} WHERE order_id = ?`;
         const [rows] = await pool.query(query, order_id);
-        console.log(rows);
+        
         if (rows.length > 0) {
             const result = rows[0];
+            if(result.hasOwnProperty("id")) {
+                delete result.id;
+            }
             return { fields: Object.keys(result), values: Object.values(result) };
         }
         else {
@@ -351,17 +331,17 @@ const getInfoOrder = async (order_id) => {
     }
 }
 
-const updateParentForGlobalOrders = async (shipment_id, agency_id) => {
-    const agencyShipmentsTable = agency_id + suffix;
-    const agencyOrdersTable = agency_id + "_orders";
-    const result = await dbUtils.findOne(pool, agencyShipmentsTable, ["shipment_id"], [shipment_id]);
+const updateParentForGlobalOrders = async (shipment_id, postal_code) => {
+    const agencyShipmentsTable = postal_code + suffix;
+    const agencyOrdersTable = postal_code + "_orders";
+    const result = await dbUtils.findOneIntersect(pool, agencyShipmentsTable, ["shipment_id"], [shipment_id]);
 
     if (!result || result[0].length <= 0) {
         console.log("Shipment does not exist.");
         throw new Error("Lô hàng không tồn tại.");
     }
 
-    const order_ids = JSON.parse(result.order_ids);
+    const order_ids = JSON.parse(result[0].order_ids);
 
     for (const order_id of order_ids) {
         const localUpdatingResult = await dbUtils.updateOne(pool, agencyOrdersTable, ["parent"], [shipment_id], ["order_id"], [order_id]);
@@ -396,9 +376,9 @@ const updateOrderToDatabase = async (fields, values, order_id) => {
     return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 }
 
-const compareOrdersInDatabase = async (shipment_id, ordersFromRequest, agency_id) => {
-    const agencyShipmentsTable = agency_id + suffix;
-    const agencyOrdersTable = agency_id + "_orders";
+const compareOrdersInDatabase = async (shipment_id, ordersFromRequest, postal_code) => {
+    const agencyShipmentsTable = postal_code + suffix;
+    const agencyOrdersTable = postal_code + "_orders";
 
     try{
         //console.log(agencyShipmentsTable);
@@ -430,12 +410,40 @@ const compareOrdersInDatabase = async (shipment_id, ordersFromRequest, agency_id
     } 
 }
 
-const decomposeShipment = async (shipment_id, order_ids , agency_id) => {
-    const agencyShipmentsTable = agency_id + suffix;
-    const agencyOrdersTable = agency_id + "_orders";
+const recieveShipment = async (shipment_id, postal_code) => {
+
+    const agencyOrdersTable = postal_code + "_orders";
+
+    try {
+        const getOrderIDsQuery = `SELECT order_ids FROM ${table} WHERE shipment_id = ?`;
+        const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
+
+        if (rows.length > 0) {
+            const order_ids = JSON.parse(rows[0].order_ids);
+            console.log(order_ids);
+            let result;
+            for (const order_id of order_ids) {
+                const orderData = await getInfoOrder(order_id);
+                result = await dbUtils.insert(pool, agencyOrdersTable, orderData.fields, orderData.values);
+            }
+            return result[0];
+        } else {
+            console.log("Shipment does not exist");
+            throw new Error("Thông tin lô hàng không hợp lệ!");
+        }
+
+    } catch (error) {
+        console.log("Error: ", error);
+        throw new Error(error.message);
+    }
+}
+
+const decomposeShipment = async (shipment_id, order_ids , postal_code) => {
+    const agencyShipmentsTable = postal_code + suffix;
+    const agencyOrdersTable = postal_code + "_orders";
     
     try {
-        const compareOrders = await compareOrdersInDatabase(shipment_id, order_ids, agency_id);
+        const compareOrders = await compareOrdersInDatabase(shipment_id, order_ids, postal_code);
         const { error, message } = compareOrders;    
         
         if (error) {
@@ -455,6 +463,8 @@ const decomposeShipment = async (shipment_id, order_ids , agency_id) => {
         throw error;
     }
 }
+
+
 
 module.exports = {
     createNewShipment,
