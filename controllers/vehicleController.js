@@ -94,7 +94,7 @@ const createNewVehicle = async (req, res) => {
             if (!existed) {
                 return res.status(404).json({
                     error: true,
-                    message: `Nhân viên có mã nhân viên ${req.body.staff_id} của đối tác vận tải có mã đối tác ${req.body.transport_partner_id} không tồn tại.`,
+                    message: `Đối tác vận tải có mã đối tác ${req.body.transport_partner_id} không tồn tại.`,
                 });
             }
         }
@@ -103,7 +103,7 @@ const createNewVehicle = async (req, res) => {
             
         if (!resultCreatingNewVehicle || resultCreatingNewVehicle.affectedRows <= 0) {
             return res.status(409).json({
-                error: false,
+                error: true,
                 message: `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thất bại.`,
             });
         }

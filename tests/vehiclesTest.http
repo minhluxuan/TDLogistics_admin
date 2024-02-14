@@ -3,9 +3,9 @@ Content-Type: application/json
 
 {
     "agency_id": "BC_70001_077204005691",
-    "staff_id": "BC_70001_077204005691",
+    "staff_id": "BC_70001_077204005684",
     "type": "motorbike",
-    "license_plate": "72-H1 24767",
+    "license_plate": "72-H1 24768",
     "max_load": 50
 }
 
