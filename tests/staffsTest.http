@@ -272,8 +272,7 @@ POST http://localhost:5000/api/v1/staffs/create
 Content-Type: application/json
 
 {
-
-    "username": "minhluxuan2k1",
+    "username": "minhluxuan2k15",
     "password": "minhluxuan@TDlogistics2k24",
     "fullname": "Lữ Xuân Minh",
     "phone_number": "0981430419",

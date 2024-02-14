@@ -68,7 +68,7 @@ const checkPostalCode = async (province, district, postal_code) => {
 
 	const postalCodeOfDistrictFromDatabase = resultFindingDistrict[0].postal_code;
 
-	if (!postalCodeOfDistrictFromDatabase || postalCodeOfDistrictFromDatabase.slice(0, 4) !== postalCodeOfDistrictFromDatabase.slice(0, 4)) {
+	if (!postalCodeOfDistrictFromDatabase || postalCodeOfDistrictFromDatabase.slice(0, 4) !== postal_code.slice(0, 4)) {
 		return new Object({
 			success: false,
 			message: "Tên quận/huyện không khớp với mã bưu chính.",
