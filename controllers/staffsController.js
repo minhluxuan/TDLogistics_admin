@@ -151,13 +151,13 @@ const createNewStaff = async (req, res) => {
 			if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
 				return res.status(409).json({
 					error: false,
-					message: `Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thất bại.`,
+					message: `Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} thất bại.`,
 				});
 			}
 			else {
 				return res.status(201).json({
 					error: false,
-					message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thành công.`,
+					message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} thành công.`,
 				});
 			}
 		}
@@ -172,10 +172,10 @@ const createNewStaff = async (req, res) => {
 				});
 			}
 
-			if (!(await agencyService.checkExistAgency({ agency_id: req.body.agency_id }))) {
+			if (!(await agencyService.checkExistAgency({ agency_id: req.user.agency_id }))) {
 				return res.status(404).json({
 					error: true,
-					message: `Bưu cục có mã bưu cục ${req.body.agency_id} không tồn tại.`,
+					message: `Bưu cục có mã bưu cục ${req.user.agency_id} không tồn tại.`,
 				});
 			}
 
@@ -198,6 +198,7 @@ const createNewStaff = async (req, res) => {
 			const creatorIdSubParts = req.user.agency_id.split('_');
 			req.body.staff_id = creatorIdSubParts[0] + '_' + creatorIdSubParts[1] + '_' + req.body.cccd;
 			req.body.password = utils.hash(req.body.password);
+			req.body.agency_id = req.user.agency_id;
 
 			if (req.file) {
 				req.body.avatar = req.file.filename;
@@ -208,13 +209,13 @@ const createNewStaff = async (req, res) => {
 			if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
 				return res.status(409).json({
 					error: false,
-					message: `Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thất bại.`,
+					message: `Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} thất bại.`,
 				});
 			}
 			else {
 				return res.status(201).json({
 					error: false,
-					message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thành công.`,
+					message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} thành công.`,
 				});
 			}
 		}
