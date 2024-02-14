@@ -29,7 +29,7 @@ const getTransportPartner = async (req, res) => {
             });
         }
 
-        if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role)) {
+        if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role)) {
             const { error } = transportPartnerValidation.validateFindingPartnerByAdmin(req.body);
 
             if (error) {
@@ -50,7 +50,7 @@ const getTransportPartner = async (req, res) => {
             });
         }
 
-        if (["ADMIN", "MANAGER", "TELLER", "COMPLAINT_SOLVER"].includes(req.user.role)) {
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINT_SOLVER"].includes(req.user.role)) {
             const { error } = transportPartnerValidation.validateFindingPartnerByAdmin(req.body);
 
             if (error) {
@@ -79,7 +79,7 @@ const getTransportPartner = async (req, res) => {
 
 const createNewTransportPartner = async (req, res) => {
     try {
-        if (["ADMIN", "MANAGER"].includes(req.user.role)) {
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
 			const { error } = transportPartnerValidation.validateCreatingPartnerByAdmin(req.body);
 
 			if (error) {
@@ -96,7 +96,7 @@ const createNewTransportPartner = async (req, res) => {
 				});
 			}
 		}
-		else if (["AGENCY_MANAGER"].includes(req.user.role)) {
+		else if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
 			const { error } = transportPartnerValidation.validateCreatingPartnerByAgency(req.body);
 
 			if (error) {
@@ -158,7 +158,7 @@ const createNewTransportPartner = async (req, res) => {
             district: req.body.user_district || null,
             town: req.body.town || null,
             detail_address: req.body.user_detail_address || null,
-            role: "TRANSPORT_PARTNER",
+            role: "TRANSPORT_PARTNER_REPRESENTOR",
             position: req.body.user_position || null,
             bin: req.body.user_bin || null,
             bank: req.body.user_bank || null,
@@ -232,7 +232,8 @@ const updateTransportPartner = async (req, res) => {
         const updatorIdSubParts = req.user.staff_id.split('_');
 		const partnerIdSubParts = req.query.transport_partner_id.split('_');
 
-		if (req.user.role === "AGENCY_MANAGER" && updatorIdSubParts[1] !== partnerIdSubParts[1]) {
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"] && 
+            (updatorIdSubParts[0] !== partnerIdSubParts[0] || updatorIdSubParts[1] !== partnerIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
 				message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
@@ -287,15 +288,16 @@ const updateContract = async (req, res) => {
             });
         }
 
-        const deletorIdSubParts = req.user.staff_id.split('_');
+        const updatorIdSubParts = req.user.staff_id.split('_');
         const partnerIdSubParts = req.query.transport_partner_id.split('_');
 
-        if (req.user.role === "AGENCY_MANAGER" && deletorIdSubParts[1] !== partnerIdSubParts[1]) {
-            return res.status(404).json({
-                error: true,
-                message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
-            });
-        }
+        if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"] && 
+            (updatorIdSubParts[0] !== partnerIdSubParts[0] || updatorIdSubParts[1] !== partnerIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
 
         const resultGettingOneTransportPartner = await transportPartnerService.getOnePartner(req.query);
 
@@ -367,7 +369,8 @@ const deleteTransportPartner = async (req, res) => {
         const deletorIdSubParts = req.user.staff_id.split('_');
 		const partnerIdSubParts = req.query.transport_partner_id.split('_');
 
-		if (req.user.role === "AGENCY_MANAGER" && deletorIdSubParts[1] !== partnerIdSubParts[1]) {
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"] && 
+            (deletorIdSubParts[0] !== partnerIdSubParts[0] || deletorIdSubParts[1] !== partnerIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
 				message: `Đối tác vận tải có mã đối tác ${req.query.transport_partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,

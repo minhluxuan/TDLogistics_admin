@@ -87,7 +87,7 @@ const checkWardsOccupation = async (province, district, wards) => {
 		if (!resultFindingWard || resultFindingWard.length <= 0) {
 			return new Object({
 				success: false,
-				message: `Phường/xã/thị trấn ${ward} không tồn tại.`
+				message: `${ward} không tồn tại.`
 			});
 		}
 
@@ -95,7 +95,7 @@ const checkWardsOccupation = async (province, district, wards) => {
 		if (occupierAgencyId && (new RegExp(process.env.REGEX_PERSONNEL)).test(occupierAgencyId)) {
 			return new Object({
 				success: false,
-				message: `Phường/xã/thị trấn ${ward} đã được quản lý bởi đại lý/bưu cục có mã đại lý ${occupierAgencyId}.`,
+				message: `${ward} đã được quản lý bởi đại lý/bưu cục có mã đại lý ${occupierAgencyId}.`,
 			});
 		}
 	}
@@ -208,7 +208,7 @@ const locateAgencyInArea = async (choice, province, district, wards, agency_id, 
 		if (!provinceResultUpdate || provinceResultUpdate[0].affectedRows <= 0) {
 			return new Object({
 				success: false,
-				message: `Tỉnh thành ${province} không tồn tại.`,
+				message: `${province} không tồn tại.`,
 			});
 		}
 
@@ -218,7 +218,7 @@ const locateAgencyInArea = async (choice, province, district, wards, agency_id, 
 		if (!districtResultUpdate || districtResultUpdate[0].affectedRows <= 0) {
 			return new Object({
 				success: false,
-				message: `Quận/huyện ${district} không tồn tại.`,
+				message: `${district} không tồn tại.`,
 			});
 		}
 
@@ -229,13 +229,13 @@ const locateAgencyInArea = async (choice, province, district, wards, agency_id, 
 			if (!wardResultUpdate || wardResultUpdate[0].affectedRows <= 0) {
 				return new Object({
 					success: false,
-					message: `Phường/xã/thị trấn ${ward} không tồn tại.`,
+					message: `${ward} không tồn tại.`,
 				});
 			}
 		}
 	}
 
-	if (choice === 1) {
+	if (choice === 1) {console.log(province, district, wards);
 		const provinceSelectQuery = `SELECT ?? FROM ?? WHERE ?? = ? LIMIT 1`;
 		const provinceResultSelect = await pool.query(provinceSelectQuery, ["agency_ids", "province", "province", province]);
 
@@ -261,7 +261,7 @@ const locateAgencyInArea = async (choice, province, district, wards, agency_id, 
 
 		const districtUpdateQuery = `UPDATE ?? SET ?? = ? WHERE ?? = ? AND ?? = ?`;
 		await pool.query(districtUpdateQuery, ["district", "agency_ids", JSON.stringify(agenciesOfDistrict), "province", province, "district", district]);
-		console.log(wards);
+
 		for (const ward of wards) {
 			const wardUpdateQuery = `UPDATE ?? SET ?? = ?, ?? = ? WHERE ?? = ? AND ?? = ? AND ?? = ?`;
 			await pool.query(wardUpdateQuery, ["ward", "agency_id", null, "postal_code", null, "province", province, "district", district, "ward", ward]);

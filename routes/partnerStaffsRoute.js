@@ -122,7 +122,10 @@ router.post("/login", passport.authenticate("partnerStaffLogin"), (req, res, nex
     })(req, res, next);
 });
 router.get("/check", partnerStaffsController.checkExistPartnerStaff);
-router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []), 
+router.post(
+    "/create",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]), 
     upload.fields([{
             name: 'avatar', maxCount: 1
         }, {
@@ -138,16 +141,46 @@ router.get(
     "TRANSPORT_PARTNER", "PARTNER_DRIVER", "PARTNER_SHIPPER"], []),
     partnerStaffsController.getPartnerStaffs
 );
-router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []), partnerStaffsController.deletePartnerStaff);
-router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []), partnerStaffsController.updatePartnerStaffInfo);
-router.patch("/update_password", auth.isAuthenticated(), auth.isAuthorized(["PARTNER_DRIVER", "PARTNER_SHIPPER"], []), partnerStaffsController.updatePartnerPassword);
-router.patch("/update_avatar", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE"], []), upload.single("avatar"), partnerStaffsController.updatePartnerAvatar);
-router.patch("/update_licenses", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []),  upload.fields([{
+router.delete(
+    "/delete",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    partnerStaffsController.deletePartnerStaff
+);
+router.put(
+    "/update",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    partnerStaffsController.updatePartnerStaffInfo
+);
+router.patch(
+    "/update_password",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["PARTNER_DRIVER", "PARTNER_SHIPPER"]),
+    partnerStaffsController.updatePartnerPassword
+);
+router.patch(
+    "/update_avatar",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE"]),
+    upload.single("avatar"),
+    partnerStaffsController.updatePartnerAvatar
+);
+router.patch(
+    "/update_licenses",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    upload.fields([{
     name: 'license_before', maxCount: 1
 }, {
     name: 'license_after', maxCount: 1
 }]), partnerStaffsController.updatePartnerLicenseImg);
-router.get("/logout", auth.isAuthenticated(), auth.isAuthorized(["PARTNER_DRIVER", "PARTNER_SHIPPER"], []), partnerStaffsController.logout);
+router.get(
+    "/logout",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["PARTNER_DRIVER", "PARTNER_SHIPPER"]),
+    partnerStaffsController.logout
+);
 
 module.exports = router;
 

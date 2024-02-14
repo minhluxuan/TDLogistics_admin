@@ -1,4 +1,4 @@
-GET http://localhost:5000/api/v1/agencies/check?agency_id=
+GET http://localhost:5000/api/v1/agencies/check?agency_id=BC_70001_077204005691
 Content-Type: application/json
 
 ###

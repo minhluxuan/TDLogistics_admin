@@ -48,7 +48,7 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:5000/api/v1/business/update?business_id=BC_70001_077204005692&agency_id=BC_70001_077204005691
+PUT http://localhost:5000/api/v1/business/update?business_id=BC_70001_077204005692
 Content-Type: application/json
 
 {
@@ -59,7 +59,7 @@ Content-Type: application/json
 
 ###
 
-PATCH http://localhost:5000/api/v1/business/update_business_representor?business_id=BC_70001_077204005692&agency_id=BC_70001_077204005691
+PATCH http://localhost:5000/api/v1/business/update_business_representor?business_id=BC_70001_077204005692
 Content-Type: application/json
 
 {

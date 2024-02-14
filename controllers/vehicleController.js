@@ -37,7 +37,7 @@ const checkExistVehicle = async (req, res) => {
 
 const createNewVehicle = async (req, res) => {
     try {
-        if (["ADMIN", "MANAGER"].includes(req.user.role) || req.user.privileges.includes(46)) {
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
 			const { error } = vehicleValidation.validateCreatingVehicleByAdmin(req.body);
 
 			if (error) {
@@ -54,7 +54,7 @@ const createNewVehicle = async (req, res) => {
 				});
 			}
 		}
-		else if (["AGENCY_MANAGER"].includes(req.user.role) || req.user.privileges.includes(45)) {
+		else if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
 			const { error } = businessValidation.validateCreatingVehicleByAgency(req.body);
 
 			if (error) {
@@ -89,7 +89,7 @@ const createNewVehicle = async (req, res) => {
         req.body.vehicle_id = agencyIdSubParts[0] + '_' + agencyIdSubParts[1] + '_' + modifiedLicensePlate;
 
         if (req.body.hasOwnProperty("transport_partner_id")) {
-            const existed = await partnerStaffService.checkExistPartnerStaff({ staff_id: req.body.staff_id });
+            const existed = await partnerStaffService.checkExistPartnerStaff({ transport_partner_id: req.body.transport_partner_id });
 
             if (!existed) {
                 return res.status(404).json({
@@ -107,12 +107,11 @@ const createNewVehicle = async (req, res) => {
                 message: `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thất bại.`,
             });
         }
-        else {
-            return res.status(201).json({
-                error: false,
-                message: `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thành công.`,
-            });
-        }
+
+        return res.status(201).json({
+            error: false,
+            message: `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thành công.`,
+        });
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -124,8 +123,7 @@ const createNewVehicle = async (req, res) => {
 
 const getVehicle = async (req, res) => {
     try {
-        if (["DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER", "PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)
-            || req.user.privileges.includes(41)) {
+        if (["DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER", "PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)) {
             const { error } = vehicleValidation.validateFindingVehicleByStaff(req.query);
 
             if (error) {
@@ -144,14 +142,14 @@ const getVehicle = async (req, res) => {
             });
         }
 
-        if (req.user.role === "TRANSPORT_PARTNER" || req.user.privileges.includes(42)) {
+        if (req.user.role === "TRANSPORT_PARTNER_REPRESENTOR") {
             const { error } = vehicleValidation.validateFindingVehicle(req.body);
 
             if (error) {
                 return res.status(400).json({
                     error: true,
                     message: error.message,
-                }); 
+                });
             }
 
             req.body.transport_partner_id = req.user.transport_partner_id;
@@ -165,7 +163,7 @@ const getVehicle = async (req, res) => {
             });
         }
 
-        if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(43)) {
+        if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role)) {
             const { error } = vehicleValidation.validateFindingVehicle(req.body);
 
             if (error) {
@@ -186,7 +184,7 @@ const getVehicle = async (req, res) => {
             });
         }
 
-        if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(44)) {
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
             const { error } = vehicleValidation.validateFindingVehicle(req.body);
 
             if (error) {
@@ -262,8 +260,9 @@ const addOrders = async (req, res) => {
         const updatorIdSubParts = req.user.staff_id.split('_');
 		const vehicleIdSubParts = req.query.vehicle_id.split('_');
 
-		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role) || req.user.privileges.includes(50))
-		&& (updatorIdSubParts[1] !== vehicleIdSubParts[1])) {
+		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
+		&& (updatorIdSubParts[0] !== vehicleIdSubParts[0] ||
+            updatorIdSubParts[1] !== vehicleIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
 				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
@@ -316,8 +315,9 @@ const deleteOrders = async (req, res) => {
         const deletorIdSubParts = req.user.staff_id.split('_');
 		const vehicleIdSubParts = req.query.vehicle_id.split('_');
 
-		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role) || req.user.privileges.includes(52))
-		&& (deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
+		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
+		&& (deletorIdSubParts[0] !== vehicleIdSubParts[0] ||
+            deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
 				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
@@ -370,8 +370,9 @@ const updateVehicle = async (req, res) => {
         const updatorIdSubParts = req.user.staff_id.split('_');
 		const vehicleIdSubParts = req.query.vehicle_id.split('_');
 
-		if ((req.user.role === "AGENCY_MANAGER" || req.user.privileges.includes(47))
-		&& (updatorIdSubParts[1] !== vehicleIdSubParts[1])) {
+		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
+		&& (updatorIdSubParts[0] !== vehicleIdSubParts[0] ||
+            updatorIdSubParts[1] !== vehicleIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
 				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
@@ -413,8 +414,9 @@ const deleteVehicle = async (req, res) => {
         const deletorIdSubParts = req.user.staff_id.split('_');
 		const vehicleIdSubParts = req.query.vehicle_id.split('_');
 
-		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role) || req.user.privileges.includes(54))
-		&& (deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
+		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
+		&& (deletorIdSubParts[0] !== vehicleIdSubParts[0] ||
+            deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
 				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,

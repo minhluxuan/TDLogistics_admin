@@ -34,7 +34,7 @@ const checkExistStaff = async (req, res) => {
 
 const getStaffs = async (req, res) => {
 	try {
-		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(15)) {
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
 			const { error } = staffValidation.validateFindingStaffByAdmin(req.body);
 
 			if (error) {
@@ -52,7 +52,7 @@ const getStaffs = async (req, res) => {
 			});
 		}
 
-		if (["AGENCY_MANAGER"].includes(req.user.role) || req.user.privileges.includes(14)) {
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
 			const { error } = staffValidation.validateFindingStaffByAdmin(req.body);
 
 			if (error) {
@@ -81,10 +81,10 @@ const getStaffs = async (req, res) => {
 			});
 		}
 
-		if (req.user.staff_id !== req.query.staff_id) {
-			return res.status(401).json({
+		if (req.user.staff_id !== req.body.staff_id) {
+			return res.status(403).json({
 				error: true,
-				message: "Bạn không được phép truy cập tài nguyên này.",
+				message: "Người dùng không được phép truy cập tài nguyên này.",
 			});
 		}
 
@@ -105,7 +105,7 @@ const getStaffs = async (req, res) => {
 
 const createNewStaff = async (req, res) => {
 	try {
-		if (["ADMIN", "MANAGER"].includes(req.user.role) || req.user.privileges.includes(12)) {
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
 			const { error } = staffValidation.validateCreatingStaffByAdmin(req.body);
 
 			if (error) {
@@ -151,21 +151,19 @@ const createNewStaff = async (req, res) => {
 			if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
 				return res.status(409).json({
 					error: false,
-					message: `Kết quả:\n
-					Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thất bại.`,
+					message: `Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thất bại.`,
 				});
 			}
 			else {
 				return res.status(201).json({
 					error: false,
-					message: `Kết quả:\n
-					Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thành công.`,
+					message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thành công.`,
 				});
 			}
 		}
 
-		if (["AGENCY_MANAGER"].includes(req.user.role) || req.user.privileges.includes(11)) {
-			const { error } = staffValidation.validateCreatingStaffByAdmin(req.body);
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const { error } = staffValidation.validateCreatingStaffByAgency(req.body);
 
 			if (error) {
 				return res.status(400).json({
@@ -210,15 +208,13 @@ const createNewStaff = async (req, res) => {
 			if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
 				return res.status(409).json({
 					error: false,
-					message: `Kết quả:\n
-					Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thất bại.`,
+					message: `Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thất bại.`,
 				});
 			}
 			else {
 				return res.status(201).json({
 					error: false,
-					message: `Kết quả:\n
-					Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thành công.`,
+					message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} trong cơ sở dữ liệu tổng thành công.`,
 				});
 			}
 		}
@@ -244,52 +240,41 @@ const updateStaffInfo = async (req, res) => {
 
 		const updatorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
-		const staffId = req.query.staff_id;
-		const agencyId = req.query.agency_id;
 
-		if (updatorIdSubParts[0] === "BC" || updatorIdSubParts[0] === "DL") {
-			if (updatorIdSubParts[1] !== staffIdSubParts[1]) {
-				return res.status(404).json({
-					error: true,
-					message: `
-					Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${updatorIdSubParts[1]}.`
-				});
-			}
-		}
-
-		if ((req.user.role === "AGENCY_MANAGER" || req.user.privileges.includes(16)) && req.user.agency_id !== agencyId) {
+		if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+			&& (updatorIdSubParts[0] !== staffIdSubParts[0]
+			|| updatorIdSubParts[1] !== staffIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
-				message: `
-				Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${updatorIdSubParts[1]}.`
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${updatorIdSubParts[1]}.`
 			});
 		}
 
 		if (req.body.hasOwnProperty("paid_salary")) {
-			const staff = (await staffsService.getOneStaff({ staff_id: req.query.staff_id }))[0];
+			const resultGettingOneStaff = (await staffsService.getOneStaff({ staff_id: req.query.staff_id }))[0];
+			if (!resultGettingOneStaff || resultGettingOneStaff.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`
+				})
+			}
+
+			const staff = resultGettingOneStaff[0];
 			req.body.paid_salary += parseInt(staff.paid_salary || 0);
 		}
 
-		const conditions = new Object({
-			staff_id: staffId,
-			agency_id: agencyId,
-		});
-
-		const resultUpdatingStaff = await staffsService.updateStaff(req.body, conditions);
+		const resultUpdatingStaff = await staffsService.updateStaff(req.body, { staff_id: req.query.staff_id });
 		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows <= 0) {
-			return res.status(409).json({
+			return res.status(404).json({
 				error: false,
-				message: `Kết quả:\n
-				Cập nhật thông tin nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu tổng thất bại.`,
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`,
 			});
 		}
-		else {
-			return res.status(201).json({
-				error: false,
-				message: `Kết quả:\n
-				Cập nhật thông tin nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu tổng thành công.`,
-			});
-		}
+
+		return res.status(201).json({
+			error: false,
+			message: `Cập nhật thông tin nhân viên có mã nhân viên ${req.query.staff_id} thành công.`,
+		});
 	} catch (error) {
 		res.status(500).json({
 			error: true,
@@ -311,48 +296,50 @@ const deleteStaff = async (req, res) => {
 
 		const deletorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
-		const staffId = req.query.staff_id;
-		const agencyId = req.query.agency_id;
 
-		if (deletorIdSubParts[0] === "BC" || deletorIdSubParts[0] === "DL") {
-			if (deletorIdSubParts[1] !== staffIdSubParts[1]) {
-				return res.status(404).json({
-					error: true,
-					message: `
-					Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${deletorIdSubParts[1]}.`
-				});
-			}
-		}
-
-		if ((req.user.role === "AGENCY_MANAGER" || req.user.privileges.includes(16)) && req.user.agency_id !== agencyId) {
+		if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+			&& (deletorIdSubParts[0] !== staffIdSubParts[0]
+			|| deletorIdSubParts[1] !== staffIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
-				message: `
-				Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${updatorIdSubParts[1]}.`
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${deletorIdSubParts[1]}.`
 			});
 		}
 
-		const conditions = new Object({
-			staff_id: staffId,
-			agency_id: agencyId
-		});
-
-		let textResultDeletingStaff;
-		const resultDeletingStaff = await staffsService.deleteStaff(conditions);
-		if (!resultDeletingStaff || resultDeletingStaff.affectedRows <= 0) {
-			textResultDeletingStaff = `
-			Xóa nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu tổng không thành công.
-			Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong cơ sở dữ liệu tổng.`
+		const resultGettingOneStaff = await staffsService.getOneStaff(req.query);
+		if (!resultGettingOneStaff || resultGettingOneStaff.length <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`
+			});
 		}
-		else {
-			textResultDeletingStaff = `
-			Xóa nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu tổng thành công.`;
+
+		const staff = resultGettingOneStaff[0];
+		const avatar = staff.avatar;
+
+		const resultDeletingStaff = await staffsService.deleteStaff({ staff_id: req.query.staff_id });
+		if (!resultDeletingStaff || resultDeletingStaff.affectedRows <= 0) {
+			return res.status(200).json({
+				error: false,
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`,
+			});
 		}
 	
-		res.status(200).json({
+		if (avatar) {
+			const folderPath = path.join("storage", "staff", "img", "avatar");
+			if (!fs.existsSync(folderPath)) {
+				fs.mkdirSync(folderPath);
+			}
+
+			const avatarPath = path.join(folderPath, avatar);
+			if (fs.existsSync(avatarPath)) {
+				fs.unlinkSync(avatarPath);
+			}
+		}
+
+		return res.status(200).json({
 			error: false,
-			message: `Kết quả:\n
-			${textResultDeletingStaff}\n`,
+			message: `Xóa nhân viên có mã nhân viên ${req.query.staff_id} thành công.`,
 		});
 	} catch (error) {
 		console.log(error);
@@ -379,16 +366,12 @@ const updatePassword = async (req, res) => {
 			active: true,
 		});
 
-		const condition = new Object({
-			staff_id: req.user.staff_id,
-		});
-
-		const result = await staffsService.updatePassword(updatedInfo, condition);
+		const result = await staffsService.updatePassword(updatedInfo, { staff_id: req.user.staff_id });
 		
 		if (!result || result.affectedRows <= 0) {
 			return res.status(404).json({
 				error: true,
-				message: "Cập nhật mật khẩu không thành công. Người dùng không tồn tại."
+				message: `Nhân viên có mã nhân viên ${req.user.staff_id} không tồn tại.`,
 			});
 		}
 
@@ -415,7 +398,19 @@ const updateAvatar = async (req, res) => {
 			});
 		}
 
-		const resultGettingOneStaff = await staffsService.getOneStaff({ staff_id: req.user.staff_id, agency_id: req.user.agency_id });
+		const updatorIdSubParts = req.user.staff_id.split('_');
+		const staffIdSubParts = req.query.staff_id.split('_');
+
+		if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+			&& (updatorIdSubParts[0] !== staffIdSubParts[0]
+			|| updatorIdSubParts[1] !== staffIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${updatorIdSubParts[1]}.`
+			});
+		}
+
+		const resultGettingOneStaff = await staffsService.getOneStaff({ staff_id: req.query.staff_id });
 		
 		if (!resultGettingOneStaff || resultGettingOneStaff.length <= 0) {
 			return res.status(404).json({
@@ -427,6 +422,14 @@ const updateAvatar = async (req, res) => {
 		const staff = resultGettingOneStaff[0];
 		const fileName = staff.avatar;
 
+		const resultUpdatingStaff = await staffsService.updateStaff({ avatar: req.file.filename });
+		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`,
+			});
+		}
+
 		const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
 		if (!fs.existsSync(tempFolderPath)) {
 			fs.mkdirSync(tempFolderPath);
@@ -435,64 +438,6 @@ const updateAvatar = async (req, res) => {
 		const officialFolderPath = path.join("storage", "staff", "img", "avatar");
 		if (!fs.existsSync(officialFolderPath)) {
 			fs.mkdirSync(officialFolderPath);
-		}
-
-		const updatorIdSubParts = req.user.staff_id.split('_');
-		const staffIdSubParts = req.query.staff_id.split('_');
-		const staffId = req.query.staff_id;
-		const agencyId = req.query.agency_id;
-
-		if (updatorIdSubParts[0] === "BC" || updatorIdSubParts[0] === "DL") {
-			if (updatorIdSubParts[1] !== staffIdSubParts[1]) {
-				return res.status(404).json({
-					error: true,
-					message: `
-					Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${updatorIdSubParts[1]}.`
-				});
-			}
-		}
-
-		if ((req.user.role === "AGENCY_MANAGER" || req.user.privileges.includes(16)) && req.user.agency_id !== agencyId) {
-			return res.status(404).json({
-				error: true,
-				message: `
-				Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${updatorIdSubParts[1]}.`
-			});
-		}
-
-		const updatedInfo = new Object({
-			avatar: req.file.filename,
-		});
-
-		const conditions = new Object({
-			staff_id: staffId,
-			agency_id: agencyId,
-		});
-
-		let textResultUpdatingStaffInAgency;
-		if (staffIdSubParts[0] === "BC" || staffIdSubParts[0] === "DL") {
-			const resultUpdatingStaffInAgency = await staffsService.updateStaff(updatedInfo, conditions, staffIdSubParts[1]);
-			if (!resultUpdatingStaffInAgency || resultUpdatingStaffInAgency.affectedRows <= 0) {
-				textResultUpdatingStaffInAgency = `
-				Cập nhật ảnh đại diện nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu bưu cục không thành công.
-				Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${staffIdSubParts[1]}.`
-			}
-			else {
-				textResultUpdatingStaffInAgency = `
-				Cập nhật ảnh đại diện nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu bưu cục thành công.`;
-			}
-		}
-
-		let textResultUpdatingStaff;
-		const resultUpdatingStaff = await staffsService.updateStaff(updatedInfo, conditions);
-		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows <= 0) {
-			textResultUpdatingStaff = `
-			Cập nhật ảnh đại diện nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu tổng không thành công.
-			Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong cơ sở dữ liệu tổng.`
-		}
-		else {
-			textResultUpdatingStaff = `
-			Cập nhật ảnh đại diện nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu tổng thành công.`;
 		}
 
 		if (fileName) {
@@ -507,11 +452,9 @@ const updateAvatar = async (req, res) => {
 
 		fs.renameSync(tempFilePath, officialFilePath);
 
-		res.status(201).json({
+		return res.status(201).json({
 			error: false,
-			message: `Kết quả:\n
-			${textResultUpdatingStaff}\n
-			${textResultUpdatingStaffInAgency || ""}`,
+			message: `Cập nhật ảnh đại diện cho nhân viên có mã nhân viên ${req.query.staff_id} thành công.`,
 		});
 	} catch (error) {
 		console.log(error);

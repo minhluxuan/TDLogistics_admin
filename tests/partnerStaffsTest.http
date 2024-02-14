@@ -1,4 +1,4 @@
-GET http://localhost:5000/api/v1/partner_staffs/check?cccd=077204005692
+GET http://localhost:5000/api/v1/partner_staffs/check?cccd=077204005691
 
 ###
 

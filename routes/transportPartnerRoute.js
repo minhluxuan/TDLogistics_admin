@@ -48,32 +48,37 @@ const upload = multer({
 });
 
 
-router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "TRANSPORT_PARTNER"], []), transportPartnerController.getTransportPartner);
+router.get(
+    "/search",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "TRANSPORT_PARTNER_REPRESENTOR"]),
+    transportPartnerController.getTransportPartner);
 router.post(
     "/create",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], []),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
     upload.single("contract"),
     transportPartnerController.createNewTransportPartner
 );
 router.put(
     "/update",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], []),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []),
     upload.single("contract"),
     transportPartnerController.updateTransportPartner
 );
 router.patch(
     "/update_contract", 
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "ADMIN_MANAGER"], []),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []),
     upload.single("contract"),
     transportPartnerController.updateContract,
 );
 router.delete(
     "/delete",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "AGENCY_MANAGER"], []),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []),
     transportPartnerController.deleteTransportPartner
 );
 

@@ -59,7 +59,7 @@ const getPartnerStaffs = async (req, res) => {
 		});
 	}
 
-	if (["TRANSPORT_PARTNER"].includes(req.user.role)) { 
+	if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
 		const { error } = partnerStaffValidation.validateFindingPartnerStaffByPartner(req.body);
 
 		if (error) {
@@ -132,7 +132,7 @@ const createNewPartnerStaff = async (req, res) => {
 		const staffIdSubParts = req.user.staff_id.split('_');
 		const partnerIdSubParts = req.body.partner_id.split('_');
 
-		if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
 		&& (staffIdSubParts[0] !== partnerIdSubParts[0]
 		|| staffIdSubParts[1] !== partnerIdSubParts[1])) {
 			return res.status(404).json({
@@ -267,7 +267,7 @@ const updatePartnerStaffInfo = async (req, res) => {
 		const updatorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
 
-		if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
 		&& (staffIdSubParts[0] !== updatorIdSubParts[0]
 		|| staffIdSubParts[1] !== updatorIdSubParts[1])) {
 			return res.status(404).json({
@@ -310,7 +310,7 @@ const deletePartnerStaff = async (req,res)=>{
 		const deletorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
 
-		if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
 		&& (staffIdSubParts[0] !== deletorIdSubParts[0]
 		|| staffIdSubParts[1] !== deletorIdSubParts[1])) {
 			return res.status(404).json({
@@ -438,7 +438,7 @@ const updatePartnerAvatar = async (req, res) => {
 		const updatorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
 
-		if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
 		&& (staffIdSubParts[0] !== updatorIdSubParts[0]
 		|| staffIdSubParts[1] !== updatorIdSubParts[1])) {
 			return res.status(404).json({
@@ -508,7 +508,7 @@ const updatePartnerLicenseImg = async (req, res) => {
 		const updatorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
 
-		if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
 		&& (staffIdSubParts[0] !== updatorIdSubParts[0]
 		|| staffIdSubParts[1] !== updatorIdSubParts[1])) {
 			return res.status(404).json({
