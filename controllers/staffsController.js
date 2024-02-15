@@ -4,8 +4,11 @@ const utils = require("../lib/utils");
 const validation = require("../lib/validation");
 const fs = require("fs");
 const path = require('path');
+const { object } = require("joi");
 
 const staffValidation = new validation.StaffValidation();
+
+const userCannotBeAffected = ["TD_00000_077165007713"];
 
 const checkExistStaff = async (req, res) => {
 	try {
@@ -239,6 +242,13 @@ const updateStaffInfo = async (req, res) => {
 			});
 		}
 
+		if (userCannotBeAffected.includes(req.query.staff_id)) {
+			return res.status(403).json({
+				error: true,
+				message: "Người dùng không được phép truy cập tài nguyên này.",
+			});
+		}
+
 		const updatorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
 
@@ -249,6 +259,26 @@ const updateStaffInfo = async (req, res) => {
 				error: true,
 				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${updatorIdSubParts[1]}.`
 			});
+		}
+
+		const propertiesWillBeCheckExist = ["username", "email", "phone_number"];
+		const tempUser = new Object();
+
+		for (const prop of propertiesWillBeCheckExist) {
+			if (req.body.hasOwnProperty(prop) && req.body[prop]) {
+				tempUser[prop] = req.body[prop];
+			}
+		}
+
+		if (Object.keys(tempUser).length > 0) {
+			const resultCheckingExistStaff = await staffsService.checkExistStaff(tempUser);
+			
+			if (resultCheckingExistStaff.existed) {
+				return res.status(409).json({
+					error: true,
+					message: resultCheckingExistStaff.message,
+				});
+			}
 		}
 
 		if (req.body.hasOwnProperty("paid_salary")) {
@@ -292,6 +322,13 @@ const deleteStaff = async (req, res) => {
 			return res.status(400).json({
 				error: true,
 				message: error.message,
+			});
+		}
+
+		if (userCannotBeAffected.includes(req.query.staff_id)) {
+			return res.status(403).json({
+				error: true,
+				message: "Người dùng không được phép truy cập tài nguyên này.",
 			});
 		}
 
@@ -361,6 +398,13 @@ const updatePassword = async (req, res) => {
 				message: error.message,
 			});
 		}
+
+		if (userCannotBeAffected.includes(req.query.staff_id)) {
+			return res.status(403).json({
+				error: true,
+				message: "Người dùng không được phép truy cập tài nguyên này.",
+			});
+		}
 		
 		const updatedInfo = new Object({
 			password: utils.hash(req.body.new_password),
@@ -399,6 +443,13 @@ const updateAvatar = async (req, res) => {
 			});
 		}
 
+		if (userCannotBeAffected.includes(req.query.staff_id)) {
+			return res.status(403).json({
+				error: true,
+				message: "Người dùng không được phép truy cập tài nguyên này.",
+			});
+		}
+
 		const updatorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
 
@@ -423,7 +474,7 @@ const updateAvatar = async (req, res) => {
 		const staff = resultGettingOneStaff[0];
 		const fileName = staff.avatar;
 
-		const resultUpdatingStaff = await staffsService.updateStaff({ avatar: req.file.filename });
+		const resultUpdatingStaff = await staffsService.updateStaff({ avatar: req.file.filename }, { staff_id: req.query.staff_id });
 		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows <= 0) {
 			return res.status(404).json({
 				error: true,
