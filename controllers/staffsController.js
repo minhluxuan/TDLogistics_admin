@@ -169,7 +169,7 @@ const createNewStaff = async (req, res) => {
 			}
 
 			const tempFilePath = path.join(tempFolderPath, req.file.filename);
-			const officialFilePath = path.join(officialFilePath, req.file.filename);
+			const officialFilePath = path.join(officialFolderPath, req.file.filename);
 
 			fs.renameSync(tempFilePath, officialFilePath);
 
@@ -241,7 +241,7 @@ const createNewStaff = async (req, res) => {
 			}
 
 			const tempFilePath = path.join(tempFolderPath, req.file.filename);
-			const officialFilePath = path.join(officialFilePath, req.file.filename);
+			const officialFilePath = path.join(officialFolderPath, req.file.filename);
 
 			fs.renameSync(tempFilePath, officialFilePath);
 
