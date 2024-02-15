@@ -40,29 +40,11 @@ const checkPostalCode = async (province, district, postal_code) => {
 		});
 	}
 
-	const resultFindingProvince = await dbUtils.findOneIntersect(pool, "province", ["province"], [province]);
-
-	if (!resultFindingProvince || resultFindingProvince.length <= 0) {
-		return new Object({
-			success: false,
-			message: "Tên tỉnh/thành phố không tồn tại.",
-		});
-	}
-
-	const postalCodeOfProvinceFromDatabase = resultFindingProvince[0].postal_code;
-
-	if (!postalCodeOfProvinceFromDatabase || postalCodeOfProvinceFromDatabase.slice(0, 2) !== postal_code.slice(0, 2)) {
-		return new Object({
-			success: false,
-			message: "Tên tỉnh/thành phố không khớp với mã bưu chính.",
-		});
-	}
-
 	const resultFindingDistrict = await dbUtils.findOneIntersect(pool, "district", ["province", "district"], [province, district]);
 	if (!resultFindingDistrict || resultFindingDistrict.length <= 0) {
 		return new Object({
 			success: false,
-			message: "Tên quận/huyện không tồn tại.",
+			message: `${district}, ${province} không tồn tại.`,
 		});
 	}
 
@@ -71,7 +53,7 @@ const checkPostalCode = async (province, district, postal_code) => {
 	if (!postalCodeOfDistrictFromDatabase || postalCodeOfDistrictFromDatabase.slice(0, 4) !== postal_code.slice(0, 4)) {
 		return new Object({
 			success: false,
-			message: "Tên quận/huyện không khớp với mã bưu chính.",
+			message: `${district}, ${province} không khớp với mã bưu chính ${postal_code}.`,
 		});
 	}
 
