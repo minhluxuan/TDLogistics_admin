@@ -276,6 +276,26 @@ const updatePartnerStaffInfo = async (req, res) => {
 			});
 		}
 
+		const propertiesWillBeCheckExist = ["username", "email", "phone_number"];
+		const tempUser = new Object();
+
+		for (const prop of propertiesWillBeCheckExist) {
+			if (req.body.hasOwnProperty(prop) && req.body[prop]) {
+				tempUser[prop] = req.body[prop];
+			}
+		}
+
+		if (Object.keys(tempUser).length > 0) {
+			const resultCheckingExistPartnerStaff = await partnerStaffsService.checkExistPartnerStaff(tempUser);
+			
+			if (resultCheckingExistPartnerStaff.existed) {
+				return res.status(409).json({
+					error: true,
+					message: resultCheckingExistPartnerStaff.message,
+				});
+			}
+		}
+
 		const resultUpdatingPartnerStaff = await partnerStaffsService.updatePartnerStaff(req.body, { staff_id: req.query.staff_id });
 		if (!resultUpdatingPartnerStaff || resultUpdatingPartnerStaff.affectedRows <= 0) {
 			return res.status(200).json({

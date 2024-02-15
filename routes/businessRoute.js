@@ -26,16 +26,16 @@ const sessionStrategy = new LocalStrategy({
         return done(null, false);
     }
 
-    const passwordFromDatabase = staff.password;
+    const passwordFromDatabase = business.password;
     const match = bcrypt.compareSync(password, passwordFromDatabase);
 
     if (!match) {
         return done(null, false);
     }
 
-    const business_id = business.staff_id;
+    const business_id = business.business_id;
     const role = "BUSINESS_USER";
-    const active = staff.active;
+    const active = business.active;
 
     return done(null, {
         business_id,
@@ -88,7 +88,7 @@ const upload = multer({
 });
 
 router.post("/login", passport.authenticate("businessLogin"), (req, res, next) => {
-    passport.authenticate("normalLogin", (err, user, info) => {
+    passport.authenticate("businessLogin", (err, user, info) => {
         if (err) {
             return next(err);
         }
