@@ -157,12 +157,26 @@ const createNewStaff = async (req, res) => {
 					message: `Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} thất bại.`,
 				});
 			}
-			else {
-				return res.status(201).json({
-					error: false,
-					message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} thành công.`,
-				});
+
+			const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
+			if (!fs.existsSync(tempFolderPath)) {
+				fs.mkdirSync(tempFolderPath);
 			}
+
+			const officialFolderPath = path.join("storage", "staff", "img", "avatar");
+			if (!fs.existsSync(officialFolderPath)) {
+				fs.mkdirSync(officialFolderPath);
+			}
+
+			const tempFilePath = path.join(tempFolderPath, req.file.filename);
+			const officialFilePath = path.join(officialFilePath, req.file.filename);
+
+			fs.renameSync(tempFilePath, officialFilePath);
+
+			return res.status(201).json({
+				error: false,
+				message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} thành công.`,
+			});
 		}
 
 		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
@@ -215,12 +229,26 @@ const createNewStaff = async (req, res) => {
 					message: `Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} thất bại.`,
 				});
 			}
-			else {
-				return res.status(201).json({
-					error: false,
-					message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} thành công.`,
-				});
+
+			const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
+			if (!fs.existsSync(tempFolderPath)) {
+				fs.mkdirSync(tempFolderPath);
 			}
+
+			const officialFolderPath = path.join("storage", "staff", "img", "avatar");
+			if (!fs.existsSync(officialFolderPath)) {
+				fs.mkdirSync(officialFolderPath);
+			}
+
+			const tempFilePath = path.join(tempFolderPath, req.file.filename);
+			const officialFilePath = path.join(officialFilePath, req.file.filename);
+
+			fs.renameSync(tempFilePath, officialFilePath);
+
+			return res.status(201).json({
+				error: false,
+				message: `Tạo tài khoản nhân viên có mã nhân viên ${req.body.staff_id} thành công.`,
+			});
 		}
 	} catch (error) {
 		console.log(error);
