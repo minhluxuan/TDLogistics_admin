@@ -85,6 +85,13 @@ const getBusiness = async (req, res) => {
 				});
 			}
 
+			if (req.body.business_id !== req.user.business_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+
 			const result = await businessService.getOneBusinessUser(req.body);
 			return res.status(200).json({
 				error: false,
