@@ -14,6 +14,32 @@ const businessRepresentorTable = "business_representor";
 
 const pool = mysql.createPool(dbOptions).promise();
 
+const checkExistBusinessUnion = async (conditions) => {
+	const fields = Object.keys(conditions);
+	const values = Object.values(conditions);
+	const result = await dbUtils.findOneUnion(pool, table, fields, values);
+
+	if (!result) {
+		throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút.");
+	}
+
+	if (result.length <= 0) {
+		return new Object({
+		existed: false,
+		message: "Người dùng chưa tồn tại.",
+		});
+	}
+
+	for (let i = 0; i < fields.length; i++) {
+		if (result[0][fields[i]] === values[i]) {
+		return new Object({
+			existed: true,
+			message: `Người dùng có ${fields[i]}: ${values[i]} đã tồn tại.`,
+		});
+		}
+	}
+}
+
 const checkExistBusiness = async (conditions) => {
 	const fields = Object.keys(conditions);
 	const values = Object.values(conditions);
@@ -93,6 +119,7 @@ const deleteBusinessUSer= async(info) => {
 };
 
 module.exports = {
+	checkExistBusinessUnion,
 	checkExistBusiness,
 	checkExistBusinessRepresentor,
 	createNewBusinessUser,

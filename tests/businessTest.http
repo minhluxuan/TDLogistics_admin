@@ -54,7 +54,8 @@ Content-Type: application/json
 {
     "bin": "0981430418",
     "bank": "MB Bank",
-    "debit": 240
+    "debit": 240,
+    "email": "alphasolutions@alphasolutions.com"
 }
 
 ###

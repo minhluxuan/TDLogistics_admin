@@ -31,6 +31,15 @@ Content-Type: application/json
 
 ###
 
+GET http://localhost:5000/api/v1/partner_staffs/search
+Content-Type: application/json
+
+{
+    "staff_id": "TD_00000_077204005692"
+}
+
+###
+
 POST http://localhost:5000/api/v1/partner_staffs/create
 Content-Type: application/json
 
@@ -49,7 +58,8 @@ PUT http://localhost:5000/api/v1/partner_staffs/update?staff_id=TD_00000_0772040
 Content-Type: application/json
 
 {
-    "fullname": "Lữ Xuân Sáng"
+    "fullname": "Lữ Xuân Minh",
+    "username": "minhluxuan"
 }
 
 ###

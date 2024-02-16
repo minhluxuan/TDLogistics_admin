@@ -284,6 +284,26 @@ const updateBusinessInfo = async (req, res) => {
 			});
 		}
 
+		const propertiesWillBeCheckExist = ["email", "phone_number"];
+		const tempUser = new Object();
+
+		for (const prop of propertiesWillBeCheckExist) {
+			if (req.body.hasOwnProperty(prop) && req.body[prop]) {
+				tempUser[prop] = req.body[prop];
+			}
+		}
+
+		if (Object.keys(tempUser).length > 0) {
+			const resultCheckingExistBusiness = await businessService.checkExistBusinessUnion(tempUser);
+			
+			if (resultCheckingExistBusiness.existed) {
+				return res.status(409).json({
+					error: true,
+					message: resultCheckingExistBusiness.message,
+				});
+			}
+		}
+
 		if (req.body.hasOwnProperty("debit")) {
 			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.query);
 			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
