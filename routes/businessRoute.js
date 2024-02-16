@@ -7,6 +7,7 @@ const fs = require("fs");
 const businessController = require("../controllers/businessController");
 const Business = require("../database/Business");
 const auth = require("../lib/auth");
+const bcrypt = require("bcrypt");
 
 const router = express.Router();
 

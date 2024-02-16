@@ -1,8 +1,100 @@
+POST http://localhost:5000/api/v1/business/login
+Content-Type: application/json
+
+{
+    "username": "nguyenhan",
+    "password": "NguyenNhan@2k4"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan",
+    "password": "AlphaSolutions@alphasolutions2k24"
+}
+
+###
+
 GET http://localhost:5000/api/v1/business/search
 Content-Type: application/json
 
 {
     "bank": "Sacombank"
+}
+
+###
+
+GET http://localhost:5000/api/v1/business/search
+Content-Type: application/json
+
+{
+    "bank": "OCB"
+}
+
+###
+
+GET http://localhost:5000/api/v1/business/search
+Content-Type: application/json
+
+{
+    "tax_number": "1234567871"
+}
+###
+
+GET http://localhost:5000/api/v1/business/search
+Content-Type: application/json
+
+{
+    "tax_number": "1234567871",
+    "business_name": "LeetCode"
+}
+
+###
+
+GET http://localhost:5000/api/v1/business/search
+Content-Type: application/json
+
+{
+    "province": "Thành phố Hồ Chí Minh"
+}
+
+###
+
+GET http://localhost:5000/api/v1/business/search_representor
+Content-Type: application/json
+
+{
+    "business_id": "BC_70001_077204005692"
+}
+
+###
+
+GET http://localhost:5000/api/v1/business/search_representor
+Content-Type: application/json
+
+{
+    "business_id": "BC_70001_079204002587"
+}
+
+###
+
+GET http://localhost:5000/api/v1/business/search_representor
+Content-Type: application/json
+
+{
+    "business_id": "BC_70001_079204002597"
+}
+
+###
+
+GET http://localhost:5000/api/v1/business/search_representor
+Content-Type: application/json
+
+{
+    "business_id": "BC_70001_077204005696"
 }
 
 ###
@@ -57,7 +149,7 @@ Content-Type: application/json
     "user_phone_number": "0981430418",
     "user_email": "minh.luxuanhcmut@hcmut.edu.vn",
     "user_date_of_birth": "2004-03-03",
-    "user_cccd": "077204005692",
+    "user_cccd": "077204005693",
     "user_province": "Bà Rịa - Vũng Tàu",
     "user_district": "Đất Đỏ",
     "user_town": "Đất Đỏ",
@@ -241,12 +333,13 @@ Content-Type: application/json
 
 ###
 
-PATCH http://localhost:5000/api/v1/business/update_business_representor?business_id=BC_70001_077204005692
+PUT http://localhost:5000/api/v1/business/update?business_id=BC_70001_077204005692
 Content-Type: application/json
 
 {
-    "bin": "0981430418",
-    "bank": "MB Bank"
+    "business_name": "LeetCode",
+    "email": "nhan.nguyen6104@gmail.com",
+    "debit": 600
 }
 
 ###
@@ -258,7 +351,58 @@ Content-Type: application/json
     "bin": "0981430418",
     "bank": "MB Bank"
 }
+
+###
+
+PATCH http://localhost:5000/api/v1/business/update_business_representor?business_id=BC_70001_077204005693
+Content-Type: application/json
+
+{
+    "bin": "0937629145",
+    "bank": "OCB"
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/business/update_business_representor?business_id=BC_70001_077204005696
+Content-Type: application/json
+
+{
+    "fullname": "Hồ Thành Nhân",
+    "email": "hothanhan@gmail.com",
+    "cccd" : "079258135611"
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/business/update_business_representor?business_id=BC_70001_077203105692
+Content-Type: application/json
+
+{
+    "email": "hothanhan@gmail.com"
+}
+
 
 ###
 
 DELETE http://localhost:5000/api/v1/business/delete?business_id=BC_70001_077204005692&agency_id=BC_70001_077204005691
+
+###
+
+DELETE http://localhost:5000/api/v1/business/delete?business_id=BC_70001_077204005696&agency_id=BC_70001_077204005691
+
+###
+
+DELETE http://localhost:5000/api/v1/business/delete?business_id=BC_70001_079204002587&agency_id=BC_70001_077204005691
+
+###
+
+DELETE http://localhost:5000/api/v1/business/delete?business_id=BC_70001_079204002597&agency_id=BC_70001_077204005691
+
+###
+
+DELETE http://localhost:5000/api/v1/business/delete?business_id=BC_70001_077204005693&agency_id=BC_70001_077204005691
+
+###
+
+GET http://localhost:5000/get_session
