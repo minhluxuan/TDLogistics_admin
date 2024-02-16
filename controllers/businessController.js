@@ -149,13 +149,21 @@ const getRepresentor = async (req, res) => {
 
 		if (["BUSINESS_USER"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingRepresentorByBusiness(req.body);
-
 			if (error) {
 				return res.status(400).json({
 					error: true,
 					message: error.message,
 				});
 			}
+
+			
+			if (req.body.business_id !== req.user.business_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+
 
 			const result = await businessService.getOneRepresentor(req.body);
 			return res.status(200).json({
