@@ -276,7 +276,7 @@ const updatePartnerStaffInfo = async (req, res) => {
 			});
 		}
 
-		const propertiesWillBeCheckExist = ["username", "email", "phone_number"];
+		const propertiesWillBeCheckExist = ["username", "email", "phone_number", "bin"];
 		const tempUser = new Object();
 
 		for (const prop of propertiesWillBeCheckExist) {
