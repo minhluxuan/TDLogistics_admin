@@ -10,6 +10,27 @@ Content-Type: application/json
     "password": "MinhLuXuan@TDlogistics2k24"
 }
 
+### REPRESENTOR
+
+POST http://localhost:5000/api/v1/partner_staffs/login
+Content-Type: application/json
+
+{
+    "username": "nguyenhan456",
+    "password": "NhanNguyen@2k4"
+}
+
+###
+
+POST http://localhost:5000/api/v1/partner_staffs/login
+Content-Type: application/json
+
+{
+    "username": "nguyenhan789",
+    "password": "NhanNguyen@2k4"
+}
+
+
 ###
 
 PATCH http://localhost:5000/api/v1/partner_staffs/update_password
@@ -43,6 +64,103 @@ Content-Type: application/json
     "role": "PARTNER_DRIVER"
 }
 
+### create a new successful
+
+POST http://localhost:5000/api/v1/partner_staffs/create
+Content-Type: application/json
+
+{
+    "partner_id": "TD_00000_077204005691",
+    "username": "nguyenhan",
+    "password": "NguyenNhan@2k4",
+    "fullname": "Nguyễn Thành Nhân",
+    "cccd": "077204005699",
+    "role": "PARTNER_DRIVER"
+}
+
+### Role invalid
+
+POST http://localhost:5000/api/v1/partner_staffs/create
+Content-Type: application/json
+
+{
+    "partner_id": "TD_00000_077204005691",
+    "username": "nguyennhan2k4",
+    "password": "NguyenNhan@2k4",
+    "fullname": "Nguyễn Văn A",
+    "cccd": "077204005695",
+    "role": "PARTNER_Shipper"
+}
+
+### username duplicated
+
+POST http://localhost:5000/api/v1/partner_staffs/create
+Content-Type: application/json
+
+{
+    "partner_id": "TD_00000_077204005691",
+    "username": "nguyenhan",
+    "password": "NguyenNhan@2k4",
+    "fullname": "Nguyễn Văn A",
+    "cccd": "077204005695",
+    "role": "PARTNER_SHIPPER"
+}
+
+### password invalid
+POST http://localhost:5000/api/v1/partner_staffs/create
+Content-Type: application/json
+
+{
+    "partner_id": "TD_00000_077204005691",
+    "username": "nguyenhan256",
+    "password": "NguyenNhan2k4",
+    "fullname": "Nguyễn Văn A",
+    "cccd": "077204005695",
+    "role": "PARTNER_SHIPPER"
+}
+
+###
+
+POST http://localhost:5000/api/v1/partner_staffs/create
+Content-Type: application/json
+
+{
+    "partner_id": "TD_00000_077204005691",
+    "username": "nguyenhan256",
+    "password": "NguyenNhan@2k4",
+    "fullname": "Nguyễn Văn B",
+    "cccd": "077204005621",
+    "role": "PARTNER_SHIPPER"
+}
+
+###
+
+POST http://localhost:5000/api/v1/partner_staffs/create
+Content-Type: application/json
+
+{
+    "partner_id": "TD_00000_077204005691",
+    "username": "nguyenhan456",
+    "password": "NguyenNhan@2k4",
+    "fullname": "Nguyễn Văn C",
+    "cccd": "077204005622",
+    "role": "TRANSPORT_PARTNER_REPRESENTOR"
+}
+
+###
+
+POST http://localhost:5000/api/v1/partner_staffs/create
+Content-Type: application/json
+
+{
+    "partner_id": "TD_00000_077204005691",
+    "username": "nguyenhan789",
+    "password": "NguyenNhan@2k4",
+    "fullname": "Nguyễn Văn D",
+    "cccd": "077204005623",
+    "role": "PARTNER_SHIPPER"
+}
+
 ###
 
 PUT http://localhost:5000/api/v1/partner_staffs/update?staff_id=TD_00000_077204005692
@@ -54,7 +172,135 @@ Content-Type: application/json
 
 ###
 
+PUT http://localhost:5000/api/v1/partner_staffs/update?staff_id=TD_00000_077204005621
+Content-Type: application/json
+
+{
+    "fullname": "Nguyễn Thành Sáng"
+}
+###
+
+PUT http://localhost:5000/api/v1/partner_staffs/update?staff_id=TD_00000_077204005622
+Content-Type: application/json
+
+{
+    "date_of_birth": "2004-06-01", 
+    "email": "nhan.nguyen1606@hcmut.edu.vn",
+    "phone_number": "0908339096",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "8",
+    "town": "9",
+    "detail_address": "258/135C Nguyễn Duy",
+    "position": "Lái xe",
+    "bin": "1234567890",
+    "bank": "TPBank"
+}
+
+
+###
+
+PUT http://localhost:5000/api/v1/partner_staffs/update?staff_id=TD_00000_077204005623
+Content-Type: application/json
+
+{
+    "date_of_birth": "2004-07-01", 
+    "email": "nhan.nguyen16067@hcmut.edu.vn",
+    "phone_number": "0908339096",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "8",
+    "town": "9",
+    "detail_address": "258/135C Nguyễn Duy",
+    "position": "Giao hàng",
+    "bin": "1234567890",
+    "bank": "VIB"
+}
+###
+
+PUT http://localhost:5000/api/v1/partner_staffs/update?staff_id=TD_00000_077204005623
+Content-Type: application/json
+
+{
+    "email": "nhan.nguyen16067@hcmut.edu.vn"
+}
+
+###
+
+PUT http://localhost:5000/api/v1/partner_staffs/update?staff_id=TD_00000_077204005623
+Content-Type: application/json
+
+{
+    "phone_number": "0908339096"
+}
+
+### 
+
 DELETE http://localhost:5000/api/v1/partner_staffs/delete?staff_id=TD_00000_077204005692
+
+### query invalid
+
+DELETE http://localhost:5000/api/v1/partner_staffs/delete?staffs_id=TD_00000_077204005692
+
+### staff_id inexistent
+
+DELETE http://localhost:5000/api/v1/partner_staffs/delete?staff_id=TD_00000_077204005693
+
+###
+
+DELETE http://localhost:5000/api/v1/partner_staffs/delete?staff_id=TD_00000_077204005621
+###
+
+DELETE http://localhost:5000/api/v1/partner_staffs/delete?staff_id=TD_00000_077204005622
+###
+
+DELETE http://localhost:5000/api/v1/partner_staffs/delete?staff_id=TD_00000_077204005623
+
+### ADMIN SEARCH
+
+GET http://localhost:5000/api/v1/partner_staffs/search
+Content-Type: "application/json"
+
+{
+    "partner_id": "TD_00000_077204005691"
+}
+
+###
+
+GET  http://localhost:5000/api/v1/partner_staffs/search
+Content-Type: "application/json"
+
+{
+      "staff_id": "TD_00000_077204005622"
+}
+
+
+###
+
+GET http://localhost:5000/api/v1/partner_staffs/search
+Content-Type: "application/json"
+
+{
+      "fullname": "Nguyễn Văn C"
+}
+
+###
+
+GET http://localhost:5000/api/v1/partner_staffs/search
+Content-Type: "application/json"
+
+{
+      "staff_id": "TD_00000_077204005623"
+}
+
+
+###
+
+PATCH http://localhost:5000/api/v1/partner_staffs/update_password
+Content-Type: application/json
+
+{
+    "new_password": "NhanNguyen@2k4",
+    "confirm_password": "NhanNguyen@2k4"
+}
 
 ###
 

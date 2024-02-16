@@ -1,3 +1,4 @@
+
 POST http://localhost:5000/api/v1/staffs/login
 Content-Type: application/json
 
@@ -141,13 +142,17 @@ Content-Type: application/json
 GET http://localhost:5000/api/v1/staffs/search
 Content-Type: application/json
 
+{
+    "staff_id": "TD_00000_077204005692"
+}
+
 ###
 
 GET http://localhost:5000/api/v1/staffs/search
 Content-Type: application/json
 
 {
-    "fullname": "Nguyễn Tiến Dũng"
+    "fullname": "Lữ Xuân Minh"
 }
 
 
@@ -449,3 +454,6 @@ Content-Type: application/json
 ###
 
 GET http://localhost:5000/get_session
+
+###
+
