@@ -138,7 +138,7 @@ router.get(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
     "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER",
-    "TRANSPORT_PARTNER", "PARTNER_DRIVER", "PARTNER_SHIPPER"], []),
+    "TRANSPORT_PARTNER_REPRESENTOR", "PARTNER_DRIVER", "PARTNER_SHIPPER"], []),
     partnerStaffsController.getPartnerStaffs
 );
 router.delete(

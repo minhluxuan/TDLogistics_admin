@@ -11,7 +11,8 @@ GET http://localhost:5000/api/v1/business/search_representor
 Content-Type: application/json
 
 {
-    "business_id": "BC_70001_077204005692"
+    "business_id": "BC_70001_077204005692",
+    "phone_number": "0981430418"
 }
 
 ###

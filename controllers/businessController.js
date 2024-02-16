@@ -43,7 +43,7 @@ const getBusiness = async (req, res) => {
 			if (error) {
 				return res.status(400).json({
 					error: true,
-					message: "Thông tin không hợp lệ.",
+					message: error.message,
 				});
 			}
 
@@ -55,14 +55,13 @@ const getBusiness = async (req, res) => {
 			});
 		}
 
-		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(27)) {
-			const searcherIdSubParts = req.user.staff_id.split('_');
-			const businessIdSubParts = req.body.business_id.split('_');
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role)) {
+			const { error } = businessValidation.validateFindingBusinessByAdmin(req.body);
 
-			if (searcherIdSubParts[1] !== businessIdSubParts[1] || req.user.agency_id !== req.body.agency_id) {
-				return res.status(404).json({
+			if (error) {
+				return res.status(400).json({
 					error: true,
-					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.query.business_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+					message: error.message,
 				});
 			}
 
@@ -76,7 +75,7 @@ const getBusiness = async (req, res) => {
 			});
 		}
 
-		if (["BUSINESS_USER"].includes(req.user.role) || req.user.privileges.includes(26)) {
+		if (["BUSINESS_USER"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingBusinessByBusiness(req.body);
 
 			if (error) {
@@ -103,25 +102,66 @@ const getBusiness = async (req, res) => {
 
 const getRepresentor = async (req, res) => {
 	try {
-		const { error } = businessValidation.validateFindingRepresentor(req.body);
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
+			const { error } = businessValidation.validateFindingRepresentorByAdmin(req.body);
 
-		if (error) {
-			return res.status(400).json({
-				error: true,
-				message: error.message,
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			const result = await businessService.getManyRepresentors(req.body);
+			return res.status(200).json({
+				error: false,
+				data: result,
+				message: "Lấy thông tin thành công.",
 			});
 		}
 
-		const result = await businessService.getRepresentor(req.body);
-		return res.status(200).json({
-			error: false,
-			data: result,
-			message: "Lấy thông tin thành công.",
-		});
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role)) {
+			const { error } = businessValidation.validateFindingRepresentorByAdmin(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+			
+			req.body.agency_id = req.user.agency_id;
+
+			const result = await businessService.getManyRepresentors(req.body);
+			return res.status(200).json({
+				error: false,
+				data: result,
+				message: "Lấy thông tin thành công.",
+			});
+		}
+
+		if (["BUSINESS_USER"].includes(req.user.role)) {
+			const { error } = businessValidation.validateFindingRepresentorByBusiness(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			const result = await businessService.getOneRepresentor(req.body);
+			return res.status(200).json({
+				error: false,
+				data: result,
+				message: "Lấy thông tin thành công.",
+			});
+		}
 	} catch (error) {
+		console.log(error);
 		res.status(500).json({
 			error: true,
-			message: error,
+			message: error.message,
 		});
 	}
 }
@@ -373,6 +413,27 @@ const updateBusinessRepresentor = async (req, res) => {
 			error: true,
 			message: `Người đại diện doanh nghiệp có mã doanh nghiệp ${req.query.business_id} không tồn tại.`
 		});
+	}
+
+	const propertiesWillBeCheckExist = ["phone_number", "email", "cccd", "bin"];
+
+	const tempUser = new Object();
+
+	for (const prop of propertiesWillBeCheckExist) {
+		if (req.body.hasOwnProperty(prop) && req.body[prop]) {
+			tempUser[prop] = req.body[prop];
+		}
+	}
+
+	if (Object.keys(tempUser).length > 0) {
+		const resultCheckingExistBusinessRepresentor = await businessService.checkExistBusinessRepresentor(tempUser);
+		
+		if (resultCheckingExistBusinessRepresentor.existed) {
+			return res.status(409).json({
+				error: true,
+				message: resultCheckingExistBusinessRepresentor.message,
+			});
+		}
 	}
 
 	const resultUpdatingBusinessRepresentor = await businessService.updateBusinessRepresentor(req.body, req.query);

@@ -28,8 +28,12 @@ const getManyBusinessUsers = async (conditions) => {
   	return await Business.getManyBussinessUsers(conditions);
 }
 
-const getRepresentor = async (conditions) => {
-    return await Business.getRepresentor(conditions);
+const getOneRepresentor = async (conditions) => {
+    return await Business.getOneRepresentor(conditions);
+}
+
+const getManyRepresentors = async (conditions) => {
+    return await Business.getManyRepresentors(conditions);
 }
 
 const updateBusinessUser = async (info, conditions) => {
@@ -52,7 +56,8 @@ module.exports = {
     createNewRepresentor,
     getOneBusinessUser,
     getManyBusinessUsers,
-    getRepresentor,
+    getOneRepresentor,
+    getManyRepresentors,
     updateBusinessUser,
     updateBusinessRepresentor,
     deleteBusinessUser

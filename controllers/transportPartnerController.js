@@ -10,7 +10,7 @@ const transportPartnerValidation = new validation.TransportPartnerValidation();
 
 const getTransportPartner = async (req, res) => {
     try {
-        if (["TRANSPORT_PARTNER"].includes(req.user.role)) {
+        if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) {
             const { error } = transportPartnerValidation.validateFindingPartnerByPartner(req.body);
 
             if (error) {
