@@ -140,6 +140,7 @@ const createNewTransportPartner = async (req, res) => {
             email: req.body.email,
             bin: req.body.bin,
             bank: req.body.bank,
+            contract: req.file.filename || null,
         };
 
         req.body.user_password = utils.hash(req.body.user_password);
