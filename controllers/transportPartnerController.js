@@ -129,7 +129,7 @@ const createNewTransportPartner = async (req, res) => {
         
         const newTransportPartner = {
             transport_partner_id: transportPartnerId,
-            agency_id: req.user.agency_id,
+            agency_id: req.body.agency_id,
             tax_code: req.body.tax_code || null,
             transport_partner_name: req.body.transport_partner_name,
             province: req.body.province,
@@ -146,6 +146,7 @@ const createNewTransportPartner = async (req, res) => {
         req.body.user_password = utils.hash(req.body.user_password);
 
         const newStaff = new Object({
+            agency_id: req.body.agency_id,
             partner_id: transportPartnerId,
             staff_id: transportPartnerId,
             username: req.body.username,
