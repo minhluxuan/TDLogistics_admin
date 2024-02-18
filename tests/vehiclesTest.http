@@ -25,6 +25,17 @@ Content-Type: application/json
 
 {
     
+    "staff_id": "BC_70001_077204005684",
+    "type": "motorbike",
+    "license_plate": "72-H1 24768",
+    "max_load": 50
+}
+###
+POST http://localhost:5000/api/v1/vehicles/create
+Content-Type: application/json
+
+{
+    
     "agency_id": "as",
     "staff_id": "BC_70001_077204005684",
     "type": "motorbike",
