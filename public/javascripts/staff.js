@@ -1,12 +1,20 @@
 const socket = io("http://localhost:5000");
 const notificationArea = document.querySelector("#notificationArea");
+// let receivedNotification = false; // Flag to track if a notification has been received
 
 socket.on("notifyNewOrderToAgency", (order) => {
-    const message = "Thời gian tạo: " + order.createdTime + '\n' +
-                    "Điểm gửi: " + order.source + '\n' + 
-                    "Điểm nhận: " + order.destination + '\n';
-    
-    const p = document.createElement("p");
-    p.innerText = message;
-    notificationArea.appendChild(p);
+    // if (!receivedNotification) {
+        const message = "Thời gian tạo: " + order.createdTime + '\n' +
+                        "Điểm gửi: " + order.source + '\n' + 
+                        "Điểm nhận: " + order.destination + '\n';
+        
+        const p = document.createElement("p");
+        p.innerText = message;
+        notificationArea.appendChild(p);
+        
+        receivedNotification = true; // Set the flag to true after receiving the first notification
+        
+        // Remove the event listener after receiving the first notification
+        // socket.off("notifyNewOrderToAgency");
+    // }
 });

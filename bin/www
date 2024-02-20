@@ -63,6 +63,9 @@ io.on("connection", () => {
     }
 });
 
+
+global._io = io;
+
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);

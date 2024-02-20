@@ -13,7 +13,7 @@ eventManager.once("ioInitialize", (io) => {
 });
 
 const createNewOrder = async (info) => {
-    try {console.log(info);
+    try {
         const orderTime = new Date();
 
         // const { error } = OrderValidation.validateCreatingOrder(info);
