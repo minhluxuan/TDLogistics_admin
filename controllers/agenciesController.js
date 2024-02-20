@@ -33,7 +33,7 @@ const checkExistAgency = async (req, res) => {
 
 const getAgencies = async (req, res) => {
 	try {
-		if (!["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(1)) {
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_DRIVER", "AGENCY_SHIPPER"].includes(req.user.role)) {
 			const { error } = agencyValidation.validateFindingAgencyByAgency(req.query);
 
 			if (error) {
@@ -59,7 +59,8 @@ const getAgencies = async (req, res) => {
 				message: `Lấy thông tin bưu cục thành công.`,
 			});
 		}
-		else if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(2)) {
+		
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(2)) {
 			const { error } = agencyValidation.validateFindingAgencyByAdmin(req.body);
 
 			if (error) {
@@ -103,7 +104,7 @@ const createNewAgency = async (req, res) => {
 	try {
 		const { error } = agencyValidation.validateCreatingAgency(req.body);
 
-		if (error) {
+		if (error) {console.log(error);
 			return res.status(400).json({
 				error: true,
 				message: error.message,
@@ -128,11 +129,11 @@ const createNewAgency = async (req, res) => {
 		}
 
 		const tempUser = new Object({
-			username: req.body.username,
-			cccd: req.body.cccd,
-			phone_number: req.body.phone_number,
-			email: req.body.phone_number,
-		});
+            username: req.body.username,
+            cccd: req.body.user_cccd,
+            phone_number: req.body.user_phone_number,
+            email: req.body.user_phone_number,
+        });
 
 		const resultCheckingExistStaff = await staffsService.checkExistStaff(tempUser);
 
@@ -192,9 +193,7 @@ const createNewAgency = async (req, res) => {
 
 		let textResultCreatingNewAgency;
 		if (!resultCreatingNewAgency || resultCreatingNewAgency.affectedRows <= 0) {
-			textResultCreatingNewAgency = `
-			Tạo bưu cục có mã bưu cục ${agencyId} trong cơ sở dữ liệu tổng thất bại.\n
-			Vui lòng tạo thủ công bưu cục với mã bưu cục ${agencyId} và thông tin đã cung cấp trước đó.`;
+			textResultCreatingNewAgency = `Tạo bưu cục có mã bưu cục ${agencyId} trong cơ sở dữ liệu tổng thất bại.`;
 		}
 		else {
 			textResultCreatingNewAgency = `Tạo bưu cục có mã bưu cục ${agencyId} trong cơ sở dữ liệu tổng thành công.`
@@ -205,8 +204,7 @@ const createNewAgency = async (req, res) => {
 		let textResultCreatingNewStaff;
 		if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
 			textResultCreatingNewStaff = `
-			Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu tổng thất bại.\n
-			Vui lòng tạo thủ công tài khoản nhân viên quản lý bưu cục với mã nhân viên ${agencyId} và thông tin đã cung cấp trước đó.`;
+			Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu tổng thất bại.`;
 		}
 		else {
 			textResultCreatingNewStaff = `Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu tổng thành công.`
@@ -226,7 +224,7 @@ const createNewAgency = async (req, res) => {
 			${textResultCreatingNewStaff}\n
 			${textResultCreatingNewAgency}\n
 			${textResultCreatingTablesForAgency}\n
-			${textResultLocatingAgencyInArea}.`,
+			${textResultLocatingAgencyInArea}`,
 		});
 	} catch (error) {
 		console.log(error);

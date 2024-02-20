@@ -1,11 +1,51 @@
 const express = require("express");
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
 const multer = require("multer");
-const businessController = require("../controllers/businessController");
 const path = require("path");
 const fs = require("fs");
+const businessController = require("../controllers/businessController");
+const Business = require("../database/Business");
 const auth = require("../lib/auth");
+const bcrypt = require("bcrypt");
 
 const router = express.Router();
+
+const sessionStrategy = new LocalStrategy({
+    usernameField: "username",
+    passwordField: "password",
+}, async (username, password, done) => {
+    const resultGettingOneBusiness = await Business.getOneBusinessUser({ username: username });
+
+    if (resultGettingOneBusiness.length <= 0) {
+        done(null, false);
+    }
+
+    const business = resultGettingOneBusiness[0];
+
+    if (!business) {
+        return done(null, false);
+    }
+
+    const passwordFromDatabase = business.password;
+    const match = bcrypt.compareSync(password, passwordFromDatabase);
+
+    if (!match) {
+        return done(null, false);
+    }
+
+    const business_id = business.business_id;
+    const role = "BUSINESS_USER";
+    const active = business.active;
+
+    return done(null, {
+        business_id,
+        role,
+        active,
+    });
+});
+
+passport.use("businessLogin", sessionStrategy);
 
 const storage = multer.diskStorage({
     destination: function (req, file, done) {
@@ -48,13 +88,64 @@ const upload = multer({
     fileFilter: fileFilter,
 });
 
+router.post("/login", passport.authenticate("businessLogin"), (req, res, next) => {
+    passport.authenticate("businessLogin", (err, user, info) => {
+        if (err) {
+            return next(err);
+        }
+        if (!user) {
+            return res.status(401).json({ error: true, message: "Xác thực thất bại." });
+        }
+
+        return res.status(200).json({ error: false, message: "Xác thực thành công." });
+    })(req, res, next);
+});
 router.get("/check", businessController.checkExistBusiness);
-router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [29, 30]), upload.single("contract"), businessController.createNewBusinessUser);
-router.get("/search", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"], [26, 27, 28]), businessController.getBusiness);
-router.get("/search_representor", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"], [39]), businessController.getRepresentor);
-router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [31, 33]), businessController.updateBusinessInfo);
-router.patch("/update_business_representor", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [32, 34]), businessController.updateBusinessRepresentor);
-router.patch("/update_contract", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [35, 36]), upload.single("contract"), businessController.updateContract);
-router.delete("/delete", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "AGENCY_MANAGER"], [37, 38]), businessController.deleteBusinessUser);
+router.post(
+    "/create",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    upload.single("contract"),
+    businessController.createNewBusinessUser
+);
+router.get(
+    "/search",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    businessController.getBusiness
+);
+router.get(
+    "/search_representor",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    businessController.getRepresentor
+);
+router.put(
+    "/update",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    businessController.updateBusinessInfo
+);
+router.patch(
+    "/update_business_representor",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    businessController.updateBusinessRepresentor
+);
+router.patch(
+    "/update_contract",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    upload.single("contract"),
+    businessController.updateContract
+);
+router.delete(
+    "/delete",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    businessController.deleteBusinessUser
+);
 
 module.exports = router;

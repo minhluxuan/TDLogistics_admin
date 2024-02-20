@@ -4,9 +4,11 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var { app, sessionMiddleware } = require('../app');
 var debug = require('debug')('tdlogistics:server');
 var http = require('http');
+const Socket = require("socket.io");
+const passport = require("passport");
 
 /**
  * Get port from environment and store in Express.
@@ -24,6 +26,42 @@ var server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
+
+const io = Socket(server);
+ 
+function onlyForHandshake(middleware) {
+  return (req, res, next) => {
+    const isHandshake = req._query.sid === undefined;
+    if (isHandshake) {
+      middleware(req, res, next);
+    } else {
+      next();
+    }
+  };
+}
+
+io.engine.use(onlyForHandshake(sessionMiddleware));
+io.engine.use(onlyForHandshake(passport.session()));
+io.engine.use(
+  onlyForHandshake((req, res, next) => {
+    if (req.user) {
+      next();
+    } else {
+      res.writeHead(401);
+      res.end();
+    }
+  }),
+);
+
+let ioInitialized = false; // Bản ghi tạm thời
+
+io.on("connection", () => {
+    if (!ioInitialized) {
+        // Kích hoạt sự kiện "ioInitialize" chỉ một lần
+        require('../lib/eventManager').emit("ioInitialize", io);
+        ioInitialized = true; // Đánh dấu là đã kích hoạt
+    }
+});
 
 server.listen(port);
 server.on('error', onError);

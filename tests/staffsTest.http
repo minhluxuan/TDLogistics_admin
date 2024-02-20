@@ -6,6 +6,136 @@ Content-Type: application/json
     "password": "NTDung@tdlogistics2k24"
 }
 
+### MANAGER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### HUMAN_RESOURCE_MANAGER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k4",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### TELLER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### COMPLAINTS_SOLVER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k2",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### AGENCY_MANAGER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k6",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### AGENCY_TELLER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k1",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### AGENCY_COMPLAINTS_SOLVER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k9",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### AGENCY_HUMAN_RESOURCE_MANAGER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k10",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### DRIVER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k11",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### SHIPPER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k12",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### AGENCY_DRIVER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k13",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+### AGENCY_SHIPPER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k14",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
 ###
 
 GET http://localhost:5000/api/v1/staffs/search
@@ -20,6 +150,7 @@ Content-Type: application/json
     "fullname": "Nguyễn Tiến Dũng"
 }
 
+
 ###
 
 POST http://localhost:5000/api/v1/staffs/create
@@ -27,11 +158,34 @@ Content-Type: application/json
 
 {
     "agency_id": "TD_00000_077165007713",
-    "username": "minhluxuan",
+    "username": "minhluxuan2k",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430421",
+    "email": "minh.luxuanhcmus@hcmus.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005693",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Giám đốc",
+    "role": "MANAGER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "minhluxuan2k4",
     "password": "minhluxuan@TDlogistics2k24",
     "fullname": "Lữ Xuân Minh",
     "phone_number": "0981430418",
-    "email": "minh.luxuanhcmus@hcmut.edu.vn",
+    "email": "minh.luxuanhcmut@hcmut.edu.vn",
     "date_of_birth": "2004-03-03",
     "cccd": "077204005692",
     "province": "Tỉnh Bà Rịa - Vũng Tàu",
@@ -45,7 +199,232 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:5000/api/v1/staffs/update?staff_id=TD_00000_077204005692&agency_id=TD_00000_077165007713
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "minhluxuan",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430411",
+    "email": "minh.luxuanhcmus@hcmut.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005690",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giao dịch",
+    "role": "TELLER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "minhluxuan2k2",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430416",
+    "email": "minh.luxuanuel@uel.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005695",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giải quyết khiếu nại",
+    "role": "COMPLAINTS_SOLVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_70001_077204005691",
+    "username": "minhluxuan2k6",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430417",
+    "email": "minh.luxuanussh@ussh.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005696",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Quản lý bưu cục",
+    "role": "AGENCY_MANAGER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k15",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430419",
+    "email": "minh.luxuanuit@uit.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005697",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giao dịch",
+    "role": "AGENCY_TELLER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k9",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430420",
+    "email": "minh.luxuanui@ui.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005699",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giải quyết khiếu nại",
+    "role": "AGENCY_COMPLAINTS_SOLVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k10",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430422",
+    "email": "minh.luxuanuef@uef.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005680",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Quản trị nhân sự",
+    "role": "AGENCY_HUMAN_RESOURCE_MANAGER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+
+    "username": "minhluxuan2k17",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430429",
+    "email": "minh.luxuanuefa@uefa.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005671",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Tài xế",
+    "role": "DRIVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "minhluxuan2k12",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430424",
+    "email": "minh.luxuanufm@ufm.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005682",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Bưu tá",
+    "role": "SHIPPER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k13",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430425",
+    "email": "minh.luxuansgu@sgu.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005683",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Tài xế",
+    "role": "AGENCY_DRIVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k14",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430426",
+    "email": "minh.luxuansiu@siu.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005684",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Bưu tá",
+    "role": "AGENCY_SHIPPER",
+    "salary": 25000000
+}
+
+###
+
+PUT http://localhost:5000/api/v1/staffs/update?staff_id=TD_00000_077204005692
 Content-Type: application/json
 
 {
@@ -54,7 +433,7 @@ Content-Type: application/json
 
 ###
 
-DELETE http://localhost:5000/api/v1/staffs/delete?staff_id=TD_00000_077204005692&agency_id=TD_00000_077165007713
+DELETE http://localhost:5000/api/v1/staffs/delete?staff_id=TD_00000_077204005692
 Content-Type: application/json
 
 ###
@@ -66,3 +445,7 @@ Content-Type: application/json
     "new_password": "NTDung@tdlogistics2k24",
     "confirm_password": "NTDung@tdlogistics2k24"
 }
+
+###
+
+GET http://localhost:5000/get_session

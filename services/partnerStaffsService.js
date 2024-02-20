@@ -1,32 +1,31 @@
 const PartnerStaffs = require("../database/PartnerStaffs");
 
-const checkExistPartnerStaff = async (fields, values) => {
-    return PartnerStaffs.checkExistPartnerStaff(fields, values);
+const checkExistPartnerStaff = async (info) => {
+    return await PartnerStaffs.checkExistPartnerStaff(info);
 }
 
-const createNewPartnerStaff = async (fields, values) => {
-    await PartnerStaffs.createNewPartnerStaff(fields, values);
+const createNewPartnerStaff = async (info, postal_code) => {
+    return await PartnerStaffs.createNewPartnerStaff(info, postal_code);
 }
 
-const getOnePartnerStaff = async (fields, values) => {
-    return await PartnerStaffs.getOnePartnerStaff(fields, values);
+const getOnePartnerStaff = async (info) => {
+    return await PartnerStaffs.getOnePartnerStaff(info);
 }
 
-const getManyPartnerStaffs = async () => {
-  	return await PartnerStaffs.getManyPartnerStaffs() ;
+const getManyPartnerStaffs = async (info) => {
+  	return await PartnerStaffs.getManyPartnerStaffs(info);
 }
 
-const updatePartnerStaff = async (fields, values, conditionFields, conditionValues) => {
-  	return await PartnerStaffs.updatePartnerStaff(fields, values, conditionFields, conditionValues) ;
+const updatePartnerStaff = async (info, conditions, postal_code) => {
+  	return await PartnerStaffs.updatePartnerStaff (info, conditions, postal_code) ;
 }
 
-const deletePartnerStaff = async(fields, values) => {
-  	return await PartnerStaffs.deletePartnerStaff(fields, values);
+const deletePartnerStaff = async (info, postalCode) => {
+  	return await PartnerStaffs.deletePartnerStaff(info, postalCode);
 }
 
-
-const updatePartnerPassword = async (fields, values, conditionFields, conditionValues) => {
-   return await PartnerStaffs.updatePartnerStaff(fields, values, conditionFields, conditionValues);
+const updatePartnerPassword = async (info, conditions) => {
+   return await PartnerStaffs.updatePartnerPassword(info, conditions);
 }
 
 module.exports = {

@@ -2,56 +2,90 @@ const mysql = require("mysql2");
 const dbUtils = require("../lib/dbUtils");
 
 const dbOptions = {
-	host: process.env.HOST,
-	port: process.env.DBPORT,
-	user: process.env.USER,
-	password: process.env.PASSWORD,
-	database: process.env.DATABASE,
+  host: process.env.HOST,
+  port: process.env.DBPORT,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
 };
 
 const table = "partner_staff";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-const checkExistPartnerStaff = async (fields, values) => {
-	const query = `SELECT * FROM ${table} WHERE ${fields.map(field => `${field} = ?`).join(' OR ')}`;
-	const result = await pool.query(query, values);
-	return result[0].length > 0;
-};
+const checkExistPartnerStaff = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+	const result = await dbUtils.findOneUnion(pool, table, fields, values);
 
-const createNewPartnerStaff = async (fields, values) => {
-	const lastUser = await dbUtils.getLastRow(pool, table);
-
-	let partnerStaffId = "0000000";
-
-	if (lastUser) {
-		partnerStaffId = (parseInt(lastUser["staff_id"]) + 1).toString().padStart(7, "0");
+	if (!result) {
+		throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút.");
 	}
 
-	fields.push("staff_id");
-	values.push(partnerStaffId);
+	if (result.length <= 0) {
+		return new Object({
+		existed: false,
+		message: "Người dùng chưa tồn tại.",
+		});
+	}
 
-	await dbUtils.insert(pool, table, fields, values);
+	for (let i = 0; i < fields.length; i++) {
+		if (result[0][fields[i]] === values[i]) {
+		return new Object({
+			existed: true,
+			message: `Người dùng có ${fields[i]}: ${values[i]} đã tồn tại.`,
+		});
+		}
+	}
 };
 
-const getManyPartnerStaffs = async (fields, values) => {
-  	return await dbUtils.find(pool, table, fields, values);
+const createNewPartnerStaff = async (info) => {
+  const fields = Object.keys(info);
+  const values = Object.values(info);
+
+
+  return await dbUtils.insert(pool, table, fields, values);
 };
 
-const getOnePartnerStaff = async (fields, values) => {
-  	return await dbUtils.findOne(pool, table, fields, values);
+const getManyPartnerStaffs = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+
+	const result = await dbUtils.find(pool, table, fields, values);
+	return result;
+	};
+
+const getOnePartnerStaff = async (info) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+
+	return await dbUtils.findOneIntersect(pool, table, fields, values);
 };
 
-const updatePartnerStaff = async (fields, values, conditionFields, conditionValues) => {
-  	return await dbUtils.update(pool, table, fields, values, conditionFields,conditionValues);
+const updatePartnerStaff = async (info, conditions) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+	const conditionFields = Object.keys(conditions);
+	const conditionValues = Object.values(conditions);
+
+	return await dbUtils.updateOne(pool, table, fields, values, conditionFields, conditionValues);
 };
 
-const deletePartnerStaff= async(fields, values) => {
-  	return await dbUtils.deleteOne(pool, table, fields, values);
+const deletePartnerStaff = async (conditions) => {
+	const fields = Object.keys(conditions);
+	const values = Object.values(conditions);
+
+	return await dbUtils.deleteOne(pool, table, fields, values);
 };
 
-const updatePartnerPassword = async (fields, values, conditionFields, conditionValues) => {
-	await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
+const updatePartnerPassword = async (info, conditions) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+
+	const conditionFields = Object.keys(conditions);
+	const conditionValues = Object.values(conditions);
+
+	return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
 module.exports = {

@@ -133,12 +133,12 @@ const deleteOrders = async (vehicle, order_ids) => {
 
     if (vehicle.order_ids) {
         const prevOrderIds = JSON.parse(vehicle.order_ids);
-        for (let i = 0; i < prevOrderIds.length; i++) {
-            if (order_ids.includes(prevOrderIds[i]) && await decreaseMass(vehicle.vehicle_id, prevOrderIds[i])) {
+        for (let i = 0; i < order_ids.length; i++) {
+            const orderIndex = prevOrderIds.indexOf(order_ids[i]);
+            if (orderIndex >= 0 && await decreaseMass(vehicle.vehicle_id, order_ids[i])) {
                 ++acceptedNumber;
-                acceptedArray.push(prevOrderIds[i]);
-                prevOrderIds.splice(i, 1);
-                --i;
+                acceptedArray.push(order_ids[i]);
+                prevOrderIds.splice(orderIndex, 1);
             }
             else {
                 ++notAcceptedNumber;

@@ -1,43 +1,29 @@
 const partnerStaffsService = require ("../services/partnerStaffsService");
+const transportPartnersService = require("../services/transportPartnerService");
 const utils = require("../utils");
 const validation = require("../lib/validation");
 const fs = require("fs");
-const path = require('path');
+const path = require("path");
 
 const partnerStaffValidation = new validation.PartnerStaffValidation();
 
-const verifyStaffSuccess = (req, res) => {
-	return res.status(200).json({
-		error: false,
-		valid: true,
-		message: "Xác thực thành công."
-	});
-};
-
-const verifyStaffFail = (req, res) => {
-	return res.status(404).json({
-		error: true,
-		valid: false,
-		message: "Xác thực thất bại. Vui lòng đăng nhập hoặc đăng ký.",
-	});
-};
-
 const checkExistPartnerStaff = async (req, res) => {
-	const { error } = partnerStaffValidation.validateCheckingExistPartnerStaff(req.query);
-
-	if (error) {
-		return res.status(400).json({
-			error: true,
-			message: "Thông tin không hợp lệ.",
-		});
-	}
-
 	try {
-		const existed = await partnerStaffsService.checkExistPartnerStaff(Object.keys(req.query), Object.values(req.query));
+		const { error } = partnerStaffValidation.validateCheckingExistPartnerStaff(req.query);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: "Thông tin không hợp lệ.",
+			});
+		}
+
+		const resultCheckingExistPartnerStaff = await partnerStaffsService.checkExistPartnerStaff(req.query);
+		
 		return res.status(200).json({
 			error: false,
-			existed: existed,
-			message: existed ? "Nhân viên đã tồn tại." : "Nhân viên chưa tồn tại.",
+			existed: resultCheckingExistPartnerStaff.existed,
+			message: resultCheckingExistPartnerStaff.message,
 		});
 	} catch (error) {
 		res.status(500).json({
@@ -48,158 +34,218 @@ const checkExistPartnerStaff = async (req, res) => {
 };
 
 const getPartnerStaffs = async (req, res) => {
-	if (req.user.permission == 2) {
-		try {
-			const { error } = partnerStaffValidation.validateFindingPartnerStaffByPartnerStaff(req.query);
+	if (["PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)) {
+		const { error } = partnerStaffValidation.validateFindingPartnerStaffByPartnerStaff(req.body);
 
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: "Mã nhân viên không hợp lệ.",
-				});
-			}
-
-			if (req.user.staff_id !== req.query.staff_id) {
-				return res.status(401).json({
-					error: true,
-					message: "Bạn không được phép truy cập tài nguyên này.",
-				});
-			}
-
-			const keys = Object.keys(req.query);
-			const values = Object.values(req.query);
-
-			const result = await partnerStaffsService.getOnePartnerStaff(keys, values); 
-			return res.status(200).json({
-				error: false,
-				data: result,
-				message: "Lấy thông tin thành công.",
-			});
-		} catch (error) {
-			return res.status(500).json({
+		if (error) {
+			return res.status(400).json({
 				error: true,
 				message: error.message,
 			});
 		}
+
+		if (req.user.staff_id !== req.body.staff_id) {
+			return res.status(403).json({
+				error: true,
+				message: "Người dùng không được phép truy cập tài nguyên này.",
+			});
+		}
+
+		const result = await partnerStaffsService.getOnePartnerStaff(req.body); 
+		return res.status(200).json({
+			error: false,
+			data: result,
+			message: "Lấy thông tin thành công.",
+		});
 	}
 
-	if (req.user.permission === 3) {
+	if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
+		const { error } = partnerStaffValidation.validateFindingPartnerStaffByPartner(req.body);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		req.body.partner_id = req.user.partner_id;
+
+		const result = await partnerStaffsService.getManyPartnerStaffs(req.body);
+		return res.status(200).json({
+			error: false,
+			data: result,
+			message: "Lấy thông tin thành công.",
+		});
+	}
+
+	if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
 		const { error } = partnerStaffValidation.validateFindingPartnerStaffByAdmin(req.body);
 
 		if (error) {
 			return res.status(400).json({
 				error: true,
-				message: "Thông tin không hợp lệ.",
+				message: error.message,
 			});
 		}
 
-		const keys = Object.keys(req.body);
-		const values = Object.values(req.body);
+		req.body.agency_id = req.user.agency_id;
 
-		keys.push("agency_id");
-		values.push(req.user.agency_id);
+		const result = await partnerStaffsService.getManyPartnerStaffs(req.body);
+		return res.status(200).json({
+			error: false,
+			data: result,
+			message: "Lấy thông tin thành công.",
+		});
+	}
 
-		try {
-			const result = await partnerStaffsService.getManyPartnerStaffs(keys, values);
-			return res.status(200).json({
-				error: false,
-				data: result,
-				message: "Lấy thông tin thành công.",
-			});
-		} catch (error) {
-			res.status(500).json({
+	if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+		const { error } = partnerStaffValidation.validateFindingPartnerStaffByAdmin(req.body);
+
+		if (error) {
+			return res.status(400).json({
 				error: true,
-				message: error,
+				message: error.message,
 			});
 		}
+
+		const result = await partnerStaffsService.getManyPartnerStaffs(req.body);
+		return res.status(200).json({
+			error: false,
+			data: result,
+			message: "Lấy thông tin thành công.",
+		});
 	}
 };
 
 const createNewPartnerStaff = async (req, res) => {
 	try {
-
 		const { error } = partnerStaffValidation.validateCreatingPartnerStaff(req.body);
 
 		if (error) {
 			return res.status(400).json({
 				error: true,
-				message: "Thông tin không hợp lệ.",
+				message: error.message,
 			});
 		}
 
-		const existed = await partnerStaffsService.checkExistPartnerStaff(["cccd", "phone_number", "email"], [req.body.cccd, req.body.phone_number, req.body.email]);
+		const staffIdSubParts = req.user.staff_id.split('_');
+		const partnerIdSubParts = req.body.partner_id.split('_');
 
-		if (existed) {
-			return res.status(409).json({
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		&& (staffIdSubParts[0] !== partnerIdSubParts[0]
+		|| staffIdSubParts[1] !== partnerIdSubParts[1])) {
+			return res.status(404).json({
 				error: true,
-				message: "Nhân viên đã tồn tại.",
+				message: `Đối tác có mã đối tác ${req.body.partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
 			});
 		}
 
-		req.body.password = utils.hash(req.body.password);
+		const resultGettingOnePartner = await transportPartnersService.getOnePartner({ transport_partner_id: req.body.partner_id });
 
-		const keys = Object.keys(req.body);
-		const values = Object.values(req.body);
-
-		if (req.files.avatar ) {
-			keys.push("avatar");
-			values.push(req.files.avatar[0].filename);
+		if (!resultGettingOnePartner || resultGettingOnePartner.length <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Đối tác có mã đối tác ${req.body.partner_id} không tồn tại.`,
+			});
 		}
 
-		if (req.files.license_before && req.files.license_after) {
-			keys.push("image_license");
-			values.push(JSON.stringify(new Object({
-				before: req.files.license_before[0].filename,
-				after: req.files.license_after[0].filename
-			})));
-		}
+		const partner = resultGettingOnePartner[0];
 
-		await partnerStaffsService.createNewPartnerStaff(keys, values);
-
-		if (req.files.avatar) {
-			const tempFolderAvatarPath = path.join("storage", "partner_staff", "img", "avatar_temp");
-			if (!fs.existsSync(tempFolderAvatarPath)) {
-				fs.mkdirSync(tempFolderAvatarPath, { recursive: true });
-			}	
-
-			const officialFolderAvatarPath = path.join("storage", "partner_staff", "img", "avatar");
-			if (!fs.existsSync(officialFolderAvatarPath)) {
-				fs.mkdirSync(officialFolderAvatarPath, { recursive: true });
-			}
-
-			const tempAvatarFilePath = path.join(tempFolderAvatarPath, req.files.avatar[0].filename);
-			const officialAvatarFilePath = path.join(officialFolderAvatarPath, req.files.avatar[0].filename);
-			
-			fs.renameSync(tempAvatarFilePath, officialAvatarFilePath);
-		}
-
-		if (req.files.license_before && req.files.license_after) {
-			const tempFolderLicensePath = path.join("storage", "partner_staff", "img", "license_temp");
-			if (!fs.existsSync(tempFolderLicensePath)) {
-				fs.mkdirSync(tempFolderLicensePath, { recursive: true });
-			}	
-
-			const officialFolderLicensePath = path.join("storage", "partner_staff", "img", "license");
-			if (!fs.existsSync(officialFolderLicensePath)) {
-				fs.mkdirSync(officialFolderLicensePath, { recursive: true });
-			}	
-
-			const tempBeforeLicenseFilePath = path.join(tempFolderLicensePath, req.files.license_before[0].filename);
-			const officialBeforeLicenseFilePath = path.join(officialFolderLicensePath, req.files.license_before[0].filename);
-			
-			const tempAfterLicenseFilePath = path.join(tempFolderLicensePath, req.files.license_after[0].filename);
-			const officialAfterLicenseFilePath = path.join(officialFolderLicensePath, req.files.license_after[0].filename);
-
-			fs.renameSync(tempBeforeLicenseFilePath, officialBeforeLicenseFilePath);
-			fs.renameSync(tempAfterLicenseFilePath, officialAfterLicenseFilePath);
-		}
-
-		return res.status(200).json({
-			error: false,
-			message: "Thêm thành công!",
+		const tempUser = new Object({
+			username: req.body.username,
+			cccd: req.body.cccd,
+			email: req.body.email || null,
+			phone_number: req.body.phone_number || null,
 		});
 
+		for (const key in tempUser) {
+			if (tempUser[key] === null) {
+				delete tempUser[key];
+			}
+		}
+
+		const checkingExistPartnerStaff = await partnerStaffsService.checkExistPartnerStaff(tempUser);
+
+		if (checkingExistPartnerStaff.existed) {
+			return res.status(409).json({
+				error: true,
+				message: checkingExistPartnerStaff.message,
+			});
+		}
+
+		req.body.agency_id = partner.agency_id;
+		req.body.staff_id = staffIdSubParts[0] + '_' + staffIdSubParts[1] + '_' + req.body.cccd;
+		req.body.password = utils.hash(req.body.password);
+		
+		if (req.files) {
+			if (req.files.avatar) {
+				req.body.avatar = req.files.avatar[0].filename;
+			}
+	
+			if (req.files.license_before && req.files.license_after) {
+				req.body.avatar.image_license = JSON.stringify(new Object({
+					before: req.files.license_before[0].filename,
+					after: req.files.license_after[0].filename
+				}));
+			}
+		}
+
+		const resultCreatingNewPartnerStaff = await partnerStaffsService.createNewPartnerStaff(req.body);
+
+		if (!resultCreatingNewPartnerStaff || resultCreatingNewPartnerStaff.affectedRows <= 0) {
+			return res.status(409).json({
+				error: true,
+				message: `Tạo tài khoản nhân viên đối tác vận tải có mã nhân viên ${req.body.staff_id} thất bại.\n`
+			});
+		}
+
+		if (req.files) {
+			if (req.files.avatar) {
+				const tempFolderAvatarPath = path.join("storage", "partner_staff", "img", "avatar_temp");
+				if (!fs.existsSync(tempFolderAvatarPath)) {
+					fs.mkdirSync(tempFolderAvatarPath, { recursive: true });
+				}	
+	
+				const officialFolderAvatarPath = path.join("storage", "partner_staff", "img", "avatar");
+				if (!fs.existsSync(officialFolderAvatarPath)) {
+					fs.mkdirSync(officialFolderAvatarPath, { recursive: true });
+				}
+	
+				const tempAvatarFilePath = path.join(tempFolderAvatarPath, req.files.avatar[0].filename);
+				const officialAvatarFilePath = path.join(officialFolderAvatarPath, req.files.avatar[0].filename);
+				
+				fs.renameSync(tempAvatarFilePath, officialAvatarFilePath);
+			}
+	
+			if (req.files.license_before && req.files.license_after) {
+				const tempFolderLicensePath = path.join("storage", "partner_staff", "img", "license_temp");
+				if (!fs.existsSync(tempFolderLicensePath)) {
+					fs.mkdirSync(tempFolderLicensePath, { recursive: true });
+				}	
+	
+				const officialFolderLicensePath = path.join("storage", "partner_staff", "img", "license");
+				if (!fs.existsSync(officialFolderLicensePath)) {
+					fs.mkdirSync(officialFolderLicensePath, { recursive: true });
+				}	
+	
+				const tempBeforeLicenseFilePath = path.join(tempFolderLicensePath, req.files.license_before[0].filename);
+				const officialBeforeLicenseFilePath = path.join(officialFolderLicensePath, req.files.license_before[0].filename);
+				
+				const tempAfterLicenseFilePath = path.join(tempFolderLicensePath, req.files.license_after[0].filename);
+				const officialAfterLicenseFilePath = path.join(officialFolderLicensePath, req.files.license_after[0].filename);
+	
+				fs.renameSync(tempBeforeLicenseFilePath, officialBeforeLicenseFilePath);
+				fs.renameSync(tempAfterLicenseFilePath, officialAfterLicenseFilePath);
+			}
+		}
+
+		return res.status(201).json({
+			error: false,
+			message: `Tạo tài khoản nhân viên đối tác vận tải có mã nhân viên ${req.body.staff_id} thành công.\n`,
+		});
 	} catch (error) {
+		console.log(error);
 		return res.status(500).json({
 			error: true,
 			message: error.message,
@@ -208,39 +254,59 @@ const createNewPartnerStaff = async (req, res) => {
 };
 
 const updatePartnerStaffInfo = async (req, res) => {
-	const { error } = partnerStaffValidation.validateFindingPartnerStaffByPartnerStaff(req.query) || partnerStaffValidation.validateUpdatingPartnerStaff(req.body);
-
-	if (error) {
-		return res.status(400).json({
-			error: true,
-			message: "Thông tin không hợp lệ.",
-		});
-	}
-
-	const staffId = req.query.staff_id;
-
-	req.body.active = true;
-
-	const keys = Object.keys(req.body);
-	const values = Object.values(req.body);
-
-	// Kiểm tra nhân viên được cập nhật có thuộc agency của admin 
-	const conditionFields = ["staff_id"];
-	const conditionValues = [staffId];
-
 	try {
-		const result = await partnerStaffsService.updatePartnerStaff(keys, values, conditionFields, conditionValues);
+		const { error } = partnerStaffValidation.validateFindingPartnerStaffByPartnerStaff(req.query) || partnerStaffValidation.validateUpdatingPartnerStaff(req.body);
 
-		if (result[0].affectedRows <= 0) {
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+		
+		const updatorIdSubParts = req.user.staff_id.split('_');
+		const staffIdSubParts = req.query.staff_id.split('_');
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		&& (staffIdSubParts[0] !== updatorIdSubParts[0]
+		|| staffIdSubParts[1] !== updatorIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
-				message: "Nhân viên không tồn tại."
+				message: `Nhân viên có mã nhân viên ${req.body.partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
 			});
 		}
 
-		res.status(200).json({
+		const propertiesWillBeCheckExist = ["username", "email", "phone_number", "bin"];
+		const tempUser = new Object();
+
+		for (const prop of propertiesWillBeCheckExist) {
+			if (req.body.hasOwnProperty(prop) && req.body[prop]) {
+				tempUser[prop] = req.body[prop];
+			}
+		}
+
+		if (Object.keys(tempUser).length > 0) {
+			const resultCheckingExistPartnerStaff = await partnerStaffsService.checkExistPartnerStaff(tempUser);
+			
+			if (resultCheckingExistPartnerStaff.existed) {
+				return res.status(409).json({
+					error: true,
+					message: resultCheckingExistPartnerStaff.message,
+				});
+			}
+		}
+
+		const resultUpdatingPartnerStaff = await partnerStaffsService.updatePartnerStaff(req.body, { staff_id: req.query.staff_id });
+		if (!resultUpdatingPartnerStaff || resultUpdatingPartnerStaff.affectedRows <= 0) {
+			return res.status(200).json({
+				error: false,
+				message: `Cập nhật thông tin nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu tổng thất bại.`,
+			});
+		}
+
+		return res.status(200).json({
 			error: false,
-			message: "Cập nhật thành công.",
+			message: `Cập nhật thông tin nhân viên có mã nhân viên ${req.query.staff_id} trong cơ sở dữ liệu tổng thành công.`,
 		});
 	} catch (error) {
 		res.status(500).json({
@@ -250,111 +316,118 @@ const updatePartnerStaffInfo = async (req, res) => {
 	}
 };
 
-const deletePartnerStaff = async (req,res)=>{
-	if (!req.isAuthenticated() || req.user.permission < 3) {
-		return res.status(401).json({
-			error: true,
-			message: "Bạn không có quyền truy cập tài nguyên này!",
-		});
-	}
-
-	const { error } = partnerStaffValidation.validateDeletingPartnerStaff(req.query);
-
-	if (error) {
-		return res.status(400).json({
-			error: true,
-			message: "Thông tin không hợp lệ.",
-		});
-	}
-
+const deletePartnerStaff = async (req,res)=>{	
 	try {
-	// kiểm tra staffId có thuộc quyền quản lý của agencyId của admin hay không
-	const partnerStaff = await partnerStaffsService.getOnePartnerStaff(["staff_id"], [req.query.staff_id]);
-	
-	if (!partner || partnerStaff.length <= 0) {
-		return res.status(200).json({
-			error: true,
-			message: "Bạn không có quyền truy cập tài nguyên này. ",
-		});
-	}
-	
-	const result = await partnerStaffsService.deletePartnerStaff(["staff_id"], [req.query.staff_id]);
-	
-	if (!result || result.affectedRows <= 0) {
-		return res.status(404).json({
-			error: true,
-			message: "Người dùng không tồn tại.",
-		});
-	}
+		const { error } = partnerStaffValidation.validateDeletingPartnerStaff(req.query);
 
-	const avatar = partnerStaff[0]["avatar"];
-
-	if (avatar) {
-		const avatarPath = path.join("storage", "partner_staff", "img", "avatar", partnerStaff[0]["avatar"]);
-		if (fs.existsSync(avatarPath)) {
-			fs.unlinkSync(avatarPath,(err) => {
-				if (err) {
-					console.log(err);
-				} else {
-					console.log(`Avatar ${req.query.staff_id} deleted successfully`);
-				}
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
 			});
 		}
-	}
-
-	const license = partnerStaff[0]["image_license"];
-
-	if (license) {
-		const licenseFront = license["before"];
-		const licenseBack = license["after"];
-		const licensePath = path.join("storage", "partner_staff", "img", "license");
-		if (licenseFront) {
-			const licenseFrontPath = path.join(licensePath, licenseFront);
-			if (fs.existsSync(licenseFrontPath)) {
-				fs.unlinkSync(licenseFrontPath);
-			}
-		}
-
-		if (licenseBack) {
-			const licenseBackPath = path.join(licensePath, licenseBack);
-			if (fs.existsSync(licenseBackPath)) {
-				fs.unlinkSync(licenseBackPath);
-			}
-		}
-	}
 	
-	return res.status(200).json({
-		error: false,
-		message: `Xóa nhân viên ${req.query.staff_id} thành công.`,
-	});
+		const deletorIdSubParts = req.user.staff_id.split('_');
+		const staffIdSubParts = req.query.staff_id.split('_');
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		&& (staffIdSubParts[0] !== deletorIdSubParts[0]
+		|| staffIdSubParts[1] !== deletorIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.body.partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
+
+		const resultGettingOnePartner = await partnerStaffsService.getOnePartnerStaff(req.query);
+
+		if (!resultGettingOnePartner || resultGettingOnePartner.length <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`,
+			});
+		}
+
+		const staff = resultGettingOnePartner[0];
+		const avatar = staff.avatar;
+		const license = staff.license ? JSON.parse(staff.license) : null;
+
+		const resultDeletingPartnerStaff = await partnerStaffsService.deletePartnerStaff(req.query);
+		if (!resultDeletingPartnerStaff || resultDeletingPartnerStaff.affectedRows <= 0) {
+			return res.status(200).json({
+				error: false,
+				message: `Xóa nhân viên có mã nhân viên ${req.query.staff_id} thất bại.`,
+			});
+		}
+
+
+		if (avatar) {
+			const avatarPath = path.join("storage", "partner_staff", "img", "avatar", avatar);
+			if (fs.existsSync(avatarPath)) {
+				fs.unlinkSync(avatarPath);
+			}
+		}
+
+		if (license) {
+			const licenseFront = license.before;
+			const licenseBack = license.after;
+
+			const licensePath = path.join("storage", "partner_staff", "img", "license");
+
+			if (licenseFront) {
+				const licenseFrontPath = path.join(licensePath, licenseFront);
+				if (fs.existsSync(licenseFrontPath)) {
+					fs.unlinkSync(licenseFrontPath);
+				}
+			}
+
+			if (licenseBack) {
+				const licenseBackPath = path.join(licensePath, licenseBack);
+				if (fs.existsSync(licenseBackPath)) {
+					fs.unlinkSync(licenseBackPath);
+				}
+			}
+		}
+	
+		return res.status(200).json({
+			error: false,
+			message: `Xóa nhân viên có mã nhân viên ${req.query.staff_id} thành công.`,
+		});
 
 	} catch (error) {
 		res.status(500).json({
-			status: "error",
-			message: "Đã xảy ra lỗi. Vui lòng thử lại.",
+			error: true,
+			message: error.message,
 		});
 	}
 };
 
 const updatePartnerPassword = async (req, res) => {
-	const { error } = partnerStaffValidation.validateUpdatePartnerPassword(req.body);
-
-	if (error) {
-		return res.status(400).json({
-			error: true,
-			message: "Thông tin không hợp lệ.",
-		});
-	}
-	
-	const hashedNewPassword = utils.hash(req.body.new_password);
-
 	try {
-		const result = await partnerStaffsService.updatePartnerPassword(["password", "active"], [hashedNewPassword, 1], ["staff_id"], [req.user.staff_id]) ;
+		const { error } = partnerStaffValidation.validateUpdatePartnerPassword(req.body);
 
-		if (!result || result[0].affectedRows <= 0) {
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		const updatedInfo = new Object({
+			password: utils.hash(req.body.new_password),
+			active: true,
+		});
+
+		const condition = new Object({
+			staff_id: req.user.staff_id,
+		});
+
+		const resultUpdatingPassword = await partnerStaffsService.updatePartnerPassword(updatedInfo, condition);
+
+		if (!resultUpdatingPassword || resultUpdatingPassword.affectedRows <= 0) {
 			return res.status(404).json({
 				error: true,
-				message: "Nhân viên không tồn tại.",
+				message: "Cập nhật mật khẩu không thành công. Người dùng không tồn tại.",
 			});
 		}
 
@@ -362,6 +435,7 @@ const updatePartnerPassword = async (req, res) => {
 			error: false,
 			message: "Cập nhật mật khẩu thành công.",
 		});
+
 	} catch (error) {
 		res.status(500).json({
 			error: true,
@@ -371,57 +445,77 @@ const updatePartnerPassword = async (req, res) => {
 };
 
 const updatePartnerAvatar = async (req, res) => {
-	if (!req.file) {
-		return res.status(404).json({
-			error: true,
-			message: "Vui lòng thêm hình ảnh cá nhân.",
-		});
-	}
-
 	try {
-		const partnerStaff = await partnerStaffsService.getOnePartnerStaff(["staff_id"], [req.query.staff_id]);
+		const { error } = partnerStaffValidation.validateFindingPartnerStaffByPartnerStaff(req.query);
+		
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
 
-		if (!partnerStaff || partnerStaff.length <= 0) {
+		const updatorIdSubParts = req.user.staff_id.split('_');
+		const staffIdSubParts = req.query.staff_id.split('_');
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		&& (staffIdSubParts[0] !== updatorIdSubParts[0]
+		|| staffIdSubParts[1] !== updatorIdSubParts[1])) {
 			return res.status(404).json({
 				error: true,
-				message: "Bạn không được phép truy cập tài nguyên này.",
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
 			});
 		}
 
-		const result = await partnerStaffsService.updatePartnerStaff(["avatar"], [req.file.filename], ["staff_id"], [req.query.staff_id]);
+		const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff({ staff_id: req.query.staff_id });
 
-		if (!result || result[0].affectedRows <= 0) {
-			return res.status(403).json({
+		if (!resultGettingOnePartnerStaff || resultGettingOnePartnerStaff.length <= 0) {
+			return res.status(404).json({
 				error: true,
-				message: "Bạn không có quyền truy cập tài nguyên này.",
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`,
 			});
 		}
 
-		if (partnerStaff[0]["avatar"]) {
-			const oldAvatarPath = path.join("storage", "partner_staff", "img", "avatar", partnerStaff[0]["avatar"]);
-			fs.unlinkSync(oldAvatarPath);
+		const partner = resultGettingOnePartnerStaff[0];
+		const fileName = partner.avatar;
+
+		const resultUpdatingStaff = await partnerStaffsService.updatePartnerStaff({ avatar: req.file.filename }, { staff_id: req.query.staff_id });
+		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.user.staff_id} không tồn tại.`
+			});
 		}
 
-		const tempFolderAvatarPath = path.join("storage", "partner_staff", "img", "avatar_temp");
-		if (!fs.existsSync(tempFolderAvatarPath)) {
-			fs.mkdirSync(tempFolderAvatarPath, { recursive: true });
+		const tempFolderPath = path.join("storage", "partner_staff", "img", "avatar_temp");
+		if (!fs.existsSync(tempFolderPath)) {
+			fs.mkdirSync(tempFolderPath, { recursive: true });
 		}	
 
-		const officialFolderAvatarPath = path.join("storage", "partner_staff", "img", "avatar");
-		if (!fs.existsSync(officialFolderAvatarPath)) {
-			fs.mkdirSync(officialFolderAvatarPath, { recursive: true });
+		const officialFolderPath = path.join("storage", "partner_staff", "img", "avatar");
+		if (!fs.existsSync(officialFolderPath)) {
+			fs.mkdirSync(officialFolderPath, { recursive: true });
 		}
 
-		const tempAvatarFilePath = path.join(tempFolderAvatarPath, req.file.filename);
-		const officialAvatarFilePath = path.join(officialFolderAvatarPath, req.file.filename);
+		if (fileName) {
+			const oldFilePath = path.join(officialFolderPath, fileName);
+			if (fs.existsSync(oldFilePath)) {
+				fs.unlinkSync(oldFilePath);
+			}
+		}
 
-		fs.renameSync(tempAvatarFilePath, officialAvatarFilePath);
+		const tempFilePath = path.join(tempFolderPath, req.file.filename);
+		const officialFilePath = path.join(officialFolderPath, req.file.filename);
 
-		res.status(201).json({
+		fs.renameSync(tempFilePath, officialFilePath);
+
+		return res.status(201).json({
 			error: false,
-			message: "Cập nhật thành công.",
-		});	
+			message: `Kết quả:\n
+			Cập nhật avatar cho nhân viên có mã nhân viên ${req.query.staff_id} thành công.`,
+		});
 	} catch (error) {
+		console.log(error);
 		res.status(500).json({
 			error: true,
 			message: error.message,
@@ -429,13 +523,96 @@ const updatePartnerAvatar = async (req, res) => {
 	}
 };
 
-const logout = async (req, res) => {
-	if (!req.isAuthenticated() || req.user.permission < 1) {
-		return res.status(401).json({
-		error: true,
-		message: "Vui lòng đăng nhập.",
+const updatePartnerLicenseImg = async (req, res) => {
+	try {
+		const updatorIdSubParts = req.user.staff_id.split('_');
+		const staffIdSubParts = req.query.staff_id.split('_');
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+		&& (staffIdSubParts[0] !== updatorIdSubParts[0]
+		|| staffIdSubParts[1] !== updatorIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.body.partner_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
+
+		const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff({ staff_id: req.query.staff_id });
+
+		if (!resultGettingOnePartnerStaff || resultGettingOnePartnerStaff.length <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.user.staff_id} không tồn tại.`,
+			});
+		}
+
+		const staff = resultGettingOnePartnerStaff[0];
+
+		const imgs = JSON.stringify({
+			before: req.files.license_before[0].filename,
+			after: req.files.license_after[0].filename
+		});
+
+		const imageLicense = staff.image_license ? JSON.parse(staff.image_license) : null;
+
+		const resultUpdatingLicenses = await partnerStaffsService.updatePartnerStaff({ image_license: imgs}, { staff_id: req.query.staff_id });
+		if (!resultUpdatingLicenses || resultUpdatingLicenses.affectedRows <= 0) {
+			return res.status(403).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.user.staff_id} không tồn tại.`,
+			});
+		}
+
+		const tempFolderLicensePath = path.join("storage", "partner_staff", "img", "license_temp");
+		if (!fs.existsSync(tempFolderLicensePath)) {
+			fs.mkdirSync(tempFolderLicensePath, { recursive: true });
+		}
+
+		const officialFolderLicensePath = path.join("storage", "partner_staff", "img", "license");
+		if (!fs.existsSync(officialFolderLicensePath)) {
+			fs.mkdirSync(officialFolderLicensePath, { recursive: true });
+		}
+
+		if (imageLicense) {
+			if (imageLicense.before) {
+				const oldLicenseFrontPath = path.join(licensePath, licenseBefore);
+				if (fs.existsSync(oldLicenseFrontPath)) {
+					fs.unlinkSync(oldLicenseFrontPath);
+	
+				}
+			}
+			if (imageLicense.after) {
+				const oldLicenseBackPath = path.join(licensePath, licenseAfter);
+				if (fs.existsSync(oldLicenseBackPath)) {
+					fs.unlinkSync(oldLicenseBackPath);
+				}
+			}
+		}
+
+		const tempBeforeLicenseFilePath = path.join(tempFolderLicensePath, req.files.license_before[0].filename);
+		const officialBeforeLicenseFilePath = path.join(officialFolderLicensePath, req.files.license_before[0].filename);
+		
+		fs.renameSync(tempBeforeLicenseFilePath, officialBeforeLicenseFilePath);
+
+		const tempAfterLicenseFilePath = path.join(tempFolderLicensePath, req.files.license_after[0].filename);
+		const officialAfterLicenseFilePath = path.join(officialFolderLicensePath, req.files.license_after[0].filename);
+		
+		fs.renameSync(tempAfterLicenseFilePath, officialAfterLicenseFilePath);
+
+		return res.status(201).json({
+			error: false,
+			message: `Cập nhật hình ảnh giấy phép lái xe cho nhân viên ${req.query.staff_id} thành công.`,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: true,
+			message: error.message,
 		});
 	}
+}
+
+const logout = async (req, res) => {
 	try {
 		res.clearCookie("connect.sid");
 		req.logout(() => {
@@ -454,96 +631,12 @@ const logout = async (req, res) => {
 	}
 };
 
-const updatePartnerLicenseImg = async (req, res) => {
-	if (!req.files.license_before)
-	{
-		return res.status(404).json({
-			error: true,
-			message: "Vui lòng thêm hình ảnh mặt trước.",
-		});
-	}
-
-	if (!req.files.license_after)
-	{
-		return res.status(404).json({
-			error: true,
-			message: "Vui lòng thêm hình ảnh mặt sau.",
-		});
-	}
-
-	try {
-		const partnerStaff = await partnerStaffsService.getOnePartnerStaff(["staff_id"], [req.query.staff_id]);
-		if (!partnerStaff || partnerStaff.length <= 0) {
-			return res.status(404).json({
-				error: true,
-				message: "Bạn không được phép truy cập tài nguyên này.",
-			});
-		}
-
-		const imgs = JSON.stringify({ 
-			beforeImg : req.files.license_before[0].filename,
-			afterImg :	req.files.license_after[0].filename
-		});
-
-		const result = await partnerStaffsService.updatePartnerStaff(["image_license"], [imgs], ["staff_id"], [req.query.staff_id]);
-
-		if (!result || result[0].affectedRows <= 0) {
-			return res.status(403).json({
-				error: true,
-				message: "Bạn không có quyền truy cập tài nguyên này.",
-			});
-		}
-
-		const imageLicense = JSON.parse(partnerStaff[0].image_license);
-		const licenseBefore = imageLicense.before;
-		const licenseAfter = imageLicense.after;
-
-		const licensePath = path.join("storage", "partner_staff", "img", "license");
-		const oldLicenseFrontPath = path.join(licensePath, licenseBefore);
-		const oldLicenseBackPath = path.join(licensePath, licenseAfter);
-
-		fs.unlinkSync(oldLicenseFrontPath);
-		fs.unlinkSync(oldLicenseBackPath);
-
-		const tempFolderLicensePath = path.join("storage", "partner_staff", "img", "license_temp");
-		if (!fs.existsSync(tempFolderLicensePath)) {
-			fs.mkdirSync(tempFolderLicensePath, { recursive: true });
-		}	
-
-		const officialFolderLicensePath = path.join("storage", "partner_staff", "img", "license");
-		if (!fs.existsSync(officialFolderLicensePath)) {
-			fs.mkdirSync(officialFolderLicensePath, { recursive: true });
-		}	
-		
-		const tempBeforeLicenseFilePath = path.join(tempFolderLicensePath, req.files.license_before[0].filename);
-		const officialBeforeLicenseFilePath = path.join(officialFolderLicensePath, req.files.license_before[0].filename);
-		
-		const tempAfterLicenseFilePath = path.join(tempFolderLicensePath, req.files.license_after[0].filename);
-		const officialAfterLicenseFilePath = path.join(officialFolderLicensePath, req.files.license_after[0].filename);
-
-		fs.renameSync(tempBeforeLicenseFilePath, officialBeforeLicenseFilePath);
-		fs.renameSync(tempAfterLicenseFilePath, officialAfterLicenseFilePath);
-
-		res.status(201).json({
-			error: false,
-			message: "Cập nhật thành công.",
-		});	
-	} catch (error) {
-		res.status(500).json({
-			error: true,
-			message: error.message,
-		});
-	}
-}
-
 module.exports = {
 	checkExistPartnerStaff,
 	createNewPartnerStaff,
 	getPartnerStaffs,
 	updatePartnerStaffInfo,
 	deletePartnerStaff,
-	verifyStaffSuccess,
-	verifyStaffFail,
 	updatePartnerPassword,
 	updatePartnerAvatar,
 	updatePartnerLicenseImg,

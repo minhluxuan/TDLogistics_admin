@@ -2,13 +2,69 @@ POST http://localhost:5000/api/v1/vehicles/create
 Content-Type: application/json
 
 {
+    
     "agency_id": "BC_70001_077204005691",
-    "staff_id": "BC_70001_077204005691",
+    "staff_id": "BC_70001_077204005684",
     "type": "motorbike",
-    "license_plate": "72-H1 24767",
+    "license_plate": "72-H1 24768",
     "max_load": 50
 }
+###
+POST http://localhost:5000/api/v1/vehicles/create
+Content-Type: application/json
 
+{
+    "agency_id": "BC_70001_077204005691",
+    "staff_id": "BC_70001_077204005684",
+    "license_plate": "42-H1 24768",
+    "max_load": 50
+}
+###
+POST http://localhost:5000/api/v1/vehicles/create
+Content-Type: application/json
+
+{
+    
+    "staff_id": "BC_70001_077204005684",
+    "type": "motorbike",
+    "license_plate": "72-H1 24768",
+    "max_load": 50
+}
+###
+POST http://localhost:5000/api/v1/vehicles/create
+Content-Type: application/json
+
+{
+    
+    "agency_id": "as",
+    "staff_id": "BC_70001_077204005684",
+    "type": "motorbike",
+    "license_plate": "72-H1 24768",
+    "max_load": 50
+}
+###
+POST http://localhost:5000/api/v1/vehicles/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_70001_077204005691",
+    "staff_id": "invalid staff_id",
+    "type": "motorbike",
+    "license_plate": "72-H1 24768",
+    "max_load": 50
+}
+###
+POST http://localhost:5000/api/v1/vehicles/create
+Content-Type: application/json
+
+{
+    
+    "agency_id": "BC_70001_077204001691",
+    "staff_id": "BC_70001_077204005684",
+    "type": "motorbike",
+    "license_plate": "72-H1 2768",
+    "max_load": 50
+}
 ###
 
 PUT http://localhost:5000/api/v1/vehicles/update?vehicle_id=BC_70001_72H124767
@@ -17,7 +73,12 @@ Content-Type: application/json
 {
     "max_load": 60
 }
+###
+PUT http://localhost:5000/api/v1/vehicles/update?vehicle_id=BC_70001_72H124767
+Content-Type: application/json
 
+{
+}
 ###
 
 GET http://localhost:5000/api/v1/vehicles/search_order_ids?vehicle_id=BC_70001_72H124767
@@ -32,6 +93,13 @@ Content-Type: application/json
 }
 
 ###
+PATCH http://localhost:5000/api/v1/vehicles/add_orders?vehicle_id=BC_70001_72H124767
+Content-Type: application/json
+
+{
+    "order_ids": ["TD202452225629673","TD202402225629672"]
+}
+###
 
 PATCH http://localhost:5000/api/v1/vehicles/delete_orders?vehicle_id=BC_70001_72H124767
 Content-Type: application/json
@@ -43,3 +111,5 @@ Content-Type: application/json
 ###
 
 DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=BC_70001_72H124767
+###
+DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=invalid_vehicle_id

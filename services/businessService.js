@@ -1,5 +1,9 @@
 const Business = require("../database/Business");
 
+const checkExistBusinessUnion = async (conditions) => {
+    return await Business.checkExistBusinessUnion(conditions);
+}
+
 const checkExistBusiness = async (conditions) => {
     return await Business.checkExistBusiness(conditions);
 }
@@ -24,8 +28,12 @@ const getManyBusinessUsers = async (conditions) => {
   	return await Business.getManyBussinessUsers(conditions);
 }
 
-const getRepresentor = async (conditions) => {
-    return await Business.getRepresentor(conditions);
+const getOneRepresentor = async (conditions) => {
+    return await Business.getOneRepresentor(conditions);
+}
+
+const getManyRepresentors = async (conditions) => {
+    return await Business.getManyRepresentors(conditions);
 }
 
 const updateBusinessUser = async (info, conditions) => {
@@ -41,13 +49,15 @@ const deleteBusinessUser = async(info) => {
 }
 
 module.exports = {
+    checkExistBusinessUnion,
     checkExistBusiness,
     checkExistBusinessRepresentor,
     createNewBusinessUser,
     createNewRepresentor,
     getOneBusinessUser,
     getManyBusinessUsers,
-    getRepresentor,
+    getOneRepresentor,
+    getManyRepresentors,
     updateBusinessUser,
     updateBusinessRepresentor,
     deleteBusinessUser

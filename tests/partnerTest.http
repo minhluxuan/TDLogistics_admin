@@ -1,0 +1,211 @@
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "phuongtrang123",
+    "user_password": "PhuongTrang2k24@tdlogistics",
+    "user_fullname": "Lữ Xuân Minh",
+    "user_phone_number": "0981430417",
+    "user_email": "minh.luxuanhcmc@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-03",
+    "user_cccd": "077204005691",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050138319579",
+    "user_bank": "Sacombank",
+
+    "agency_id": "BC_70001_077204005691",
+    "transport_partner_name": "Phương Trang",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+PUT http://localhost:5000/api/v1/transport_partners/update?transport_partner_id=TD_00000_077204002691
+Content-Type: application/json
+
+{
+    "debit": 5000000
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/transport_partners/delete?transport_partner_id=TD_00000_077204002691
+
+###
+
+GET http://localhost:5000/api/v1/transport_partners/search
+Content-Type: application/json
+
+{
+    "transport_partner_name": "Phương Trang"
+}
+
+#END OF DEFAULT TEST
+###
+//mising field: passed
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "phuongtrang123",
+    "user_password": "PhuongTrang2k24@tdlogistics",
+    "user_fullname": "Lữ Xuân Minh",
+    "user_phone_number": "0981430417",
+    "user_email": "minh.luxuanhcmc@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-03",
+    "user_cccd": "077204005691",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050138319579"
+}
+
+###
+//invalid email/phone number: passed
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "phuongtrang123",
+    "user_password": "PhuongTrang2k24@tdlogistics",
+    "user_fullname": "Lữ Xuân Minh",
+    "user_phone_number": "0981430417",
+    "user_email": "invalid email",
+    "user_date_of_birth": "2004-03-03",
+    "user_cccd": "077204005691",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050138319579",
+    "user_bank": "Sacombank",
+    "agency_id": "BC_70001_077204005691",
+    "transport_partner_name": "Phương Trang",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+
+###
+//invalid bin: passed
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "phuongtrang123",
+    "user_password": "PhuongTrang2k24@tdlogistics",
+    "user_fullname": "Lữ Xuân Minh",
+    "user_phone_number": "0981430417",
+    "user_email": "minh.luxuanhcmc@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-03",
+    "user_cccd": "077204005691",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "invalid bin",
+    "user_bank": "Sacombank",
+    "agency_id": "BC_70001_077204005691",
+    "transport_partner_name": "Phương Trang",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+#TEST for different auth: passed
+###
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "phuongtrang123",
+    "user_password": "PhuongTrang2k24@tdlogistics",
+    "user_fullname": "Lữ Xuân Minh",
+    "user_phone_number": "0981430417",
+    "user_email": "minh.luxuanhcmc@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-03",
+    "user_cccd": "077204005691",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050138319579",
+    "user_bank": "Sacombank",
+
+
+    "transport_partner_name": "Phương Trang",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+###
+//passed
+PUT http://localhost:5000/api/v1/transport_partners/update?transport_partner_id=TD_00000_077204002691
+Content-Type: application/json
+
+{
+    "tax_code": "123456789",
+    "transport_partner_name": "Phương Trang",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+//test failed: email failed, phonenumber failed, other field failed too.
+PUT http://localhost:5000/api/v1/transport_partners/update?transport_partner_id=TD_00000_077204002691
+Content-Type: application/json
+
+{
+    "tax_code": "123456789",
+    "transport_partner_name": "Phương Trang",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 99",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "invalid email",
+    "bin": "0508319579",
+    "bank": "Sacombank",
+    "debit": 5000000
+}
+###
+//test_passed: invalid id checked
+DELETE http://localhost:5000/api/v1/transport_partners/delete?transport_partner_id=TD_00000_077204002692

@@ -1,4 +1,4 @@
-GET http://localhost:5000/api/v1/agencies/check?agency_id=
+GET http://localhost:5000/api/v1/agencies/check?agency_id=BC_70001_077204005691
 Content-Type: application/json
 
 ###
@@ -31,7 +31,7 @@ Content-Type: application/json
     "user_salary": 25000000,
     "type": "BC",
     "level": 3,
-    "postal_code": "70001",
+    "postal_code": "71000",
     "agency_name": "Bưu cục quận 1",
     "detail_address": "49, Phạm Ngũ Lão, phường Phạm Ngũ Lão, quận 1, Thành phố Hồ Chí Minh",
     "province": "Thành phố Hồ Chí Minh",
