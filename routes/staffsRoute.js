@@ -5,6 +5,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcrypt");
+const eventManager = require("../lib/eventManager");
 const staffsController = require("../controllers/staffsController");
 const auth = require("../lib/auth");
 const Staffs = require("../database/Staffs");
@@ -15,38 +16,42 @@ const sessionStrategy = new LocalStrategy({
     usernameField: "username",
     passwordField: "password",
 }, async (username, password, done) => {
-    const resultGettingOneStaff = await Staffs.getOneStaff({ username: username });
+    try {
+        const resultGettingOneStaff = await Staffs.getOneStaff({ username: username });
 
-    if (resultGettingOneStaff.length <= 0) {
-        done(null, false);
+        if (resultGettingOneStaff.length <= 0) {
+            done(null, false);
+        }
+
+        const staff = resultGettingOneStaff[0];
+
+        if (!staff) {
+            return done(null, false);
+        }
+
+        const passwordFromDatabase = staff.password;
+        const match = bcrypt.compareSync(password, passwordFromDatabase);
+
+        if (!match) {
+            return done(null, false);
+        }
+
+        const staff_id = staff.staff_id;
+        const agency_id = staff.agency_id;
+        const role = staff.role;
+        const privileges = staff.privileges ? JSON.parse(staff.privileges) : new Array();
+        const active = staff.active;
+
+        return done(null, {
+            staff_id,
+            agency_id,
+            role,
+            privileges,
+            active,
+        });
+    } catch (error) {
+        done(error);
     }
-
-    const staff = resultGettingOneStaff[0];
-
-    if (!staff) {
-        return done(null, false);
-    }
-
-    const passwordFromDatabase = staff.password;
-    const match = bcrypt.compareSync(password, passwordFromDatabase);
-
-    if (!match) {
-        return done(null, false);
-    }
-
-    const staff_id = staff.staff_id;
-    const agency_id = staff.agency_id;
-    const role = staff.role;
-    const privileges = staff.privileges ? JSON.parse(staff.privileges) : new Array();
-    const active = staff.active;
-
-    return done(null, {
-        staff_id,
-        agency_id,
-        role,
-        privileges,
-        active,
-    });
 });
 
 passport.use("normalLogin", sessionStrategy);
@@ -151,5 +156,8 @@ router.delete(
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
     staffsController.deleteStaff
 );
+router.get("/login", (req, res) => {
+    res.render("staffLogin");
+});
 
 module.exports = router;

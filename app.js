@@ -27,6 +27,7 @@ const transportPartnersRouter = require("./routes/transportPartnerRoute");
 const partnerStaffsRouter = require("./routes/partnerStaffsRoute");
 const otpPartnerStaffRouter = require("./routes/otpPartnerStaffRoute");
 const agenciesRouter = require("./routes/agenciesRoute");
+const usersRouter = require("./routes/usersRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -45,10 +46,10 @@ const app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-// app.enable('trust proxy');
+app.enable('trust proxy');
 
 // Chỉ định danh sách các trang web được phép truy cập
-const allowedOrigins = ['https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', 'https://www.thunderclient.com'];
+const allowedOrigins = ["https://www.diffchecker.com", 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', 'https://www.thunderclient.com', "http://localhost:5000", "http://127.0.0.1:5500"];
 
 // Sử dụng cors middleware với tùy chọn chỉ cho phép các trang web trong danh sách
 app.use(cors({
@@ -64,23 +65,25 @@ app.use(cors({
 	credentials: true,
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(morgan("combined"));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
+const sessionMiddleware = session({
 	secret: process.env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: false,
 	store: sessionStore,
 	cookie: {
-		secure: false,
-		sameSite: 'None',
+		// secure: false,
+		// sameSite: 'None',
 		httpOnly: false,
-		maxAge: 60 * 60 * 1000,
+		maxAge: 15 * 60 * 1000,
 	}
-}));
+});
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(morgan("combined"));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(sessionMiddleware);
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -97,6 +100,7 @@ app.use("/api/v1/transport_partners", transportPartnersRouter);
 app.use("/api/v1/otp_partner_staff", otpPartnerStaffRouter);
 app.use("/api/v1/agencies", agenciesRouter);
 app.use("/api/v1/authorization", authorizationRouter);
+app.use("/api/v1/users", usersRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({
@@ -147,4 +151,7 @@ const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
 
 cleanUpExpiredSession.start();
 
-module.exports = app;
+module.exports = {
+	app,
+	sessionMiddleware,
+};

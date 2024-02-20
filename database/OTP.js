@@ -27,7 +27,7 @@ const createOTP = async (phonenumber, otp) => {
     }
 };
 
-const verifyOTP = async (phone_number, otp) => {console.log(phone_number);
+const verifyOTP = async (phone_number, otp) => {
     let currentTime = new Date();
     currentTime = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
 
@@ -37,7 +37,6 @@ const verifyOTP = async (phone_number, otp) => {console.log(phone_number);
         const result = await pool.query(query, [phone_number, otp, currentTime]);
         
         const isValidOTP = Array.isArray(result[0]) && result[0].length > 0;
-        console.log(isValidOTP ? "Valid OTP" : "Invalid OTP");
         return isValidOTP;
     } catch (error) {
         console.log("Error: ", error);
