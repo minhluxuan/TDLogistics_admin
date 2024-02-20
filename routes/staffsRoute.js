@@ -159,5 +159,8 @@ router.delete(
 router.get("/login", (req, res) => {
     res.render("staffLogin");
 });
+router.get("/", (req, res) => {
+    res.render("staff");
+})
 
 module.exports = router;

@@ -28,6 +28,7 @@ const partnerStaffsRouter = require("./routes/partnerStaffsRoute");
 const otpPartnerStaffRouter = require("./routes/otpPartnerStaffRoute");
 const agenciesRouter = require("./routes/agenciesRoute");
 const usersRouter = require("./routes/usersRoute");
+const ordersRouter = require("./routes/ordersRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -101,6 +102,7 @@ app.use("/api/v1/otp_partner_staff", otpPartnerStaffRouter);
 app.use("/api/v1/agencies", agenciesRouter);
 app.use("/api/v1/authorization", authorizationRouter);
 app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/orders", ordersRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({

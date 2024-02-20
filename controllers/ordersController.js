@@ -1,9 +1,16 @@
 const moment = require("moment");
 const ordersService = require("../services/ordersService");
 const Validation = require("../lib/validation");
-const servicesFee = require("../lib/servicesFee");
-const libMap = require("../lib/map");
+// const servicesFee = require("../lib/servicesFee");
+// const libMap = require("../lib/map");
 const eventManager = require("../lib/eventManager");
+
+eventManager.once("ioInitialize", (io) => {
+    // Thiết lập trình xử lý sự kiện 'connection' và 'disconnect' trong io
+    io.on("connection", (socket) => {
+        socket.on("notifyNewOrderFromUser", (info) => createNewOrder(info));
+    });
+});
 
 const createNewOrder = async (info) => {
     try {console.log(info);
@@ -41,7 +48,7 @@ const getOrders = async (req, res) => {
     res.render("order");
 }
 
-const OrderValidation = new Validation.OrderValidation();
+// const OrderValidation = new Validation.OrderValidation();
 
 const checkExistOrder = async (req, res) => {
     try {
@@ -142,7 +149,7 @@ const calculateFee = async (req, res) => {
         //     });
         // }
 
-        const fee = await ordersService.calculateFee(req.body.address_source, req.body.address_dest);
+        // const fee = await ordersService.calculateFee(req.body.address_source, req.body.address_dest);
         return res.status(200).json({
             error: false,
             fee: fee
@@ -295,7 +302,7 @@ const createNewOrderOld = async (req, res) => {
             const orderTime = new Date();
             const formattedOrderTime = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
             const orderId = "TD" + orderTime.getFullYear().toString() + orderTime.getMonth().toString() + orderTime.getDay().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
-            const fee = await servicesFee.calculateExpressFee(serviceType, req.body.address_source, req.body.address_dest);
+            // const fee = await servicesFee.calculateExpressFee(serviceType, req.body.address_source, req.body.address_dest);
 
             const newOrder = new Object({
                 //user_id: req.user.user_id || null,
