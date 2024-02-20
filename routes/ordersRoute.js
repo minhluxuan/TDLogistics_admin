@@ -5,8 +5,10 @@ const router = express.Router();
 
 router.get("/check", ordersController.checkExistOrder);
 router.post("/search", ordersController.getOrder);
-router.post("/create", ordersController.createNewOrder);
+//router.post("/create", ordersController.createNewOrder);
 router.patch("/update", ordersController.updateOrder);
 router.delete("/cancel", ordersController.cancelOrder);
-
+router.get("/create", (req, res) => {
+    res.render("order");
+})
 module.exports = router;
