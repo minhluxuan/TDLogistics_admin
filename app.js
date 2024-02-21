@@ -32,7 +32,6 @@ const agenciesRouter = require("./routes/agenciesRoute");
 const usersRouter = require("./routes/usersRoute");
 const ordersRouter = require("./routes/ordersRoute");
 
-
 const dbOptions = {
 	host: process.env.HOST,
 	port: process.env.DBPORT,
