@@ -1,9 +1,10 @@
 const moment = require("moment");
 const ordersService = require("../services/ordersService");
 const Validation = require("../lib/validation");
-// const servicesFee = require("../lib/servicesFee");
-// const libMap = require("../lib/map");
+const servicesFee = require("../lib/servicesFee");
+const libMap = require("../lib/map");
 const eventManager = require("../lib/eventManager");
+const { object } = require("joi");
 
 eventManager.once("ioInitialize", (io) => {
     // Thiết lập trình xử lý sự kiện 'connection' và 'disconnect' trong io
@@ -11,33 +12,94 @@ eventManager.once("ioInitialize", (io) => {
         socket.on("notifyNewOrderFromUser", (info) => createNewOrder(info));
     });
 });
+const OrderValidation = new Validation.OrderValidation();
 
 const createNewOrder = async (info) => {
     try {
         const orderTime = new Date();
+        
+        const { error } = OrderValidation.validateCreatingOrder(info);
 
-        // const { error } = OrderValidation.validateCreatingOrder(info);
+        if (error) {
+            console.log(error.message);
+            eventManager.emit("notifyFailCreatedNewOrder", "Thông tin đơn hàng không hợp lệ!");
+            throw new Error("Thông tin đơn hàng không hợp lệ!");
+        }
 
-        // if (error) {
-        //     throw error;
-        // }
+        if(info.service_type === 2 || info.service_type === 3) {
+            if(info.province_source !== info.province_dest) {
+                const errorMessage = "Đơn hàng phải được giao nội tỉnh!";
+                console.log(errorMessage);
+                eventManager.emit("notifyFailCreatedNewOrder", errorMessage);
+                throw new Error(errorMessage);
+            }
+        }
 
-        // Check conditions
+        // console.log("Pass Validation");
 
-        const agencyId = "BC_71000_077204005691";
-        info.createdTime = orderTime;
+        const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);
+        if(!resultFindingManagedAgency.sucess) {
+            console.log(resultFindingManagedAgency.message);
+            eventManager.emit("notifyFailCreatedNewOrder", resultFindingManagedAgency.message);
+            throw new Error(resultFindingManagedAgency.message);
+        }
+        info.address_source = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
+        info.address_dest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
+        info.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
+        info.journey = JSON.stringify(new Array());
+        const agencies = resultFindingManagedAgency.data.agency_id;
+        const areaAgencyIdSubParts = agencies.split('_');
+        info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
+        info.fee = await servicesFee.calculateExpressFee(info.service_type, info.address_source, info.address_dest);
 
-        // const resultCreatingNewOrder = await ordersService.createNewOrder(info);
+        // console.log("Pass Prepare Information")
 
-        // if (!resultCreatingNewOrder || resultCreatingNewOrder.affectedRows === 0) {
-        //     return eventManager.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
-        // }
+        const newOrder = new Object({
+            order_id: info.order_id,
+            name_sender: info.name_sender,
+            phone_sender: info.phone_sender,
+            name_reciever: info.name_reciever,	
+            phone_reciever: info.phone_reciever,
+            order_time: info.order_time,
+            mass: info.mass,
+            height: info.height,
+            width: info.width,
+            length: info.length,
+            coordinate_source: JSON.stringify([info.long_source, info.lat_source]),	
+            province_source: info.province_source,
+            district_source: info.district_source,
+            ward_source: info.ward_source,
+            address_source: info.address_source,	
+            coordinate_dest: JSON.stringify([info.long_destination, info.lat_destination]),	 	
+            province_dest: info.province_dest,
+            district_dest: info.district_dest,
+            ward_dest: info.ward_dest,
+            address_dest:info.address_dest,	
+            fee: info.fee,
+            COD: info.COD,
+            journey: info.journey,
+            service_type: info.service_type
+        });
+
+        // console.log(newOrder);
+
+        const resultCreatingNewOrder = await ordersService.createNewOrder(newOrder);
+        if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
+            throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+        }
+
+        const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(newOrder, resultFindingManagedAgency.data.postal_code);
+        if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
+            throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+        }
+
+        // console.log("Pass Writing Database");
 
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
         
         eventManager.emit("notifyNewOrderToAgency", {
-            order: info,
-            room: agencyId,
+            order: newOrder,
+            room: resultFindingManagedAgency.data.agency_id,
         });
     } catch (error) {
         return eventManager.emit("notifyError", error.message);
@@ -48,7 +110,6 @@ const getOrders = async (req, res) => {
     res.render("order");
 }
 
-// const OrderValidation = new Validation.OrderValidation();
 
 const checkExistOrder = async (req, res) => {
     try {
@@ -163,201 +224,6 @@ const calculateFee = async (req, res) => {
     }
 }
 
-const createNewOrderOld = async (req, res) => {
-    try {
-        const orderTime = new Date();
-
-        const { error } = OrderValidation.validateCreatingOrder(req.body);
-
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: error.message,
-            });
-        }
-
-        const serviceType = req.body.service_type;
-        
-        if(serviceType === 1) {
-            const provinceSource = req.body.province_source; //delete leading space
-            const districtSource = req.body.district_source;
-            const wardSource = req.body.ward_source;
-            const addressSource = req.body.detail_source + ", " + wardSource + ", " + districtSource + ", " + provinceSource; 
-            
-            const resultFindingManagedAgency = await ordersService.findingManagedAgency(wardSource, districtSource, provinceSource);
-            
-            if (!resultFindingManagedAgency.success) {
-                return res.status(404).json({
-                    error: true,
-                    message: resultFindingManagedAgency.message,
-                });
-            }
-
-            const formattedOrderTime = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
-            const agencies = resultFindingManagedAgency.data.agency_id;
-            const areaAgencyIdSubParts = agencies[0].split('_');
-            const orderId = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
-            // const fee = await servicesFee.calculateExpressFee(serviceType, req.body.address_source, req.body.address_dest);
-            const fee = 100000;
-
-            req.body.order_id = orderId;
-            req.body.order_time = formattedOrderTime;
-            req.body.phone_number_sender = req.user.phone_number;
-            req.body.journey = JSON.stringify(new Array());
-            
-            const resultCreatingNewOrder = await ordersService.createNewOrder(req.body);
-            if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
-                throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
-            }
-
-            const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(req.body, resultFindingManagedAgency.data.postal_code[0]);
-            if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
-                throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
-            }
-            
-            // eventManager.emit("notifyNewOrder", newOrder);
-
-            return res.status(201).json({
-                error: false,
-                message: "Tạo đơn hàng thành công.",
-            });
-        }
-        else if (serviceType === 2) {
-            const provinceSource = req.body.province_source; //delete leading space
-            const districtSource = req.body.district_source;;
-            const wardSource = req.body.ward_source;
-            const addressSource = req.body.detail_source + ", " + wardSource + ", " + districtSource + ", " + provinceSource; 
-            
-            const provinceDest = req.body.province_dest;
-            if(provinceDest !== provinceSource) {
-                const error = new Error("Đơn hàng phải được giao nội tỉnh");
-                error.status = 400;
-                throw error;
-            }
-            
-            const resultFindingManagedAgency = await ordersService.findingManagedAgency(wardSource, districtSource, provinceSource);
-            
-            if (!resultFindingManagedAgency.success) {
-                return res.status(404).json({
-                    error: true,
-                    message: resultFindingManagedAgency.message,
-                });
-            }
-
-            const formattedOrderTime = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
-            const agencies = resultFindingManagedAgency.data.agency_id;
-            const areaAgencyIdSubParts = agencies[0].split('_');
-            const orderId = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
-            // const fee = await servicesFee.calculateExpressFee(serviceType, req.body.address_source, req.body.address_dest);
-            const fee = 100000;
-
-            req.body.order_id = orderId;
-            req.body.order_time = formattedOrderTime;
-            req.body.phone_number_sender = req.user.phone_number;
-            req.body.journey = JSON.stringify(new Array());
-
-            const resultCreatingNewOrder = await ordersService.createNewOrder(req.body);
-            if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
-                throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
-            }
-
-            const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(req.body, resultFindingManagedAgency.data.postal_code[0]);
-            if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
-                throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
-            }
-
-            const resultGettingAvailableShipper = await ordersService.getAvailableShippers(req.body.province_source, req.body.district_source, req.body.ward_source);
-            
-
-            const shipperList = await ordersService.distributeOrder(managedAgency, req.body.address_source);
-            const standardDeliveryTime = moment(orderTime).add(4, "hours").format("YYYY-MM-DD HH:mm:ss");
-
-            eventManager.emit("notifyNewOrder", newOrder);
-
-            return res.status(200).json({
-                error: false,
-                result: result[0],
-                shipperList: shipperList,
-                deadlineTime: standardDeliveryTime,
-                message: "Tạo đơn giao nhanh nội tỉnh thành công!"
-            });
-
-        } else if(serviceType === 3) {
-            const provinceSource = req.body.province_source; //delete leading space
-            const districtSource = req.body.district_source;;
-            const wardSource = req.body.ward_source;
-            const addressSource = req.body.detail_source + ", " + wardSource + ", " + districtSource + ", " + provinceSource; 
-            
-            
-            const provinceDest = req.body.province_dest;
-            if(provinceDest !== provinceSource) {
-                const error = new Error("Đơn hàng phải được giao nội tỉnh");
-                error.status = 400;
-                throw error;
-            }
-
-            const { agency_id: managedAgency, postal_code } = await ordersService.findingManagedAgency(wardSource, districtSource, provinceSource);
-            
-
-            const orderTime = new Date();
-            const formattedOrderTime = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
-            const orderId = "TD" + orderTime.getFullYear().toString() + orderTime.getMonth().toString() + orderTime.getDay().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
-            // const fee = await servicesFee.calculateExpressFee(serviceType, req.body.address_source, req.body.address_dest);
-
-            const newOrder = new Object({
-                //user_id: req.user.user_id || null,
-                user_id: "00000001",
-                order_id: orderId,
-                name_sender: req.body.name_sender,
-                phone_sender: req.body.phone_sender,
-                name_reciever: req.body.name_reciever,	
-                phone_reciever: req.body.phone_reciever,
-                order_time: formattedOrderTime,
-                mass: req.body.mass,
-                height: req.body.height,
-                width: req.body.width,
-                length: req.body.length,
-                coordinate_source: JSON.stringify([req.body.long_source, req.body.lat_source]),	
-                address_source: req.body.address_source,	
-                coordinate_dest: JSON.stringify([req.body.long_destination, req.body.lat_destination]),	 	
-                address_dest:req.body.address_dest,	
-                fee: fee,
-                COD: req.body.COD,
-                service_type: serviceType
-            });
-
-
-
-            await ordersService.createOrderInAgencyTable(newOrder, postal_code);
-            const result = await ordersService.createNewOrder(newOrder);
-
-            const shipperList = await ordersService.distributeOrder(managedAgency, req.body.address_source);
-            const standardDeliveryTime = moment(orderTime).add(2, "hours").format("YYYY-MM-DD HH:mm:ss");
-
-            eventManager.emit("notifyNewOrder", newOrder);
-
-            return res.status(200).json({
-                error: false,
-                result: result[0],
-                shipperList: shipperList,
-                standardDeliveryTime: standardDeliveryTime,
-                message: "Tạo đơn giao hỏa tốc nội tỉnh thành công!"
-            });
-        } else {
-            const error = new Error("Không tồn tại phương thức vận chuyển");
-            error.status = 400;
-            throw error;
-        }
-
-        
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
 
 const updateOrder = async (req, res) => {
     if (!req.isAuthenticated() || req.user.permission !== 1) {
