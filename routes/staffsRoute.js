@@ -108,13 +108,13 @@ router.post("/login", passport.authenticate("normalLogin"), (req, res, next) => 
             return next(err);
         }
         if (!user) {
-            return res.status(401).json({ error: true, message: "Xác thực thất bại." });
+            return res.status(401).json({ error: true, valid: false, message: "Xác thực thất bại." });
         }
 
-        return res.status(200).json({ error: false, message: "Xác thực thành công." });
+        return res.status(200).json({ error: false, valid: true, message: "Xác thực thành công." });
     })(req, res, next);
 });
-router.get(
+router.post(
     "/search",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",

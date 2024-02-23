@@ -25,7 +25,7 @@ const sessionStrategy = new LocalStrategy({
 
 passport.use("otpLogin", sessionStrategy);
 
-router.get("/login", (req, res) => {
+router.post("/login", (req, res) => {
     res.render("userLogin");
 });
 router.post("/send_otp", usersController.createOTP);
@@ -36,15 +36,15 @@ router.post("/verify_otp", passport.authenticate("otpLogin"), (req, res, next) =
         }
 
         if (!user) {
-            return res.status(401).json({ error: true, message: "Xác thực thất bại." });
+            return res.status(401).json({ error: true, valid: false, message: "Xác thực thất bại." });
         }
 
-        return res.status(200).json({ error: false, message: "Xác thực thành công." });
+        return res.status(200).json({ error: false, valid: true, message: "Xác thực thành công." });
     })(req, res, next);
 });
 router.post("/check", usersController.checkExistUser);
 router.post("/create", usersController.createNewUser);
-router.get("/", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.getOneUser);
+router.post("/get", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.getOneUser);
 router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.updateUserInfo);
 router.get("/logout", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.logout);
 
