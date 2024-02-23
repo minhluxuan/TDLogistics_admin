@@ -1,5 +1,6 @@
 const moment = require("moment");
 const ordersService = require("../services/ordersService");
+const usersService = require("../services/usersService");
 const Validation = require("../lib/validation");
 const servicesFee = require("../lib/servicesFee");
 const libMap = require("../lib/map");
@@ -8,8 +9,33 @@ const { object } = require("joi");
 
 eventManager.once("ioInitialize", (io) => {
     // Thiết lập trình xử lý sự kiện 'connection' và 'disconnect' trong io
-    io.on("connection", (socket) => {
-        socket.on("notifyNewOrderFromUser", (info) => createNewOrder(info));
+    io.sockets.on("connection", (socket) => {
+        socket.on("notifyNewOrderFromUser", (info) => {
+            try {
+                const OrderValidation = new Validation.OrderValidation();
+                const { error } = OrderValidation.validateCreatingOrder(info);
+
+                if (error) {
+                    console.log(error.message);
+                    eventManager.emit("notifyFailCreatedNewOrder", "Thông tin đơn hàng không hợp lệ!");
+                    throw new Error("Thông tin đơn hàng không hợp lệ!");
+                }
+
+                if(info.service_type === 2 || info.service_type === 3) {
+                    if(info.province_source !== info.province_dest) {
+                        const errorMessage = "Đơn hàng phải được giao nội tỉnh!";
+                        console.log(errorMessage);
+                        eventManager.emit("notifyFailCreatedNewOrder", errorMessage);
+                        throw new Error(errorMessage);
+                    }
+                }
+                info.phone_sender = socket.request.user.phone_number;
+                console.log(info.phone_sender);
+                createNewOrder(info);
+            } catch (error) {
+                return eventManager.emit("notifyError", error.message);
+            }    
+        });
     });
 });
 const OrderValidation = new Validation.OrderValidation();
@@ -18,93 +44,80 @@ const createNewOrder = async (info) => {
     try {
         const orderTime = new Date();
         
-        const { error } = OrderValidation.validateCreatingOrder(info);
+        console.log("Pass Validation");
 
-        if (error) {
-            console.log(error.message);
-            eventManager.emit("notifyFailCreatedNewOrder", "Thông tin đơn hàng không hợp lệ!");
-            throw new Error("Thông tin đơn hàng không hợp lệ!");
-        }
-
-        if(info.service_type === 2 || info.service_type === 3) {
-            if(info.province_source !== info.province_dest) {
-                const errorMessage = "Đơn hàng phải được giao nội tỉnh!";
-                console.log(errorMessage);
-                eventManager.emit("notifyFailCreatedNewOrder", errorMessage);
-                throw new Error(errorMessage);
-            }
-        }
-
-        // console.log("Pass Validation");
-
+        info.name_sender = await usersService.getNameUsingPhoneNummber(info.phone_sender);
+        console.log(info.name_sender);
         const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);
         if(!resultFindingManagedAgency.sucess) {
             console.log(resultFindingManagedAgency.message);
             eventManager.emit("notifyFailCreatedNewOrder", resultFindingManagedAgency.message);
             throw new Error(resultFindingManagedAgency.message);
         }
-        info.address_source = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
-        info.address_dest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
+        const addressSource = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
+        const addressDest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
         info.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
         info.journey = JSON.stringify(new Array());
         const agencies = resultFindingManagedAgency.data.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
         info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
-        info.fee = await servicesFee.calculateExpressFee(info.service_type, info.address_source, info.address_dest);
+        info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
 
-        // console.log("Pass Prepare Information")
+        console.log("Pass Prepare Information")
 
-        const newOrder = new Object({
-            order_id: info.order_id,
-            name_sender: info.name_sender,
-            phone_sender: info.phone_sender,
-            name_reciever: info.name_reciever,	
-            phone_reciever: info.phone_reciever,
-            order_time: info.order_time,
-            mass: info.mass,
-            height: info.height,
-            width: info.width,
-            length: info.length,
-            coordinate_source: JSON.stringify([info.long_source, info.lat_source]),	
-            province_source: info.province_source,
-            district_source: info.district_source,
-            ward_source: info.ward_source,
-            address_source: info.address_source,	
-            coordinate_dest: JSON.stringify([info.long_destination, info.lat_destination]),	 	
-            province_dest: info.province_dest,
-            district_dest: info.district_dest,
-            ward_dest: info.ward_dest,
-            address_dest:info.address_dest,	
-            fee: info.fee,
-            COD: info.COD,
-            journey: info.journey,
-            service_type: info.service_type
-        });
+        // const newOrder = new Object({
+        //     order_id: info.order_id,
+        //     name_reciever: info.name_reciever,	
+        //     phone_reciever: info.phone_reciever,
+        //     order_time: info.order_time,
+        //     mass: info.mass,
+        //     height: info.height,
+        //     width: info.width,
+        //     length: info.length,
+        //     province_source: info.province_source,
+        //     district_source: info.district_source,
+        //     ward_source: info.ward_source,
+        //     detail_source: info.detail_source,	
+        //     long_source: info.long_source,
+        //     lat_source: info.lat_source,	 	
+        //     province_dest: info.province_dest,
+        //     district_dest: info.district_dest,
+        //     ward_dest: info.ward_dest,
+        //     detail_dest:info.detail_dest,	
+        //     long_destination: info.long_destination,
+        //     lat_destination: info.lat_destination,
+        //     fee: info.fee,
+        //     COD: info.COD,
+        //     journey: info.journey,
+        //     service_type: info.service_type
+        // });
 
         // console.log(newOrder);
 
-        const resultCreatingNewOrder = await ordersService.createNewOrder(newOrder);
+        const resultCreatingNewOrder = await ordersService.createNewOrder(info);
         if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
             throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
         }
 
-        const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(newOrder, resultFindingManagedAgency.data.postal_code);
+        const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(info, resultFindingManagedAgency.data.postal_code);
         if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
             throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
         }
 
-        // console.log("Pass Writing Database");
+        console.log("Pass Writing Database");
 
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
         
         eventManager.emit("notifyNewOrderToAgency", {
-            order: newOrder,
+            order: info,
             room: resultFindingManagedAgency.data.agency_id,
         });
     } catch (error) {
         return eventManager.emit("notifyError", error.message);
     }
 }
+
+
 
 const getOrders = async (req, res) => {
     res.render("order");

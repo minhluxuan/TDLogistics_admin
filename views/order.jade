@@ -6,15 +6,7 @@ html
   body
 
     form(method="post" action="/api/v1/orders/create")
-    
-      div 
-        label(for="name_sender") Tên người gửi
-        input#name_sender(type="text" name="name_sender" placeholder="Tên người gửi" required)
-      
-      div
-        label(for="phone_sender") Số điện thoại người gửi
-        input#phone_sender(type="text" name="phone_sender" placeholder="Số điện thoại người gửi" required pattern="[0-9]+" title="Only numbers are allowed")
-
+  
       div
         label(for="name_reciever") Tên người nhận
         input#name_reciever(type="text" name="name_reciever" placeholder="Tên người nhận" required)

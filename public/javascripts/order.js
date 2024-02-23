@@ -4,8 +4,6 @@ const notificationArea = document.querySelector("#notificationArea");
 const createNewOrder = (e) => {
     e.preventDefault();
     const newOrder = new Object({
-        name_sender: document.getElementById("name_sender").value,
-        phone_sender: document.getElementById("phone_sender").value,
         name_reciever: document.getElementById("name_reciever").value,	
         phone_reciever: document.getElementById("phone_reciever").value,
         mass: parseFloat(document.getElementById("mass").value),
