@@ -4,6 +4,7 @@ const usersService = require("../services/usersService");
 const Validation = require("../lib/validation");
 const servicesFee = require("../lib/servicesFee");
 const libMap = require("../lib/map");
+const utils = require("../lib/utils");
 const eventManager = require("../lib/eventManager");
 const { object } = require("joi");
 
@@ -54,13 +55,14 @@ const createNewOrder = async (info) => {
             eventManager.emit("notifyFailCreatedNewOrder", resultFindingManagedAgency.message);
             throw new Error(resultFindingManagedAgency.message);
         }
-        const addressSource = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
-        const addressDest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
+        
         info.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
         info.journey = JSON.stringify(new Array());
         const agencies = resultFindingManagedAgency.data.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
         info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
+        const addressSource = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
+        const addressDest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
         info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
 
         console.log("Pass Prepare Information")
@@ -267,8 +269,8 @@ const updateOrder = async (req, res) => {
     const fields = Object.keys(req.body);
     const values = Object.values(req.body);
 
-    const conditionFields = ["order_id", "user_id"];
-    const conditionValues = [orderId, req.user.user_id];
+    const conditionFields = ["order_id", "phone_sender"];
+    const conditionValues = [orderId, req.user.phone_number];
 
     try {
         const result = await ordersService.updateOrder(fields, values, conditionFields, conditionValues);
@@ -280,28 +282,14 @@ const updateOrder = async (req, res) => {
             });
         }
 
-        const updatedRow = (await ordersService.getOrder({ order_id: orderId }))[0];
+        const updatedRow = (await ordersService.getOrderForUpdating({ order_id: orderId }))[0];
 
-        const source = {
-            lat: updatedRow["lat_source"],
-            long: updatedRow["long_source"]
-        };
 
-        const destination = {
-            lat: updatedRow["lat_destination"],
-            long: updatedRow["long_destination"]
-        };
+        const addressSource = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
+        const addressDest = utils.getAddressFromComponent(updatedRow.province_dest, updatedRow.district_dest, updatedRow.ward_dest, updatedRow.detail_dest);
+        const updatingFee = servicesFee.calculateExpressFee(updatedRow.service_type, addressSource, addressDest);
 
-        const map = new libMap.Map();
-
-        const distance = (await map.calculateDistance(source, destination)).distance;
-
-        const updatingFee = libMap.calculateFee(distance);
-
-        const updatingAddressSource = await map.convertCoordinateToAddress(source);
-        const updatingAddressDestination = await map.convertCoordinateToAddress(destination);
-
-        await ordersService.updateOrder(["fee", "address_source", "address_destination"], [updatingFee, updatingAddressSource, updatingAddressDestination], ["order_id"], [orderId]);
+        await ordersService.updateOrder(["fee"], [updatingFee], ["order_id"], [orderId]);
 
         return res.status(200).json({
             error: false,
@@ -362,7 +350,7 @@ const cancelOrder = async (req, res) => {
     const { error } = OrderValidation.validateCancelingOrder({ order_id: orderId });
 
     if (error) {
-        return res.status(401).json({
+        return res.status(404).json({
             error: true,
             message: "Mã đơn hàng không tồn tại.",
         });
@@ -393,6 +381,132 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+
+
+const createOrderForAgency = async (req, res) => {
+	try {
+        if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+
+            const orderTime = new Date();
+
+            const { error } = OrderValidation.validateCreatingOrderForAgency(req.body);
+            
+            if(error) {
+                return res.status(500).json({
+                    error: true,
+                    message: "Thông tin đơn hàng không hợp lệ",
+                });
+            }
+
+            req.body.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
+            req.body.journey = JSON.stringify(new Array());
+            // const agencyId = req.user.agency_id;
+            const agencyId = "BC_78300_089204006685";
+            const areaAgencyIdSubParts = agencyId.split('_');
+            req.body.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
+            const addressSource = req.body.detail_source + ", " + req.body.ward_source + ", " + req.body.district_source + ", " + req.body.province_source; 
+            const addressDest = req.body.detail_dest + ", " + req.body.ward_dest + ", " + req.body.district_dest + ", " + req.body.province_dest; 
+            req.body.fee = await servicesFee.calculateExpressFee(req.body.service_type, addressSource, addressDest);
+
+            const postalCode = areaAgencyIdSubParts[1];
+
+            const resultCreatingNewOrder = await ordersService.createNewOrder(req.body);
+            if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
+                throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+            }
+    
+            const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(req.body, postalCode);
+            if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
+                throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+            }
+
+            return res.status(500).json({
+                error: false,
+                message: `Đơn hàng được tạo thành công`
+            });
+
+        } else {
+            return res.status(401).json({
+                error: true,
+                message: "Người dùng không được cấp quyền để thực hiện thao tác!"
+            });
+        }
+		
+	} catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+	}
+}
+
+const updateOrderForAgency = async (req, res) => {
+    try {
+        if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+
+            const orderId = req.query.order_id;
+
+            if (orderId === undefined || orderId === null || orderId === "") {
+                return res.status(400).json({
+                    error: true,
+                    message: "Mã đơn hàng không tồn tại.",
+                });
+            }
+
+            const { error } = OrderValidation.validateUpdatingOrder(req.body);
+            
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: "Thông tin không hợp lệ.",
+                });
+            }
+
+            const fields = Object.keys(req.body);
+            const values = Object.values(req.body);
+
+            const conditionFields = ["order_id"];
+            const conditionValues = [orderId];
+
+        
+            const result = await ordersService.updateOrder(fields, values, conditionFields, conditionValues);
+
+            if (result.affectedRows <= 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: "Đơn hàng đã quá hạn để cập nhật hoặc không tồn tại."
+                });
+            }
+
+            const updatedRow = (await ordersService.getOrderForUpdating({ order_id: orderId }))[0];
+
+
+            const addressSource = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
+            const addressDest = utils.getAddressFromComponent(updatedRow.province_dest, updatedRow.district_dest, updatedRow.ward_dest, updatedRow.detail_dest);
+            const updatingFee = servicesFee.calculateExpressFee(updatedRow.service_type, addressSource, addressDest);
+
+            await ordersService.updateOrder(["fee"], [updatingFee], ["order_id"], [orderId]);
+
+            return res.status(200).json({
+                error: false,
+                message: "Cập nhật thành công.",
+            });
+
+        } else {
+            return res.status(401).json({
+                error: true,
+                message: "Người dùng không được cấp quyền để thực hiện thao tác!"
+            });
+        }
+		
+	} catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+	}
+}
+
 module.exports = {
     checkExistOrder,
     getOrders,
@@ -403,4 +517,6 @@ module.exports = {
     cancelOrder,
     calculateFee,
     getOrderStatus,
+    createOrderForAgency,
+    updateOrderForAgency
 }

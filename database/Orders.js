@@ -68,32 +68,10 @@ const getOrderByOrderID = async (order_id) => {
 //     return await SQLutils.find(pool, table);
 // };
 
-// const getOrder = async (data) => {
-//     let whereClause = ``;
-
-//     const timeInterval = new Array();
-
-//     if (data.hasOwnProperty("start_order_time") && !data.hasOwnProperty("end_order_time") || !data.hasOwnProperty("start_order_time") && data.hasOwnProperty("end_order_time") || data.start_order_time > data.end_order_time) {
-//         throw new Error("Thông tin không hợp lệ.");
-//     }
-//     else if (data.hasOwnProperty("start_order_time") && data.hasOwnProperty("end_order_time")) {
-//         whereClause += `? <= order_time AND order_time <= ? AND `;
-//         timeInterval.push(data.start_order_time);
-//         timeInterval.push(data.end_order_time);
-//         delete data["start_order_time"];
-//         delete data["end_order_time"];
-//     }
-
-//     whereClause += `${Object.keys(data).map(field => `${field} = ?`).join(" AND ")}`;
-//     let values = Object.values(data);
-//     values = [...timeInterval, ...values];
-
-//     const query = `SELECT order_id, user_id, order_time, mass, height, width, length, long_source, lat_source, long_destination, lat_destination, address_source, address_destination, fee, COD, status_code FROM ${table} WHERE ${whereClause}`;
-
-//     const result = await pool.query(query, values);
-
-//     return result[0];
-// };
+const getOrderForUpdating = async (order_id) => {
+    const result = await SQLutils.findOneIntersect(pool, table, ["order_id"], order_id);
+    return result[0];
+};
 
 const createNewOrder = async (newOrder) => {
     return await SQLutils.insert(pool, table, Object.keys(newOrder), Object.values(newOrder));
@@ -334,6 +312,7 @@ const distributeOrder = async (agency_id, address_source) => {
 
 module.exports = {
     checkExistOrder,
+    getOrderForUpdating,
     getOrdersByUserID,
     getOrderByOrderID,
     createNewOrder,
@@ -344,5 +323,6 @@ module.exports = {
     findingManagedAgency,
     createOrderInAgencyTable,
     getOrderStatus,
-    distributeOrder
+    distributeOrder,
+    
 };

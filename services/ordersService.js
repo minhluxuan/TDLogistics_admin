@@ -3,6 +3,10 @@ const Orders = require("../database/Orders");
 const checkExistOrder = async (order_id) => {
     return Orders.checkExistOrder(order_id);
 };
+//just use for update order
+const getOrderForUpdating = async (order_id) => {
+    return await Orders.getOrderForUpdating(order_id);
+}
 
 const getOrdersByUserID = async (user_id, status_code = null) => {
     return await Orders.getOrdersByUserID(user_id, status_code);
@@ -49,6 +53,7 @@ const distributeOrder = async (agency_id, address_source) => {
 
 module.exports = {
     checkExistOrder,
+    getOrderForUpdating,
     getOrdersByUserID,
     getOrderByOrderID,
     createNewOrder,
