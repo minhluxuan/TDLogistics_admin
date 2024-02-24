@@ -1,0 +1,11 @@
+doctype html
+html
+  head
+    title= "Quản trị bưu cục"
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js")
+  body
+    input#source(type="text", placeholder="Điểm gửi")
+    input#destination(type="text", placeholder="Điểm nhận")
+    input#submit(type="submit", value="Tạo")
+    p#notificationArea
+    script(src="/javascripts/order.js")

@@ -108,14 +108,14 @@ router.post(
     upload.single("contract"),
     businessController.createNewBusinessUser
 );
-router.get(
+router.post(
     "/search",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
     "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
     businessController.getBusiness
 );
-router.get(
+router.post(
     "/search_representor",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",

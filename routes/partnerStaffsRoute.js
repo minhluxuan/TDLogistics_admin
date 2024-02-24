@@ -133,7 +133,7 @@ router.post(
         }, {
             name: 'license_after', maxCount: 1
         }]), partnerStaffsController.createNewPartnerStaff);
-router.get(
+router.post(
     "/search",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
