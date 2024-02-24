@@ -25,7 +25,7 @@ const sessionStrategy = new LocalStrategy({
 
 passport.use("otpLogin", sessionStrategy);
 
-router.post("/login", (req, res) => {
+router.get("/login", (req, res) => {
     res.render("userLogin");
 });
 router.post("/send_otp", usersController.createOTP);
