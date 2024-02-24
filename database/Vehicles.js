@@ -198,34 +198,26 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
-    let shipmentIndex;
-    let overloadFlag = false;
 
-    for (shipmentIndex = 0; shipmentIndex < shipment_ids.length && !overloadFlag; shipmentIndex++) {
+
+    for (let i = 0; i < shipment_ids.length; i++) {
         const getShipmentQuery = `SELECT mass FROM shipment WHERE shipment_id = ?`;
-        const [shipmentRow] = await pool.query(getShipmentQuery, [shipment_ids[shipmentIndex]]);
+        const [shipmentRow] = await pool.query(getShipmentQuery, [shipment_ids[i]]);
         const { mass: shipmentMass } = shipmentRow[0];
-
-        if(shipmentMass + currentMass > vehicle.max_load) {
-            overloadFlag = true;
-            break;
-        }      
-
-        if (!prevShipmentIds.includes(shipment_ids[shipmentIndex])) {
-            prevShipmentIds.push(shipment_ids[shipmentIndex]);
-            currentMass = currentMass + shipmentMass;
-            acceptedArray.push(shipment_ids[shipmentIndex]);
+    
+        if (prevShipmentIds.includes(shipment_ids[i])) { 
+            missingShipmentArray.push(shipment_ids[i]);
         }
-        else {
-            missingShipmentArray.push(shipment_ids[shipmentIndex]);
-        }
-    }
-
-    if(overloadFlag) {
-        for(let i = shipmentIndex; i < shipment_ids.length; i++) {
+        else if(shipmentMass + currentMass > vehicle.max_load) {
             overloadShipmentArray.push(shipment_ids[i]);
         }
+        else {
+            prevShipmentIds.push(shipment_ids[i]);
+            currentMass = currentMass + shipmentMass;
+            acceptedArray.push(shipment_ids[i]);
+        }
     }
+
     const jsonShipmentIds = JSON.stringify(prevShipmentIds);
     const result = await dbUtils.updateOne(pool, table, ["shipment_ids", "mass"], [jsonShipmentIds, currentMass], ["vehicle_id"], [vehicle.vehicle_id]);
 
