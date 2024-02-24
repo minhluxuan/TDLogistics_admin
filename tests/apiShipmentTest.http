@@ -49,8 +49,8 @@ POST http://localhost:5000/api/v1/shipments/add
 Content-Type: application/json
 
 {
-    "shipment_id": "TD202412112533216",
-    "order_id": "TD2024132145338"
+    "shipment_id": "TD202416171622962",
+    "order_id": "TD_AD_202422212274052"
 }
 
 ### TD2024132126392 TD2024132139335 TD2024132145338
@@ -58,8 +58,8 @@ POST http://localhost:5000/api/v1/shipments/remove
 Content-Type: application/json
 
 {
-    "shipment_id": "TD202412112533216",
-    "order_id": "TD2024132139335"
+    "shipment_id": "TD202416171622962",
+    "order_id": "TD_AD_202422212274052"
 }
 
 ###

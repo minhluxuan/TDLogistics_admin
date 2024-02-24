@@ -21,13 +21,13 @@ const getVehicleOrderIds = async (vehicle) => {
     return await Vehicle.getVehicleOrderIds(vehicle);
 };
 
-const addOrders = async (vehicle, order_ids) => {
-    return await Vehicle.addOrders(vehicle, order_ids);
-}
+// const addOrders = async (vehicle, order_ids) => {
+//     return await Vehicle.addOrders(vehicle, order_ids);
+// }
 
-const deleteOrders = async (vehicle, order_ids) => {
-    return await Vehicle.deleteOrders(vehicle, order_ids);
-}
+// const deleteOrders = async (vehicle, order_ids) => {
+//     return await Vehicle.deleteOrders(vehicle, order_ids);
+// }
 
 const updateVehicle = async (info, conditions) => {
     return await Vehicle.updateVehicle(info, conditions);
@@ -37,14 +37,24 @@ const deleteVehicle = async (conditions) => {
     return await Vehicle.deleteVehicle(conditions);
 };
 
+const addShipmentToVehicle = async(vehicle, shipment_ids) => {
+    return await Vehicle.addShipmentToVehicle(vehicle, shipment_ids);
+}
+
+const deleteShipmentFromVehicle = async(vehicle, shipment_ids) => {
+    return await Vehicle.deleteShipmentFromVehicle(vehicle, shipment_ids);
+}
+
 module.exports = {
     checkExistVehicle,
     createNewVehicle,
     updateVehicle,
-    addOrders,
-    deleteOrders,
+    // addOrders,
+    // deleteOrders,
     deleteVehicle,
     getVehicle,
     getOneVehicle,
     getVehicleOrderIds,
+    addShipmentToVehicle,
+    deleteShipmentFromVehicle
 };

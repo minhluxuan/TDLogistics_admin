@@ -246,115 +246,115 @@ const getVehicleOrderIds = async (req, res) => {
     }
 };
 
-const addOrders = async (req, res) => {
-    try {
-        const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateOrderIds(req.body);
+// const addOrders = async (req, res) => {
+//     try {
+//         const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateOrderIds(req.body);
     
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ.",
-            });
-        }
+//         if (error) {
+//             return res.status(400).json({
+//                 error: true,
+//                 message: "Thông tin không hợp lệ.",
+//             });
+//         }
 
-        const updatorIdSubParts = req.user.staff_id.split('_');
-		const vehicleIdSubParts = req.query.vehicle_id.split('_');
+//         const updatorIdSubParts = req.user.staff_id.split('_');
+// 		const vehicleIdSubParts = req.query.vehicle_id.split('_');
 
-		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
-		&& (updatorIdSubParts[0] !== vehicleIdSubParts[0] ||
-            updatorIdSubParts[1] !== vehicleIdSubParts[1])) {
-			return res.status(404).json({
-				error: true,
-				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
-			});
-		}
+// 		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
+// 		&& (updatorIdSubParts[0] !== vehicleIdSubParts[0] ||
+//             updatorIdSubParts[1] !== vehicleIdSubParts[1])) {
+// 			return res.status(404).json({
+// 				error: true,
+// 				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+// 			});
+// 		}
 
-        const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.query.vehicle_id });
+//         const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.query.vehicle_id });
 
-        if (!resultGettingOneVehicle || resultGettingOneVehicle.length <= 0) {
-            return res.status(404).json({
-                error: true,
-                message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
-            });
-        }
+//         if (!resultGettingOneVehicle || resultGettingOneVehicle.length <= 0) {
+//             return res.status(404).json({
+//                 error: true,
+//                 message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
+//             });
+//         }
 
-        const result = await vehicleService.addOrders(resultGettingOneVehicle[0], req.body.order_ids);
+//         const result = await vehicleService.addOrders(resultGettingOneVehicle[0], req.body.order_ids);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                error: true,
-                message: "Phương tiện không tồn tại.",
-            });
-        }
+//         if (result.affectedRows === 0) {
+//             return res.status(404).json({
+//                 error: true,
+//                 message: "Phương tiện không tồn tại.",
+//             });
+//         }
 
-        res.status(201).json({
-            error: false,
-            info: result,
-            message: "Thêm thành công.",
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
+//         res.status(201).json({
+//             error: false,
+//             info: result,
+//             message: "Thêm thành công.",
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({
+//             error: true,
+//             message: error.message,
+//         });
+//     }
+// }
 
-const deleteOrders = async (req, res) => {
-    try {
-        const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateOrderIds(req.body);
+// const deleteOrders = async (req, res) => {
+//     try {
+//         const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateOrderIds(req.body);
     
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ.",
-            });
-        }
+//         if (error) {
+//             return res.status(400).json({
+//                 error: true,
+//                 message: "Thông tin không hợp lệ.",
+//             });
+//         }
 
-        const deletorIdSubParts = req.user.staff_id.split('_');
-		const vehicleIdSubParts = req.query.vehicle_id.split('_');
+//         const deletorIdSubParts = req.user.staff_id.split('_');
+// 		const vehicleIdSubParts = req.query.vehicle_id.split('_');
 
-		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
-		&& (deletorIdSubParts[0] !== vehicleIdSubParts[0] ||
-            deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
-			return res.status(404).json({
-				error: true,
-				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
-			});
-		}
+// 		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
+// 		&& (deletorIdSubParts[0] !== vehicleIdSubParts[0] ||
+//             deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
+// 			return res.status(404).json({
+// 				error: true,
+// 				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+// 			});
+// 		}
 
-        const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.query.vehicle_id });
+//         const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.query.vehicle_id });
 
-        if (!resultGettingOneVehicle || resultGettingOneVehicle.length <= 0) {
-            return res.status(404).json({
-                error: true,
-                message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
-            });
-        }
+//         if (!resultGettingOneVehicle || resultGettingOneVehicle.length <= 0) {
+//             return res.status(404).json({
+//                 error: true,
+//                 message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
+//             });
+//         }
 
-        const result = await vehicleService.deleteOrders(resultGettingOneVehicle[0], req.body.order_ids);
+//         const result = await vehicleService.deleteOrders(resultGettingOneVehicle[0], req.body.order_ids);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                error: true,
-                message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
-            });
-        }
+//         if (result.affectedRows === 0) {
+//             return res.status(404).json({
+//                 error: true,
+//                 message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
+//             });
+//         }
 
-        res.status(201).json({
-            error: false,
-            info: result,
-            message: "Xóa thành công.",
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
+//         res.status(201).json({
+//             error: false,
+//             info: result,
+//             message: "Xóa thành công.",
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({
+//             error: true,
+//             message: error.message,
+//         });
+//     }
+// }
 
 const updateVehicle = async (req, res) => {
     try {
@@ -443,13 +443,128 @@ const deleteVehicle = async (req, res) => {
         });
     }
 };
+
+
+const addShipmentToVehicle = async (req, res) => {
+    try {
+        const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateUpdatingVehicle(req.body);
+        
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: "Thông tin không hợp lệ.",
+            });
+        }
+
+        const updatorIdSubParts = req.user.staff_id.split('_');
+		const vehicleIdSubParts = req.query.vehicle_id.split('_');
+
+		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
+		&& (updatorIdSubParts[0] !== vehicleIdSubParts[0] ||
+            updatorIdSubParts[1] !== vehicleIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
+
+        const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.query.vehicle_id });
+
+        if (!resultGettingOneVehicle || resultGettingOneVehicle.length <= 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
+            });
+        }
+
+        const result = await vehicleService.addShipmentToVehicle(resultGettingOneVehicle[0], req.body.shipment_ids);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: "Phương tiện không tồn tại.",
+            });
+        }
+
+        return res.status(201).json({
+            error: false,
+            info: result,
+            message: "Thêm thành công.",
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({
+            error: true,
+            message: error.message
+        });
+    }
+}
+
+const deleteShipmentFromVehicle = async (req, res) => {
+    try {
+        const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateOrderIds(req.body);
+    
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: "Thông tin không hợp lệ.",
+            });
+        }
+
+        const deletorIdSubParts = req.user.staff_id.split('_');
+		const vehicleIdSubParts = req.query.vehicle_id.split('_');
+
+		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
+		&& (deletorIdSubParts[0] !== vehicleIdSubParts[0] ||
+            deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
+			});
+		}
+
+        const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.query.vehicle_id });
+
+        if (!resultGettingOneVehicle || resultGettingOneVehicle.length <= 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
+            });
+        }
+
+        const result = await vehicleService.deleteShipmentFromVehicle(resultGettingOneVehicle[0], req.body.shipment_ids);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
+            });
+        }
+
+        return res.status(201).json({
+            error: false,
+            info: result,
+            message: "Xóa thành công.",
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 module.exports = {
     checkExistVehicle,
     createNewVehicle,
     getVehicle,
     getVehicleOrderIds,
     updateVehicle,
-    addOrders,
-    deleteOrders,
-    deleteVehicle
+    // addOrders,
+    // deleteOrders,
+    deleteVehicle,
+    addShipmentToVehicle,
+    deleteShipmentFromVehicle,
 };

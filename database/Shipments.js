@@ -77,7 +77,13 @@ const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => 
 
 const createNewShipment = async (fields, values, postal_code) => {
     const agencyTable = postal_code + suffix;
-    return await dbUtils.insert(pool, agencyTable, fields, values);
+
+    const defaultFields = ["mass", "order_ids", "parent", "status"];
+    const defaultValues = [0, JSON.stringify([]), null, 0];
+
+    const allFields = [...fields, ...defaultFields];
+    const allValues = [...values, ...defaultValues];
+    return await dbUtils.insert(pool, agencyTable, allFields, allValues);
 }
 
 
@@ -85,96 +91,150 @@ const addOrderToShipment = async (shipment_id, order_id, postal_code) => {
     const agencyShipmentsTable = postal_code + suffix;
     const agencyOrdersTable = postal_code + "_orders";
 
-    try {
-        const getOrderQuery = `SELECT parent, mass FROM ${agencyOrdersTable} WHERE order_id = ? LIMIT 1`;
-        const [orderRow] = await pool.query(getOrderQuery, order_id);
+    const getOrderQuery = `SELECT parent, mass FROM ${agencyOrdersTable} WHERE order_id = ? LIMIT 1`;
+    const [orderRow] = await pool.query(getOrderQuery, order_id);
 
-        if (!orderRow || orderRow.length <= 0) {
-            console.log("Order is not exist");
-            throw new Error("Đơn hàng không tồn tại!");
-        }
-
-        const { parent: orderParent, mass: orderMass } = orderRow[0];
-
-        if (orderParent !== null && orderParent !== undefined) {
-            console.log(orderParent);
-            console.log("Order already exist in shipment");
-            throw new Error("Đơn hàng đã được quét lên từ trước!");
-        }
-        //append order_ids, cong mass
-        //UPDATE `shipment` SET `order_ids` = JSON_ARRAY_APPEND(COALESCE(order_ids, '[]'), '$', "1");
-        const updateShipmentQuery = `
-            UPDATE ${agencyShipmentsTable}
-            SET 
-                order_ids = JSON_ARRAY_APPEND(COALESCE(order_ids, '[]'), '$', ?),
-                mass = mass + ?
-            WHERE shipment_id = ?
-        `;
-        const result = await pool.query(updateShipmentQuery,[order_id, orderMass, shipment_id]);
-
-        return result[0];
-    } catch (error) {
-        console.log("Error: ", error);
-        throw new Error(error.message);
+    if (!orderRow || orderRow.length <= 0) {
+        console.log("Order is not exist");
+        return new Object({
+            success: false,
+            data: null,
+            message: `Đơn hàng ${order_id} không tồn tại!`
+        });
     }
+
+    const { parent: orderParent, mass: orderMass } = orderRow[0];
+
+    if (orderParent !== null && orderParent !== undefined) {
+        console.log("Order already exist in shipment ", orderParent);
+        return new Object({
+            success: false,
+            data: null,
+            message: `Đơn hàng đã được quét lên lô hàng ${orderParent} từ trước!`
+        });
+    }
+
+    const getBucketQuery = `SELECT order_ids FROM ${agencyShipmentsTable} WHERE shipment_id = ?`;
+    const [bucket] = await pool.query(getBucketQuery, shipment_id);
+    let prevOrderIds;
+    if (bucket.length > 0) {
+        prevOrderIds = JSON.parse(bucket[0].order_ids);
+        if(prevOrderIds.includes(order_id)) {
+            console.log("Order is contained in this shipment!");
+            return new Object({
+                success: false,
+                data: null,
+                message: `Đơn hàng ${order_id} tồn tại trong lô hàng ${shipment_id} này!`
+            });
+        }       
+    } else {
+        console.log("Shipment does not exist");
+        return new Object({
+            success: false,
+            data: null,
+            message: `Thông tin lô hàng ${shipment_id} không tồn tại!`
+        });
+    } 
+    
+    prevOrderIds.push(order_id);
+    const jsonOrderIds = JSON.stringify(prevOrderIds);
+    //append order_ids, cong mass
+    //UPDATE `shipment` SET `order_ids` = JSON_ARRAY_APPEND(COALESCE(order_ids, '[]'), '$', "1");
+    const updateShipmentQuery = `
+        UPDATE ${agencyShipmentsTable}
+        SET 
+            order_ids = ?,
+            mass = mass + ?
+        WHERE shipment_id = ?
+    `;
+    const result = await pool.query(updateShipmentQuery,[jsonOrderIds, orderMass, shipment_id]);
+
+    // return result[0];
+    return new Object({
+        success: true,
+        data: {
+            affectedRows: result ? result.affectedRows : 0,
+            order_ids: jsonOrderIds,
+            addingOrder: order_id
+        },
+        message: `Thêm đơn hàng ${order_id} vào lô hàng ${shipment_id} thành công!`
+    });
+    
 }
+
+
 
 const deleteOrderFromShipment = async (shipment_id, order_id, postal_code) => {
     const agencyShipmentsTable = postal_code + suffix;
     const agencyOrdersTable = postal_code + "_orders";
+      
+    const getOrderQuery = `SELECT mass FROM ${agencyOrdersTable} WHERE order_id = ?`;
+    const [orderRow] = await pool.query(getOrderQuery, order_id);
 
-    try {
-        
-        const getOrderQuery = `SELECT mass FROM ${agencyOrdersTable} WHERE order_id = ?`;
-        const [orderRow] = await pool.query(getOrderQuery, order_id);
-
-        if (!orderRow || orderRow.length <= 0) {
-            console.log("Order is not exist");
-            throw new Error("Đơn hàng không tồn tại!");
-        }
-
-        const { mass: orderMass } = orderRow[0];
-
-        const getBucketQuery = `SELECT order_ids FROM ${agencyShipmentsTable} WHERE shipment_id = ?`;
-        const [bucket] = await pool.query(getBucketQuery, shipment_id);
-
-        if (bucket.length > 0) {
-            const ordersFromDatabase = JSON.parse(bucket[0].order_ids);
-            const setFromDatabase = new Set(ordersFromDatabase);
-            console.log(setFromDatabase);
-            
-
-            if(!setFromDatabase.has(order_id)) {
-                console.log("Order is not contained in shipment!");
-                throw new Error("Đơn hàng không tồn tại trong lô hàng!");
-            }
-            
-        } else {
-            console.log("Shipment does not exist");
-            throw new Error("Thông tin lô hàng không hợp lệ!");
-        } 
-        
-        // UPDATE `shipment`
-        // SET order_ids = JSON_REMOVE(order_ids, JSON_UNQUOTE(JSON_SEARCH(order_ids, 'one', '2')))
-        // WHERE shipment_id = 'TD20240423370236';
-
-        const updateShipmentQuery = `
-                UPDATE ${agencyShipmentsTable}
-                SET 
-                    order_ids = JSON_REMOVE(order_ids, JSON_UNQUOTE(JSON_SEARCH(order_ids, 'one', ?))),
-                    mass = mass - ?
-                WHERE shipment_id = ?;
-        `;
-
-        const result = await pool.query(updateShipmentQuery, [order_id, orderMass, shipment_id]);
-        const updateOrderQuery = `UPDATE ${agencyOrdersTable} SET parent = null WHERE order_id = ?`;
-        await pool.query(updateOrderQuery, order_id);
-        return result;
-        
-    } catch (error) {
-        console.log("Error: ", error);
-        throw new Error(error.message);
+    if (!orderRow || orderRow.length <= 0) {
+        console.log("Order is not exist");
+        return new Object({
+            success: false,
+            data: null,
+            message: `Đơn hàng ${order_id} không tồn tại!`
+        });
     }
+
+    const { mass: orderMass } = orderRow[0];
+
+    const getBucketQuery = `SELECT order_ids FROM ${agencyShipmentsTable} WHERE shipment_id = ?`;
+    const [bucket] = await pool.query(getBucketQuery, shipment_id);
+    let prevOrderIds;
+    if (bucket.length > 0) {
+        prevOrderIds = JSON.parse(bucket[0].order_ids);
+        if(!prevOrderIds.includes(order_id)) {
+            console.log("Order is not contained in shipment!");
+            return new Object({
+                success: false,
+                data: null,
+                message: `Đơn hàng ${order_id} không tồn tại trong lô hàng ${shipment_id} này!`
+            });
+        } else {
+            const orderIndex = prevOrderIds.indexOf(order_id);
+            prevOrderIds.splice(orderIndex, 1);
+        }
+        
+    } else {
+        console.log("Shipment does not exist");
+        return new Object({
+            success: false,
+            data: null,
+            message: `Thông tin lô hàng ${shipment_id} không tồn tại!`
+        });
+    } 
+    
+    // UPDATE `shipment`
+    // SET order_ids = JSON_REMOVE(order_ids, JSON_UNQUOTE(JSON_SEARCH(order_ids, 'one', '2')))
+    // WHERE shipment_id = 'TD20240423370236';
+    const jsonOrderIds = JSON.stringify(prevOrderIds);
+
+    const updateOrderQuery = `UPDATE ${agencyOrdersTable} SET parent = null WHERE order_id = ?`;
+    await pool.query(updateOrderQuery, order_id);
+
+    const updateShipmentQuery = `
+            UPDATE ${agencyShipmentsTable}
+            SET 
+                order_ids = ?,
+                mass = mass - ?
+            WHERE shipment_id = ?;
+    `;
+
+    const result = await pool.query(updateShipmentQuery,[jsonOrderIds, orderMass, shipment_id]);
+    
+    return new Object({
+        success: true,
+        data: {
+            affectedRows: result ? result.affectedRows : 0,
+            order_ids: jsonOrderIds,
+            deletingOrder: order_id
+        },
+        message: `Xóa đơn hàng ${order_id} khỏi lô hàng ${shipment_id} thành công!`
+    });
 }
 
 //trường hợp thêm vào nếu thêm trên database tổng bị lỗi thì nhân viên bưu cục tự xóa trong db bưu cục
@@ -199,47 +259,6 @@ const deleteGlobalShipment = async (shipment_id) => {
     return await dbUtils.deleteOne(pool, table, ["shipment_id"], [shipment_id]);
 }
 
-// const updateShipment = async (order_ids, shipment_id) => {
-    
-//     const ordersTable = "orders";
-//     const currentTime = new Date();
-//     const formattedTime = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
-//     const statusMessage = "Đóng lô thành công!";
-
-//     for (const order_id of order_ids) { 
-//         //append to Journey and update parent of orders
-//         const updateJourneyQuery = `
-//             UPDATE ${ordersTable}
-//             SET 
-//                 journey = JSON_ARRAY_APPEND(
-//                     COALESCE(journey, '[]'),
-//                     '$',
-//                     JSON_OBJECT(
-//                         'shipment_id', ?,
-//                         'status', ?,
-//                         'date', ?
-//                     )
-//                 ),
-//                 parent = ?
-//             WHERE order_id = ?
-//         `;
-
-//         await pool.query(updateJourneyQuery, [shipment_id, statusMessage, formattedTime, shipment_id, order_id]);
-
-//         //update shipment
-//         const updateShipmentQuery = `
-//             UPDATE ${table}
-//             SET mass = mass + (
-//                 SELECT mass
-//                 FROM ${ordersTable}
-//                 WHERE order_id = ?
-//             )
-//             WHERE shipment_id = ?
-//         `;
-
-//         await pool.query(updateShipmentQuery, [order_id, shipment_id]);
-//     }   
-// }
 
 const updateShipment = async (fields, values, conditionFields, conditionValues, postal_code) => {
     try {
@@ -456,10 +475,6 @@ module.exports = {
     getDataForShipmentCode,
     updateShipment,
     getInfoShipment,
-    recieveShipment,
-    addOrderToShipment,
-    deleteOrderFromShipment,
-    updateOrderToDatabase,
     recieveShipment,
     addOrderToShipment,
     deleteOrderFromShipment,

@@ -385,7 +385,7 @@ const cancelOrder = async (req, res) => {
 
 const createOrderForAgency = async (req, res) => {
 	try {
-        if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+        if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
 
             const orderTime = new Date();
 
@@ -420,7 +420,7 @@ const createOrderForAgency = async (req, res) => {
                 throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
             }
 
-            return res.status(500).json({
+            return res.status(200).json({
                 error: false,
                 message: `Đơn hàng được tạo thành công`
             });
@@ -442,7 +442,7 @@ const createOrderForAgency = async (req, res) => {
 
 const updateOrderForAgency = async (req, res) => {
     try {
-        if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+        if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
 
             const orderId = req.query.order_id;
 

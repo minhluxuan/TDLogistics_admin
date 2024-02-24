@@ -113,3 +113,19 @@ Content-Type: application/json
 DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=BC_70001_72H124767
 ###
 DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=invalid_vehicle_id
+
+###
+PATCH http://localhost:5000/api/v1/vehicles/delete_shipments?vehicle_id=BC_78300_67H112345
+Content-Type: application/json
+
+{
+    "shipment_ids": ["TD202412112533216", "TD20240522616352", "TD20241211922797"]
+}
+
+###
+PATCH http://localhost:5000/api/v1/vehicles/add_shipments?vehicle_id=BC_78300_67H112345
+Content-Type: application/json
+
+{
+    "shipment_ids": ["TD202412112533216", "TD20240522616352", "TD202412112533216", "TD20241211922797"]
+}

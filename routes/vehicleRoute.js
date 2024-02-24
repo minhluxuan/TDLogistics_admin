@@ -34,23 +34,45 @@ router.put(
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"]),
     vehicleController.updateVehicle
 );
-router.patch(
-    "/add_orders",
-    auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
-    vehicleController.addOrders
-);
-router.patch(
-    "/delete_orders",
-    auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
-    vehicleController.deleteOrders
-);
+// router.patch(
+//     "/add_orders",
+//     auth.isAuthenticated(),
+//     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+//     vehicleController.addOrders
+// );
+// router.patch(
+//     "/delete_orders",
+//     auth.isAuthenticated(),
+//     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+//     vehicleController.deleteOrders
+// );
 router.delete(
     "/delete",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
     vehicleController.deleteVehicle
 );
+
+router.patch(
+    "/add_shipments",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    vehicleController.addShipmentToVehicle
+);
+router.patch(
+    "/delete_shipments",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    vehicleController.deleteShipmentFromVehicle
+);
+
+// router.patch(
+//     "/add_shipments",
+//     vehicleController.addShipmentToVehicle
+// );
+// router.patch(
+//     "/delete_shipments",
+//     vehicleController.deleteShipmentFromVehicle
+// );
 
 module.exports = router;

@@ -177,10 +177,16 @@ const addOrderToShipment = async (req, res) => {
         const shipmentID = req.body.shipment_id;
         const orderID = req.body.order_id;
         const result = await shipmentService.addOrderToShipment(shipmentID, orderID, postalCode);
+        if(!result.success) {
+            return res.status(404).json({
+                error: true,
+                message: result.message,
+            })
+        }
         return res.status(200).json({
             error: false,
-            data: result,
-            message: 'Thêm đơn hàng vào lô hàng thành công!',
+            data: result.data,
+            message: result.message,
         });
 
     } catch(error) {
@@ -217,16 +223,16 @@ const deleteOrderFromShipment = async (req, res) => {
         const orderID = req.body.order_id;
         const result = await shipmentService.deleteOrderFromShipment(shipmentID, orderID, postalCode);
 
-        if (!result || result[0].affectedRows <= 0) {
+        if(!result.success) {
             return res.status(404).json({
                 error: true,
-                message: "Đơn hàng không tồn tại trong lô hàng.",
-            });
+                message: result.message,
+            })
         }
-
         return res.status(200).json({
             error: false,
-            message: "Xóa đơn hàng vào lô hàng thành công!",
+            data: result.data,
+            message: result.message,
         });
 
     } catch(error) {
