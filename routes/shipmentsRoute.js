@@ -60,7 +60,7 @@ router.post("/remove",
 
 router.post("/undertake", 
     auth.isAuthenticated(), 
-    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
+    auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER", "PARTNER_SHIPPER"]),
     shipmentController.undertakeShipment);
 
 module.exports = router;
