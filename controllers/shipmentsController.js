@@ -172,7 +172,8 @@ const deleteOrderFromShipment = async (req, res) => {
 const confirmCreateShipment = async (req, res) => {
     try {
         if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
-            const agency_id = "TD_78300_00000";
+            const agency_id = req.user.agency_id;
+            // const agency_id = "TD_78300_00000";
             const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
 
             const { error } = shipmentRequestValidation.validateShipmentID(req.body);
@@ -355,7 +356,8 @@ const updateShipmentToDatabase = async (req, res) => {
 const decomposeShipment = async (req, res) => {
     try {
         if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
-            const agency_id = "TD_78300_00000";
+            const agency_id = req.user.agency_id;
+            // const agency_id = "TD_78300_00000";
             const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
         
             const { error } = shipmentRequestValidation.validateDecomposingShipment(req.body);
@@ -398,7 +400,8 @@ const decomposeShipment = async (req, res) => {
 const recieveShipment = async (req, res) => {
     try {
         if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
-            const agency_id = "TD_78300_00000";
+            const agency_id = req.user.agency_id;
+            // const agency_id = "TD_78300_00000";
             const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
             const { error } = shipmentRequestValidation.validateShipmentID(req.body);
             if(error) {
