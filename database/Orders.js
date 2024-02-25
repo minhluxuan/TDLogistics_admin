@@ -14,67 +14,6 @@ const table = "orders";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-<<<<<<< HEAD
-const checkExistOrder = async (order_id) => {
-    const result = await SQLutils.findOne(pool, table, ["order_id"], [order_id]);
-    return result.length > 0;
-};
-
-const getOrdersByUserID = async (user_id, status_code = null) => {
-    let conditionFields = ["user_id"];
-    let conditionValues = [user_id];
-    if(status_code !== null) {
-        conditionFields.push("status_code");
-        conditionValues.push(status_code);
-    }
-
-    const rows = await SQLutils.find(pool, table, conditionFields, conditionValues);
-    const orders = rows.map(row => ({
-        order_id: rows[0].order_id,
-        name_sender: rows[0].name_sender,
-        phone_sender: rows[0].phone_sender,
-        name_reciever: rows[0].name_reciever,
-        phone_reciever: rows[0].phone_reciever,
-        order_time: rows[0].order_time
-    }));
-    return orders;
-}
-
-const getOrderByOrderID = async (order_id) => {
-    const [row] = await SQLutils.findOne(pool, table, ["order_id"], [order_id]);
-    const {status_message} = await getOrderStatus(row.order_id);
-    
-    const Order = new Object ({
-        order_id: row.order_id,
-        name_sender: row.name_sender,
-        phone_sender: row.phone_sender,
-        name_reciever: row.name_reciever,
-        phone_reciever: row.phone_reciever,
-        order_time: row.order_time,
-        mass: row.mass,
-        height: row.height,
-        width: row.width,
-        length: row.length,	
-        address_source: row.address_source,	
-        address_dest: row.address_dest,	
-        fee: row.fee,
-        COD: row.COD,
-        service_type: (row.service_type === 1 ? "Giao hàng tiêu chuẩn" : "Giao hàng nhanh"),	
-        status_message: status_message
-    });
-    return Order;
-}
-
-// const getAllOrders = async () => {
-//     return await SQLutils.find(pool, table);
-// };
-
-const getOrderForUpdating = async (order_id) => {
-    const result = await SQLutils.findOneIntersect(pool, table, ["order_id"], order_id);
-    return result[0];
-};
-
-=======
 const checkExistOrder = async (info) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
@@ -104,7 +43,6 @@ const getOrderForUpdating = async (order_id) => {
     return result;
 };
 
->>>>>>> 212daa7c7a252b3d7a99a0bb7dd51ce8a24865c7
 const createNewOrder = async (newOrder) => {
     return await SQLutils.insert(pool, table, Object.keys(newOrder), Object.values(newOrder));
 }
@@ -156,47 +94,6 @@ const getProvincePostalCode = async (province) => {
 // AND table_name = 'agency';
 
 const findingManagedAgency = async (ward, district, province) => {
-<<<<<<< HEAD
-
-    // const postal_code = await getDistrictPostalCode(district, province);
-    // if(!postal_code) {
-    //     // throw new Error("Không tìm thấy mã bưu chính!");
-    //     return {
-    //         sucess: false,
-    //         data: {
-    //             postal_code: null,
-    //             agency_id: null,
-    //         },
-    //         message: "Không tìm thấy mã bưu chính!"
-    //     }
-    // } 
-
-    const table = "ward";
-    const query = `SELECT agency_id, postal_code FROM ${table} WHERE ward = ? AND district = ? AND province = ?`;
-    const result = await pool.query(query, [ward, district, province]);
-    console.log(result[0][0].agency_id, result[0][0].postal_code);
-    if(!result[0][0].agency_id || !result[0][0].postal_code) {
-        // throw new Error("Không tồn tại bưu cục tại xã/thị trấn!");
-        return {
-            sucess: false,
-            data: {
-                postal_code: null,
-                agency_id: null,
-            },
-            message: "Không tồn tại bưu cục tại xã/thị trấn!"
-        }
-    }
-    
-    return {
-        sucess: true,
-        data: {
-            postal_code: result[0][0].postal_code,
-            agency_id: result[0][0].agency_id,
-        },
-        message: "Lấy thông tin thành công!"
-    }
-  
-=======
     const table = "ward";
     const query = `SELECT agency_id, postal_code FROM ${table} WHERE ward = ? AND district = ? AND province = ? LIMIT 1`;
     const result = await pool.query(query, [ward, district, province]);
@@ -213,7 +110,6 @@ const findingManagedAgency = async (ward, district, province) => {
         postal_code: result[0][0].postal_code,
         agency_id: result[0][0].agency_id,
     }
->>>>>>> 212daa7c7a252b3d7a99a0bb7dd51ce8a24865c7
 }
 
 const createOrderInAgencyTable = async (newOrder, postal_code) => {
@@ -364,13 +260,8 @@ const distributeOrder = async (agency_id, address_source) => {
 module.exports = {
     checkExistOrder,
     getOrderForUpdating,
-<<<<<<< HEAD
-    getOrdersByUserID,
-    getOrderByOrderID,
-=======
     getOrdersOfAgency,
     getOrders,
->>>>>>> 212daa7c7a252b3d7a99a0bb7dd51ce8a24865c7
     createNewOrder,
     updateOrder,
     cancelOrder,

@@ -13,6 +13,6 @@ router.get("/", (req, res) => {
     res.render("order");
 });
 
-router.post("/agency_create", ordersController.createOrderForAgency);
+//router.post("/agency_create", ordersController.createOrderForAgency);
 
 module.exports = router;

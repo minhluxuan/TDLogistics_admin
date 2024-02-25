@@ -1,5 +1,9 @@
 const Shipment = require("../database/Shipments");
 
+const checkExistShipment = async (shipment_id, agency_id) => {
+    return await Shipment.checkExistShipment(shipment_id, agency_id);
+}
+
 const createNewShipment = async (fields, values, postal_code) => {
     return await Shipment.createNewShipment(fields, values, postal_code);
 }
@@ -60,7 +64,12 @@ const deleteOrderFromShipment = async (shipment_id, order_id, postal_code) => {
     return await Shipment.deleteOrderFromShipment(shipment_id, order_id, postal_code);
 }
 
+const undertakeShipment = async (shipment_id, staff_id, agency_id, status_code) => {
+    return await Shipment.undertakeShipment(shipment_id, staff_id, agency_id, status_code);
+}
+
 module.exports = {
+    checkExistShipment,
     createNewShipment,
     getDataForShipmentCode,
     updateShipment,
@@ -76,4 +85,5 @@ module.exports = {
     deleteGlobalShipment,
     updateShipmentToDatabase,
     decomposeShipment,
+    undertakeShipment,
 };

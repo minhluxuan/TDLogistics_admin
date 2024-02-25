@@ -1,6 +1,7 @@
 const mysql = require("mysql2");
 const moment = require("moment");
 const dbUtils = require("../lib/dbUtils");
+const utils = require("../lib/utils");
 require("dotenv").config();
 
 
@@ -16,6 +17,27 @@ const table = "shipment";
 const suffix = "_" + table;
 
 const pool = mysql.createPool(dbOptions).promise();
+
+const checkExistShipment = async (shipment_id, agency_id) => {
+    const postal_code = utils.getPostalCodeFromAgencyID(agency_id);
+    const agencyShipmentTable = postal_code + "_shipment";
+    
+    // const getShipmentInAgencyQuery = `SELECT * FROM ${agencyShipmentTable} WHERE shipment_id = ?`;
+    const getShipmentInAgencyResult = await dbUtils.findOneIntersect(pool, agencyShipmentTable, ["shipment_id"], [shipment_id]);
+
+    if(!getShipmentInAgencyResult || getShipmentInAgencyResult.length <= 0) {
+        return new Object({
+            existed: false,
+            message: `Lô hàng có mã ${shipment_id} không tồn tại trong bưu cục ${agency_id}!`
+        });
+    }
+
+    return new Object({
+        existed: true,
+        message: `Lô hàng ${shipment_id} tồn tại trong bưu cục ${agency_id}!`
+    })
+
+}
 
 const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => {
     try {
@@ -75,15 +97,30 @@ const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => 
     }
 }
 
-const createNewShipment = async (fields, values, postal_code) => {
-    const agencyTable = postal_code + suffix;
+const createNewShipment = async (info, agency_id) => {
+    const agencyTable = utils.getPostalCodeFromAgencyID(agency_id) + suffix;
 
+    const fields = Object.keys(info);
+    const values = Object.values(info);
     const defaultFields = ["mass", "order_ids", "parent", "status"];
     const defaultValues = [0, JSON.stringify([]), null, 0];
 
     const allFields = [...fields, ...defaultFields];
     const allValues = [...values, ...defaultValues];
-    return await dbUtils.insert(pool, agencyTable, allFields, allValues);
+    await dbUtils.insert(pool, agencyTable, allFields, allValues);
+    const resultCheckingExistShipment = await checkExistShipment(info.shipment_id, agency_id);
+    if(resultCheckingExistShipment.existed) {
+        return new Object({
+            success: true,
+            message: `Tạo lô hàng ${info.shipment_id} trên bưu cục ${agency_id} thành công!`
+        });
+    }
+    else {
+        return new Object({
+            success: false,
+            message: "Tạo lô hàng thất bại!"
+        });
+    }
 }
 
 
@@ -466,9 +503,57 @@ const decomposeShipment = async (shipment_id, order_ids , postal_code) => {
     return await pool.query(shipmentsQuery, [shipment_id]);
 }
 
+// status_code cho orders, shipper cho orders, shipment_ids cho vehicle
+
+const undertakeShipment = async (shipment_id, staff_id, agency_id, status_code) => {
+    const postal_code = utils.getPostalCodeFromAgencyID(agency_id);
+    const agencyShipmentsTable = postal_code + "_shipment";
+    const agencyOrdersTable = postal_code + "_orders";
+    const getOrderIDsQuery = `SELECT order_ids FROM ${agencyShipmentsTable} WHERE shipment_id = ?`;
+    const [getOrderIDsResult] = await pool.query(getOrderIDsQuery, shipment_id);
+
+    const assignShipmentQuery = `UPDATE vehicle SET shipment_ids = ? WHERE staff_id = ?`;
+    const assignShipmentResult = await pool.query(assignShipmentQuery, [JSON.stringify(shipment_id), staff_id]);
+    if(assignShipmentResult.affectedRows <= 0) {
+        return new Object({
+            success: false,
+            data: null,
+            message: "Thông tin nhân viên giao hàng không tồn tại!"
+        });
+    }
+
+    const order_ids = JSON.parse(getOrderIDsResult[0].order_ids);
+    let acceptedArray = new Array();
+    let unacceptedArray = new Array();
+    for(let i = 0; i < order_ids.length; i++) {
+        const assignShipperQuery = `UPDATE ${agencyOrdersTable} SET shipper = ?, status_code = ? WHERE order_id = ?`;
+        const assignShipperResult = await pool.query(assignShipperQuery, [staff_id, status_code, order_ids[i]]);
+        if(assignShipperResult[0].affectedRows > 0) {
+            const assignShipperToDatabaseQuery = `UPDATE orders SET shipper = ?, status_code = ? WHERE order_id = ?`;
+            const assignShipperToDatabaseResult = await pool.query(assignShipperToDatabaseQuery, [staff_id, status_code, order_ids[i]]);
+            acceptedArray.push(order_ids[i]);
+        } else {
+            unacceptedArray.push(order_ids[i]);
+        }
+    }
+
+    return new Object({
+        success: true,
+        data: {
+            numberAccepted: acceptedArray.length,
+            acceptedArray: acceptedArray,
+            numberunaccepted: unacceptedArray.length,
+            unacceptedArray: unacceptedArray,
+            shipperUndertake: staff_id
+        },
+        message: `Lô hàng có mã ${shipment_id} đã được đảm nhận bởi nhân viên có mã ${staff_id}`
+    })
+
+}
 
 
 module.exports = {
+    checkExistShipment,
     createNewShipment,
     updateParentForGlobalOrders,
     confirmCreateShipment,
@@ -485,4 +570,5 @@ module.exports = {
     updateShipmentToDatabase,
     deleteShipment,
     deleteGlobalShipment,
+    undertakeShipment,
 };
