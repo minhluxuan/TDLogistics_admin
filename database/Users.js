@@ -30,7 +30,7 @@ const createNewUser = async (newUser) => {
 
 const getOneUser = async (conditions) => {
     const fields = Object.keys(conditions);
-    const values = Object.values(conditions);console.log(fields, values);
+    const values = Object.values(conditions);
 
     return await SQLutils.findOneIntersect(pool, table, fields, values);
 }

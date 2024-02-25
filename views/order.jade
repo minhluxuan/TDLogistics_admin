@@ -8,12 +8,12 @@ html
     form(method="post" action="/api/v1/orders/create")
   
       div
-        label(for="name_reciever") Tên người nhận
-        input#name_reciever(type="text" name="name_reciever" placeholder="Tên người nhận" required)
+        label(for="name_receiver") Tên người nhận
+        input#name_receiver(type="text" name="name_receiver" placeholder="Tên người nhận" required)
       
       div
-        label(for="phone_reciever") Số điện thoại người nhận
-        input#phone_reciever(type="text" name="phone_reciever" placeholder="Số điện thoại người nhận" required pattern="[0-9]+" title="Only numbers are allowed")
+        label(for="phone_receiver") Số điện thoại người nhận
+        input#phone_receiver(type="text" name="phone_receiver" placeholder="Số điện thoại người nhận" required pattern="[0-9]+" title="Only numbers are allowed")
       
       div
         label(for="mass") Mass

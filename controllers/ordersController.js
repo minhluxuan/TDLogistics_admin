@@ -8,123 +8,87 @@ const utils = require("../lib/utils");
 const eventManager = require("../lib/eventManager");
 const { object } = require("joi");
 
-eventManager.once("ioInitialize", (io) => {
-    // Thiết lập trình xử lý sự kiện 'connection' và 'disconnect' trong io
-    io.sockets.on("connection", (socket) => {
-        socket.on("notifyNewOrderFromUser", (info) => {
-            try {
-                const OrderValidation = new Validation.OrderValidation();
-                const { error } = OrderValidation.validateCreatingOrder(info);
-
-                if (error) {
-                    console.log(error.message);
-                    eventManager.emit("notifyFailCreatedNewOrder", "Thông tin đơn hàng không hợp lệ!");
-                    throw new Error("Thông tin đơn hàng không hợp lệ!");
-                }
-
-                if(info.service_type === 2 || info.service_type === 3) {
-                    if(info.province_source !== info.province_dest) {
-                        const errorMessage = "Đơn hàng phải được giao nội tỉnh!";
-                        console.log(errorMessage);
-                        eventManager.emit("notifyFailCreatedNewOrder", errorMessage);
-                        throw new Error(errorMessage);
-                    }
-                }
-                info.phone_sender = socket.request.user.phone_number;
-                console.log(info.phone_sender);
-                createNewOrder(info);
-            } catch (error) {
-                return eventManager.emit("notifyError", error.message);
-            }    
-        });
-    });
-});
 const OrderValidation = new Validation.OrderValidation();
 
-const createNewOrder = async (info) => {
-    try {
-        const orderTime = new Date();
+try {
+    eventManager.once("ioInitialize", io => {
+        io.sockets.on("connection", (socket) => {
+            socket.on("notifyNewOrderFromUser", (info) => {
+                try {
+                    const orderTime = new Date();
         
-        console.log("Pass Validation");
+                    info.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
+        
+                    if (["USER"].includes(socket.request.user.role)) {
+                        const { error } = OrderValidation.validateCreatingOrder(info);
+        
+                        if (error) {
+                            return socket.emit("notifyError", error.message);
+                        }   
+                    }
+                    else if (["MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
+                        const { error } = OrderValidation.validateCreatingOrderByAgency(info);
+        
+                        if (error) {
+                            return socket.emit("notifyError", error.message);
+                        }
+                    }
+        
+                    if (info.service_type === 2 || info.service_type === 3) {
+                        if(info.province_source !== info.province_dest) {
+                            const errorMessage = "Đơn hàng phải được giao nội tỉnh!";
+                            return socket.emit("notifyError", errorMessage);
+                        }
+                    }
+        
+                    info.phone_number_sender = socket.request.user.phone_number;
+                    info.name_sender = socket.request.user.fullname;
+                    createNewOrder(socket, info, orderTime);
+                } catch (error) {
+                    return eventManager.emit("notifyError", error.message);
+                }    
+            });
+        });
+    });
+} catch (error) {
+    console.log(error);
+    return eventManager.emit("notifyError", error.message);
+}
 
-        info.name_sender = await usersService.getNameUsingPhoneNummber(info.phone_sender);
-        console.log(info.name_sender);
+const createNewOrder = async (socket, info, orderTime) => {
+    try {
         const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);
-        if(!resultFindingManagedAgency.sucess) {
-            console.log(resultFindingManagedAgency.message);
-            eventManager.emit("notifyFailCreatedNewOrder", resultFindingManagedAgency.message);
-            throw new Error(resultFindingManagedAgency.message);
-        }
         
-        info.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
         info.journey = JSON.stringify(new Array());
-        const agencies = resultFindingManagedAgency.data.agency_id;
+        const agencies = resultFindingManagedAgency.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
+        info.agency_id = agencies;
         info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
         const addressSource = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
         const addressDest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
-        info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
-
-        console.log("Pass Prepare Information")
-
-        // const newOrder = new Object({
-        //     order_id: info.order_id,
-        //     name_reciever: info.name_reciever,	
-        //     phone_reciever: info.phone_reciever,
-        //     order_time: info.order_time,
-        //     mass: info.mass,
-        //     height: info.height,
-        //     width: info.width,
-        //     length: info.length,
-        //     province_source: info.province_source,
-        //     district_source: info.district_source,
-        //     ward_source: info.ward_source,
-        //     detail_source: info.detail_source,	
-        //     long_source: info.long_source,
-        //     lat_source: info.lat_source,	 	
-        //     province_dest: info.province_dest,
-        //     district_dest: info.district_dest,
-        //     ward_dest: info.ward_dest,
-        //     detail_dest:info.detail_dest,	
-        //     long_destination: info.long_destination,
-        //     lat_destination: info.lat_destination,
-        //     fee: info.fee,
-        //     COD: info.COD,
-        //     journey: info.journey,
-        //     service_type: info.service_type
-        // });
-
-        // console.log(newOrder);
+        // info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
 
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
         if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
-            throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+            return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
 
-        const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(info, resultFindingManagedAgency.data.postal_code);
+        const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(info, resultFindingManagedAgency.postal_code);
         if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
-            throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+            return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
-
-        console.log("Pass Writing Database");
 
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
         
         eventManager.emit("notifyNewOrderToAgency", {
             order: info,
-            room: resultFindingManagedAgency.data.agency_id,
+            room: resultFindingManagedAgency.agency_id,
         });
     } catch (error) {
-        return eventManager.emit("notifyError", error.message);
+        console.log(error);
+        return socket.emit("notifyError", error.message);
     }
 }
-
-
-
-const getOrders = async (req, res) => {
-    res.render("order");
-}
-
 
 const checkExistOrder = async (req, res) => {
     try {
@@ -143,61 +107,45 @@ const checkExistOrder = async (req, res) => {
     }
 }
 
-const getOrderByUserID = async (req, res) => {
+const getOrders = async (req, res) => {
     try {
-        const { error } = OrderValidation.validateFindingOrderByUserID(req.body);
+        const { error } = OrderValidation.validateFindingOrders(req.body);
 
         if (error) {
             return res.status(400).json({
                 error: true,
-                message: "Thông tin không hợp lệ!",
+                message: error.message,
             });
         }
 
-        //const userID = req.user.user_id;
-        const userID = "00000001";
-        const statusCode = (req.body.status_code ? req.body.status_code : null);
+        if (["USER"].includes(req.user.role)) {
+            req.body.phone_number = req.user.phone_number;
 
-        const result = await ordersService.getOrdersByUserID(userID, statusCode);
-        return res.status(200).json({
-            error: false,
-            data: result,
-            message: "Lấy thông tin thành công!"
-        });
-        
-    } catch (error) {
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-    
-}
-
-const getOrderByOrderID = async (req, res) => {
-    // if(!req.isAuthenticated() || req.user.permission !== 1) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    try {
-        const { error } = OrderValidation.validateFindingOrderByOrderID(req.body);
-
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
+            const result = await ordersService.getOrders(req.body);
+            return res.status(200).json({
+                error: false,
+                data: result,
+                message: "Lấy thông tin thành công!"
             });
         }
-        const result = await ordersService.getOrderByOrderID(req.body.order_id);
+
+        if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_SHIPPER"].includes(req.user.role)) {
+            const agencyIdSubParts = req.user.agency_id.split('_');
+            
+            const result = await ordersService.getOrdersOfAgency(agencyIdSubParts[1], req.body);
+            return res.status(200).json({
+                error: false,
+                data: result,
+                message: "Lấy thông tin thành công!",
+            });
+        }
+
+        const result = await ordersService.getOrders(req.body);
         return res.status(200).json({
             error: false,
             data: result,
-            message: "Lấy thông tin thành công!"
+            message: "Lấy thông tin thành công!",
         });
-
-        
     } catch (error) {
         return res.status(500).json({
             error: true,
@@ -205,74 +153,27 @@ const getOrderByOrderID = async (req, res) => {
         });
     }
 }
-
-const calculateFee = async (req, res) => {
-    // if(!req.isAuthenticated() || req.user.permission !== 1) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-
-    try {
-        // const { error } = OrderValidation.validateCreatingOrder(req.body);
-
-        // if (error) {
-        //     return res.status(400).json({
-        //         error: true,
-        //         //message: "Thông tin không hợp lệ!",
-        //         message: error.message,
-        //     });
-        // }
-
-        // const fee = await ordersService.calculateFee(req.body.address_source, req.body.address_dest);
-        return res.status(200).json({
-            error: false,
-            fee: fee
-        });
-
-    } catch(error) {
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
-
 
 const updateOrder = async (req, res) => {
-    if (!req.isAuthenticated() || req.user.permission !== 1) {
-        return res.status(401).json({
-            error: true,
-            message: "Bạn không được phép truy cập tài nguyên này.",
-        });
-    }
-    
-    const orderId = req.query.order_id;
+    try {    
+        const orderId = req.query.order_id;
 
-    if (orderId === undefined || orderId === null || orderId === "") {
-        return res.status(400).json({
-            error: true,
-            message: "Mã đơn hàng không tồn tại.",
-        });
-    }
+        if (!orderId) {
+            return res.status(400).json({
+                error: true,
+                message: "Mã đơn hàng không tồn tại.",
+            });
+        }
 
-    const { error } = OrderValidation.validateUpdatingOrder(req.body);
-    
-    if (error) {
-        return res.status(400).json({
-            error: true,
-            message: "Thông tin không hợp lệ.",
-        });
-    }
+        const { error } = OrderValidation.validateUpdatingOrder(req.body);
+        
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
 
-    const fields = Object.keys(req.body);
-    const values = Object.values(req.body);
-
-    const conditionFields = ["order_id", "phone_sender"];
-    const conditionValues = [orderId, req.user.phone_number];
-
-    try {
         const result = await ordersService.updateOrder(fields, values, conditionFields, conditionValues);
 
         if (result.affectedRows <= 0) {
@@ -283,7 +184,6 @@ const updateOrder = async (req, res) => {
         }
 
         const updatedRow = (await ordersService.getOrderForUpdating({ order_id: orderId }))[0];
-
 
         const addressSource = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
         const addressDest = utils.getAddressFromComponent(updatedRow.province_dest, updatedRow.district_dest, updatedRow.ward_dest, updatedRow.detail_dest);
@@ -303,75 +203,39 @@ const updateOrder = async (req, res) => {
     }
 };
 
-const getOrderStatus = async (req, res) => {
-    // if(!req.isAuthenticated() || req.user.permisson < 1) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
+const cancelOrder = async (req, res) => {
     try {
-
-        const { error } = OrderValidation.validateFindingOrderStatus(req.body);
+        const { error } = OrderValidation.validateCancelingOrder(req.query);
 
         if (error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
-            });
-        }
-        
-        const result = await ordersService.getOrderStatus(req.body.order_id);
-        return res.status(200).json({
-            error: false,
-            status_code: result.status_code,
-            status_message: result.status_message
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
-
-const cancelOrder = async (req, res) => {
-    if (!req.isAuthenticated() || req.user.permission !== 1) {
-        return res.status(401).json({
-            error: true,
-            message: "Bạn không được phép truy cập tài nguyên này.",
-        });
-    }
-
-    const orderId = req.query.order_id;
-
-   //const { error } = (new Validation.OrderValidation({ order_id: orderId })).validateCancelingOrder();
-    const { error } = OrderValidation.validateCancelingOrder({ order_id: orderId });
-
-    if (error) {
-        return res.status(404).json({
-            error: true,
-            message: "Mã đơn hàng không tồn tại.",
-        });
-    }
-
-    const conditionFields = ["user_id", "order_id"];
-    const conditionValues = [req.user.user_id, orderId];
-
-    try {
-        const result = await ordersService.updateOrder(["status_code"], [7], conditionFields, conditionValues);
-
-        if (result.affectedRows <= 0) {
             return res.status(404).json({
                 error: true,
-                message: `Đơn hàng ${orderId} quá hạn để hủy hoặc không tồn tại.`,
+                message: `Đơn hàng có mã đơn hàng ${req.query.order_id} không tồn tại.`,
             });
         }
 
-        res.status(200).json({
+        if (["USER"].includes(req.user.role)) {
+            req.query.phone_number = req.user.phone_number;
+        }
+        else if (["BUSINESS".includes(req.user.role)]) {
+            req.query.business_id = req.user.business_id;
+        }
+        else if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            req.query.agency_id = req.user.agency_id;
+        }
+
+        const resultDeletingOrder = await ordersService.cancelOrder(req.query);
+
+        if (resultDeletingOrder || resultDeletingOrder.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng ${req.query.order_id} quá hạn để hủy hoặc không tồn tại.`,
+            });
+        }
+
+        return res.status(200).json({
             error: false,
-            message: `Hủy đơn hàng ${orderId} thành công.`,
+            message: `Hủy đơn hàng ${req.query.order_id} thành công.`,
         });
     } catch (error) {
         res.status(500).json({
@@ -510,13 +374,8 @@ const updateOrderForAgency = async (req, res) => {
 module.exports = {
     checkExistOrder,
     getOrders,
-    getOrderByUserID,
-    getOrderByOrderID,
     createNewOrder,
     updateOrder,
     cancelOrder,
-    calculateFee,
-    getOrderStatus,
-    createOrderForAgency,
-    updateOrderForAgency
+    // calculateFee,
 }

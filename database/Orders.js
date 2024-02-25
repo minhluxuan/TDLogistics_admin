@@ -14,6 +14,7 @@ const table = "orders";
 
 const pool = mysql.createPool(dbOptions).promise();
 
+<<<<<<< HEAD
 const checkExistOrder = async (order_id) => {
     const result = await SQLutils.findOne(pool, table, ["order_id"], [order_id]);
     return result.length > 0;
@@ -73,6 +74,37 @@ const getOrderForUpdating = async (order_id) => {
     return result[0];
 };
 
+=======
+const checkExistOrder = async (info) => {
+    const fields = Object.keys(info);
+    const values = Object.values(info);
+
+    const result = await SQLutils.findOneIntersect(pool, table, fields, values);
+    return result.length > 0;
+};
+
+const getOrdersOfAgency = async (postalCode, conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    const result = await SQLutils.find(pool, postalCode + '_' + table, fields, values);
+    return result;
+}
+
+const getOrders = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    const result = await SQLutils.find(pool, table, fields, values);
+    return result;
+}
+
+const getOrderForUpdating = async (order_id) => {
+    const result = await SQLutils.findOneIntersect(pool, table, ["order_id"], order_id);
+    return result;
+};
+
+>>>>>>> 212daa7c7a252b3d7a99a0bb7dd51ce8a24865c7
 const createNewOrder = async (newOrder) => {
     return await SQLutils.insert(pool, table, Object.keys(newOrder), Object.values(newOrder));
 }
@@ -124,6 +156,7 @@ const getProvincePostalCode = async (province) => {
 // AND table_name = 'agency';
 
 const findingManagedAgency = async (ward, district, province) => {
+<<<<<<< HEAD
 
     // const postal_code = await getDistrictPostalCode(district, province);
     // if(!postal_code) {
@@ -163,6 +196,24 @@ const findingManagedAgency = async (ward, district, province) => {
         message: "Lấy thông tin thành công!"
     }
   
+=======
+    const table = "ward";
+    const query = `SELECT agency_id, postal_code FROM ${table} WHERE ward = ? AND district = ? AND province = ? LIMIT 1`;
+    const result = await pool.query(query, [ward, district, province]);
+
+    if (!result || !result[0] || result[0].length === 0) {
+        throw new Error(`${ward}, ${district}, ${province} không tồn tại.`);
+    }
+
+    if(!result[0][0].agency_id || !result[0][0].postal_code) {
+        throw new Error(`Xin lỗi quý khách. Dịch vụ chúng tôi chưa có mặt ở ${ward}, ${district}, ${province}.`);
+    }
+    
+    return {
+        postal_code: result[0][0].postal_code,
+        agency_id: result[0][0].agency_id,
+    }
+>>>>>>> 212daa7c7a252b3d7a99a0bb7dd51ce8a24865c7
 }
 
 const createOrderInAgencyTable = async (newOrder, postal_code) => {
@@ -313,8 +364,13 @@ const distributeOrder = async (agency_id, address_source) => {
 module.exports = {
     checkExistOrder,
     getOrderForUpdating,
+<<<<<<< HEAD
     getOrdersByUserID,
     getOrderByOrderID,
+=======
+    getOrdersOfAgency,
+    getOrders,
+>>>>>>> 212daa7c7a252b3d7a99a0bb7dd51ce8a24865c7
     createNewOrder,
     updateOrder,
     cancelOrder,

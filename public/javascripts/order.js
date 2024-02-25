@@ -4,8 +4,8 @@ const notificationArea = document.querySelector("#notificationArea");
 const createNewOrder = (e) => {
     e.preventDefault();
     const newOrder = new Object({
-        name_reciever: document.getElementById("name_reciever").value,	
-        phone_reciever: document.getElementById("phone_reciever").value,
+        name_receiver: document.getElementById("name_receiver").value,	
+        phone_number_receiver: document.getElementById("phone_receiver").value,
         mass: parseFloat(document.getElementById("mass").value),
         height: parseFloat(document.getElementById("height").value),
         width: parseFloat(document.getElementById("width").value),
@@ -30,6 +30,12 @@ const createNewOrder = (e) => {
 }
 
 document.querySelector("#submit").addEventListener('click', createNewOrder);
+
+socket.on("notifyError", message => {
+    const p = document.createElement("p");
+    p.innerText = message;
+    notificationArea.appendChild(p);
+});
 
 socket.on("notifySuccessCreatedNewOrder", message => {
     const p = document.createElement("p");

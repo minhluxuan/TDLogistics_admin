@@ -43,7 +43,6 @@ const createNewPartnerStaff = async (info) => {
   const fields = Object.keys(info);
   const values = Object.values(info);
 
-
   return await dbUtils.insert(pool, table, fields, values);
 };
 
@@ -53,7 +52,7 @@ const getManyPartnerStaffs = async (info) => {
 
 	const result = await dbUtils.find(pool, table, fields, values);
 	return result;
-	};
+};
 
 const getOnePartnerStaff = async (info) => {
 	const fields = Object.keys(info);

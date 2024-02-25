@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/check", agenciesController.checkExistAgency);
 router.post("/create", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"]), agenciesController.createNewAgency);
 router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"]), agenciesController.updateAgency);
-router.get(
+router.post(
     "/search",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "HUMAN_RESOURCE_MANAGER", "MANAGER", "TELLER", "COMPLAINTS_SOLVER",
