@@ -1,0 +1,19 @@
+POST http://localhost:5000/api/v1/orders/search
+Content-Type: application/json
+
+{
+
+}
+
+###
+
+PUT http://localhost:5000/api/v1/orders/update?order_id=BC_71000_2024225161651124
+Content-Type: application/json
+
+{
+    "mass": 30
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/orders/cancel?order_id=TD_00009_2024218234849782

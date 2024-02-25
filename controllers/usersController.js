@@ -114,6 +114,8 @@ const createNewUser = async (req, res) => {
             });
         }
 
+        req.body.user_id = "PU" + "_00000_" + req.body.phone_number; 
+
         const resultCreatingNewUser = await usersService.createNewUser(req.body);
 
         if (!resultCreatingNewUser || resultCreatingNewUser.affectedRows === 0) {

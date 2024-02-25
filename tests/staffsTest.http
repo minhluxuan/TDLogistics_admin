@@ -6,6 +6,16 @@ Content-Type: application/json
     "password": "NTDung@tdlogistics2k24"
 }
 
+### AGENCY_MANAGER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "buucucquan1",
+    "password": "Buucucquan1@tdlogistics"
+}
+
 ### MANAGER
 
 POST http://localhost:5000/api/v1/staffs/login
