@@ -199,8 +199,6 @@ const addOrderToShipment = async (shipment_id, order_id, postal_code) => {
     
 }
 
-
-
 const deleteOrderFromShipment = async (shipment_id, order_id, postal_code) => {
     const agencyShipmentsTable = postal_code + suffix;
     const agencyOrdersTable = postal_code + "_orders";
@@ -295,7 +293,6 @@ const deleteShipment = async (shipment_id, postal_code) => {
 const deleteGlobalShipment = async (shipment_id) => {
     return await dbUtils.deleteOne(pool, table, ["shipment_id"], [shipment_id]);
 }
-
 
 const updateShipment = async (fields, values, conditionFields, conditionValues, postal_code) => {
     try {

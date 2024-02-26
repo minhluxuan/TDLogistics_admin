@@ -114,3 +114,10 @@ Content-Type: application/json
 }
 
 ###
+POST https://tdlogistics.govt.hu/api/v1/staffs/login 
+Content-Type: application/json
+
+{
+    "username": "ntdung@tdlogistics",
+    "password": "NTDung@tdlogistics2k24"
+}
