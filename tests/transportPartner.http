@@ -1,0 +1,30 @@
+POST http://localhost:5000/transport_partners/create
+Content-Type: application/json
+{
+    "username": "nhanhothanh",
+    "user_password": "Password123!",
+    "user_fullname": "Hồ Thành Nhân",
+    "user_phone_number": "0976481171",
+    "user_email": "nhanhothanh@example.com",
+    "user_date_of_birth": "1990-01-01",
+    "user_cccd": "0332255478",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 1",
+    "user_town": "'Phường Đa Kao'",
+    "user_detail_address": "123 Main St",
+    "user_position": "Driver",
+    "user_bin": "050138319579",
+    "user_bank": "Bank",
+
+    "agency_id": "BC_70001_077204005691",
+    "tax_code": "123456",
+    "transport_partner_name": "Transport Partner",
+    "province": "Province",
+    "district": "District",
+    "town": "Town",
+    "detail_address": "123 Main St",
+    "phone_number": "1234567890",
+    "email": "transport.partner@example.com",
+    "bin": "123456",
+    "bank": "Bank"
+}
