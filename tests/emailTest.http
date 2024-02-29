@@ -1,0 +1,26 @@
+POST http://localhost:5000/api/v1/email/create
+Content-Type: application/json
+
+{
+    "email": ["hadjsadsadjđsdagsddfdfudfgdf@gmail.com", "nhan.hothanhcs22@hcmut.edu.vn"],
+    "subject": "TEST EMAIL",
+    "content":"Second"
+}
+###
+POST http://localhost:5000/api/v1/email/create
+Content-Type: application/json
+
+{
+    "email":  "nhan.hothanhcs22@hcmut.edu.vn",
+    "subject": "TEST EMAIL",
+    "content":"Second"
+}
+###
+POST http://localhost:5000/api/v1/email/create
+Content-Type: application/json
+
+{
+    "email": [],
+    "subject": "TEST EMAIL",
+    "content":"Second"
+}
