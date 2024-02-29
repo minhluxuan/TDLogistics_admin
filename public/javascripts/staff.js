@@ -4,10 +4,9 @@ const notificationArea = document.querySelector("#notificationArea");
 
 socket.on("notifyNewOrderToAgency", (order) => {
     // if (!receivedNotification) {
-        const message = "Thời gian tạo: " + order.createdTime + '\n' +
-                        "Điểm gửi: " + order.source + '\n' + 
-                        "Điểm nhận: " + order.destination + '\n';
+        const message = "Thời gian tạo: " + order.order_time + '\n';
         
+        console.log("Check");
         const p = document.createElement("p");
         p.innerText = message;
         notificationArea.appendChild(p);

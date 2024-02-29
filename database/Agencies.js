@@ -113,6 +113,11 @@ const createTablesForAgency = async (postal_code) => {
 		successCreatedTable.push(shipmentTable);
 	}
 
+	const addPrimaryKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD PRIMARY KEY (order_id)`;
+	const addForeignKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE`;
+	await pool.query(addPrimaryKeyForOrdersTableQuery);
+	await pool.query(addForeignKeyForOrdersTableQuery);
+
 	if (successCreatedTable.length !== 2) {
 		const missedTable = neccessaryTable.filter(table => !successCreatedTable.includes(table));
 
