@@ -2,7 +2,7 @@ const moment = require("moment");
 const shipmentService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
 const utils = require("../lib/utils");
-
+const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
 
 
@@ -358,7 +358,7 @@ const decomposeShipment = async (req, res) => {
         if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
             const agency_id = req.user.agency_id;
             // const agency_id = "TD_78300_00000";
-            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
+            // const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
         
             const { error } = shipmentRequestValidation.validateDecomposingShipment(req.body);
 
@@ -373,7 +373,7 @@ const decomposeShipment = async (req, res) => {
             const shipmentID = req.body.shipment_id;
             const order_ids = req.body.order_ids;
 
-            const result = await shipmentService.decomposeShipment(shipmentID, order_ids, postalCode);
+            const result = await shipmentService.decomposeShipment(shipmentID, order_ids, agency_id);
 
             if (!result || result[0].affetedRows <= 0) {
                 return res.status(404).json({

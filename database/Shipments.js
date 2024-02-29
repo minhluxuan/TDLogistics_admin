@@ -2,6 +2,8 @@ const mysql = require("mysql2");
 const moment = require("moment");
 const dbUtils = require("../lib/dbUtils");
 const utils = require("../lib/utils");
+const { setStatusToOrder } = require("./Orders");
+const servicesStatus = require("../lib/servicesStatus");
 require("dotenv").config();
 
 
@@ -480,7 +482,8 @@ const recieveShipment = async (shipment_id, postal_code) => {
 
 }
 
-const decomposeShipment = async (shipment_id, order_ids , postal_code) => {
+const decomposeShipment = async (shipment_id, order_ids , agency_id) => {
+    const postal_code = utils.getPostalCodeFromAgencyID(agency_id);
     const agencyShipmentsTable = postal_code + suffix;
     const agencyOrdersTable = postal_code + "_orders";
     const compareOrders = await compareOrdersInDatabase(shipment_id, order_ids, postal_code);
@@ -494,6 +497,12 @@ const decomposeShipment = async (shipment_id, order_ids , postal_code) => {
     for (const order_id of order_ids) {
         const ordersQuery = `UPDATE ${agencyOrdersTable} SET parent = null WHERE order_id = ?`;
         await pool.query(ordersQuery, [order_id]);
+        const orderInfo = new Object({
+            order_id: order_id,
+            shipment_id: shipment_id,
+            managed_by: agency_id
+        });
+        await setStatusToOrder(orderInfo, servicesStatus.enter_agency, true);
     }
 
     const shipmentsQuery = `UPDATE ${agencyShipmentsTable} SET status = 1 WHERE shipment_id = ? `;
@@ -525,9 +534,16 @@ const undertakeShipment = async (shipment_id, staff_id, agency_id, status_code) 
     for(let i = 0; i < order_ids.length; i++) {
         const assignShipperQuery = `UPDATE ${agencyOrdersTable} SET shipper = ?, status_code = ? WHERE order_id = ?`;
         const assignShipperResult = await pool.query(assignShipperQuery, [staff_id, status_code, order_ids[i]]);
+        
         if(assignShipperResult[0].affectedRows > 0) {
-            const assignShipperToDatabaseQuery = `UPDATE orders SET shipper = ?, status_code = ? WHERE order_id = ?`;
-            const assignShipperToDatabaseResult = await pool.query(assignShipperToDatabaseQuery, [staff_id, status_code, order_ids[i]]);
+            const assignShipperToDatabaseQuery = `UPDATE orders SET shipper = ? WHERE order_id = ?`;
+            const assignShipperToDatabaseResult = await pool.query(assignShipperToDatabaseQuery, [staff_id, order_ids[i]]);
+            const orderInfo = new Object({
+                order_id: order_ids[i],
+                shipment_id: shipment_id,
+                managed_by: staff_id,
+            });
+            await setStatusToOrder(orderInfo, {code: status_code, message: servicesStatus.getStatusMessage(status_code)}, true);
             acceptedArray.push(order_ids[i]);
         } else {
             unacceptedArray.push(order_ids[i]);

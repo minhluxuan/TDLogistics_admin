@@ -44,8 +44,8 @@ const deleteGlobalShipment = async (shipment_id) => {
     return await Shipment.deleteGlobalShipment(shipment_id);
 }
 
-const decomposeShipment = async (shipment_id, order_ids, postal_code) => {
-    return await Shipment.decomposeShipment(shipment_id, order_ids, postal_code);
+const decomposeShipment = async (shipment_id, order_ids, agency_id) => {
+    return await Shipment.decomposeShipment(shipment_id, order_ids, agency_id);
 }
 
 const updateShipmentToDatabase = async (fields, values, shipment_id) => {

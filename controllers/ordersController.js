@@ -7,6 +7,7 @@ const libMap = require("../lib/map");
 const utils = require("../lib/utils");
 const eventManager = require("../lib/eventManager");
 const { object } = require("joi");
+const servicesStatus = require("../lib/servicesStatus");
 
 const OrderValidation = new Validation.OrderValidation();
 
@@ -67,7 +68,8 @@ const createNewOrder = async (socket, info, orderTime) => {
         const addressSource = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
         const addressDest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
         // info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
-
+        info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
+        
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
         if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
@@ -155,17 +157,8 @@ const getOrders = async (req, res) => {
 }
 
 const updateOrder = async (req, res) => {
-    try {    
-        const orderId = req.query.order_id;
-
-        if (!orderId) {
-            return res.status(400).json({
-                error: true,
-                message: "Mã đơn hàng không tồn tại.",
-            });
-        }
-
-        const { error } = OrderValidation.validateUpdatingOrder(req.body);
+    try {
+        const { error } = OrderValidation.validateQueryUpdatingOrder(req.query) || OrderValidation.validateUpdatingOrder(req.body);
         
         if (error) {
             return res.status(400).json({
@@ -173,27 +166,49 @@ const updateOrder = async (req, res) => {
                 message: error.message,
             });
         }
+        
+        if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            req.query.agency_id = req.user.agency_id;
+        }
+        else if (["SHIPPER", "AGENCY_SHIPPER", "PARTNER_SHIPPER"].includes(req.user.role)) {
+            req.query.shipper = req.user.staff_id;
+        }
+        //Update status_code = taken_success and not append new Journey
+        req.body.status_code = servicesStatus.taken_success.code;
+        const result = await ordersService.updateOrder(req.body, req.query);
 
-        const result = await ordersService.updateOrder(fields, values, conditionFields, conditionValues);
-
-        if (result.affectedRows <= 0) {
+        if (result.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
-                message: "Đơn hàng đã quá hạn để cập nhật hoặc không tồn tại."
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+        
+        const resultGettingOneOrder = await ordersService.getOneOrder(req.query);
+        if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã đơn hàng ${req.query.order_id} không tồn tại.`,
             });
         }
 
-        const updatedRow = (await ordersService.getOrderForUpdating({ order_id: orderId }))[0];
-
-        const addressSource = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
-        const addressDest = utils.getAddressFromComponent(updatedRow.province_dest, updatedRow.district_dest, updatedRow.ward_dest, updatedRow.detail_dest);
-        const updatingFee = servicesFee.calculateExpressFee(updatedRow.service_type, addressSource, addressDest);
-
-        await ordersService.updateOrder(["fee"], [updatingFee], ["order_id"], [orderId]);
+        // const addressSource = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
+        // const addressDest = utils.getAddressFromComponent(updatedRow.province_dest, updatedRow.district_dest, updatedRow.ward_dest, updatedRow.detail_dest);
+        // const updatingFee = servicesFee.calculateExpressFee(updatedRow.service_type, addressSource, addressDest);
+        const updatedFee = 10000;
+        
+        const resultUpdatingOneOrder = await ordersService.updateOrder({ fee: updatedFee }, req.query);
+        if (!resultUpdatingOneOrder || resultUpdatingOneOrder.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã đơn hàng ${req.query.order_id} không tồn tại.`,
+            });
+        }
+        
 
         return res.status(200).json({
             error: false,
-            message: "Cập nhật thành công.",
+            message: `Cập nhật đơn hàng có mã đơn hàng ${req.query.order_id} thành công.`,
         });
     } catch (error) {
         return res.status(500).json({

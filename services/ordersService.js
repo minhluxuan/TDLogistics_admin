@@ -51,6 +51,10 @@ const distributeOrder = async (agency_id, address_source) => {
     return await Orders.distributeOrder(agency_id, address_source);
 }
 
+const  setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false) => {
+    return await Orders.setStatusToOrder(orderInfo, orderStatus, isUpdateJourney);
+}
+
 module.exports = {
     checkExistOrder,
     getOrderForUpdating,
@@ -64,5 +68,6 @@ module.exports = {
     findingManagedAgency,
     createOrderInAgencyTable,
     getOrderStatus,
-    distributeOrder
+    distributeOrder,
+    setStatusToOrder
 };
