@@ -181,7 +181,7 @@ const addOrdersToShipment = async (shipment, order_ids, postal_code = null) => {
     if (shipment.order_ids) {
         const prevOrderIds = JSON.parse(shipment.order_ids);
         for (let i = 0; i < order_ids.length; i++) {
-            if (!prevOrderIds.includes(order_ids[i]) && await updateParentAndIncreaseMass(shipment.shipment_id, order_ids[i]), postal_code) {
+            if (!prevOrderIds.includes(order_ids[i]) && await updateParentAndIncreaseMass(shipment.shipment_id, order_ids[i], postal_code)) {
                 prevOrderIds.push(order_ids[i]);
                 ++acceptedNumber;
                 acceptedArray.push(order_ids[i]);
@@ -221,7 +221,7 @@ const deleteOrdersFromShipment = async (shipment, order_ids, postal_code = null)
         const prevOrderIds = JSON.parse(shipment.order_ids);
         for (let i = 0; i < order_ids.length; i++) {
             const orderIndex = prevOrderIds.indexOf(order_ids[i]);
-            if (orderIndex >= 0 && await updateParentAndDecreaseMass(shipment.shipment_id, order_ids[i]), postal_code) {
+            if (orderIndex >= 0 && await updateParentAndDecreaseMass(shipment.shipment_id, order_ids[i], postal_code)) {
                 ++acceptedNumber;
                 acceptedArray.push(order_ids[i]);
                 prevOrderIds.splice(orderIndex, 1);
@@ -238,7 +238,7 @@ const deleteOrdersFromShipment = async (shipment, order_ids, postal_code = null)
         jsonOrderIds = JSON.stringify(new Array());
     }
 
-    const result = await dbUtils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["shipment_id"], [shipment.shipment_id]);
+    const result = await dbUtils.updateOne(pool, shipmentTable, ["order_ids"], [jsonOrderIds], ["shipment_id"], [shipment.shipment_id]);
 
     return new Object({
         affectedRows: result ? result.affectedRows : 0,
@@ -281,14 +281,16 @@ const updateShipmentForAgency = async (info, conditions, postal_code) => {
     return dbUtils.updateOne(pool, postal_code + '_' + table, fields, values, conditionFields, conditionValues);
 };
 
-const updateShipment = async (info, conditions) => {
+const updateShipment = async (info, conditions, postalCode) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
 
     const conditionFields = Object.keys(conditions);
     const conditionValues = Object.values(conditions);
 
-    return dbUtils.updateOne(pool, table, fields, values, conditionFields, conditionValues);
+    const shipmentTable = postalCode ? postalCode + '_' + table : table;
+
+    return dbUtils.updateOne(pool, shipmentTable, fields, values, conditionFields, conditionValues);
 };
 
 const getShipmentForAgency = async (fields, values, postal_code) => {

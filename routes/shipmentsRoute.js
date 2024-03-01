@@ -43,12 +43,12 @@ router.post("/recieve",
     shipmentController.recieveShipment);
 
 
-router.post("/add",
+router.post("/add_orders",
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
     shipmentController.addOrderToShipment);
 
-router.post("/remove", 
+router.post("/remove_orders", 
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
     shipmentController.deleteOrderFromShipment);

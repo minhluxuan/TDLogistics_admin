@@ -16,21 +16,19 @@ Content-Type: application/json
 
 ### Trong cái cập nhật này mass có thể là số âm bởi vì mục tiêu của hàm này là cập nhật mass, append order_id (api khác của order)
 ### một cách thủ công khi không quét được lên lô hàng hay xuống lô hàng
-POST http://localhost:5000/api/v1/shipments/update
+POST http://localhost:5000/api/v1/shipments/update?shipment_id=BC_71000_202421221132823
 Content-Type: application/json
 
 {
-    "mass": -123,
-    "shipment_id": "TD20241211922797"
+   "mass": -134
 }
 
 ### mass dương, lên hàng
-POST http://localhost:5000/api/v1/shipments/update
+POST http://localhost:5000/api/v1/shipments/update?shipment_id=BC_71000_202421221132823
 Content-Type: application/json
 
 {
     "mass": 200,
-    "shipment_id": "TD20241211922797"
 }
 ### TD202410161859226 
 ### order_id BC_78300_20242231634518, BC_78300_2024224111043787, BC_78300_2024223163246472
@@ -42,12 +40,11 @@ Content-Type: application/json
 }
 
 ### TD2024132126392 TD2024132139335 TD2024132145338
-POST http://localhost:5000/api/v1/shipments/remove
+POST http://localhost:5000/api/v1/shipments/remove_orders?shipment_id=BC_71000_202421221132823
 Content-Type: application/json
 
 {
-    "shipment_id": "TD202416171622962",
-    "order_id": "TD_AD_202422212274052"
+    "order_ids": ["BC_71000_2024225161651124"]
 }
 
 ###
