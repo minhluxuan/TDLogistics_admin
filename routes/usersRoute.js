@@ -2,6 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const usersController = require("../controllers/usersController");
+const Users = require("../database/Users");
 const auth = require("../lib/auth");
 
 const router = express.Router();
@@ -14,11 +15,26 @@ const sessionStrategy = new LocalStrategy({
     if (!valid) {
         return done(null, false);
     }
+
+    const resultGettingOneUser = await Users.getOneUser({ phone_number: phone_number });
+    if (!resultGettingOneUser || resultGettingOneUser.length === 0) {
+        return done(null, false);
+    }
     
+    const user = resultGettingOneUser[0];
+    if (!user) {
+        return done(null, false);
+    }
+
+    const user_id = user.user_id;
+    const fullname = user.fullname;
+
     const role = "USER";
 
     return done(null, {
         role,
+        user_id,
+        fullname,
         phone_number,
     });
 });
@@ -38,7 +54,7 @@ router.post("/verify_otp", passport.authenticate("otpLogin"), (req, res, next) =
         if (!user) {
             return res.status(401).json({ error: true, valid: false, message: "Xác thực thất bại." });
         }
-
+        console.log(req);
         return res.status(200).json({ error: false, valid: true, message: "Xác thực thành công." });
     })(req, res, next);
 });

@@ -55,7 +55,7 @@ app.set('view engine', 'jade');
 app.enable('trust proxy');
 
 // Chỉ định danh sách các trang web được phép truy cập
-const allowedOrigins = ["https://www.diffchecker.com", 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', 'https://www.thunderclient.com', "http://localhost:5000", "http://127.0.0.1:5500"];
+const allowedOrigins = ['http://localhost:5000', 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', "https://admin-td-logistics-web.vercel.app"];
 
 // Sử dụng cors middleware với tùy chọn chỉ cho phép các trang web trong danh sách
 app.use(cors({

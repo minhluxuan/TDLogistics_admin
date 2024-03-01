@@ -4,20 +4,24 @@ const checkExistShipment = async (shipment_id, agency_id) => {
     return await Shipment.checkExistShipment(shipment_id, agency_id);
 }
 
-const createNewShipment = async (info, agency_id) => {
-    return await Shipment.createNewShipment(info, agency_id);
+const createNewShipment = async (info, postalCode) => {
+    return await Shipment.createNewShipment(info, postalCode);
 }
 
 const getDataForShipmentCode = async(staff_id, transport_partner_id = null) => {
     return await Shipment.getDataForShipmentCode(staff_id, transport_partner_id);
 }
 
-const updateShipment = async(fields, values, conditionFields, conditionValues, postal_code) => {
-    return await Shipment.updateShipment(fields, values, conditionFields, conditionValues, postal_code);
+const updateShipmentForAgency = async(info, conditions, postal_code) => {
+    return await Shipment.updateShipmentForAgency(info, conditions, postal_code);
 }
 
 const getShipmentForAdmin = async (fields, values) => {
     return await Shipment.getShipmentForAdmin(fields, values);
+}
+
+const getOneShipment = async (conditions, postal_code = null) => {
+    return await Shipment.getOneShipment(conditions, postal_code);
 }
 
 const getShipmentForAgency = async (fields, values, postal_code) => {
@@ -56,12 +60,12 @@ const recieveShipment = async (shipment_id, postal_code) => {
     return await Shipment.recieveShipment(shipment_id, postal_code);
 }
 
-const addOrderToShipment = async (shipment_id, order_id, postal_code) => {
-    return await Shipment.addOrderToShipment(shipment_id, order_id, postal_code);
+const addOrdersToShipment = async (shipment, order_ids, postal_code) => {
+    return await Shipment.addOrdersToShipment(shipment, order_ids, postal_code);
 }
 
-const deleteOrderFromShipment = async (shipment_id, order_id, postal_code) => {
-    return await Shipment.deleteOrderFromShipment(shipment_id, order_id, postal_code);
+const deleteOrdersFromShipment = async (shipment, order_id, postal_code) => {
+    return await Shipment.deleteOrdersFromShipment(shipment, order_id, postal_code);
 }
 
 const undertakeShipment = async (shipment_id, staff_id, agency_id, status_code) => {
@@ -72,15 +76,16 @@ module.exports = {
     checkExistShipment,
     createNewShipment,
     getDataForShipmentCode,
-    updateShipment,
+    updateShipmentForAgency,
     getShipmentForAdmin,
     getShipmentForAgency,
+    getOneShipment,
     getInfoShipment,
     updateParentForGlobalOrders,
     confirmCreateShipment,
     recieveShipment,
-    addOrderToShipment,
-    deleteOrderFromShipment,
+    addOrdersToShipment,
+    deleteOrdersFromShipment,
     deleteShipment,
     deleteGlobalShipment,
     updateShipmentToDatabase,

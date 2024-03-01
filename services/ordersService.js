@@ -12,21 +12,29 @@ const getOrdersOfAgency = async (postalCode, conditions) => {
     return await Orders.getOrdersOfAgency(postalCode, conditions);
 }
 
+const getOneOrder = async (conditions) => {
+    return await Orders.getOneOrder(conditions);
+}
+
 const getOrders = async (conditions) => {
     return await Orders.getOrders(conditions);
 }
 
-const updateOrder = async (fields, values, conditionFields, conditionValues) => {
-    return await Orders.updateOrder(fields, values, conditionFields, conditionValues);
+const updateOrder = async (info, conditions) => {
+    return await Orders.updateOrder(info, conditions);
 };
 
 const createNewOrder = async (newOrder) => {
     return await Orders.createNewOrder(newOrder);
 }
 
-const cancelOrder = async (fields, values)=> {
-    return await Orders.cancelOrder(fields, values);
+const cancelOrderWithTimeConstraint = async (conditions) => {
+    return await Orders.cancelOrderWithTimeConstraint(conditions);
 };
+
+const cancelOrderWithoutTimeConstraint = async (conditions) => {
+    return await Orders.cancelOrderWithoutTimeConstraint(conditions);
+}
 
 const getDistrictPostalCode = async (district, province) => {
     return await Orders.getDistrictPostalCode(district, province);
@@ -59,10 +67,12 @@ module.exports = {
     checkExistOrder,
     getOrderForUpdating,
     getOrdersOfAgency,
+    getOneOrder,
     getOrders,
     createNewOrder,
     updateOrder,
-    cancelOrder,
+    cancelOrderWithTimeConstraint,
+    cancelOrderWithoutTimeConstraint,
     getDistrictPostalCode,
     getProvincePostalCode,
     findingManagedAgency,

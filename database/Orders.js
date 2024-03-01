@@ -14,11 +14,12 @@ const table = "orders";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-const checkExistOrder = async (info) => {
+const checkExistOrder = async (info, postal_code = null) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
 
-    const result = await SQLutils.findOneIntersect(pool, table, fields, values);
+    const ordersTable = postal_code ? postal_code + '_' + table : table;
+    const result = await SQLutils.findOneIntersect(pool, ordersTable, fields, values);
     return result.length > 0;
 };
 
@@ -27,6 +28,14 @@ const getOrdersOfAgency = async (postalCode, conditions) => {
     const values = Object.values(conditions);
 
     const result = await SQLutils.find(pool, postalCode + '_' + table, fields, values);
+    return result;
+}
+
+const getOneOrder = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    const result = await SQLutils.findOneIntersect(pool, table, fields, values);
     return result;
 }
 
@@ -47,21 +56,20 @@ const createNewOrder = async (newOrder) => {
     return await SQLutils.insert(pool, table, Object.keys(newOrder), Object.values(newOrder));
 }
 
-const updateOrder = async (fields, values, conditionFields, conditionValues) => {
-    const currentTime = new Date();
-    currentTime.setMinutes(currentTime.getMinutes() - 30);
-    const formattedTime = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
-    
-    const setClause = `${fields.map(field => `${field} = ?`).join(", ")}`;
-    const whereClause = `${conditionFields.map(field => `${field} = ?`).join(" AND ")} AND order_time > ?`;
+const updateOrder = async (info, conditions) => {
+    const fields = Object.keys(info);
+    const values = Object.values(info);
 
-    const query = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
+    const conditionFields = Object.keys(conditions);
+    const conditionValues = Object.values(conditions);
 
-    const result = await pool.query(query, [...values, ...conditionValues, formattedTime]);
-    return result[0];
+    return await SQLutils.updateOne(pool, table, fields, values, conditionFields, conditionValues);
 };
 
-const cancelOrder = async (fields, values) => {
+const cancelOrderWithTimeConstraint = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
     const currentTime = new Date();
     currentTime.setMinutes(currentTime.getMinutes() - 30);
     const formattedTime = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
@@ -72,14 +80,12 @@ const cancelOrder = async (fields, values) => {
     return result[0];
 };
 
-const getDistrictPostalCode = async (district, province) => {
-    
-    const table = "district";
-    const query = `SELECT postal_code FROM ${table} WHERE district = ? AND province = ?`;
-    const result = await pool.query(query, [district, province]);
-    return result[0][0].postal_code;
-}
+const cancelOrderWithoutTimeConstraint = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
 
+    return SQLutils.deleteOne(pool, table, fields, values);
+}
 
 const getProvincePostalCode = async (province) => {
     const table = "province";
@@ -118,7 +124,6 @@ const createOrderInAgencyTable = async (newOrder, postal_code) => {
 }
 
 const getOrderStatus = async (order_id) => {
-
     const ordersTable = "orders";
     const agencyTable = "agency";
     const statusQuery = `SELECT journey, status_code FROM ${ordersTable} WHERE order_id = ?`;
@@ -212,126 +217,20 @@ const getOrderStatus = async (order_id) => {
         status_code: status_code,
         status_message: statusMessage
     }
-    
-
-    
-}
-
-const distributeOrder = async (agency_id, address_source) => {
-    const staffTable = "staff";
-    const staffRole = "Shipper";
-    const activeStatus = 1;
-    const map = new libMap.Map();
-    
-    const rows = await SQLutils.find(pool, staffTable, ["agency_id", "role", "active"], [agency_id, staffRole, activeStatus]);
-    const source = await map.convertAddressToCoordinate(address_source);
-    let shipperListByMinDistance = [];
-    console.log(rows);
-    for (const row of rows) {
-        let { staff_id, fullname, last_location } = row;
-        last_location = JSON.parse(last_location);
-        const shipperCoordinate = {
-            lat: last_location[0],
-            long: last_location[1]
-        }
-        
-        const distance = (await map.calculateDistance(source, shipperCoordinate)).distance;
-        console.log(distance);
-        shipperListByMinDistance.push({
-            staff_id,
-            fullname,
-            distance,
-        });
-    }
-    shipperListByMinDistance.sort((a, b) => a.distance - b.distance);
-
-
-    const selectedStaffid = shipperListByMinDistance[0].staff_id;
-    const selectedStaffname = shipperListByMinDistance[0].fullname;
-
-    return {
-        selectedStaffid: selectedStaffid,
-        selectedStaffname: selectedStaffname,
-        shipperList: shipperListByMinDistance
-    }
-
-}
-
-const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false) => {
-    
-    if(isUpdateJourney) {
-        if(!orderInfo.managed_by) {
-            return new Object({
-                success: false,
-                data: null,
-                message: "Không đủ thông tin để thực hiện thao tác trên!"
-            });
-        }        
-        const currentTime = new Date();
-        const settingTime = moment(currentTime).format("ss:mm:HH DD-MM-YYYY");
-
-        const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ?`;
-        const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
-        const journey = (getJourneyResult[0].journey ? JSON.parse(getJourneyResult[0].journey) : new Array());
-
-        const newOrderState = new Object({
-            shipment_id: orderInfo.shipment_id,   
-            managed_by: orderInfo.managed_by,
-            date: settingTime
-        });
-        journey.push(newOrderState);
-
-        const result = await SQLutils.updateOne(pool, table, ["journey", "status_code"], [journey, orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result.affectedRows === 0) {
-            return new Object({
-                success: false,
-                data: null,
-                message: "Cập nhật thất bại!"
-            });
-        }
-
-        return new Object({
-            success: true,
-            data: {
-                newOrderState: newOrderState,
-                newStatus: orderStatus
-            },
-            message: `${newOrderState.date}: Đơn hàng mã ${orderInfo.order_id} được tiếp nhận bởi ${newOrderLocation.managed_by}`
-        });
-
-    } else {
-        const result = await SQLutils.updateOne(pool, table, ["status_code"], [orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result.affectedRows <= 0) {
-            return new Object({
-                success: false,
-                data: null,
-                message: "Cập nhật thất bại!"
-            });
-        }
-
-        return new Object({
-            success: true,
-            data: {
-                newStatus: orderStatus
-            },
-            message: `Trạng thái ${orderStatus.message} được cập nhật cho đơn hàng mã ${orderInfo.order_id}`
-        });
-    }
 }
 
 module.exports = {
     checkExistOrder,
     getOrderForUpdating,
     getOrdersOfAgency,
+    getOneOrder,
     getOrders,
     createNewOrder,
     updateOrder,
-    cancelOrder,
-    getDistrictPostalCode,
+    cancelOrderWithTimeConstraint,
+    cancelOrderWithoutTimeConstraint,
     getProvincePostalCode,
     findingManagedAgency,
     createOrderInAgencyTable,
     getOrderStatus,
-    distributeOrder,
-    setStatusToOrder,
 };

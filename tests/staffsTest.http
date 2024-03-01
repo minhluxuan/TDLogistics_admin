@@ -6,6 +6,26 @@ Content-Type: application/json
     "password": "NTDung@tdlogistics2k24"
 }
 
+###
+
+POST https://tdlogistics.govt.hu/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "ntdung@tdlogistics",
+    "password": "NTDung@tdlogistics2k24"
+}
+
+### AGENCY_MANAGER
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "buucucquan1",
+    "password": "Buucucquan1@tdlogistics"
+}
+
 ### MANAGER
 
 POST http://localhost:5000/api/v1/staffs/login
@@ -449,3 +469,7 @@ Content-Type: application/json
 ###
 
 GET http://localhost:5000/get_session
+
+###
+
+GET https://tdlogistics.govt.hu/get_session

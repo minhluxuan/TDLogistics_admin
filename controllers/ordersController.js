@@ -21,18 +21,22 @@ try {
                     info.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
         
                     if (["USER"].includes(socket.request.user.role)) {
-                        const { error } = OrderValidation.validateCreatingOrder(info);
+                        // const { error } = OrderValidation.validateCreatingOrder(info);
         
-                        if (error) {
-                            return socket.emit("notifyError", error.message);
-                        }   
+                        // if (error) {
+                        //     return socket.emit("notifyError", error.message);
+                        // }
+
+                        info.user_id = socket.request.user.user_id;
+                        info.phone_number_sender = socket.request.user.phone_number;
+                        info.name_sender = socket.request.user.fullname;
                     }
                     else if (["MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
-                        const { error } = OrderValidation.validateCreatingOrderByAgency(info);
+                        // const { error } = OrderValidation.validateCreatingOrderByAgency(info);
         
-                        if (error) {
-                            return socket.emit("notifyError", error.message);
-                        }
+                        // if (error) {
+                        //     return socket.emit("notifyError", error.message);
+                        // }
                     }
         
                     if (info.service_type === 2 || info.service_type === 3) {
@@ -42,8 +46,6 @@ try {
                         }
                     }
         
-                    info.phone_number_sender = socket.request.user.phone_number;
-                    info.name_sender = socket.request.user.fullname;
                     createNewOrder(socket, info, orderTime);
                 } catch (error) {
                     return eventManager.emit("notifyError", error.message);
@@ -120,8 +122,8 @@ const getOrders = async (req, res) => {
             });
         }
 
-        if (["USER"].includes(req.user.role)) {
-            req.body.phone_number = req.user.phone_number;
+        if (["USER", "BUSINESS"].includes(req.user.role)) {
+            req.body.user_id = req.user.user_id || req.user.business_id;
 
             const result = await ordersService.getOrders(req.body);
             return res.status(200).json({
@@ -166,15 +168,14 @@ const updateOrder = async (req, res) => {
                 message: error.message,
             });
         }
-        
+
         if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
             req.query.agency_id = req.user.agency_id;
         }
         else if (["SHIPPER", "AGENCY_SHIPPER", "PARTNER_SHIPPER"].includes(req.user.role)) {
             req.query.shipper = req.user.staff_id;
         }
-        //Update status_code = taken_success and not append new Journey
-        req.body.status_code = servicesStatus.taken_success.code;
+
         const result = await ordersService.updateOrder(req.body, req.query);
 
         if (result.affectedRows === 0) {
@@ -183,7 +184,7 @@ const updateOrder = async (req, res) => {
                 message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
             });
         }
-        
+
         const resultGettingOneOrder = await ordersService.getOneOrder(req.query);
         if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
             return res.status(404).json({
@@ -204,7 +205,6 @@ const updateOrder = async (req, res) => {
                 message: `Đơn hàng có mã đơn hàng ${req.query.order_id} không tồn tại.`,
             });
         }
-        
 
         return res.status(200).json({
             error: false,
@@ -225,27 +225,41 @@ const cancelOrder = async (req, res) => {
         if (error) {
             return res.status(404).json({
                 error: true,
-                message: `Đơn hàng có mã đơn hàng ${req.query.order_id} không tồn tại.`,
+                message: error.message,
             });
         }
 
         if (["USER"].includes(req.user.role)) {
-            req.query.phone_number = req.user.phone_number;
-        }
-        else if (["BUSINESS".includes(req.user.role)]) {
-            req.query.business_id = req.user.business_id;
+            req.query.user_id = req.user.user_id;
+
+            const resultDeletingOneOrder = await ordersService.cancelOrderWithTimeConstraint(req.query);
+            if (!resultDeletingOneOrder || resultDeletingOneOrder.affectedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Đơn hàng có mã đơn hàng ${req.query.order_id} không tồn tại hoặc quá hạn để hủy.`,
+                });
+            }
         }
         else if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
             req.query.agency_id = req.user.agency_id;
+
+            const resultDeletingOneOrder = await ordersService.cancelOrderWithTimeConstraint(req.query);
+            if (!resultDeletingOneOrder || resultDeletingOneOrder.affectedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Đơn hàng có mã đơn hàng ${req.query.order_id} không tồn tại hoặc quá hạn để huỷ.`,
+                });
+            }
         }
+        else {
+            const resultDeletingOneOrder = await ordersService.cancelOrderWithoutTimeConstraint(req.query);
 
-        const resultDeletingOrder = await ordersService.cancelOrder(req.query);
-
-        if (resultDeletingOrder || resultDeletingOrder.affectedRows === 0) {
-            return res.status(404).json({
-                error: true,
-                message: `Đơn hàng ${req.query.order_id} quá hạn để hủy hoặc không tồn tại.`,
-            });
+            if (resultDeletingOneOrder || resultDeletingOneOrder.affectedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Đơn hàng ${req.query.order_id} quá hạn để hủy hoặc không tồn tại.`,
+                });
+            }
         }
 
         return res.status(200).json({
@@ -253,9 +267,10 @@ const cancelOrder = async (req, res) => {
             message: `Hủy đơn hàng ${req.query.order_id} thành công.`,
         });
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             error: true,
-            message: error,
+            message: error.message,
         });
     }
 };

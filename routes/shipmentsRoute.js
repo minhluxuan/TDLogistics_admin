@@ -37,11 +37,6 @@ router.post("/search",
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER"]),
     shipmentController.getShipmentForAgency);
 
-router.post("/updatedb", 
-    auth.isAuthenticated(), 
-    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.updateShipmentToDatabase);
-
 router.post("/recieve", 
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
