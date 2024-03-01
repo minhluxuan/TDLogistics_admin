@@ -327,9 +327,9 @@ const getOneShipment = async (conditions, postal_code) => {
     return await dbUtils.findOneIntersect(pool, shipmentTable, fields, values);
 }
 
-const getInfoShipment = async (shipment_id, postal_code) => {
+const getInfoShipment = async (shipment_id, postal_code = null) => {
     try {
-        const agencyTable = postal_code + suffix;
+        const agencyTable = postal_code ? postal_code + suffix : table;
         const query = `SELECT * FROM ${agencyTable} WHERE shipment_id = ?`;
         const [rows] = await pool.query(query, shipment_id);
         if (rows.length > 0) {
@@ -448,6 +448,11 @@ const compareOrdersInDatabase = async (shipment_id, ordersFromRequest, postal_co
 const recieveShipment = async (shipment_id, postal_code) => {
 
     const agencyOrdersTable = postal_code + "_orders";
+    const agencyShipmentTable = postal_code + suffix;
+    const getShipmentResult = await getInfoShipment(shipment_id);
+    const cloneShipmentFromGlobal = await dbUtils.insert(pool, agencyShipmentTable, getShipmentResult.fields, getShipmentResult.values);
+
+
     const getOrderIDsQuery = `SELECT order_ids FROM ${table} WHERE shipment_id = ?`;
     const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
 
