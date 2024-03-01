@@ -12,8 +12,8 @@ const getDataForShipmentCode = async(staff_id, transport_partner_id = null) => {
     return await Shipment.getDataForShipmentCode(staff_id, transport_partner_id);
 }
 
-const updateShipmentForAgency = async(info, conditions, postal_code) => {
-    return await Shipment.updateShipmentForAgency(info, conditions, postal_code);
+const updateShipmentForAgency = async(info, conditions, postal_code = null) => {
+    return await Shipment.updateShipment(info, conditions, postal_code);
 }
 
 const getShipmentForAdmin = async (fields, values) => {
