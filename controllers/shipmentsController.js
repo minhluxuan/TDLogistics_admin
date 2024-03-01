@@ -1,433 +1,127 @@
 const moment = require("moment");
 const shipmentService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
-// const servicesUtils = require("../services/utils");
-
+const utils = require("../lib/utils");
+const transportPartnerService = require("../services/transportPartnerService");
+const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
 
 const createNewShipment = async (req, res) => {
-    // if(!req.isAuthenticated() || req.user.permisson !== 3) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-
-    //const agency_id = req.user.agency_id;
-    const agency_id = "7400";
-
     try {
+        const createdTime = new Date();
         const { error } = shipmentRequestValidation.validateCreatingShipment(req.body);
 
         if (error) {
             return res.status(400).json({
                 error: true,
-                message: "Thông tin không hợp lệ!",
+                message: error.message,
             });
         }
 
-        let keys, values;
-
-        const createdTime = new Date();
-        const formattedCreatedTime = moment(createdTime).format("YYYY-MM-DD HH:mm:ss");
-
-        const shipmentId = "TD" + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDay().toString() + createdTime.getHours().toString() + createdTime.getMinutes().toString() + createdTime.getSeconds().toString() + createdTime.getMilliseconds().toString();
-
-        //get address throught coordinate
-        // const map = new servicesUtils.Map();
-
-        const source = {
-            lat: req.body.lat_source,
-            long: req.body.long_source,
-        };
-
-        const destination = {
-            lat: req.body.lat_destination,
-            long: req.body.long_destination,
-        };
-
-        const addressSource = await map.convertCoordinateToAddress(source);
-        const addressDestination = await map.convertCoordinateToAddress(destination);
-
-        //luôn luôn để shipment_id là phần tử đầu tiên để xóa shipment thuận tiện
-        req.body.shipment_id = shipmentId;
-        req.body.address_source = addressSource;
-        req.body.address_destination = addressDestination;
-
         if (req.body.hasOwnProperty("transport_partner_id")) {
-            const data = await shipmentService.getDataForShipmentCode(req.body.staff_id, req.body.transport_partner_id);
-            const partnerName = await utils.shortenName(data.partnerName);
-            const vehicleID = data.vehicleID;
-            const shipmentCode = "TD" + "-" + partnerName + "-" + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDay().toString() + "-" + req.body.route + "-" + vehicleID;
+            if (!(await transportPartnerService.checkExistPartner({ transport_partner_id: req.body.transport_partner_id }))) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Đối tác vận tải có mã đối tác ${req.body.transport_partner_id} không tồn tại.`,
+                });
+            }
+        }
+
+        const areaAgencyIdSubParts = req.user.agency_id.split('_');
+        req.body.shipment_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDate().toString() + createdTime.getHours().toString() + createdTime.getMinutes().toString() + createdTime.getSeconds().toString() + createdTime.getMilliseconds().toString();
+        
+        if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+            const resultCreatingShipmentForAgency = await shipmentService.createNewShipment(req.body, postalCode);
             
-            if (req.body.hasOwnProperty("route")) {
-                delete req.body.route;
+            if (!resultCreatingShipmentForAgency || resultCreatingShipmentForAgency.affectedRows === 0) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Tạo lô hàng có mã lô ${req.body.shipment_id} cho bưu cục ${req.user.agency_id} thất bại.`,
+                });
             }
-
-            req.body.shipment_code = shipmentCode;
-            req.body.vehicle_code = vehicleID;
-
-            keys = Object.keys(req.body);
-            values = Object.values(req.body);
+            
+            return res.status(201).json({
+                error: true,
+                message: `Tạo lô hàng có mã lô ${req.body.shipment_id} cho bưu cục ${req.user.agency_id} thành công.`,
+            });
         }
-        else {
-            const data = await shipmentService.getDataForShipmentCode(req.body.staff_id);
-            const shipperName = await utils.shortenName(data.fullname);
-            const vehicleID = data.vehicleID ;
-            const shipmentCode = "TD" + "-" + shipperName + "-" + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDay().toString() + "-" + req.body.route + "-" + vehicleID;
-
-            if (req.body.hasOwnProperty("route")) {
-                delete req.body.route;
+        else if (["ADMIN", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const resultCreatingShipment = await shipmentService.createNewShipment(req.body);console.log(resultCreatingShipment);
+            
+            if (!resultCreatingShipment || resultCreatingShipment.affectedRows === 0) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Tạo lô hàng có mã lô ${req.body.shipment_id} thất bại.`,
+                });
             }
-
-            req.body.shipment_code = shipmentCode;
-            req.body.vehicle_code = vehicleID;
-
-            keys = Object.keys(req.body);
-            values = Object.values(req.body);
+            
+            return res.status(201).json({
+                error: true,
+                message: `Tạo lô hàng có mã lô ${req.body.shipment_id} thành công.`,
+            });
         }
-
-        await shipmentService.createNewShipment(keys, values, agency_id);
-
-        return res.status(200).json({
-            error: false,
-            message: "Tạo lô hàng thành công!",
-        });
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
-            message: error,
+            message: error.message
         });
     }
 }
 
 const updateShipment = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission !== 3) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    // const agency_id = req.user.agency_id;
-    const agency_id = "7400";
-
     try {
-        const { error } = shipmentRequestValidation.validateUpdatingShipment(req.body);
+        if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const agency_id = req.user.agency_id;
+            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
+            
+            const { error } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query) || shipmentRequestValidation.validateUpdatingShipment(req.body);
+            
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
 
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
+            const resultUpdateShipmentForAgency = await shipmentService.updateShipmentForAgency(req.body, req.query, postalCode);
+            
+            if (!resultUpdateShipmentForAgency || resultUpdateShipmentForAgency.affectedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng có mã lô ${req.query.shipment_id} không tồn tại trong bưu cục có mã bưu cục ${agency_id}.`,
+                });
+            }
+
+            return res.status(201).json({
+                error: false,
+                message: `Cập nhật lô hàng có mã lô ${req.query.shipment_id} thuộc bưu cục ${agency_id} thành công.`,
             });
         }
+        else if (["ADMIN", "MANAGER", "TELLER"].includes(req.user.role)) {            
+            const { error } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query) || shipmentRequestValidation.validateUpdatingShipment(req.body);
+            
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
 
-        const fields = "mass";
-        const values = req.body.mass;
+            const resultUpdateShipment = await shipmentService.updateShipment(req.body, req.query);
+            
+            if (!resultUpdateShipment || resultUpdateShipment.affectedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng có mã lô ${req.query.shipment_id} không tồn tại trong cơ sở dữ liệu tổng cục.`,
+                });
+            }
 
-        const conditionFields = "shipment_id";
-        const conditionValues = req.body.shipment_id;
-
-        const result = await shipmentService.updateShipment(fields, values, conditionFields, conditionValues, agency_id);
-        
-        if (!result || result.affectedRows <= 0) {
-            return res.status(404).json({
-                error: true,
-                message: "Lô hàng không tồn tại.",
+            return res.status(201).json({
+                error: false,
+                message: `Cập nhật lô hàng có mã lô ${req.query.shipment_id} thành công.`,
             });
         }
-
-        return res.status(201).json({
-            error: false,
-            message: "Cập nhật lô hàng thành công!",
-        });
-    } catch(error) {
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
-
-const getShipmentForAgency = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission !== 3) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    // const agency_id = req.user.agency_id;
-    const agency_id = "7400";
-    
-    try {
-        const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
-        
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
-            });
-        }
-
-        const fields = "parent";
-        const values = req.body.shipment_id;
-        const result = await shipmentService.getShipmentForAgency(fields, values, agency_id);
-        
-        return res.status(200).json({
-            error: false,
-            data: result,
-            message: "Lấy thông tin lô hàng thành công!",
-        });
-
-    } catch(error) {
-        return res.status(500).json({
-            error: true,
-            message: error,
-        });
-    }
-}
-
-const getShipmentForAdmin = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission !== 4) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    
-    try {
-        const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
-        
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
-            });
-        }
-
-        const fields = "parent";
-        const values = req.body.shipment_id;
-        const result = await shipmentService.getShipmentForAdmin(fields, values);
-        
-        return res.status(200).json({
-            error: false,
-            data: result,
-            message: "Lấy thông tin lô hàng thành công!",
-        });
-
-    } catch(error) {
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
-
-const confirmCreateShipment = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission < 4) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    // const agency_id = req.session.agency_id;
-    const agency_id = "7400";
-
-    try {
-        const { error } = shipmentRequestValidation.validateShipmentID(req.body);
-        
-        if(error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
-            });
-        }
-
-        const data = await shipmentService.getInfoShipment(req.body.shipment_id, agency_id);
-
-        const result = await shipmentService.confirmCreateShipment(data.fields, data.values);
-
-        // Nếu tìm thấy một đơn hàng tồn tại trong bucket nhưng không tồn tại trong global orders hoặc agency orders
-        // thì tự động xóa lô hàng đó trong agency và cả global
-        try {
-            await shipmentService.updateParentForGlobalOrders(req.body.shipment_id, agency_id);   
-        } catch (error) {
-            await shipmentService.deleteShipment(req.body.shipment_id, agency_id);
-            await shipmentService.deleteGlobalShipment(req.body.shipment_id);
-        }
-
-        return res.status(200).json({
-            error: false,
-            message: "Tạo lô hàng trên tổng cục thành công.",
-        });
-    } catch (error) {
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
-
-const updateShipmentToDatabase = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission < 4) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    // const agency_id = req.session.agency_id;
-    const agency_id = "7400";
-
-    try {
-        const { error } = shipmentRequestValidation.validateShipmentID(req.body);
-        
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
-            });
-        }
-
-        const shipmentID = req.body.shipment_id;
-        const data = await shipmentService.getInfoShipment(shipmentID, agency_id);
-        const result = await shipmentService.updateShipmentToDatabase(data.fields, data.values, shipmentID);
-
-        if (!result || result[0].affetedRows <= 0) {
-            return res.status(404).json({
-                error: true,
-                message: "Lô hàng không tồn tại.",
-            });
-        }
-
-        return res.status(200).json({
-            error: false,
-            message: result,
-        });
-
-    } catch(error) {
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
-
-const deleteShipment = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission < 3) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    // const agency_id = req.session.agency_id;
-    const agency_id = "7400";
-
-    try {
-        const { error } = shipmentRequestValidation.validateShipmentID(req.body);
-
-        if(error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
-            });
-        }
-
-        const shipmentID = req.body.shipment_id;
-        const result = await shipmentService.deleteShipment(shipmentID, agency_id);
-
-        if (!result || result[0].affetedRows <= 0) {
-            return res.status(404).json({
-                error: true,
-                message: "Lô hàng không tồn tại.",
-            });
-        }
-
-        return res.status(200).json({
-            error: false,
-            data: result,
-        });
-    } catch(error) {
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
-
-const decomposeShipment = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission !== 3) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    // const agency_id = req.session.agency_id;
-    const agency_id = "7400";
-    
-    try {
-        const { error } = shipmentRequestValidation.validateDecomposingShipment(req.body);
-
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: "Thông tin không hợp lệ!",
-            });
-        }
-
-        const shipmentID = req.body.shipment_id;
-        const order_ids = req.body.order_ids;
-
-        const result = await shipmentService.decomposeShipment(shipmentID, order_ids, agency_id);
-
-        if (!result || result[0].affetedRows <= 0) {
-            return res.status(404).json({
-                error: true,
-                message: "Lô hàng không tồn tại.",
-            });
-        }
-
-        return res.status(200).json({
-            error: false,
-            data: result,
-            message: "Rã lô hàng thành công!",
-        });
-
-    } catch(error) {
-        return res.status(500).json({
-            error: true,
-            message: error.message,
-        });
-    }
-}
-
-const recieveShipment = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission !== 3) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    // const agency_id = req.session.agency_id;
-    const agency_id = "7400";
-
-    try {
-        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
-        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
-
-        // if(error) {
-        //     return res.status(400).json({
-        //         error: true,
-        //         message: "Thông tin không hợp lệ!",
-        //     });
-        // }
-
-        const shipmentID = req.body.shipment_id;
-        const result = await shipmentService.recieveShipment(shipmentID, agency_id);
-        return res.status(200).json({
-            error: false,
-            data: result,
-            message: "Nhập lô hàng thành công!",
-        });
-
     } catch(error) {
         return res.status(500).json({
             error: true,
@@ -437,35 +131,62 @@ const recieveShipment = async (req, res) => {
 }
 
 const addOrderToShipment = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission !== 3) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    // const agency_id = req.session.agency_id;
-    const agency_id = "7400";
-
     try {
-        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
-        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
+        if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const agency_id = req.user.agency_id;
+            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
+            
+            const { error } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query) || shipmentRequestValidation.validateOperationWithOrder(req.body);
 
-        // if(error) {
-        //     return res.status(400).json({
-        //         error: true,
-        //         message: "Thông tin không hợp lệ!",
-        //     });
-        // }
+            if(error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
 
-        const shipmentID = req.body.shipment_id;
-        const orderID = req.body.order_id;
-        const result = await shipmentService.addOrderToShipment(shipmentID, orderID, agency_id);
-        return res.status(200).json({
-            error: false,
-            data: result,
-            message: "Thêm đơn hàng vào lô hàng thành công!",
-        });
+            const resultGettingOneShipmentInAgency = await shipmentService.getOneShipment(req.query, postalCode);
+            if (!resultGettingOneShipmentInAgency || resultGettingOneShipmentInAgency.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Đơn hàng có mã lô hàng ${req.query.shipment_id} thuộc bưu cục có mã ${agency_id} không tồn tại.`,
+                });
+            }
 
+            const result = await shipmentService.addOrdersToShipment(resultGettingOneShipmentInAgency[0], req.body.order_ids, postalCode);
+            
+            return res.status(201).json({
+                error: false,
+                info: result,
+                message: `Thêm đơn hàng vào lô hàng có mã lô ${req.query.shipment_id} thành công.`,
+            });
+        }
+        else if (["ADMIN", "MANAGER", "TELLER"].includes(req.user.role)) {
+            const { error } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query) || shipmentRequestValidation.validateOperationWithOrder(req.body);
+
+            if(error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
+
+            const resultGettingOneShipment = await shipmentService.getOneShipment(req.query);
+            if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Đơn hàng có mã lô hàng ${req.query.shipment_id} không tồn tại.`,
+                });
+            }
+
+            const result = await shipmentService.addOrdersToShipment(resultGettingOneShipment[0], req.body.order_ids);
+            
+            return res.status(201).json({
+                error: false,
+                info: result,
+                message: `Thêm đơn hàng vào lô hàng có mã lô ${req.query.shipment_id} thành công.`,
+            });
+        }
     } catch(error) {
         return res.status(500).json({
             error: true,
@@ -475,47 +196,343 @@ const addOrderToShipment = async (req, res) => {
 }
 
 const deleteOrderFromShipment = async (req, res) => {
-    // if (!req.isAuthenticated() || req.user.permission !== 3) {
-    //     return res.status(401).json({
-    //         error: true,
-    //         message: "Bạn không được phép truy cập tài nguyên này.",
-    //     });
-    // }
-    // const agency_id = req.session.agency_id;
-    const agency_id = "7400";
-
     try {
-        // const shipmentRequestValidation = new utils.ShipmentValidation(req.body);
-        // const { error } = shipmentRequestValidation.validateDecomposingShipment();
+        if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const agency_id = req.user.agency_id;
+            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
+            
+            const { error } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query) || shipmentRequestValidation.validateOperationWithOrder(req.body);
 
-        // if(error) {
-        //     return res.status(400).json({
-        //         error: true,
-        //         message: "Thông tin không hợp lệ!",
-        //     });
-        // }
+            if(error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
 
-        const shipmentID = req.body.shipment_id;
-        const orderID = req.body.order_id;
-        const result = await shipmentService.deleteOrderFromShipment(shipmentID, orderID, agency_id);
+            const resultGettingOneShipmentInAgency = await shipmentService.getOneShipment(req.query, postalCode);
+            if (!resultGettingOneShipmentInAgency || resultGettingOneShipmentInAgency.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Đơn hàng có mã lô hàng ${req.query.shipment_id} thuộc bưu cục có mã ${agency_id} không tồn tại.`,
+                });
+            }
 
-        if (!result || result[0].affectedRows <= 0) {
-            return res.status(404).json({
-                error: true,
-                message: "Đơn hàng không tồn tại trong lô hàng.",
+            const result = await shipmentService.deleteOrdersFromShipment(resultGettingOneShipmentInAgency[0], req.body.order_ids, postalCode);
+            
+            return res.status(201).json({
+                error: false,
+                info: result,
+                message: `Xóa đơn hàng khỏi lô hàng có mã ${req.query.shipment_id} thành công.`,
             });
         }
+        else if (["ADMIN", "MANAGER", "TELLER"].includes(req.user.role)) {
+            const { error } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query) || shipmentRequestValidation.validateOperationWithOrder(req.body);
 
-        return res.status(200).json({
-            error: false,
-            message: "Xóa đơn hàng vào lô hàng thành công!",
-        });
+            if(error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
 
+            const resultGettingOneShipment = await shipmentService.getOneShipment(req.query);
+            if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Đơn hàng có mã ${req.query.shipment_id} không tồn tại.`,
+                });
+            }
+
+            const result = await shipmentService.deleteOrdersFromShipment(resultGettingOneShipment[0], req.body.order_ids);
+            
+            return res.status(201).json({
+                error: false,
+                info: result,
+                message: `Xóa đơn hàng khỏi lô hàng có mã ${req.query.shipment_id} thành công.`,
+            });
+        }
     } catch(error) {
         return res.status(500).json({
             error: true,
             message: error.message,
         });
+    }
+}
+
+const confirmCreateShipment = async (req, res) => {
+    try {
+        if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
+            const agency_id = req.user.agency_id;
+            // const agency_id = "TD_78300_00000";
+            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
+
+            const { error } = shipmentRequestValidation.validateShipmentID(req.body);
+            
+            if(error) {
+                return res.status(400).json({
+                    error: true,
+                    message: "Thông tin không hợp lệ!",
+                });
+            }
+
+            const data = await shipmentService.getInfoShipment(req.body.shipment_id, postalCode);
+            const result = await shipmentService.confirmCreateShipment(data.fields, data.values);
+
+            // Nếu tìm thấy một đơn hàng tồn tại trong bucket nhưng không tồn tại trong global orders hoặc agency orders
+            // thì tự động xóa lô hàng đó trong agency và cả global
+            try {
+                await shipmentService.updateParentForGlobalOrders(req.body.shipment_id, postalCode);   
+            } catch (error) {
+                await shipmentService.deleteShipment(req.body.shipment_id, postalCode);
+                await shipmentService.deleteGlobalShipment(req.body.shipment_id);
+                return res.status(404).json({
+                    error: true,
+                    message: error.message,
+                    notification: "Lỗi không tìm thấy đơn hàng trên tổng cục, đã xóa lô hàng!"
+                });
+            }
+
+            return res.status(200).json({
+                error: false,
+                message: "Tạo lô hàng trên tổng cục thành công.",
+            });
+        }
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const getShipmentForAgency = async (req, res) => {
+    try {
+        if(["AGENCY_MANAGER", "AGENCY_TELLER", "ADMIN"].includes(req.user.role)) {
+            // const agency_id = "TD_78300_00000";
+            const agency_id = req.user.agency_id;
+            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
+            const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
+            
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: "Thông tin không hợp lệ!",
+                });
+            }
+
+            const fields = "parent";
+            const values = req.body.shipment_id;
+            const result = await shipmentService.getShipmentForAgency(fields, values, postalCode);
+            
+            return res.status(200).json({
+                error: false,
+                data: result,
+                message: "Lấy thông tin lô hàng thành công!",
+            });
+        }
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+
+const getShipmentForAdmin = async (req, res) => {
+    try {
+        if(["MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
+            const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
+        
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: "Thông tin không hợp lệ!",
+                });
+            }
+
+            const fields = "parent";
+            const values = req.body.shipment_id;
+            const result = await shipmentService.getShipmentForAdmin(fields, values);
+            
+            return res.status(200).json({
+                error: false,
+                data: result,
+                message: "Lấy thông tin lô hàng thành công!",
+            });
+        }
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const deleteShipment = async (req, res) => {
+    try {
+        const { error } = shipmentRequestValidation.validateShipmentID(req.body);
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: "Thông tin không hợp lệ!",
+            });
+        }
+
+        if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const agency_id = req.user.agency_id;
+            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
+
+            const shipmentID = req.body.shipment_id;
+            const result = await shipmentService.deleteShipment(shipmentID, postalCode);
+
+            if (!result || result[0].affetedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng có mã ${req.query.shipment} không tồn tại trong bưu cục có mã ${agency_id}.`,
+                });
+            }
+            return res.status(200).json({
+                error: false,
+                data: result,
+            });
+        }
+        else if (["ADMIN", "MANAGER", "TELLER"].includes(req.user.role)) {
+            const shipmentID = req.body.shipment_id;
+            const result = await shipmentService.deleteShipment(shipmentID, postalCode);
+
+            if (!result || result[0].affetedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng có mã ${req.query.shipment} không tồn tại trong bưu cục có mã ${agency_id}.`,
+                });
+            }
+
+            return res.status(200).json({
+                error: false,
+                data: result,
+            });
+        }
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const decomposeShipment = async (req, res) => {
+    try {
+        if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const agency_id = req.user.agency_id;
+            // const agency_id = "TD_78300_00000";
+            // const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
+        
+            const { error } = shipmentRequestValidation.validateDecomposingShipment(req.body);
+
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    //message: "Thông tin không hợp lệ!",
+                    message: error.message,
+                });
+            }
+
+            const shipmentID = req.body.shipment_id;
+            const order_ids = req.body.order_ids;
+
+            const result = await shipmentService.decomposeShipment(shipmentID, order_ids, agency_id);
+
+            if (!result || result[0].affetedRows <= 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: "Lô hàng không tồn tại.",
+                });
+            }
+
+            return res.status(200).json({
+                error: false,
+                data: result,
+                message: "Rã lô hàng thành công!",
+            });
+        }
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+
+const recieveShipment = async (req, res) => {
+    try {
+        if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
+            const agency_id = req.user.agency_id;
+            // const agency_id = "TD_78300_00000";
+            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
+            const { error } = shipmentRequestValidation.validateShipmentID(req.body);
+            if(error) {
+                return res.status(400).json({
+                    error: true,
+                    message: "Thông tin không hợp lệ!",
+                });
+            }
+
+            const shipmentID = req.body.shipment_id;
+            const result = await shipmentService.recieveShipment(shipmentID, postalCode);
+            return res.status(200).json({
+                error: false,
+                data: result,
+                message: "Nhập lô hàng thành công!",
+            });
+        }
+    } catch(error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+// status_code cho orders, shipper cho orders, shipment_ids cho vehicle
+
+const undertakeShipment = async (req, res) => {
+    try {
+        if(["SHIPPER", "AGENCY_SHIPPER", "PARTNER_SHIPPER"].includes(req.user.role)) {
+            const { error } = shipmentRequestValidation.validateUndertakeShipment(req.body);
+            if(error) {
+                console.log(error.message);
+                throw new Error(error.message);
+            }
+
+            const checkExistShipment = await shipmentService.checkExistShipment(req.body.shipment_id, req.user.agency_id);
+            if(!checkExistShipment.existed) {
+                return res.status(404).json({
+                    error: true,
+                    message: checkExistShipment.message
+                });
+            }
+
+            const result = await shipmentService.undertakeShipment(req.body.shipment_id, req.user.staff_id, req.user.agency_id, req.body.status_code);
+            if(!result.success) {
+                return res.status(404).json({
+                    error: true,
+                    message: result.message
+                })
+            }
+            return res.status(200).json({
+                error: false,
+                data: result.data,
+                message: result.message
+            })
+        }
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        })
     }
 }
 
@@ -529,6 +546,6 @@ module.exports = {
     deleteOrderFromShipment,
     confirmCreateShipment,
     deleteShipment,
-    updateShipmentToDatabase,
     decomposeShipment,
+    undertakeShipment,
 };

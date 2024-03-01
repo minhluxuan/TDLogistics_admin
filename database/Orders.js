@@ -14,11 +14,12 @@ const table = "orders";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-const checkExistOrder = async (info) => {
+const checkExistOrder = async (info, postal_code = null) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
 
-    const result = await SQLutils.findOneIntersect(pool, table, fields, values);
+    const ordersTable = postal_code ? postal_code + '_' + table : table;
+    const result = await SQLutils.findOneIntersect(pool, ordersTable, fields, values);
     return result.length > 0;
 };
 

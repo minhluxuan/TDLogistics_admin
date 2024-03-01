@@ -35,8 +35,8 @@ const createNewPartner = async (info) => {
 
 const checkExistPartner = async (info) => {
     const fields = Object.keys(info);
-    const values = object.value(info);
-    const result = await dbUtils.findOne(pool, table, fields, values);
+    const values = Object.values(info);
+    const result = await dbUtils.findOneIntersect(pool, table, fields, values);
     return result.length > 0;
 };
 
