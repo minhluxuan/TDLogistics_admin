@@ -248,43 +248,57 @@ const deleteOrderFromShipment = async (req, res) => {
 
 const confirmCreateShipment = async (req, res) => {
     try {
-        if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
-            const agency_id = req.user.agency_id;
-            // const agency_id = "TD_78300_00000";
-            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
-
-            const { error } = shipmentRequestValidation.validateShipmentID(req.body);
+        const { error } = shipmentRequestValidation.validateShipmentID(req.body);
             
-            if(error) {
-                return res.status(400).json({
-                    error: true,
-                    message: "Thông tin không hợp lệ!",
-                });
-            }
-
-            const data = await shipmentService.getInfoShipment(req.body.shipment_id, postalCode);
-            const result = await shipmentService.confirmCreateShipment(data.fields, data.values);
-
-            // Nếu tìm thấy một đơn hàng tồn tại trong bucket nhưng không tồn tại trong global orders hoặc agency orders
-            // thì tự động xóa lô hàng đó trong agency và cả global
-            try {
-                await shipmentService.updateParentForGlobalOrders(req.body.shipment_id, postalCode);   
-            } catch (error) {
-                await shipmentService.deleteShipment(req.body.shipment_id, postalCode);
-                await shipmentService.deleteGlobalShipment(req.body.shipment_id);
-                return res.status(404).json({
-                    error: true,
-                    message: error.message,
-                    notification: "Lỗi không tìm thấy đơn hàng trên tổng cục, đã xóa lô hàng!"
-                });
-            }
-
-            return res.status(200).json({
-                error: false,
-                message: "Tạo lô hàng trên tổng cục thành công.",
+        if(error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
             });
         }
+        
+        const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+
+        const resultGettingOneShipment = await shipmentService.getOneShipment(req.body, postalCode);
+        if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã ${req.body.shipment_id} không tồn tại trong bưu cục có mã ${req.user.agency_id}.`
+            });
+        }
+
+        if (await shipmentService.checkExistShipment(req.body)) {
+            return res.status(409).json({
+                error: true,
+                message: `Lô hàng có mã ${req.body.shipment_id} đã tồn tại trong cơ sở dữ liệu tổng cục.`,
+            });
+        }
+
+        const shipment = resultGettingOneShipment[0];
+        if (!shipment.order_ids) {
+            return res.status(201).json({
+                error: false,
+                message: `Tạo lô hàng có mã lô hàng ${req.body.shipment} trên tổng cục thành công.`,
+            });
+        }
+
+        const resultCloneShipmentFromAgencyToGlobal = await shipmentService.confirmCreateShipment(shipment);
+        if (!resultCloneShipmentFromAgencyToGlobal || resultCloneShipmentFromAgencyToGlobal.affectedRows === 0) {
+            return res.status(409).json({
+                error: true,
+                message: `Không thể sao chép lô hàng có mã ${req.body.shipment_id} thuộc bưu cục có mã ${req.user.agency_id} từ cơ sở dữ liệu bưu cục sang cơ sở dữ liệu tổng cục.`,
+            });
+        }
+
+        const resultUpdatingParentForGlobalOrders = await shipmentService.updateParentForGlobalOrders(JSON.parse(shipment.order_ids), shipment.shipment_id);   
+
+        return res.status(201).json({
+            error: false,
+            info: resultUpdatingParentForGlobalOrders,
+            message: `Sao chép lô hàng có mã ${req.body.shipment_id} thuộc bưu cục có mã ${req.user.agency_id} từ cơ sở dữ liệu bưu cục sang cơ sở dữ liệu tổng cục thành công.`,
+        });
     } catch(error) {
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message,
@@ -292,14 +306,33 @@ const confirmCreateShipment = async (req, res) => {
     }
 }
 
-const getShipmentForAgency = async (req, res) => {
+const getShipments = async (req, res) => {
     try {
         if(["AGENCY_MANAGER", "AGENCY_TELLER", "ADMIN"].includes(req.user.role)) {
-            // const agency_id = "TD_78300_00000";
             const agency_id = req.user.agency_id;
             const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
             const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
             
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
+
+            const fields = "parent";
+            const values = req.body.shipment_id;
+            const result = await shipmentService.getShipmentForAgency(fields, values, postalCode);
+            
+            return res.status(200).json({
+                error: false,
+                data: result,
+                message: "Lấy thông tin lô hàng thành công!",
+            });
+        }
+        else if(["MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
+            const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
+        
             if (error) {
                 return res.status(400).json({
                     error: true,
@@ -309,7 +342,7 @@ const getShipmentForAgency = async (req, res) => {
 
             const fields = "parent";
             const values = req.body.shipment_id;
-            const result = await shipmentService.getShipmentForAgency(fields, values, postalCode);
+            const result = await shipmentService.getShipmentForAdmin(fields, values);
             
             return res.status(200).json({
                 error: false,
@@ -525,7 +558,7 @@ const undertakeShipment = async (req, res) => {
 module.exports = {
     createNewShipment,
     updateShipment,
-    getShipmentForAgency,
+    getShipments,
     getShipmentForAdmin,
     recieveShipment,
     addOrderToShipment,

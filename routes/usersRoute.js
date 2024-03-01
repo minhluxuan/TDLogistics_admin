@@ -60,7 +60,7 @@ router.post("/verify_otp", passport.authenticate("otpLogin"), (req, res, next) =
 });
 router.post("/check", usersController.checkExistUser);
 router.post("/create", usersController.createNewUser);
-router.post("/get", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.getOneUser);
+router.post("/search", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.getOneUser);
 router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.updateUserInfo);
 router.get("/logout", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.logout);
 

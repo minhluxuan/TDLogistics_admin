@@ -48,15 +48,15 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:5000/api/v1/shipments/confirm
+POST http://localhost:5000/api/v1/shipments/confirm_create
 Content-Type: application/json 
 
 {
-    "shipment_id": "TD202412112533216"
+    "shipment_id": "BC_71000_202421221132823"
 }
 
 ### Chỉnh sửa database bảng 78300_shipment cột order_ids thêm 1 đơn hàng với 1 order_id đểu vào test chức năng xóa bưu cục 
-POST http://localhost:5000/api/v1/shipments/confirm
+POST http://localhost:5000/api/v1/shipments/confirm_create
 Content-Type: application/json 
 
 {

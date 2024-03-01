@@ -1,7 +1,7 @@
 const Shipment = require("../database/Shipments");
 
-const checkExistShipment = async (shipment_id, agency_id) => {
-    return await Shipment.checkExistShipment(shipment_id, agency_id);
+const checkExistShipment = async (conditions) => {
+    return await Shipment.checkExistShipment(conditions);
 }
 
 const createNewShipment = async (info, postalCode) => {
@@ -28,16 +28,12 @@ const getShipmentForAgency = async (fields, values, postal_code) => {
     return await Shipment.getShipmentForAgency(fields, values, postal_code);
 }
 
-const updateParentForGlobalOrders = async (shipment_id, postal_code) => {
-    await Shipment.updateParentForGlobalOrders(shipment_id, postal_code);
+const updateParentForGlobalOrders = async (order_ids, shipment_id) => {
+    return await Shipment.updateParentForGlobalOrders(order_ids, shipment_id);
 }
 
-const confirmCreateShipment = async (fields, values) => {
-    return await Shipment.confirmCreateShipment(fields, values);
-}
-
-const getInfoShipment = async (shipment_id, postal_code) => {
-    return await Shipment.getInfoShipment(shipment_id, postal_code);
+const confirmCreateShipment = async (info) => {
+    return await Shipment.confirmCreateShipment(info);
 }
 
 const deleteShipment = async (shipment_id, postal_code) => {
@@ -80,7 +76,6 @@ module.exports = {
     getShipmentForAdmin,
     getShipmentForAgency,
     getOneShipment,
-    getInfoShipment,
     updateParentForGlobalOrders,
     confirmCreateShipment,
     recieveShipment,
