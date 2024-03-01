@@ -241,20 +241,9 @@ const deleteOrdersFromShipment = async (shipment, order_ids, postal_code = null)
 
 //trường hợp thêm vào nếu thêm trên database tổng bị lỗi thì nhân viên bưu cục tự xóa trong db bưu cục
 //nếu xóa ở createShipment thất bại
-const deleteShipment = async (shipment_id, postal_code) => {
-    const agencyTable = postal_code + suffix;
-    const field = "shipment_id";
-    const query = `DELETE FROM ${agencyTable} WHERE ${field} = ? LIMIT 1`;
-    
-    try {
-        const result = await pool.query(query, shipment_id);
-        console.log("Success!");
-        return result;
-    } 
-    catch (error) {
-        console.log("Error: ", error);
-        throw new Error("Đã xảy ra lỗi xóa lô hàng. Vui lòng thử lại sau ít phút!");
-    }
+const deleteShipment = async (shipment_id, postal_code = null) => {
+    const shipmentTable = postal_code ? postal_code + '_' + table : table;
+    return await dbUtils.deleteOne(pool, shipmentTable, ["shipment_id"], [shipment_id]);
 }
 
 const deleteGlobalShipment = async (shipment_id) => {
@@ -283,32 +272,23 @@ const updateShipment = async (info, conditions, postalCode) => {
     return dbUtils.updateOne(pool, shipmentTable, fields, values, conditionFields, conditionValues);
 };
 
-const getShipmentForAgency = async (fields, values, postal_code) => {
-    try {
-        //get all the order_id that have parent is shipment_id
-        const ordersTable = postal_code + "_orders";
-        const getShipmentQuery = `SELECT order_id FROM ${ordersTable} WHERE ${fields} = ?`;
-        const [rows] = await pool.query(getShipmentQuery, [values]);
-        const result = rows.map(row => row.order_id);
-        return result;
-    } catch (error) {
-        console.log("Error: ", error);
-        throw error;
-    }
-}
+const getShipments = async (conditions, postal_code = null) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
 
-const getShipmentForAdmin = async (fields, values) => {
-    try {
-        //get all the order_id that have parent is shipment_id
-        const ordersTable = "orders";
-        const getShipmentQuery = `SELECT order_id FROM ${ordersTable} WHERE ${fields} = ?`;
-        const [rows] = await pool.query(getShipmentQuery, [values]);
-        const result = rows.map(row => row.order_id);
-        return result;
-    } catch (error) {
-        console.log("Error: ", error);
-        throw error;
+    const shipmentTable = postal_code ? postal_code + '_' + table : table;
+    const shipments = await dbUtils.find(pool, shipmentTable, fields, values);
+    for (const shipment of shipments) {
+        try {
+            if (shipment.order_ids) {
+                shipment.order_ids = JSON.parse(shipment.order_ids);
+            }
+        } catch(error) {
+            // Nothing to do
+        }
     }
+
+    return shipments;
 }
 
 const getOneShipment = async (conditions, postal_code) => {
@@ -533,8 +513,7 @@ module.exports = {
     addOrdersToShipment,
     deleteOrdersFromShipment,
     updateOrderToDatabase,
-    getShipmentForAdmin,
-    getShipmentForAgency,
+    getShipments,
     getOneShipment,
     decomposeShipment,
     updateShipmentToDatabase,

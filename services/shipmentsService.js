@@ -12,20 +12,12 @@ const getDataForShipmentCode = async(staff_id, transport_partner_id = null) => {
     return await Shipment.getDataForShipmentCode(staff_id, transport_partner_id);
 }
 
-const updateShipmentForAgency = async(info, conditions, postal_code = null) => {
-    return await Shipment.updateShipment(info, conditions, postal_code);
-}
-
-const getShipmentForAdmin = async (fields, values) => {
-    return await Shipment.getShipmentForAdmin(fields, values);
-}
-
 const getOneShipment = async (conditions, postal_code = null) => {
     return await Shipment.getOneShipment(conditions, postal_code);
 }
 
-const getShipmentForAgency = async (fields, values, postal_code) => {
-    return await Shipment.getShipmentForAgency(fields, values, postal_code);
+const getShipments = async (conditions, postal_code) => {
+    return await Shipment.getShipments(conditions, postal_code);
 }
 
 const updateParentForGlobalOrders = async (order_ids, shipment_id) => {
@@ -36,7 +28,7 @@ const confirmCreateShipment = async (info) => {
     return await Shipment.confirmCreateShipment(info);
 }
 
-const deleteShipment = async (shipment_id, postal_code) => {
+const deleteShipment = async (shipment_id, postal_code = null) => {
     return await Shipment.deleteShipment(shipment_id, postal_code);
 }
 
@@ -72,9 +64,7 @@ module.exports = {
     checkExistShipment,
     createNewShipment,
     getDataForShipmentCode,
-    updateShipmentForAgency,
-    getShipmentForAdmin,
-    getShipmentForAgency,
+    getShipments,
     getOneShipment,
     updateParentForGlobalOrders,
     confirmCreateShipment,
