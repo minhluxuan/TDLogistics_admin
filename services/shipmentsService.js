@@ -4,8 +4,8 @@ const checkExistShipment = async (shipment_id, agency_id) => {
     return await Shipment.checkExistShipment(shipment_id, agency_id);
 }
 
-const createNewShipment = async (fields, values, postal_code) => {
-    return await Shipment.createNewShipment(fields, values, postal_code);
+const createNewShipment = async (info, agency_id) => {
+    return await Shipment.createNewShipment(info, agency_id);
 }
 
 const getDataForShipmentCode = async(staff_id, transport_partner_id = null) => {

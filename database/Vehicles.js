@@ -221,10 +221,10 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
             for (const order_id of order_ids) {
                 const orderInfo = new Object({
                     order_id: order_id,
-                    shipment_id: shipment_ids[i],
-                    managed_by: vehicle.vehicle_id
+                    // shipment_id: shipment_ids[i],
+                    // managed_by: vehicle.vehicle_id
                 });
-                await setStatusToOrder(orderInfo, servicesStatus.leave_agency, true);
+                await setStatusToOrder(orderInfo, servicesStatus.leave_agency, false);
             }
         }
     }

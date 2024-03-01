@@ -19,7 +19,6 @@ const createNewShipment = async (req, res) => {
                 });
             }
             const agency = req.user.agency_id;
-            console.log(agency);
             const areaAgencyIdSubParts = agency.split('_');
             req.body.shipment_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDate().toString() + createdTime.getHours().toString() + createdTime.getMinutes().toString() + createdTime.getSeconds().toString() + createdTime.getMilliseconds().toString();
             const result = await shipmentService.createNewShipment(req.body, agency);

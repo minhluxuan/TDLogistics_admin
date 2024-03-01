@@ -274,15 +274,15 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
         const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
         const journey = (getJourneyResult[0].journey ? JSON.parse(getJourneyResult[0].journey) : new Array());
 
-        const newOrderLocation = new Object({
+        const newOrderState = new Object({
             shipment_id: orderInfo.shipment_id,   
             managed_by: orderInfo.managed_by,
             date: settingTime
         });
-        journey.push(newOrderLocation);
+        journey.push(newOrderState);
 
         const result = await SQLutils.updateOne(pool, table, ["journey", "status_code"], [journey, orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result[0].affectedRows <= 0) {
+        if(result.affectedRows === 0) {
             return new Object({
                 success: false,
                 data: null,
@@ -293,15 +293,15 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
         return new Object({
             success: true,
             data: {
-                newOrderLocation: newOrderLocation,
+                newOrderState: newOrderState,
                 newStatus: orderStatus
             },
-            message: `${newOrderLocation.date}: Đơn hàng mã ${orderInfo.order_id} được tiếp nhận bởi ${newOrderLocation.managed_by}`
+            message: `${newOrderState.date}: Đơn hàng mã ${orderInfo.order_id} được tiếp nhận bởi ${newOrderLocation.managed_by}`
         });
 
     } else {
         const result = await SQLutils.updateOne(pool, table, ["status_code"], [orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result[0].affectedRows <= 0) {
+        if(result.affectedRows <= 0) {
             return new Object({
                 success: false,
                 data: null,
