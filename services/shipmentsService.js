@@ -36,8 +36,32 @@ const deleteGlobalShipment = async (shipment_id) => {
     return await Shipment.deleteGlobalShipment(shipment_id);
 }
 
-const decomposeShipment = async (shipment_id, order_ids, agency_id) => {
-    return await Shipment.decomposeShipment(shipment_id, order_ids, agency_id);
+const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
+    return await Shipment.decomposeShipment(order_ids, shipment_id, agency_id);
+}
+
+const compareOrdersInRequestWithOrdersInShipment = async (requestOrderIds, shipmentOrderIds) => {
+    let hitNumber = 0;
+    const hitArray = new Array();
+    let missNumber = 0;
+    const missArray = new Array();
+    for (const orderId of shipmentOrderIds) {
+        if (requestOrderIds.includes(orderId)) {
+            hitNumber++;
+            hitArray.push(orderId);
+        }
+        else {
+            missNumber++;
+            missArray.push(orderId);
+        }
+    }
+
+    return new Object({
+        hitNumber,
+        hitArray,
+        missNumber,
+        missArray,
+    });
 }
 
 const updateShipmentToDatabase = async (fields, values, shipment_id) => {
@@ -75,5 +99,6 @@ module.exports = {
     deleteGlobalShipment,
     updateShipmentToDatabase,
     decomposeShipment,
+    compareOrdersInRequestWithOrdersInShipment,
     undertakeShipment,
 };

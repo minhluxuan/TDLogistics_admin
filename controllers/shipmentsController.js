@@ -404,40 +404,55 @@ const deleteShipment = async (req, res) => {
 }
 
 const decomposeShipment = async (req, res) => {
-    try {
-        if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
-            const agency_id = req.user.agency_id;
-            // const agency_id = "TD_78300_00000";
-            // const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
-        
-            const { error } = shipmentRequestValidation.validateDecomposingShipment(req.body);
+    try {  
+        const { error } = shipmentRequestValidation.validateShipmentID(req.query) && shipmentRequestValidation.validateDecomposingShipment(req.body);
 
-            if (error) {
-                return res.status(400).json({
-                    error: true,
-                    //message: "Thông tin không hợp lệ!",
-                    message: error.message,
-                });
-            }
-
-            const shipmentID = req.body.shipment_id;
-            const order_ids = req.body.order_ids;
-
-            const result = await shipmentService.decomposeShipment(shipmentID, order_ids, agency_id);
-
-            if (!result || result[0].affetedRows <= 0) {
-                return res.status(404).json({
-                    error: true,
-                    message: "Lô hàng không tồn tại.",
-                });
-            }
-
-            return res.status(200).json({
-                error: false,
-                data: result,
-                message: "Rã lô hàng thành công!",
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
             });
         }
+
+        const resultGettingOneShipment = await shipmentService.getOneShipment(req.query);
+        if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã ${req.query.shipment_id} không tồn tại.`,
+            });
+        }
+
+        const shipment = resultGettingOneShipment[0];
+        if (!shipment.order_ids) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã ${req.query.shipment_id} không tồn tại đơn hàng nào để có thể rã lô.`
+            });
+        }
+
+        const resultComparingOrdersInRequestWithOrdersInShipment = await shipmentService.compareOrdersInRequestWithOrdersInShipment(req.body.order_ids, shipment.order_ids);
+        const hitNumber = resultComparingOrdersInRequestWithOrdersInShipment.hitNumber;
+        const hitArray = resultComparingOrdersInRequestWithOrdersInShipment.hitArray;
+        const missNumber = resultComparingOrdersInRequestWithOrdersInShipment.missNumber;
+        const missArray = resultComparingOrdersInRequestWithOrdersInShipment.missArray;
+
+        const resultDecomposingShipment = await shipmentService.decomposeShipment(shipment.order_ids, shipment.shipment_id, req.user.agency_id);
+
+        const updatedNumber = resultDecomposingShipment.updatedNumber;
+        const updatedArray = resultDecomposingShipment.updatedArray;
+
+        return res.status(201).json({
+            error: false,
+            info: {
+                hitNumber,
+                hitArray,
+                missNumber,
+                missArray,
+                updatedNumber,
+                updatedArray,
+            },
+            message: "Rã lô hàng thành công!",
+        });
     } catch(error) {
         return res.status(500).json({
             error: true,

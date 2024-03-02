@@ -158,7 +158,12 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:5000/api/v1/staffs/search
+POST http://localhost:5000/api/v1/staffs/get_info
+Content-Type: application/json
+
+###
+
+POST http://localhost:5000/api/v1/staffs/search
 Content-Type: application/json
 
 ###

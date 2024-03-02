@@ -368,36 +368,7 @@ const updateOrderToDatabase = async (fields, values, order_id) => {
     return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 }
 
-const compareOrdersInDatabase = async (shipment_id, ordersFromRequest, postal_code) => {
-    const agencyShipmentsTable = postal_code + suffix;
-    const agencyOrdersTable = postal_code + "_orders";
-        //console.log(agencyShipmentsTable);
-    const getOrderIDsQuery = `SELECT order_ids FROM ${agencyShipmentsTable} WHERE shipment_id = ?`;
-    const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
-    if (rows.length > 0) {
-        const ordersFromDatabase = JSON.parse(rows[0].order_ids);
-        console.log(ordersFromDatabase);
-
-        const setFromDatabase = new Set(ordersFromDatabase);
-        const setFromRequest = new Set(ordersFromRequest);
-
-        const setEqual =    (setFromDatabase.length === setFromRequest.length) &&
-                            (ordersFromDatabase.every(value => setFromRequest.has(value))) &&
-                            (ordersFromRequest.every(value => setFromDatabase.has(value)));
-        
-        if (setEqual) {
-            return { error: false, message: "Tất cả đơn hàng trùng khớp trên hệ thống." };
-        } else {
-            return { error: true, message: "Tồn tại đơn hàng không trùng khớp trên hệ thống." };
-        }
-    } else {
-        console.log("Shipment does not exist");
-        throw new Error("Thông tin lô hàng không hợp lệ!");
-    } 
-}
-
 const recieveShipment = async (shipment_id, postal_code) => {
-
     const agencyOrdersTable = postal_code + "_orders";
     const getOrderIDsQuery = `SELECT order_ids FROM ${table} WHERE shipment_id = ?`;
     const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
@@ -416,34 +387,35 @@ const recieveShipment = async (shipment_id, postal_code) => {
         console.log("Shipment does not exist");
         throw new Error("Thông tin lô hàng không hợp lệ!");
     }
-
 }
 
-const decomposeShipment = async (shipment_id, order_ids , agency_id) => {
-    const postal_code = utils.getPostalCodeFromAgencyID(agency_id);
-    const agencyShipmentsTable = postal_code + suffix;
-    const agencyOrdersTable = postal_code + "_orders";
-    const compareOrders = await compareOrdersInDatabase(shipment_id, order_ids, postal_code);
-    const { error, message } = compareOrders;    
-    
-    if (error) {
-        console.log(message);
-        throw new Error(message);
-    }
-    
+const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
+    let updatedNumber = 0;
+    const updatedArray = new Array();
+
     for (const order_id of order_ids) {
-        const ordersQuery = `UPDATE ${agencyOrdersTable} SET parent = null WHERE order_id = ?`;
-        await pool.query(ordersQuery, [order_id]);
+        const resultUpdatingOneOrder = await dbUtils.updateOne(pool, table, ["parent"], [null], ["order_id"], [order_id]);
         const orderInfo = new Object({
             order_id: order_id,
             shipment_id: shipment_id,
             managed_by: agency_id
         });
-        await setStatusToOrder(orderInfo, servicesStatus.enter_agency, true);
+
+        const resultUpdatingOneOrderStatus = await setStatusToOrder(orderInfo, servicesStatus.enter_agency, true);
+
+        if (resultUpdatingOneOrder && resultUpdatingOneOrderStatus && resultUpdatingOneOrder.affectedRows > 0 && resultUpdatingOneOrderStatus.affectedRows > 0) {
+            updatedNumber++;
+            updatedArray.push(order_id);
+        }
     }
 
-    const shipmentsQuery = `UPDATE ${agencyShipmentsTable} SET status = 1 WHERE shipment_id = ? `;
-    return await pool.query(shipmentsQuery, [shipment_id]);
+    const shipmentsQuery = `UPDATE ${table} SET status = 1 WHERE shipment_id = ? `;
+    await pool.query(shipmentsQuery, [shipment_id]);
+
+    return new Object({
+        updatedNumber,
+        updatedArray,
+    });
 }
 
 // status_code cho orders, shipper cho orders, shipment_ids cho vehicle
