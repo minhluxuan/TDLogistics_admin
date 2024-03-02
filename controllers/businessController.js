@@ -641,10 +641,17 @@ const getBusinessContract = async (req, res) => {
 					return res.status(200).sendFile(filePath);
 				}
 			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
 		}
 
 		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = businessValidation.validateFindingBusinessByAdmin(req.body);
+			const { error } = businessValidation.validateGettingBusinessContract(req.body);
 
 			if (error) {
 				return res.status(400).json({
@@ -669,13 +676,20 @@ const getBusinessContract = async (req, res) => {
 			if (contract) {
 				const filePath = path.join(__dirname, "..","storage", "business_user", "document", "contract", contract);
 				if (fs.existsSync(filePath)) {
-					return res.sendFile(filePath);
+					return res.status(200).sendFile(filePath);
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 
 		if (["BUSINESS_USER"].includes(req.user.role)) {
-			const { error } = businessValidation.validateFindingBusinessByBusiness(req.body);
+			const { error } = businessValidation.validateGettingBusinessContract(req.body);
 
 			if (error) {
 				return res.status(400).json({
@@ -705,8 +719,15 @@ const getBusinessContract = async (req, res) => {
 			if (contract) {
 				const filePath = path.join(__dirname, "..","storage", "business_user", "document", "contract", contract);
 				if (fs.existsSync(filePath)) {
-					return res.sendFile(filePath);
+					return res.status(200).sendFile(filePath);
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 	} catch (error) {

@@ -561,13 +561,18 @@ const getStaffAvatar = async (req, res) => {
 			const staff = resultGettingOneStaff[0];
 			const fileName = staff.avatar ? staff.avatar : null;
 			
-			console.log(fileName);
-
 			if (fileName) {
 				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 
@@ -588,10 +593,17 @@ const getStaffAvatar = async (req, res) => {
 			const fileName = staff.avatar ? staff.avatar : null;
 	
 			if (fileName) {
-				const fileName = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
-				if (fs.existsSync(fileName)) {
-						return res.status(200).sendFile(fileName);
+				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 		else
@@ -621,6 +633,13 @@ const getStaffAvatar = async (req, res) => {
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 	} catch (error) {

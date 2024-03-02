@@ -660,6 +660,13 @@ const getPartnerAvatar = async (req, res) => {
 						return res.status(200).sendFile(file);
 				}
 			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
 		}
 
 		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
@@ -683,6 +690,13 @@ const getPartnerAvatar = async (req, res) => {
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 	
@@ -708,6 +722,13 @@ const getPartnerAvatar = async (req, res) => {
 						return res.status(200).sendFile(file);
 				}
 			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
 		}
 	
 		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
@@ -729,6 +750,13 @@ const getPartnerAvatar = async (req, res) => {
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 	} 
@@ -773,6 +801,13 @@ const getPartnerLicenseBefore = async (req, res) => {
 					}
 				}
 			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
 		}
 
 		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
@@ -799,6 +834,13 @@ const getPartnerLicenseBefore = async (req, res) => {
 						return res.status(200).sendFile(fileName);
 					}
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 	
@@ -827,6 +869,13 @@ const getPartnerLicenseBefore = async (req, res) => {
 					}
 				}
 			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
 		}
 	
 		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
@@ -842,7 +891,7 @@ const getPartnerLicenseBefore = async (req, res) => {
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
 			const partner = resultGettingOnePartnerStaff[0];
 			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
-			console.log(imageLicense);
+			
 			if (imageLicense) {
 				if (imageLicense.before)
 				{
@@ -851,6 +900,13 @@ const getPartnerLicenseBefore = async (req, res) => {
 						return res.status(200).sendFile(fileName);
 					}
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 	} 
@@ -895,6 +951,13 @@ const getPartnerLicenseAfter = async (req, res) => {
 					}
 				}
 			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
 		}
 
 		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
@@ -921,6 +984,13 @@ const getPartnerLicenseAfter = async (req, res) => {
 						return res.status(200).sendFile(fileName);
 					}
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 	
@@ -949,6 +1019,13 @@ const getPartnerLicenseAfter = async (req, res) => {
 					}
 				}
 			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
 		}
 	
 		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
@@ -973,6 +1050,13 @@ const getPartnerLicenseAfter = async (req, res) => {
 						return res.status(200).sendFile(fileName);
 					}
 				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
 			}
 		}
 	} 
