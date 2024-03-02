@@ -536,12 +536,6 @@ const undertakeShipment = async (shipment_id, staff_id, postal_code, status_code
         if(assignShipperResult[0].affectedRows > 0) {
             const assignShipperToDatabaseQuery = `UPDATE orders SET shipper = ? WHERE order_id = ?`;
             const assignShipperToDatabaseResult = await pool.query(assignShipperToDatabaseQuery, [staff_id, order_ids[i]]);
-            const orderInfo = new Object({
-                order_id: order_ids[i],
-                shipment_id: shipment_id,
-                managed_by: staff_id,
-            });
-            await setStatusToOrder(orderInfo, {code: status_code, message: servicesStatus.getStatusMessage(status_code)}, true);
             acceptedArray.push(order_ids[i]);
         } else {
             unacceptedArray.push(order_ids[i]);
