@@ -1,7 +1,7 @@
 const Shipment = require("../database/Shipments");
 
-const checkExistShipment = async (conditions, postal_code = null) => {
-    return await Shipment.checkExistShipment(conditions, postal_code);
+const checkExistShipment = async (conditions, postalCode = null) => {
+    return await Shipment.checkExistShipment(conditions, postalCode);
 }
 
 const createNewShipment = async (info, postalCode) => {
@@ -88,6 +88,14 @@ const deleteOrdersFromShipment = async (shipment, order_id, postal_code) => {
     return await Shipment.deleteOrdersFromShipment(shipment, order_id, postal_code);
 }
 
+const addOneShipmentToVehicle = async (shipment_id, staff_id) => {
+    return await Shipment.addOneShipmentToVehicle(shipment_id, staff_id);
+}
+
+const updateOrders = async (order_ids, staff_ids) => {
+    return await Shipment.updateOrders(order_ids, staff_ids);
+}
+
 const undertakeShipment = async (shipment_id, staff_id, agency_id, status_code) => {
     return await Shipment.undertakeShipment(shipment_id, staff_id, agency_id, status_code);
 }
@@ -110,5 +118,7 @@ module.exports = {
     pasteShipmentToAgency,
     cloneOrdersFromGlobalToAgency,
     compareOrdersInRequestWithOrdersInShipment,
+    addOneShipmentToVehicle,
+    updateOrders,
     undertakeShipment,
 };

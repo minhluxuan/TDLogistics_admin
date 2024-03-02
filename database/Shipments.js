@@ -5,6 +5,7 @@ const Orders = require("./Orders");
 const utils = require("../lib/utils");
 const { setStatusToOrder } = require("./Orders");
 const servicesStatus = require("../lib/servicesStatus");
+const Vehicles = require("./Vehicles");
 require("dotenv").config();
 
 
@@ -400,7 +401,7 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
     const updatedArray = new Array();
     const ordersTable = "orders";
     for (const order_id of order_ids) {
-        const resultUpdatingOneOrder = await dbUtils.updateOne(pool, ordersTable, ["parent"], [null], ["order_id"], [order_id]);
+        const resultUpdatingOneOrder = await dbUtils.updateOne(pool, "orders", ["parent"], [null], ["order_id"], [order_id]);
         const orderInfo = new Object({
             order_id: order_id,
             shipment_id: shipment_id,
@@ -467,16 +468,57 @@ const cloneOrdersFromGlobalToAgency = async (order_ids, postalCode) => {
 
 // status_code cho orders, shipper cho orders, shipment_ids cho vehicle
 
-const undertakeShipment = async (shipment_id, staff_id, agency_id, status_code) => {
-    const postal_code = utils.getPostalCodeFromAgencyID(agency_id);
+const addOneShipmentToVehicle = async (shipment_id, staff_id) => {
+    return await Vehicles.updateVehicle({ shipment_ids: JSON.stringify([shipment_id]) }, { staff_id });
+}
+
+const updateOrders = async (order_ids, staff_id, postal_code) => {
+    let acceptedNumber = 0;
+    const acceptedArray = new Array();
+    let notAcceptedNumber = 0;
+    const notAcceptedArray = new Array();
+    for(let i = 0; i < order_ids.length; i++) {
+        const resultAssigningShipperToOrderInAgency = await dbUtils.updateOne(pool, postal_code + '_' + "orders", ["shipper"], [staff_id], ["order_id"], [order_ids[i]])
+
+        if(resultAssigningShipperToOrderInAgency && resultAssigningShipperToOrderInAgency.affectedRows > 0) {
+            const resultAssignShipperToDatabase = await dbUtils.updateOne(pool, "orders", ["shipper"], [staff_id], ["order_id"], [order_ids[i]]);
+            if (resultAssignShipperToDatabase && resultAssignShipperToDatabase.affectedRows > 0) {
+                const orderInfo = new Object({
+                    order_id: order_ids[i],
+                    shipment_id: shipment_id,
+                    managed_by: staff_id,
+                });
+                await setStatusToOrder(orderInfo, {code: status_code, message: servicesStatus.getStatusMessage(status_code)}, true);
+                acceptedNumber++;
+                acceptedArray.push(order_ids[i]);
+            }
+            else {
+                notAcceptedNumber++;
+                notAcceptedArray.push(order_ids[i]);
+            }
+        } else {
+            notAcceptedNumber++;
+            notAcceptedArray.push(order_ids[i]);
+        }
+    }
+
+    return new Object({
+        numberAccepted: acceptedNumber,
+        acceptedArray: acceptedArray,
+        notAcceptedNumber: notAcceptedNumber,
+        notAcceptedArray: notAcceptedArray,
+    });
+}
+
+const undertakeShipment = async (shipment_id, staff_id, postal_code, status_code) => {
     const agencyShipmentsTable = postal_code + "_shipment";
     const agencyOrdersTable = postal_code + "_orders";
     const getOrderIDsQuery = `SELECT order_ids FROM ${agencyShipmentsTable} WHERE shipment_id = ?`;
     const [getOrderIDsResult] = await pool.query(getOrderIDsQuery, shipment_id);
     
     const assignShipmentQuery = `UPDATE vehicle SET shipment_ids = ? WHERE staff_id = ?`;
-    const assignShipmentResult = await pool.query(assignShipmentQuery, [JSON.stringify(shipment_id), staff_id]);
-    if(assignShipmentResult.affectedRows <= 0) {
+    const assignShipmentResult = await pool.query(assignShipmentQuery, [JSON.stringify([shipment_id]), staff_id]);
+    if(assignShipmentResult.affectedRows === 0) {
         return new Object({
             success: false,
             data: null,
@@ -539,5 +581,7 @@ module.exports = {
     updateShipmentToDatabase,
     deleteShipment,
     deleteGlobalShipment,
+    addOneShipmentToVehicle,
+    updateOrders,
     undertakeShipment,
 };

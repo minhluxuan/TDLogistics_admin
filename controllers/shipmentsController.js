@@ -425,7 +425,6 @@ const decomposeShipment = async (req, res) => {
         }
 
         const shipment = resultGettingOneShipment[0];
-        
         try {
             if (!shipment.order_ids || JSON.parse(shipment.order_ids).length === 0) {
                 return res.status(404).json({
@@ -526,39 +525,57 @@ const receiveShipment = async (req, res) => {
 
 const undertakeShipment = async (req, res) => {
     try {
-        if(["SHIPPER", "AGENCY_SHIPPER", "PARTNER_SHIPPER"].includes(req.user.role)) {
-            const { error } = shipmentRequestValidation.validateUndertakeShipment(req.body);
-            if(error) {
-                console.log(error.message);
-                throw new Error(error.message);
-            }
+        const { error } = shipmentRequestValidation.validateUndertakeShipment(req.body);
+        if(error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
 
-            const checkExistShipment = await shipmentService.checkExistShipment({"shipment_id" : req.body.shipment_id}, utils.getPostalCodeFromAgencyID(req.user.agency_id));
-            if(!checkExistShipment) {
-                return res.status(404).json({
+        const resultGettingOneShipment = await shipmentService.getOneShipment({ shipment_id: req.body.shipment_id });
+        if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã ${req.body.shipment_id} không tồn tại.`,
+            });
+        }
+
+        const resultAddingOneShipmentToVehicle = await shipmentService.addOneShipmentToVehicle(req.body.shipment_id, req.user.staff_id);
+        if (!resultAddingOneShipmentToVehicle || resultAddingOneShipmentToVehicle.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Nhân viên có mã ${req.user.staff_id} không có phương tiện nào để có thể tiếp nhận lô hàng này.`,
+            });
+        }
+
+        const shipment = resultGettingOneShipment[0];
+        try {
+            if (!shipment.order_ids || JSON.parse(shipment.order_ids).length === 0) {
+                return res.status(201).json({
                     error: true,
-                    message: `Không tìm thấy lô hàng mã ${req.body.shipment_id}`
+                    message: `Nhân viên có mã ${req.user.staff_id} tiếp nhận lô hàng có mã ${req.body.shipment_id} thành công.`,
                 });
             }
-            
-            const result = await shipmentService.undertakeShipment(req.body.shipment_id, req.user.staff_id, req.user.agency_id, req.body.status_code);
-            if(!result.success) {
-                return res.status(404).json({
-                    error: true,
-                    message: result.message
-                })
-            }
-            return res.status(200).json({
-                error: false,
-                data: result.data,
-                message: result.message
-            })
+        } catch (error) {
+            return res.status(201).json({
+                error: true,
+                message: `Nhân viên có mã ${req.user.staff_id} tiếp nhận lô hàng có mã ${req.body.shipment_id} thành công.`,
+            });
         }
+
+        const resultUpdatingOrders = await shipmentService.updateOrders(JSON.parse(shipment.order_ids), req.user.staff_id);
+
+        return res.status(201).json({
+            error: false,
+            data: result.data,
+            message: result.message
+        })
     } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
-        })
+        });
     }
 }
 
