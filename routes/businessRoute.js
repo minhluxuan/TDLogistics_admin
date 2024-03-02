@@ -100,6 +100,7 @@ router.post("/login", passport.authenticate("businessLogin"), (req, res, next) =
         return res.status(200).json({ error: false, message: "Xác thực thành công." });
     })(req, res, next);
 });
+
 router.get("/check", businessController.checkExistBusiness);
 router.post(
     "/create",
@@ -141,11 +142,20 @@ router.patch(
     upload.single("contract"),
     businessController.updateContract
 );
+
 router.delete(
     "/delete",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
     businessController.deleteBusinessUser
+);
+
+router.post(
+    "/get_contract",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "BUSINESS_USER"]),
+    businessController.getBusinessContract
 );
 
 module.exports = router;

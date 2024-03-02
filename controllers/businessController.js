@@ -613,6 +613,111 @@ const updateContract = async (req, res) => {
 	}
 }
 
+const getBusinessContract = async (req, res) => {
+	try {
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const { error } = businessValidation.validateGettingBusinessContract(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
+			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+				});
+			}
+			const business = resultGettingOneBusiness[0];
+			const contract = business.contract ? business.contract : null;
+
+			if (contract) {
+				const filePath = path.join(__dirname, "..","storage", "business_user", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+		}
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const { error } = businessValidation.validateFindingBusinessByAdmin(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			req.body.agency_id = req.user.agency_id;
+
+			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
+			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+				});
+			}
+
+			const business = resultGettingOneBusiness[0];
+			const contract = business.contract ? business.contract : null;
+			
+			if (contract) {
+				const filePath = path.join(__dirname, "..","storage", "business_user", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.sendFile(filePath);
+				}
+			}
+		}
+
+		if (["BUSINESS_USER"].includes(req.user.role)) {
+			const { error } = businessValidation.validateFindingBusinessByBusiness(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			if (req.body.business_id !== req.user.business_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+
+			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
+			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+				});
+			}
+
+			const business = resultGettingOneBusiness[0];
+			const contract = business.contract ? business.contract : null;
+			
+			if (contract) {
+				const filePath = path.join(__dirname, "..","storage", "business_user", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.sendFile(filePath);
+				}
+			}
+		}
+	} catch (error) {
+		res.status(500).json({
+			error: true,
+			message: error,
+		});
+	}
+};
+
+
 module.exports = {
 	createNewBusinessUser,
 	getBusiness,
@@ -622,4 +727,5 @@ module.exports = {
 	updateBusinessRepresentor,
 	updateBusinessInfo,
 	deleteBusinessUser,
+	getBusinessContract
 }

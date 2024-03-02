@@ -175,11 +175,39 @@ router.patch(
 }, {
     name: 'license_after', maxCount: 1
 }]), partnerStaffsController.updatePartnerLicenseImg);
+
 router.get(
     "/logout",
     auth.isAuthenticated(),
     auth.isAuthorized(["PARTNER_DRIVER", "PARTNER_SHIPPER"]),
     partnerStaffsController.logout
+);
+
+router.post(
+    "/get_avatar",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER",
+    "TRANSPORT_PARTNER_REPRESENTOR", "PARTNER_DRIVER", "PARTNER_SHIPPER"], []),
+    partnerStaffsController.getPartnerAvatar
+);
+
+router.post(
+    "/get_license_before",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER",
+    "TRANSPORT_PARTNER_REPRESENTOR", "PARTNER_DRIVER", "PARTNER_SHIPPER"], []),
+    partnerStaffsController.getPartnerLicenseBefore
+);
+
+router.post(
+    "/get_license_after",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER",
+    "TRANSPORT_PARTNER_REPRESENTOR", "PARTNER_DRIVER", "PARTNER_SHIPPER"], []),
+    partnerStaffsController.getPartnerLicenseAfter
 );
 
 module.exports = router;

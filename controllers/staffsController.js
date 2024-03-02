@@ -545,6 +545,93 @@ const updateAvatar = async (req, res) => {
 	}
 }
 
+const getStaffAvatar = async (req, res) => {
+	try {
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
+			const { error } = staffValidation.validateGettingStaffAvatar(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: "Thông tin không hợp lệ.",
+				});
+			}
+
+			const resultGettingOneStaff = await staffsService.getOneStaff(req.body); 
+			const staff = resultGettingOneStaff[0];
+			const fileName = staff.avatar ? staff.avatar : null;
+			
+			console.log(fileName);
+
+			if (fileName) {
+				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
+				}
+			}
+		}
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const { error } = staffValidation.validateGettingStaffAvatar(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					error: error.message,
+				});
+			}
+
+			req.body.agency_id = req.user.agency_id;
+
+			const resultGettingOneStaff = await staffsService.getOneStaff(req.body); 
+			const staff = resultGettingOneStaff[0];
+			const fileName = staff.avatar ? staff.avatar : null;
+	
+			if (fileName) {
+				const fileName = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				if (fs.existsSync(fileName)) {
+						return res.status(200).sendFile(fileName);
+				}
+			}
+		}
+		else
+		{
+			const { error } = staffValidation.validateGettingStaffAvatar(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+	
+			if (req.user.staff_id !== req.body.staff_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+	
+			const resultGettingOneStaff = await staffsService.getOneStaff(req.body); 
+			const staff = resultGettingOneStaff[0];
+			const fileName = staff.avatar ? staff.avatar : null;
+	
+			if (fileName) {
+				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
+				}
+			}
+		}
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
 module.exports = {
 	checkExistStaff,
 	createNewStaff,
@@ -553,4 +640,5 @@ module.exports = {
 	deleteStaff,
 	updatePassword,
 	updateAvatar,
+	getStaffAvatar
 };
