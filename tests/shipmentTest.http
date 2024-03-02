@@ -32,7 +32,7 @@ Content-Type: application/json
 }
 ### TD202410161859226 
 ### order_id BC_78300_20242231634518, BC_78300_2024224111043787, BC_78300_2024223163246472
-POST http://localhost:5000/api/v1/shipments/add?shipment_id=BC_78300_202421221351231
+POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_78300_202421221351231
 Content-Type: application/json
 
 {
