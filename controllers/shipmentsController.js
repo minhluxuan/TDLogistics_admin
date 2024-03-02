@@ -564,9 +564,9 @@ const undertakeShipment = async (req, res) => {
 
         return res.status(201).json({
             error: false,
-            data: result.data,
-            message: result.message
-        })
+            data: resultUpdatingOrders,
+            message: `Lô hàng có mã ${req.body.shipment_id} đã được tiếp nhận bởi nhân viên có mã ${req.user.staff_id}.`
+        });
     } catch (error) {
         return res.status(500).json({
             error: true,
