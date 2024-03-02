@@ -21,9 +21,9 @@ router.post("/decompose",
     shipmentController.decomposeShipment);
 
 
-router.post("/confirm",
+router.post("/confirm_create",
     auth.isAuthenticated(), 
-    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
+    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER"]),
     shipmentController.confirmCreateShipment);
 
 
@@ -34,14 +34,14 @@ router.delete("/delete",
 
 router.post("/search", 
     auth.isAuthenticated(), 
-    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER"]),
-    shipmentController.getShipmentForAgency);
-
-router.post("/recieve", 
-    auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.recieveShipment);
+    shipmentController.getShipments);
 
+router.post("/receive", 
+    auth.isAuthenticated(), 
+    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER"]),
+    shipmentController.receiveShipment
+);
 
 router.post("/add_orders",
     auth.isAuthenticated(), 

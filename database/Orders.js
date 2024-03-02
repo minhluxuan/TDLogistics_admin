@@ -52,8 +52,9 @@ const getOrderForUpdating = async (order_id) => {
     return result;
 };
 
-const createNewOrder = async (newOrder) => {
-    return await SQLutils.insert(pool, table, Object.keys(newOrder), Object.values(newOrder));
+const createNewOrder = async (newOrder, postalCode = null) => {
+    const ordersTable = postalCode ? postalCode + '_' + table : table;
+    return await SQLutils.insert(pool, ordersTable, Object.keys(newOrder), Object.values(newOrder));
 }
 
 const updateOrder = async (info, conditions) => {
@@ -229,12 +230,12 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
             });
         }        
         const currentTime = new Date();
-        const settingTime = moment(currentTime).format("ss:mm:HH DD-MM-YYYY");
-
+        const settingTime = moment(currentTime).format("DD-MM-YYYY ss:mm:HH");
+    
         const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ?`;
         const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
+        
         let journey = (getJourneyResult[0].journey ? JSON.parse(getJourneyResult[0].journey) : new Array());
-
         const newOrderLocation = new Object({
             shipment_id: orderInfo.shipment_id,   
             managed_by: orderInfo.managed_by,
