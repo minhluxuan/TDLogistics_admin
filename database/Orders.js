@@ -52,8 +52,9 @@ const getOrderForUpdating = async (order_id) => {
     return result;
 };
 
-const createNewOrder = async (newOrder) => {
-    return await SQLutils.insert(pool, table, Object.keys(newOrder), Object.values(newOrder));
+const createNewOrder = async (newOrder, postalCode = null) => {
+    const ordersTable = postalCode ? postalCode + '_' + table : table;
+    return await SQLutils.insert(pool, ordersTable, Object.keys(newOrder), Object.values(newOrder));
 }
 
 const updateOrder = async (info, conditions) => {

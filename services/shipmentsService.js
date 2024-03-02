@@ -68,6 +68,14 @@ const updateShipmentToDatabase = async (fields, values, shipment_id) => {
     return await Shipment.updateShipmentToDatabase(fields, values, shipment_id);
 }
 
+const pasteShipmentToAgency = async (shipment, postalCode) => {
+    return await Shipment.pasteShipmentToAgency(shipment, postalCode);
+}
+
+const cloneOrdersFromGlobalToAgency = async (order_ids, postalCode) => {
+    return await Shipment.cloneOrdersFromGlobalToAgency(order_ids, postalCode);
+}
+
 const recieveShipment = async (shipment_id, postal_code) => {
     return await Shipment.recieveShipment(shipment_id, postal_code);
 }
@@ -99,6 +107,8 @@ module.exports = {
     deleteGlobalShipment,
     updateShipmentToDatabase,
     decomposeShipment,
+    pasteShipmentToAgency,
+    cloneOrdersFromGlobalToAgency,
     compareOrdersInRequestWithOrdersInShipment,
     undertakeShipment,
 };

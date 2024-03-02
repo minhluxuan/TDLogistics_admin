@@ -37,11 +37,11 @@ router.post("/search",
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
     shipmentController.getShipments);
 
-router.post("/recieve", 
+router.post("/receive", 
     auth.isAuthenticated(), 
-    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.recieveShipment);
-
+    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER"]),
+    shipmentController.receiveShipment
+);
 
 router.post("/add_orders",
     auth.isAuthenticated(), 

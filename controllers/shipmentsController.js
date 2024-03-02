@@ -461,29 +461,47 @@ const decomposeShipment = async (req, res) => {
     }
 }
 
-
-const recieveShipment = async (req, res) => {
+const receiveShipment = async (req, res) => {
     try {
-        if(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"].includes(req.user.role)) {
-            const agency_id = req.user.agency_id;
-            // const agency_id = "TD_78300_00000";
-            const postalCode = utils.getPostalCodeFromAgencyID(agency_id);
-            const { error } = shipmentRequestValidation.validateShipmentID(req.body);
-            if(error) {
-                return res.status(400).json({
-                    error: true,
-                    message: "Thông tin không hợp lệ!",
-                });
-            }
-
-            const shipmentID = req.body.shipment_id;
-            const result = await shipmentService.recieveShipment(shipmentID, postalCode);
-            return res.status(200).json({
-                error: false,
-                data: result,
-                message: "Nhập lô hàng thành công!",
+        const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+        const { error } = shipmentRequestValidation.validateShipmentID(req.body);
+        if(error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
             });
         }
+
+        const resultGettingOneShipment = await shipmentService.getOneShipment(req.body);
+        if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã ${req.body.shipment_id} không tồn tại.`,
+            });
+        }
+
+        const resultPastingShipmentToAgency = await shipmentService.pasteShipmentToAgency(resultGettingOneShipment[0], postalCode);
+        if (!resultPastingShipmentToAgency || resultPastingShipmentToAgency.affectedRows === 0) {
+            return res.status(409).json({
+                error: true,
+                message: `Sao chép lô hàng có mã ${req.body.shipment_id} từ cơ sở dữ liệu tổng cục sang cơ sở dữ liệu bưu cục thất bại.`
+            });
+        }
+
+        if (!resultGettingOneShipment[0].order_ids) {
+            return res.status(201).json({
+                error: true,
+                message: `Tiếp nhận lô hàng có mã ${req.body.shipment_id} thành công.`,
+            });
+        }
+
+        const resultCloningOrdersFromGlobalToAgency = await shipmentService.cloneOrdersFromGlobalToAgency(JSON.stringify(resultGettingOneShipment[0].order_ids), postalCode);
+        
+        return res.status(200).json({
+            error: false,
+            info: resultCloningOrdersFromGlobalToAgency,
+            message: `Tiếp nhận lô hàng có mã ${req.body.shipment_id} thành công.`,
+        });
     } catch(error) {
         return res.status(500).json({
             error: true,
@@ -536,7 +554,7 @@ module.exports = {
     createNewShipment,
     updateShipment,
     getShipments,
-    recieveShipment,
+    receiveShipment,
     addOrderToShipment,
     deleteOrderFromShipment,
     confirmCreateShipment,

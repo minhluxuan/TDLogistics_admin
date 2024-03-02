@@ -418,6 +418,47 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
     });
 }
 
+const pasteShipmentToAgency = async (shipment, postalCode) => {
+    const fields = Object.keys(shipment);
+    const values = Object.values(shipment);
+
+    const shipmentTable = postalCode + '_' + table;
+    return await dbUtils.insert(pool, shipmentTable, fields, values);
+}
+
+const cloneOrdersFromGlobalToAgency = async (order_ids, postalCode) => {
+    let acceptedNumber = 0;
+    const acceptedArray = new Array();
+    let notAcceptedNumber = 0;
+    const notAcceptedArray = new Array();
+
+    for (const order_id of order_ids) {
+        const resultGettingOneOrder = await Orders.getOneOrder({ order_id });
+        if (resultGettingOneOrder && resultGettingOneOrder.length > 0) {
+            const resultCreatingNewOrder = await Orders.createNewOrder(resultGettingOneOrder[0], postalCode);
+            if (resultCreatingNewOrder && resultCreatingNewOrder.affectedRows > 0) {
+                acceptedNumber++;
+                acceptedArray.push(order_id);
+            }
+            else {
+                notAcceptedNumber++;
+                notAcceptedArray.push(order_id);
+            }
+        }
+        else {
+            notAcceptedNumber++;
+            notAcceptedArray.push(order_id);
+        }
+    }
+    
+    return new Object({
+        acceptedNumber,
+        acceptedArray,
+        notAcceptedNumber,
+        notAcceptedArray,
+    });
+}
+
 // status_code cho orders, shipper cho orders, shipment_ids cho vehicle
 
 const undertakeShipment = async (shipment_id, staff_id, agency_id, status_code) => {
@@ -464,13 +505,12 @@ const undertakeShipment = async (shipment_id, staff_id, agency_id, status_code) 
         data: {
             numberAccepted: acceptedArray.length,
             acceptedArray: acceptedArray,
-            numberunaccepted: unacceptedArray.length,
-            unacceptedArray: unacceptedArray,
+            notAcceptedNumber: unacceptedArray.length,
+            notAcceptedArray: unacceptedArray,
             shipperUndertake: staff_id
         },
         message: `Lô hàng có mã ${shipment_id} đã được đảm nhận bởi nhân viên có mã ${staff_id}`
     })
-
 }
 
 
@@ -488,6 +528,8 @@ module.exports = {
     getShipments,
     getOneShipment,
     decomposeShipment,
+    pasteShipmentToAgency,
+    cloneOrdersFromGlobalToAgency,
     updateShipmentToDatabase,
     deleteShipment,
     deleteGlobalShipment,
