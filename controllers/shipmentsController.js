@@ -3,6 +3,7 @@ const shipmentService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
 const utils = require("../lib/utils");
 const transportPartnerService = require("../services/transportPartnerService");
+const shippersService = require("../services/shippersService");
 const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
 
@@ -574,12 +575,34 @@ const undertakeShipment = async (req, res) => {
             });
         }
 
+        const orderIdsArray = JSON.parse(shipment.order_ids);
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
-        const resultUpdatingOrders = await shipmentService.updateOrders(JSON.parse(shipment.order_ids), req.user.staff_id, postalCode);
+        const resultUpdatingOrders = await shipmentService.updateOrders(orderIdsArray, req.user.staff_id, postalCode);
+
+        const successUpdatedParentNumber = resultUpdatingOrders.acceptedNumber;
+        const successUpdatedParentArray = resultUpdatingOrders.acceptedArray;
+        const faildUpdatedParentNumber = resultUpdatingOrders.notAcceptedNumber;
+        const faildUpdatedParentArray = resultUpdatingOrders.notAcceptedArray;
+
+        const resultAssignNewTaskForShipper = await shippersService.assignNewTasks(orderIdsArray, req.user.staff_id, postalCode);
+        
+        const successAssignedTasksNumber = resultAssignNewTaskForShipper.acceptedNumber;
+        const successAssignedTasksArray = resultAssignNewTaskForShipper.acceptedArray;
+        const failAssignedTasksNumber = resultAssignNewTaskForShipper.notAcceptedNumber;
+        const failAssignedTasksArray = resultAssignNewTaskForShipper.notAcceptedArray;
 
         return res.status(201).json({
             error: false,
-            data: resultUpdatingOrders,
+            data: {
+                successUpdatedParentNumber,
+                successUpdatedParentArray,
+                faildUpdatedParentNumber,
+                faildUpdatedParentArray,
+                successAssignedTasksNumber,
+                successAssignedTasksArray,
+                failAssignedTasksNumber,
+                failAssignedTasksArray,
+            },
             message: `Lô hàng có mã ${req.body.shipment_id} đã được tiếp nhận bởi nhân viên có mã ${req.user.staff_id}.`
         });
     } catch (error) {
