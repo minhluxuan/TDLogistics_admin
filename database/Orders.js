@@ -235,17 +235,23 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
 
         const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ? LIMIT 1`;
         const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
-        const journey = (getJourneyResult[0].journey ? JSON.parse(getJourneyResult[0].journey) : new Array());
-
+        let journey;
+        try {
+            journey = getJourneyResult[0].journey ? JSON.parse(getJourneyResult[0].journey) : new Array();
+        } catch (error) {
+            journey = new Array();
+        }
+        
         const newOrderLocation = new Object({
             shipment_id: orderInfo.shipment_id,   
             managed_by: orderInfo.managed_by,
             date: settingTime
         });
+
         journey.push(newOrderLocation);
 
-        const result = await SQLutils.updateOne(pool, table, ["journey", "status_code"], [journey, orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result[0].affectedRows <= 0) {
+        const result = await SQLutils.updateOne(pool, table, ["journey", "status_code"], [JSON.stringify(journey), orderStatus.code], ["order_id"], [orderInfo.order_id]);
+        if(result.affectedRows === 0) {
             return new Object({
                 success: false,
                 data: null,

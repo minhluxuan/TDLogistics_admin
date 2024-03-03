@@ -24,7 +24,7 @@ Content-Type: application/json
 }
 
 ### mass dương, lên hàng
-POST http://localhost:5000/api/v1/shipments/update?shipment_id=BC_71000_202421221132823
+POST http://localhost:5000/api/v1/shipments/update?shipment_id=BC_71000_202422224138948
 Content-Type: application/json
 
 {
@@ -32,7 +32,7 @@ Content-Type: application/json
 }
 ### TD202410161859226 
 ### order_id BC_78300_20242231634518, BC_78300_2024224111043787, BC_78300_2024223163246472
-POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_202421221132823
+POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_202422224138948
 Content-Type: application/json
 
 {
@@ -40,7 +40,7 @@ Content-Type: application/json
 }
 
 ### TD2024132126392 TD2024132139335 TD2024132145338
-POST http://localhost:5000/api/v1/shipments/remove_orders?shipment_id=BC_71000_202421221132823
+POST http://localhost:5000/api/v1/shipments/remove_orders?shipment_id=BC_71000_202422224138948
 Content-Type: application/json
 
 {
@@ -60,7 +60,7 @@ POST http://localhost:5000/api/v1/shipments/confirm_create
 Content-Type: application/json 
 
 {
-    "shipment_id": "BC_71000_202421221132824"
+    "shipment_id": "BC_71000_202422224138948"
 }
 
 ### Lấy thông tin lô hàng cho bưu cục 
@@ -68,12 +68,12 @@ POST http://localhost:5000/api/v1/shipments/search
 Content-Type: application/json
 
 {
-    "shipment_id": "BC_71000_202421221132823"
+    "shipment_id": "BC_71000_202422224138948"
 }
 
 ###
 
-DELETE http://localhost:5000/api/v1/shipments/delete?shipment_id=BC_71000_202421221132823
+DELETE http://localhost:5000/api/v1/shipments/delete?shipment_id=BC_71000_202422224138948
 Content-Type: application/json 
 
 ###
@@ -86,23 +86,31 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:5000/api/v1/shipments/recieve
+POST http://localhost:5000/api/v1/shipments/receive
 Content-Type: application/json
 
 {
-    "shipment_id": "TD202412112533216"
+    "shipment_id": "BC_71000_202422224138948"
 }
 
 ###
-POST http://localhost:5000/api/v1/shipments/decompose
+
+POST http://localhost:5000/api/v1/shipments/decompose?shipment_id=BC_71000_202422224138948
 Content-Type: application/json
 
 {
-    "shipment_id": "TD20241211922797",
-    "order_ids": ["TD2024132145338", "TD2024132139335", "TD2024132126392"]
+    "order_ids": ["BC_71000_2024225161651125"]
 }
+
 ###
 
+POST http://localhost:5000/api/v1/shipments/undertake
+Content-Type: application/json
+
+{
+    "shipment_id": "BC_71000_202422224138948",
+    "status_code": 5
+}
 
 ### api Test container 
 

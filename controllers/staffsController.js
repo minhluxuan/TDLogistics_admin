@@ -182,20 +182,22 @@ const createNewStaff = async (req, res) => {
 				});
 			}
 
-			const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
-			if (!fs.existsSync(tempFolderPath)) {
-				fs.mkdirSync(tempFolderPath);
+			if (req.file) {
+				const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
+				if (!fs.existsSync(tempFolderPath)) {
+					fs.mkdirSync(tempFolderPath);
+				}
+
+				const officialFolderPath = path.join("storage", "staff", "img", "avatar");
+				if (!fs.existsSync(officialFolderPath)) {
+					fs.mkdirSync(officialFolderPath);
+				}
+
+				const tempFilePath = path.join(tempFolderPath, req.file.filename);
+				const officialFilePath = path.join(officialFolderPath, req.file.filename);
+
+				fs.renameSync(tempFilePath, officialFilePath);
 			}
-
-			const officialFolderPath = path.join("storage", "staff", "img", "avatar");
-			if (!fs.existsSync(officialFolderPath)) {
-				fs.mkdirSync(officialFolderPath);
-			}
-
-			const tempFilePath = path.join(tempFolderPath, req.file.filename);
-			const officialFilePath = path.join(officialFolderPath, req.file.filename);
-
-			fs.renameSync(tempFilePath, officialFilePath);
 
 			return res.status(201).json({
 				error: false,
@@ -254,20 +256,22 @@ const createNewStaff = async (req, res) => {
 				});
 			}
 
-			const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
-			if (!fs.existsSync(tempFolderPath)) {
-				fs.mkdirSync(tempFolderPath);
+			if (req.file) {
+				const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
+				if (!fs.existsSync(tempFolderPath)) {
+					fs.mkdirSync(tempFolderPath);
+				}
+
+				const officialFolderPath = path.join("storage", "staff", "img", "avatar");
+				if (!fs.existsSync(officialFolderPath)) {
+					fs.mkdirSync(officialFolderPath);
+				}
+
+				const tempFilePath = path.join(tempFolderPath, req.file.filename);
+				const officialFilePath = path.join(officialFolderPath, req.file.filename);
+
+				fs.renameSync(tempFilePath, officialFilePath);
 			}
-
-			const officialFolderPath = path.join("storage", "staff", "img", "avatar");
-			if (!fs.existsSync(officialFolderPath)) {
-				fs.mkdirSync(officialFolderPath);
-			}
-
-			const tempFilePath = path.join(tempFolderPath, req.file.filename);
-			const officialFilePath = path.join(officialFolderPath, req.file.filename);
-
-			fs.renameSync(tempFilePath, officialFilePath);
 
 			return res.status(201).json({
 				error: false,
