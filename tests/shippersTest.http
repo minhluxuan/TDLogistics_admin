@@ -1,0 +1,12 @@
+
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k15",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+###
+
+POST http://localhost:5000/api/v1/shippers/get_tasks
