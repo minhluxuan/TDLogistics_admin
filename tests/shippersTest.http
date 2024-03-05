@@ -10,3 +10,26 @@ Content-Type: application/json
 ###
 
 POST http://localhost:5000/api/v1/shippers/get_tasks
+Content-Type: application/json
+
+{
+    "option": 0
+}
+
+###
+
+PATCH http://localhost:5000/api/v1/shippers/confirm_completed
+Content-Type: application/json
+
+{
+    "id": 14
+}
+
+###
+
+POST http://localhost:5000/api/v1/shippers/get_history
+Content-Type: application/json
+
+{
+    "option": 3
+}
