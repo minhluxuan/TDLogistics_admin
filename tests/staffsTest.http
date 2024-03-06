@@ -479,3 +479,7 @@ GET http://localhost:5000/get_session
 ###
 
 GET https://tdlogistics.govt.hu/get_session
+
+###
+
+GET http://localhost:5000/api/v1/staffs/get_info
