@@ -1,4 +1,4 @@
-POST http://localhost:5000/api/v1/orders/search
+POST http://localhost:5000/api/v1/orders/search?rows=1&page=0
 Content-Type: application/json
 
 {

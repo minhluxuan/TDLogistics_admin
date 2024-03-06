@@ -39,11 +39,25 @@ const getOneOrder = async (conditions) => {
     return result;
 }
 
-const getOrders = async (conditions) => {
+const getOrders = async (conditions, paginationConditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
-    const result = await SQLutils.find(pool, table, fields, values);
+    const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
+    const result = await SQLutils.find(pool, table, fields, values, limit, offset);
+
+    for (const elm of result) {
+        try {
+            if (elm.journey) {
+                elm.journey = JSON.parse(elm.journey);
+            }   
+        } catch (error) {
+            // Nothing to do
+        }
+    }
+
     return result;
 }
 
