@@ -114,7 +114,7 @@ router.post("/login", passport.authenticate("normalLogin"), (req, res, next) => 
         return res.status(200).json({ error: false, valid: true, message: "Xác thực thành công." });
     })(req, res, next);
 });
-router.post(
+router.get(
     "/get_info",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",

@@ -17,7 +17,7 @@ const getTasks = async (conditions, postal_code) => {
     const shipperTasksTable = postal_code + '_' + defaultTasksTable;
     const queryParams = [conditions.staff_id, false];
 
-    let query = `SELECT o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ? AND s.completed = ?`;
+    let query = `SELECT s.*, o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ? AND s.completed = ?`;
     
     if (conditions.option === 1) {
         const today = moment(new Date()).format("YYYY-MM-DD");
@@ -98,15 +98,15 @@ const assignNewTasks = async (order_ids, staff_id, postal_code) => {
     });
 }
 
-const confirmCompletedTask = async (id, staff_id, postal_code) => {
-    return await dbUtils.updateOne(pool, postal_code + '_' + defaultTasksTable, ["completed"], [true], ["id", "shipper"], [id, staff_id]);
+const confirmCompletedTask = async (id, staff_id, completedTime, postal_code) => {
+    return await dbUtils.updateOne(pool, postal_code + '_' + defaultTasksTable, ["completed_at", "completed"], [completedTime, true], ["id", "shipper", "completed_at"], [id, staff_id, false]);
 }
 
 const getHistory = async (conditions, postal_code) => {
     const shipperTasksTable = postal_code + '_' + defaultTasksTable;
     const queryParams = [conditions.staff_id];
 
-    let query = `SELECT o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ?`;
+    let query = `SELECT s.*, o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ?`;
     
     if (conditions.option === 1) {
         const today = moment(new Date()).format("YYYY-MM-DD");

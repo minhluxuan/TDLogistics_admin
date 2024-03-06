@@ -37,17 +37,16 @@ const checkExistStaff = async (req, res) => {
 
 const getAuthenticatedStaffInfo = async (req, res) => {
 	try {
-		const resultGettingOneStaff = await staffsService.getOneStaff({ staff_id: req.user.staff_id });
-		if (!resultGettingOneStaff || resultGettingOneStaff.length === 0) {
-			return res.status(404).json({
-				error: true,
-				message: `Nhân viên có mã ${req.user.staff_id} không tồn tại.`
-			});
-		}
-
+		const info = new Object({
+			staff_id: req.user.staff_id,
+			role: req.user.role,
+			agency_id: req.user.agency_id,
+			privileges: req.user.privileges,
+			active: req.user.active,
+		})
 		return res.status(200).json(new Object({
 			error: false,
-			info: resultGettingOneStaff[0],
+			info: info,
 			message: `Lấy thông tin người dùng thành công`,
 		}));
 	} catch (error) {

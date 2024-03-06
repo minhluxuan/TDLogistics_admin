@@ -13,7 +13,7 @@ POST http://localhost:5000/api/v1/shippers/get_tasks
 Content-Type: application/json
 
 {
-    "option": 0
+    "option": 1
 }
 
 ###
