@@ -31,7 +31,15 @@ const createNewShipment = async (req, res) => {
         const createdTime = new Date();
         const formattedCreatedTime = moment(createdTime).format("YYYY-MM-DD HH:mm:ss");
 
-        const shipmentId = "TD" + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDay().toString() + createdTime.getHours().toString() + createdTime.getMinutes().toString() + createdTime.getSeconds().toString() + createdTime.getMilliseconds().toString();
+        const shipmentId =
+            "TD" +
+            createdTime.getFullYear().toString() +
+            createdTime.getMonth().toString() +
+            createdTime.getDay().toString() +
+            createdTime.getHours().toString() +
+            createdTime.getMinutes().toString() +
+            createdTime.getSeconds().toString() +
+            createdTime.getMilliseconds().toString();
 
         //get address throught coordinate
         // const map = new servicesUtils.Map();
@@ -58,8 +66,19 @@ const createNewShipment = async (req, res) => {
             const data = await shipmentService.getDataForShipmentCode(req.body.staff_id, req.body.transport_partner_id);
             const partnerName = await utils.shortenName(data.partnerName);
             const vehicleID = data.vehicleID;
-            const shipmentCode = "TD" + "-" + partnerName + "-" + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDay().toString() + "-" + req.body.route + "-" + vehicleID;
-            
+            const shipmentCode =
+                "TD" +
+                "-" +
+                partnerName +
+                "-" +
+                createdTime.getFullYear().toString() +
+                createdTime.getMonth().toString() +
+                createdTime.getDay().toString() +
+                "-" +
+                req.body.route +
+                "-" +
+                vehicleID;
+
             if (req.body.hasOwnProperty("route")) {
                 delete req.body.route;
             }
@@ -69,12 +88,22 @@ const createNewShipment = async (req, res) => {
 
             keys = Object.keys(req.body);
             values = Object.values(req.body);
-        }
-        else {
+        } else {
             const data = await shipmentService.getDataForShipmentCode(req.body.staff_id);
             const shipperName = await utils.shortenName(data.fullname);
-            const vehicleID = data.vehicleID ;
-            const shipmentCode = "TD" + "-" + shipperName + "-" + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDay().toString() + "-" + req.body.route + "-" + vehicleID;
+            const vehicleID = data.vehicleID;
+            const shipmentCode =
+                "TD" +
+                "-" +
+                shipperName +
+                "-" +
+                createdTime.getFullYear().toString() +
+                createdTime.getMonth().toString() +
+                createdTime.getDay().toString() +
+                "-" +
+                req.body.route +
+                "-" +
+                vehicleID;
 
             if (req.body.hasOwnProperty("route")) {
                 delete req.body.route;
@@ -93,13 +122,13 @@ const createNewShipment = async (req, res) => {
             error: false,
             message: "Tạo lô hàng thành công!",
         });
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error,
         });
     }
-}
+};
 
 const updateShipment = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission !== 3) {
@@ -127,8 +156,14 @@ const updateShipment = async (req, res) => {
         const conditionFields = "shipment_id";
         const conditionValues = req.body.shipment_id;
 
-        const result = await shipmentService.updateShipment(fields, values, conditionFields, conditionValues, agency_id);
-        
+        const result = await shipmentService.updateShipment(
+            fields,
+            values,
+            conditionFields,
+            conditionValues,
+            agency_id
+        );
+
         if (!result || result.affectedRows <= 0) {
             return res.status(404).json({
                 error: true,
@@ -140,13 +175,13 @@ const updateShipment = async (req, res) => {
             error: false,
             message: "Cập nhật lô hàng thành công!",
         });
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
         });
     }
-}
+};
 
 const getShipmentForAgency = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission !== 3) {
@@ -157,10 +192,10 @@ const getShipmentForAgency = async (req, res) => {
     // }
     // const agency_id = req.user.agency_id;
     const agency_id = "7400";
-    
+
     try {
         const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
-        
+
         if (error) {
             return res.status(400).json({
                 error: true,
@@ -171,20 +206,19 @@ const getShipmentForAgency = async (req, res) => {
         const fields = "parent";
         const values = req.body.shipment_id;
         const result = await shipmentService.getShipmentForAgency(fields, values, agency_id);
-        
+
         return res.status(200).json({
             error: false,
             data: result,
             message: "Lấy thông tin lô hàng thành công!",
         });
-
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error,
         });
     }
-}
+};
 
 const getShipmentForAdmin = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission !== 4) {
@@ -193,10 +227,10 @@ const getShipmentForAdmin = async (req, res) => {
     //         message: "Bạn không được phép truy cập tài nguyên này.",
     //     });
     // }
-    
+
     try {
         const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
-        
+
         if (error) {
             return res.status(400).json({
                 error: true,
@@ -207,20 +241,19 @@ const getShipmentForAdmin = async (req, res) => {
         const fields = "parent";
         const values = req.body.shipment_id;
         const result = await shipmentService.getShipmentForAdmin(fields, values);
-        
+
         return res.status(200).json({
             error: false,
             data: result,
             message: "Lấy thông tin lô hàng thành công!",
         });
-
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
         });
     }
-}
+};
 
 const confirmCreateShipment = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission < 4) {
@@ -234,8 +267,8 @@ const confirmCreateShipment = async (req, res) => {
 
     try {
         const { error } = shipmentRequestValidation.validateShipmentID(req.body);
-        
-        if(error) {
+
+        if (error) {
             return res.status(400).json({
                 error: true,
                 message: "Thông tin không hợp lệ!",
@@ -249,7 +282,7 @@ const confirmCreateShipment = async (req, res) => {
         // Nếu tìm thấy một đơn hàng tồn tại trong bucket nhưng không tồn tại trong global orders hoặc agency orders
         // thì tự động xóa lô hàng đó trong agency và cả global
         try {
-            await shipmentService.updateParentForGlobalOrders(req.body.shipment_id, agency_id);   
+            await shipmentService.updateParentForGlobalOrders(req.body.shipment_id, agency_id);
         } catch (error) {
             await shipmentService.deleteShipment(req.body.shipment_id, agency_id);
             await shipmentService.deleteGlobalShipment(req.body.shipment_id);
@@ -265,7 +298,7 @@ const confirmCreateShipment = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const updateShipmentToDatabase = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission < 4) {
@@ -279,7 +312,7 @@ const updateShipmentToDatabase = async (req, res) => {
 
     try {
         const { error } = shipmentRequestValidation.validateShipmentID(req.body);
-        
+
         if (error) {
             return res.status(400).json({
                 error: true,
@@ -302,14 +335,13 @@ const updateShipmentToDatabase = async (req, res) => {
             error: false,
             message: result,
         });
-
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
         });
     }
-}
+};
 
 const deleteShipment = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission < 3) {
@@ -324,7 +356,7 @@ const deleteShipment = async (req, res) => {
     try {
         const { error } = shipmentRequestValidation.validateShipmentID(req.body);
 
-        if(error) {
+        if (error) {
             return res.status(400).json({
                 error: true,
                 message: "Thông tin không hợp lệ!",
@@ -345,13 +377,13 @@ const deleteShipment = async (req, res) => {
             error: false,
             data: result,
         });
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
         });
     }
-}
+};
 
 const decomposeShipment = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission !== 3) {
@@ -362,7 +394,7 @@ const decomposeShipment = async (req, res) => {
     // }
     // const agency_id = req.session.agency_id;
     const agency_id = "7400";
-    
+
     try {
         const { error } = shipmentRequestValidation.validateDecomposingShipment(req.body);
 
@@ -390,14 +422,13 @@ const decomposeShipment = async (req, res) => {
             data: result,
             message: "Rã lô hàng thành công!",
         });
-
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
         });
     }
-}
+};
 
 const recieveShipment = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission !== 3) {
@@ -427,14 +458,13 @@ const recieveShipment = async (req, res) => {
             data: result,
             message: "Nhập lô hàng thành công!",
         });
-
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
         });
     }
-}
+};
 
 const addOrderToShipment = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission !== 3) {
@@ -465,14 +495,13 @@ const addOrderToShipment = async (req, res) => {
             data: result,
             message: "Thêm đơn hàng vào lô hàng thành công!",
         });
-
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
         });
     }
-}
+};
 
 const deleteOrderFromShipment = async (req, res) => {
     // if (!req.isAuthenticated() || req.user.permission !== 3) {
@@ -510,14 +539,13 @@ const deleteOrderFromShipment = async (req, res) => {
             error: false,
             message: "Xóa đơn hàng vào lô hàng thành công!",
         });
-
-    } catch(error) {
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
         });
     }
-}
+};
 
 module.exports = {
     createNewShipment,
