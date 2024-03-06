@@ -4,7 +4,6 @@ const LocalStrategy = require("passport-local").Strategy;
 const multer = require("multer");
 const bcrypt = require("bcrypt");
 const partnerStaffsController = require("../controllers/partnerStaffControllers");
-const utils = require("../utils");
 const PartnerStaffs = require("../database/PartnerStaffs");
 const path = require('path');
 const auth = require("../lib/auth");

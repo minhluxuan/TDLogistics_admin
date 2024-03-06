@@ -54,13 +54,13 @@ router.post("/verify_otp", passport.authenticate("otpLogin"), (req, res, next) =
         if (!user) {
             return res.status(401).json({ error: true, valid: false, message: "Xác thực thất bại." });
         }
-
+        console.log(req);
         return res.status(200).json({ error: false, valid: true, message: "Xác thực thành công." });
     })(req, res, next);
 });
 router.post("/check", usersController.checkExistUser);
 router.post("/create", usersController.createNewUser);
-router.post("/get", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.getOneUser);
+router.post("/search", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.getOneUser);
 router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.updateUserInfo);
 router.get("/logout", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.logout);
 

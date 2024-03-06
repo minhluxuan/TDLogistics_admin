@@ -27,7 +27,7 @@ const createNewVehicle = async (info) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
 
-    const defaultFields = ["mass", "order_ids", "busy"];
+    const defaultFields = ["mass", "shipment_ids", "busy"];
     const defaultValues = [0, JSON.stringify([]), false];
 
     const allFields = [...fields, ...defaultFields];

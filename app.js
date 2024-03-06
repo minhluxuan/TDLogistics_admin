@@ -29,6 +29,7 @@ const otpPartnerStaffRouter = require("./routes/otpPartnerStaffRoute");
 const agenciesRouter = require("./routes/agenciesRoute");
 const usersRouter = require("./routes/usersRoute");
 const ordersRouter = require("./routes/ordersRoute");
+const shippersRouter = require("./routes/shippersRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -50,7 +51,7 @@ app.set('view engine', 'jade');
 app.enable('trust proxy');
 
 // Chỉ định danh sách các trang web được phép truy cập
-const allowedOrigins = ['https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', "https://admin-td-logistics-web.vercel.app"];
+const allowedOrigins = ['http://localhost:5000', 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', "https://admin-td-logistics-web.vercel.app"];
 
 // Sử dụng cors middleware với tùy chọn chỉ cho phép các trang web trong danh sách
 app.use(cors({
@@ -72,8 +73,8 @@ const sessionMiddleware = session({
 	saveUninitialized: false,
 	store: sessionStore,
 	cookie: {
-		secure: true,
-		sameSite: 'None',
+		// secure: false,
+		// sameSite: 'None',
 		httpOnly: false,
 		maxAge: 15 * 60 * 1000,
 	}
@@ -103,6 +104,7 @@ app.use("/api/v1/agencies", agenciesRouter);
 app.use("/api/v1/authorization", authorizationRouter);
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/orders", ordersRouter);
+app.use("/api/v1/shippers", shippersRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({

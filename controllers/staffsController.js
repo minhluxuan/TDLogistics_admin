@@ -35,6 +35,30 @@ const checkExistStaff = async (req, res) => {
 	}
 }
 
+const getAuthenticatedStaffInfo = async (req, res) => {
+	try {
+		const resultGettingOneStaff = await staffsService.getOneStaff({ staff_id: req.user.staff_id });
+		if (!resultGettingOneStaff || resultGettingOneStaff.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã ${req.user.staff_id} không tồn tại.`
+			});
+		}
+
+		return res.status(200).json(new Object({
+			error: false,
+			info: resultGettingOneStaff[0],
+			message: `Lấy thông tin người dùng thành công`,
+		}));
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
 const getStaffs = async (req, res) => {
 	try {
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
@@ -158,20 +182,22 @@ const createNewStaff = async (req, res) => {
 				});
 			}
 
-			const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
-			if (!fs.existsSync(tempFolderPath)) {
-				fs.mkdirSync(tempFolderPath);
+			if (req.file) {
+				const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
+				if (!fs.existsSync(tempFolderPath)) {
+					fs.mkdirSync(tempFolderPath);
+				}
+
+				const officialFolderPath = path.join("storage", "staff", "img", "avatar");
+				if (!fs.existsSync(officialFolderPath)) {
+					fs.mkdirSync(officialFolderPath);
+				}
+
+				const tempFilePath = path.join(tempFolderPath, req.file.filename);
+				const officialFilePath = path.join(officialFolderPath, req.file.filename);
+
+				fs.renameSync(tempFilePath, officialFilePath);
 			}
-
-			const officialFolderPath = path.join("storage", "staff", "img", "avatar");
-			if (!fs.existsSync(officialFolderPath)) {
-				fs.mkdirSync(officialFolderPath);
-			}
-
-			const tempFilePath = path.join(tempFolderPath, req.file.filename);
-			const officialFilePath = path.join(officialFolderPath, req.file.filename);
-
-			fs.renameSync(tempFilePath, officialFilePath);
 
 			return res.status(201).json({
 				error: false,
@@ -230,20 +256,22 @@ const createNewStaff = async (req, res) => {
 				});
 			}
 
-			const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
-			if (!fs.existsSync(tempFolderPath)) {
-				fs.mkdirSync(tempFolderPath);
+			if (req.file) {
+				const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
+				if (!fs.existsSync(tempFolderPath)) {
+					fs.mkdirSync(tempFolderPath);
+				}
+
+				const officialFolderPath = path.join("storage", "staff", "img", "avatar");
+				if (!fs.existsSync(officialFolderPath)) {
+					fs.mkdirSync(officialFolderPath);
+				}
+
+				const tempFilePath = path.join(tempFolderPath, req.file.filename);
+				const officialFilePath = path.join(officialFolderPath, req.file.filename);
+
+				fs.renameSync(tempFilePath, officialFilePath);
 			}
-
-			const officialFolderPath = path.join("storage", "staff", "img", "avatar");
-			if (!fs.existsSync(officialFolderPath)) {
-				fs.mkdirSync(officialFolderPath);
-			}
-
-			const tempFilePath = path.join(tempFolderPath, req.file.filename);
-			const officialFilePath = path.join(officialFolderPath, req.file.filename);
-
-			fs.renameSync(tempFilePath, officialFilePath);
 
 			return res.status(201).json({
 				error: false,
@@ -654,6 +682,7 @@ const getStaffAvatar = async (req, res) => {
 module.exports = {
 	checkExistStaff,
 	createNewStaff,
+	getAuthenticatedStaffInfo,
 	getStaffs,
 	updateStaffInfo,
 	deleteStaff,

@@ -14,11 +14,12 @@ const table = "orders";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-const checkExistOrder = async (info) => {
+const checkExistOrder = async (info, postal_code = null) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
 
-    const result = await SQLutils.findOneIntersect(pool, table, fields, values);
+    const ordersTable = postal_code ? postal_code + '_' + table : table;
+    const result = await SQLutils.findOneIntersect(pool, ordersTable, fields, values);
     return result.length > 0;
 };
 
@@ -51,8 +52,9 @@ const getOrderForUpdating = async (order_id) => {
     return result;
 };
 
-const createNewOrder = async (newOrder) => {
-    return await SQLutils.insert(pool, table, Object.keys(newOrder), Object.values(newOrder));
+const createNewOrder = async (newOrder, postalCode = null) => {
+    const ordersTable = postalCode ? postalCode + '_' + table : table;
+    return await SQLutils.insert(pool, ordersTable, Object.keys(newOrder), Object.values(newOrder));
 }
 
 const updateOrder = async (info, conditions) => {
@@ -218,6 +220,74 @@ const getOrderStatus = async (order_id) => {
     }
 }
 
+const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false) => {
+    if(isUpdateJourney) {
+        if(!orderInfo.managed_by) {
+            return new Object({
+                success: false,
+                data: null,
+                message: "Không đủ thông tin để thực hiện thao tác trên!"
+            });
+        }
+
+        const currentTime = new Date();
+        const settingTime = moment(currentTime).format("ss:mm:HH DD-MM-YYYY");
+
+        const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ? LIMIT 1`;
+        const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
+        let journey;
+        try {
+            journey = getJourneyResult[0].journey ? JSON.parse(getJourneyResult[0].journey) : new Array();
+        } catch (error) {
+            journey = new Array();
+        }
+        
+        const newOrderLocation = new Object({
+            shipment_id: orderInfo.shipment_id,   
+            managed_by: orderInfo.managed_by,
+            date: settingTime
+        });
+
+        journey.push(newOrderLocation);
+
+        const result = await SQLutils.updateOne(pool, table, ["journey", "status_code"], [JSON.stringify(journey), orderStatus.code], ["order_id"], [orderInfo.order_id]);
+        if(result.affectedRows === 0) {
+            return new Object({
+                success: false,
+                data: null,
+                message: "Cập nhật thất bại!"
+            });
+        }
+
+        return new Object({
+            success: true,
+            data: {
+                newOrderLocation: newOrderLocation,
+                newStatus: orderStatus
+            },
+            message: `${newOrderLocation.date}: Đơn hàng mã ${orderInfo.order_id} được tiếp nhận bởi ${newOrderLocation.managed_by}`
+        });
+
+    } else {
+        const result = await SQLutils.updateOne(pool, table, ["status_code"], [orderStatus.code], ["order_id"], [orderInfo.order_id]);
+        if(result[0].affectedRows <= 0) {
+            return new Object({
+                success: false,
+                data: null,
+                message: "Cập nhật thất bại!"
+            });
+        }
+
+        return new Object({
+            success: true,
+            data: {
+                newStatus: orderStatus
+            },
+            message: `Trạng thái ${orderStatus.message} được cập nhật cho đơn hàng mã ${orderInfo.order_id}`
+        });
+    }
+}
+
 module.exports = {
     checkExistOrder,
     getOrderForUpdating,
@@ -232,4 +302,5 @@ module.exports = {
     findingManagedAgency,
     createOrderInAgencyTable,
     getOrderStatus,
+    setStatusToOrder,
 };

@@ -7,6 +7,16 @@ Content-Type: application/json
     "password": "NTDung@tdlogistics2k24"
 }
 
+###
+
+POST https://tdlogistics.govt.hu/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "ntdung@tdlogistics",
+    "password": "NTDung@tdlogistics2k24"
+}
+
 ### AGENCY_MANAGER
 
 POST http://localhost:5000/api/v1/staffs/login
@@ -133,7 +143,7 @@ POST http://localhost:5000/api/v1/staffs/login
 Content-Type: application/json
 
 {
-    "username": "minhluxuan2k14",
+    "username": "minhluxuan2k15",
     "password": "minhluxuan@TDlogistics2k24"
 }
 
@@ -149,7 +159,12 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:5000/api/v1/staffs/search
+POST http://localhost:5000/api/v1/staffs/get_info
+Content-Type: application/json
+
+###
+
+POST http://localhost:5000/api/v1/staffs/search
 Content-Type: application/json
 
 {
@@ -421,13 +436,14 @@ POST http://localhost:5000/api/v1/staffs/create
 Content-Type: application/json
 
 {
-    "username": "minhluxuan2k14",
+    "agency_id": "BC_71000_077204005691",
+    "username": "minhluxuan2k15",
     "password": "minhluxuan@TDlogistics2k24",
     "fullname": "Lữ Xuân Minh",
-    "phone_number": "0981430426",
-    "email": "minh.luxuansiu@siu.edu.vn",
+    "phone_number": "0981430475",
+    "email": "minh.luxuanhuflit@huflit.edu.vn",
     "date_of_birth": "2004-03-03",
-    "cccd": "077204005684",
+    "cccd": "077204005689",
     "province": "Tỉnh Bà Rịa - Vũng Tàu",
     "district": "Huyện Đất Đỏ",
     "town": "Thị trấn Đất Đỏ",
@@ -467,3 +483,4 @@ GET http://localhost:5000/get_session
 
 ###
 
+GET https://tdlogistics.govt.hu/get_session
