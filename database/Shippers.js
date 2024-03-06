@@ -98,8 +98,8 @@ const assignNewTasks = async (order_ids, staff_id, postal_code) => {
     });
 }
 
-const confirmCompletedTask = async (id, staff_id, postal_code) => {
-    return await dbUtils.updateOne(pool, postal_code + '_' + defaultTasksTable, ["completed"], [true], ["id", "shipper"], [id, staff_id]);
+const confirmCompletedTask = async (id, staff_id, completedTime, postal_code) => {
+    return await dbUtils.updateOne(pool, postal_code + '_' + defaultTasksTable, ["completed_at", "completed"], [completedTime, true], ["id", "shipper", "completed_at"], [id, staff_id, false]);
 }
 
 const getHistory = async (conditions, postal_code) => {
