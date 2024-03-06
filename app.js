@@ -31,9 +31,7 @@ const otpPartnerStaffRouter = require("./routes/otpPartnerStaffRoute");
 const agenciesRouter = require("./routes/agenciesRoute");
 const usersRouter = require("./routes/usersRoute");
 const ordersRouter = require("./routes/ordersRoute");
-
-//just for testing fee debugger
-const feeRouter = require("./routes/feeDebugger");
+const shippersRouter = require("./routes/shippersRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -77,8 +75,8 @@ const sessionMiddleware = session({
 	saveUninitialized: false,
 	store: sessionStore,
 	cookie: {
-		secure: false,
-		sameSite: 'None',
+		// secure: false,
+		// sameSite: 'None',
 		httpOnly: false,
 		maxAge: 15 * 60 * 1000,
 	}
@@ -110,10 +108,7 @@ app.use("/api/v1/agencies", agenciesRouter);
 app.use("/api/v1/authorization", authorizationRouter);
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/orders", ordersRouter);
-
-// just for test fee debugger
-app.use("/api/v1/fee", feeRouter);
-
+app.use("/api/v1/shippers", shippersRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({

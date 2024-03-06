@@ -81,7 +81,7 @@ POST http://localhost:5000/api/v1/orders/create
 content-type: application/json
 
 {
-    "user_id": "0000001",
+
     "name_sender": "Tran The Nhan",
     "phone_sender": "0787919942",
     "name_reciever": "Nguyen Van B",

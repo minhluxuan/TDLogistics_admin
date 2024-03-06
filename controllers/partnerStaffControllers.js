@@ -14,7 +14,7 @@ const checkExistPartnerStaff = async (req, res) => {
 		if (error) {
 			return res.status(400).json({
 				error: true,
-				message: "Thông tin không hợp lệ.",
+				message: error.message,
 			});
 		}
 

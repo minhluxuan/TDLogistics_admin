@@ -3,6 +3,7 @@ const shipmentService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
 const utils = require("../lib/utils");
 const transportPartnerService = require("../services/transportPartnerService");
+const shippersService = require("../services/shippersService");
 const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
 
@@ -425,6 +426,14 @@ const decomposeShipment = async (req, res) => {
         }
 
         const shipment = resultGettingOneShipment[0];
+
+        if (shipment.status === 1) {
+            return res.status(409).json({
+                error: true,
+                message: `Lô hàng có mã ${req.query.shipment_id} đã được rã từ trước.`,
+            });
+        }
+
         try {
             if (!shipment.order_ids || JSON.parse(shipment.order_ids).length === 0) {
                 return res.status(404).json({
@@ -437,17 +446,15 @@ const decomposeShipment = async (req, res) => {
                 error: true,
                 message: `Lô hàng có mã ${req.query.shipment_id} không tồn tại đơn hàng nào để có thể rã lô.`
             });
-        }   
-       
-        
+        }
 
-        const resultComparingOrdersInRequestWithOrdersInShipment = await shipmentService.compareOrdersInRequestWithOrdersInShipment(req.body.order_ids, shipment.order_ids);
+        const resultComparingOrdersInRequestWithOrdersInShipment = await shipmentService.compareOrdersInRequestWithOrdersInShipment(req.body.order_ids, JSON.parse(shipment.order_ids));
         const hitNumber = resultComparingOrdersInRequestWithOrdersInShipment.hitNumber;
         const hitArray = resultComparingOrdersInRequestWithOrdersInShipment.hitArray;
         const missNumber = resultComparingOrdersInRequestWithOrdersInShipment.missNumber;
         const missArray = resultComparingOrdersInRequestWithOrdersInShipment.missArray;
-        
-        const resultDecomposingShipment = await shipmentService.decomposeShipment(shipment.order_ids, shipment.shipment_id, req.user.agency_id);
+
+        const resultDecomposingShipment = await shipmentService.decomposeShipment(JSON.parse(shipment.order_ids), shipment.shipment_id, req.user.agency_id);
 
         const updatedNumber = resultDecomposingShipment.updatedNumber;
         const updatedArray = resultDecomposingShipment.updatedArray;
@@ -465,6 +472,7 @@ const decomposeShipment = async (req, res) => {
             message: "Rã lô hàng thành công!",
         });
     } catch(error) {
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message,
@@ -476,7 +484,7 @@ const receiveShipment = async (req, res) => {
     try {
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
         const { error } = shipmentRequestValidation.validateShipmentID(req.body);
-        if(error) {
+        if (error) {
             return res.status(400).json({
                 error: true,
                 message: error.message,
@@ -488,6 +496,13 @@ const receiveShipment = async (req, res) => {
             return res.status(404).json({
                 error: true,
                 message: `Lô hàng có mã ${req.body.shipment_id} không tồn tại.`,
+            });
+        }
+
+        if (await shipmentService.checkExistShipment({ shipment_id: req.body.shipment_id }, postalCode)) {
+            return res.status(409).json({
+                error: true,
+                message: `Lô hàng có mã ${req.body.shipment_id} đã tồn tại trong bưu cục có mã ${req.user.agency_id}.`,
             });
         }
 
@@ -506,7 +521,7 @@ const receiveShipment = async (req, res) => {
             });
         }
 
-        const resultCloningOrdersFromGlobalToAgency = await shipmentService.cloneOrdersFromGlobalToAgency(JSON.stringify(resultGettingOneShipment[0].order_ids), postalCode);
+        const resultCloningOrdersFromGlobalToAgency = await shipmentService.cloneOrdersFromGlobalToAgency(JSON.parse(resultGettingOneShipment[0].order_ids), postalCode);
         
         return res.status(200).json({
             error: false,
@@ -520,8 +535,6 @@ const receiveShipment = async (req, res) => {
         });
     }
 }
-
-// status_code cho orders, shipper cho orders, shipment_ids cho vehicle
 
 const undertakeShipment = async (req, res) => {
     try {
@@ -564,14 +577,38 @@ const undertakeShipment = async (req, res) => {
             });
         }
 
-        const resultUpdatingOrders = await shipmentService.updateOrders(JSON.parse(shipment.order_ids), req.user.staff_id);
+        const orderIdsArray = JSON.parse(shipment.order_ids);
+        const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+        const resultUpdatingOrders = await shipmentService.updateOrders(orderIdsArray, req.user.staff_id, postalCode);
+
+        const successUpdatedParentNumber = resultUpdatingOrders.acceptedNumber;
+        const successUpdatedParentArray = resultUpdatingOrders.acceptedArray;
+        const faildUpdatedParentNumber = resultUpdatingOrders.notAcceptedNumber;
+        const faildUpdatedParentArray = resultUpdatingOrders.notAcceptedArray;
+
+        const resultAssignNewTaskForShipper = await shippersService.assignNewTasks(orderIdsArray, req.user.staff_id, postalCode);
+        
+        const successAssignedTasksNumber = resultAssignNewTaskForShipper.acceptedNumber;
+        const successAssignedTasksArray = resultAssignNewTaskForShipper.acceptedArray;
+        const failAssignedTasksNumber = resultAssignNewTaskForShipper.notAcceptedNumber;
+        const failAssignedTasksArray = resultAssignNewTaskForShipper.notAcceptedArray;
 
         return res.status(201).json({
             error: false,
-            data: resultUpdatingOrders,
+            data: {
+                successUpdatedParentNumber,
+                successUpdatedParentArray,
+                faildUpdatedParentNumber,
+                faildUpdatedParentArray,
+                successAssignedTasksNumber,
+                successAssignedTasksArray,
+                failAssignedTasksNumber,
+                failAssignedTasksArray,
+            },
             message: `Lô hàng có mã ${req.body.shipment_id} đã được tiếp nhận bởi nhân viên có mã ${req.user.staff_id}.`
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message,

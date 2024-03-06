@@ -370,7 +370,7 @@ const updateOrderToDatabase = async (fields, values, order_id) => {
     return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 }
 
-const recieveShipment = async (shipment_id, postal_code) => {
+const receiveShipment = async (shipment_id, postal_code) => {
     const agencyOrdersTable = postal_code + "_orders";
     const agencyShipmentTable = postal_code + suffix;
     const getShipmentResult = await getInfoShipment(shipment_id);
@@ -399,8 +399,9 @@ const recieveShipment = async (shipment_id, postal_code) => {
 const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
     let updatedNumber = 0;
     const updatedArray = new Array();
-    const ordersTable = "orders";
-    for (const order_id of order_ids) {
+    const orderIdsSet = new Set(order_ids);
+
+    for (const order_id of orderIdsSet) {
         const resultUpdatingOneOrder = await dbUtils.updateOne(pool, "orders", ["parent"], [null], ["order_id"], [order_id]);
         const orderInfo = new Object({
             order_id: order_id,
@@ -410,7 +411,7 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
 
         const resultUpdatingOneOrderStatus = await setStatusToOrder(orderInfo, servicesStatus.enter_agency, true);
 
-        if (resultUpdatingOneOrder && resultUpdatingOneOrderStatus && resultUpdatingOneOrder.affectedRows > 0 && resultUpdatingOneOrderStatus.affectedRows > 0) {
+        if (resultUpdatingOneOrder && resultUpdatingOneOrder.affectedRows > 0 && resultUpdatingOneOrderStatus.success) {
             updatedNumber++;
             updatedArray.push(order_id);
         }
@@ -440,19 +441,24 @@ const cloneOrdersFromGlobalToAgency = async (order_ids, postalCode) => {
     const notAcceptedArray = new Array();
 
     for (const order_id of order_ids) {
-        const resultGettingOneOrder = await Orders.getOneOrder({ order_id });
-        if (resultGettingOneOrder && resultGettingOneOrder.length > 0) {
-            const resultCreatingNewOrder = await Orders.createNewOrder(resultGettingOneOrder[0], postalCode);
-            if (resultCreatingNewOrder && resultCreatingNewOrder.affectedRows > 0) {
-                acceptedNumber++;
-                acceptedArray.push(order_id);
+        try {
+            const resultGettingOneOrder = await Orders.getOneOrder({ order_id });
+            if (resultGettingOneOrder && resultGettingOneOrder.length > 0) {
+                const resultCreatingNewOrder = await Orders.createNewOrder(resultGettingOneOrder[0], postalCode);
+                if (resultCreatingNewOrder && resultCreatingNewOrder.affectedRows > 0) {
+                    acceptedNumber++;
+                    acceptedArray.push(order_id);
+                }
+                else {
+                    notAcceptedNumber++;
+                    notAcceptedArray.push(order_id);
+                }
             }
             else {
                 notAcceptedNumber++;
                 notAcceptedArray.push(order_id);
             }
-        }
-        else {
+        } catch (error) {
             notAcceptedNumber++;
             notAcceptedArray.push(order_id);
         }
@@ -483,12 +489,6 @@ const updateOrders = async (order_ids, staff_id, postal_code) => {
         if(resultAssigningShipperToOrderInAgency && resultAssigningShipperToOrderInAgency.affectedRows > 0) {
             const resultAssignShipperToDatabase = await dbUtils.updateOne(pool, "orders", ["shipper"], [staff_id], ["order_id"], [order_ids[i]]);
             if (resultAssignShipperToDatabase && resultAssignShipperToDatabase.affectedRows > 0) {
-                const orderInfo = new Object({
-                    order_id: order_ids[i],
-                    shipment_id: shipment_id,
-                    managed_by: staff_id,
-                });
-                await setStatusToOrder(orderInfo, {code: status_code, message: servicesStatus.getStatusMessage(status_code)}, true);
                 acceptedNumber++;
                 acceptedArray.push(order_ids[i]);
             }
@@ -510,52 +510,6 @@ const updateOrders = async (order_ids, staff_id, postal_code) => {
     });
 }
 
-const undertakeShipment = async (shipment_id, staff_id, postal_code, status_code) => {
-    const agencyShipmentsTable = postal_code + "_shipment";
-    const agencyOrdersTable = postal_code + "_orders";
-    const getOrderIDsQuery = `SELECT order_ids FROM ${agencyShipmentsTable} WHERE shipment_id = ?`;
-    const [getOrderIDsResult] = await pool.query(getOrderIDsQuery, shipment_id);
-    
-    const assignShipmentQuery = `UPDATE vehicle SET shipment_ids = ? WHERE staff_id = ?`;
-    const assignShipmentResult = await pool.query(assignShipmentQuery, [JSON.stringify([shipment_id]), staff_id]);
-    if(assignShipmentResult.affectedRows === 0) {
-        return new Object({
-            success: false,
-            data: null,
-            message: "Thông tin nhân viên giao hàng không tồn tại!"
-        });
-    }
-
-    const order_ids = JSON.parse(getOrderIDsResult[0].order_ids);
-    let acceptedArray = new Array();
-    let unacceptedArray = new Array();
-    for(let i = 0; i < order_ids.length; i++) {
-        const assignShipperQuery = `UPDATE ${agencyOrdersTable} SET shipper = ?, status_code = ? WHERE order_id = ?`;
-        const assignShipperResult = await pool.query(assignShipperQuery, [staff_id, status_code, order_ids[i]]);
-        
-        if(assignShipperResult[0].affectedRows > 0) {
-            const assignShipperToDatabaseQuery = `UPDATE orders SET shipper = ? WHERE order_id = ?`;
-            const assignShipperToDatabaseResult = await pool.query(assignShipperToDatabaseQuery, [staff_id, order_ids[i]]);
-            acceptedArray.push(order_ids[i]);
-        } else {
-            unacceptedArray.push(order_ids[i]);
-        }
-    }
-
-    return new Object({
-        success: true,
-        data: {
-            numberAccepted: acceptedArray.length,
-            acceptedArray: acceptedArray,
-            notAcceptedNumber: unacceptedArray.length,
-            notAcceptedArray: unacceptedArray,
-            shipperUndertake: staff_id
-        },
-        message: `Lô hàng có mã ${shipment_id} đã được đảm nhận bởi nhân viên có mã ${staff_id}`
-    })
-}
-
-
 module.exports = {
     checkExistShipment,
     createNewShipment,
@@ -563,7 +517,7 @@ module.exports = {
     confirmCreateShipment,
     getDataForShipmentCode,
     updateShipment,
-    recieveShipment,
+    receiveShipment,
     addOrdersToShipment,
     deleteOrdersFromShipment,
     updateOrderToDatabase,
@@ -577,5 +531,4 @@ module.exports = {
     deleteGlobalShipment,
     addOneShipmentToVehicle,
     updateOrders,
-    undertakeShipment,
 };

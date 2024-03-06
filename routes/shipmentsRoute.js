@@ -14,6 +14,10 @@ router.post("/update",
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
     shipmentController.updateShipment);
 
+router.post("/get",
+    auth.isAuthenticated(), 
+    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
+    shipmentController.getShipments);
 
 router.post("/decompose",
     auth.isAuthenticated(), 

@@ -41,12 +41,15 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
 }
 
 const compareOrdersInRequestWithOrdersInShipment = async (requestOrderIds, shipmentOrderIds) => {
+    const requestOrderIdsSet = new Set(requestOrderIds);
+    const shipmentOrderIdsSet = new Set(shipmentOrderIds);
+
     let hitNumber = 0;
     const hitArray = new Array();
     let missNumber = 0;
     const missArray = new Array();
-    for (const orderId of shipmentOrderIds) {
-        if (requestOrderIds.includes(orderId)) {
+    for (const orderId of shipmentOrderIdsSet) {
+        if (requestOrderIdsSet.has(orderId)) {
             hitNumber++;
             hitArray.push(orderId);
         }
@@ -76,8 +79,8 @@ const cloneOrdersFromGlobalToAgency = async (order_ids, postalCode) => {
     return await Shipment.cloneOrdersFromGlobalToAgency(order_ids, postalCode);
 }
 
-const recieveShipment = async (shipment_id, postal_code) => {
-    return await Shipment.recieveShipment(shipment_id, postal_code);
+const receiveShipment = async (shipment_id, postal_code) => {
+    return await Shipment.receiveShipment(shipment_id, postal_code);
 }
 
 const addOrdersToShipment = async (shipment, order_ids, postal_code) => {
@@ -92,12 +95,8 @@ const addOneShipmentToVehicle = async (shipment_id, staff_id) => {
     return await Shipment.addOneShipmentToVehicle(shipment_id, staff_id);
 }
 
-const updateOrders = async (order_ids, staff_ids) => {
-    return await Shipment.updateOrders(order_ids, staff_ids);
-}
-
-const undertakeShipment = async (shipment_id, staff_id, agency_id, status_code) => {
-    return await Shipment.undertakeShipment(shipment_id, staff_id, agency_id, status_code);
+const updateOrders = async (order_ids, staff_ids, postal_code) => {
+    return await Shipment.updateOrders(order_ids, staff_ids, postal_code);
 }
 
 module.exports = {
@@ -108,7 +107,7 @@ module.exports = {
     getOneShipment,
     updateParentForGlobalOrders,
     confirmCreateShipment,
-    recieveShipment,
+    receiveShipment,
     addOrdersToShipment,
     deleteOrdersFromShipment,
     deleteShipment,
@@ -120,5 +119,4 @@ module.exports = {
     compareOrdersInRequestWithOrdersInShipment,
     addOneShipmentToVehicle,
     updateOrders,
-    undertakeShipment,
 };
