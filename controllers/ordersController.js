@@ -113,19 +113,36 @@ const checkExistOrder = async (req, res) => {
 
 const getOrders = async (req, res) => {
     try {
-        const { error } = OrderValidation.validateFindingOrders(req.body);
+        if (req.query.rows) {
+            req.query.rows = parseInt(req.query.rows);
+        }
 
-        if (error) {
+        if (req.query.page) {
+            req.query.page = parseInt(req.query.page);
+        }
+
+        const { error1 } = OrderValidation.validatePaginationConditions(req.query);
+
+        if (error1) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: error1.message,
+            });
+        }
+
+        const { error2 } = OrderValidation.validateFindingOrders(req.body);
+
+        if (error2) {
+            return res.status(400).json({
+                error: true,
+                message: error1.message,
             });
         }
 
         if (["USER", "BUSINESS"].includes(req.user.role)) {
             req.body.user_id = req.user.user_id || req.user.business_id;
 
-            const result = await ordersService.getOrders(req.body);
+            const result = await ordersService.getOrders(req.body, req.query);
             return res.status(200).json({
                 error: false,
                 data: result,
@@ -136,7 +153,7 @@ const getOrders = async (req, res) => {
         if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_SHIPPER"].includes(req.user.role)) {
             const agencyIdSubParts = req.user.agency_id.split('_');
             
-            const result = await ordersService.getOrdersOfAgency(agencyIdSubParts[1], req.body);
+            const result = await ordersService.getOrdersOfAgency(agencyIdSubParts[1], req.body, req.query);
             return res.status(200).json({
                 error: false,
                 data: result,
@@ -144,13 +161,14 @@ const getOrders = async (req, res) => {
             });
         }
 
-        const result = await ordersService.getOrders(req.body);
+        const result = await ordersService.getOrders(req.body, req.query);
         return res.status(200).json({
             error: false,
             data: result,
             message: "Lấy thông tin thành công!",
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message,

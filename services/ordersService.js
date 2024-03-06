@@ -8,16 +8,16 @@ const getOrderForUpdating = async (order_id) => {
     return await Orders.getOrderForUpdating(order_id);
 }
 
-const getOrdersOfAgency = async (postalCode, conditions) => {
-    return await Orders.getOrdersOfAgency(postalCode, conditions);
+const getOrdersOfAgency = async (postalCode, conditions, paginationConditions) => {
+    return await Orders.getOrdersOfAgency(postalCode, conditions, paginationConditions);
 }
 
 const getOneOrder = async (conditions) => {
     return await Orders.getOneOrder(conditions);
 }
 
-const getOrders = async (conditions) => {
-    return await Orders.getOrders(conditions);
+const getOrders = async (conditions, paginationConditions) => {
+    return await Orders.getOrders(conditions, paginationConditions);
 }
 
 const updateOrder = async (info, conditions) => {

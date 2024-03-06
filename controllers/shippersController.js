@@ -1,3 +1,4 @@
+const moment = require("moment");
 const shippersService = require("../services/shippersService");
 const utils = require("../lib/utils");
 const validation = require("../lib/validation");
@@ -35,6 +36,7 @@ const getTasks = async (req, res) => {
 
 const confirmCompletedTask = async (req, res) => {
     try {
+        const completedTime = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
         const { error } = shippersValidation.validateConfirmingCompletedTasks(req.body);
 
         if (error) {
@@ -45,11 +47,11 @@ const confirmCompletedTask = async (req, res) => {
         }
 
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
-        const resultConfirmingCompletedTask = await shippersService.confirmCompletedTask(req.body.id, req.user.staff_id, postalCode);
+        const resultConfirmingCompletedTask = await shippersService.confirmCompletedTask(req.body.id, req.user.staff_id, completedTime, postalCode);
         if (!resultConfirmingCompletedTask || resultConfirmingCompletedTask.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
-                message: `Công việc không tồn tại.`,
+                message: "Công việc đã hoàn thành trước đó hoặc không tồn tại.",
             });
         }
 
