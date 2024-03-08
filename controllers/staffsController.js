@@ -443,6 +443,24 @@ const deleteStaff = async (req, res) => {
 	}
 }
 
+const logout = (req, res) => {
+	try {
+		req.logout(() => {
+			req.session.destroy();
+		});
+
+		return res.status(200).json({
+			error: false,
+			message: "Đăng xuất thành công.",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			error: true,
+			message: "Đăng xuất thất bại."
+		});
+	}
+} 
+
 const updatePassword = async (req, res) => {
 	try {
 		const { error } = staffValidation.validateUpdatePassword(req.body);
@@ -579,6 +597,7 @@ module.exports = {
 	getStaffs,
 	updateStaffInfo,
 	deleteStaff,
+	logout,
 	updatePassword,
 	updateAvatar,
 };
