@@ -30,21 +30,22 @@ Content-Type: application/json
 {
     "mass": 200,
 }
-### TD202410161859226 
-### order_id BC_78300_20242231634518, BC_78300_2024224111043787, BC_78300_2024223163246472
-POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_202422224138948
+###  BC_78300_202429164715749
+### order_id BC_78300_20242231694521, BC_78300_202422316114087, BC_78300_2024223161154877
+### 39 40 41
+POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_78300_202429164715749
 Content-Type: application/json
 
 {
-    "order_ids": ["BC_78300_2024223163234692","BC_78300_2024223163234271", "BC_78300_2024223162829291"]
+    "order_ids": ["BC_78300_20242231694521","BC_78300_202422316114087", "BC_78300_2024223161154877"]
 }
 
 ### TD2024132126392 TD2024132139335 TD2024132145338
-POST http://localhost:5000/api/v1/shipments/remove_orders?shipment_id=BC_71000_202422224138948
+POST http://localhost:5000/api/v1/shipments/remove_orders?shipment_id=BC_78300_202429164715749
 Content-Type: application/json
 
 {
-    "order_ids": ["BC_71000_2024225161651124"]
+    "order_ids": ["BC_78300_202422316114087", "BC_78300_2024223161154877"]
 }
 
 ###
@@ -95,11 +96,11 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:5000/api/v1/shipments/decompose?shipment_id=BC_71000_202422224138948
+POST http://localhost:5000/api/v1/shipments/decompose?shipment_id=BC_78300_202428204443125
 Content-Type: application/json
 
 {
-    "order_ids": ["BC_71000_2024225161651125"]
+    "order_ids": ["BC_78300_2024223163234692","BC_78300_2024223163234271","BC_78300_2024223162829291"]
 }
 
 ###

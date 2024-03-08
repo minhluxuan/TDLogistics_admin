@@ -102,30 +102,9 @@ content-type: application/json
 
 ###
 
-POST http://localhost:5000/api/v1/orders/agency_create
+GET http://localhost:5000/api/v1/orders/check?order_id=BC_78300_202422301010550
 content-type: application/json
 
 {
-    "name_sender": "Tran The Nhan",
-    "phone_sender": "0787919942",
-    "name_reciever": "Nguyen Van B",
-    "phone_reciever": "0787919943",
-    "mass": 24,
-    "height": 30,
-    "width": 25,
-    "length": 60,
-    "province_source": "Tỉnh Bà Rịa - Vũng Tàu",
-    "district_source": "Huyện Đất Đỏ",
-    "ward_source": "Thị trấn Đất Đỏ",
-    "detail_source": "Đường tỉnh 52, tổ 6 Khu phố Hiệp Hòa",
-    "province_dest": "Tỉnh An Giang", 
-    "district_dest": "Thành phố Long Xuyên",
-    "ward_dest": "Phường Mỹ Long",
-    "detail_dest": "20 Lý Thái Tổ",
-    "long_source": 107.271563,
-    "lat_source": 10.477812,
-    "long_destination": 105.442062,
-    "lat_destination": 10.377187,
-    "COD": 32000,
-    "service_type": 1
+    
 }

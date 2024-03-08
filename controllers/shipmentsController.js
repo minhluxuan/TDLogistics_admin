@@ -44,7 +44,7 @@ const createNewShipment = async (req, res) => {
             }
             
             return res.status(201).json({
-                error: true,
+                error: false,
                 message: `Tạo lô hàng có mã lô ${req.body.shipment_id} cho bưu cục ${req.user.agency_id} thành công.`,
             });
         }
@@ -59,7 +59,7 @@ const createNewShipment = async (req, res) => {
             }
             
             return res.status(201).json({
-                error: true,
+                error: false,
                 message: `Tạo lô hàng có mã lô ${req.body.shipment_id} thành công.`,
             });
         }
