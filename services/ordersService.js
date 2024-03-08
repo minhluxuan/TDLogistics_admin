@@ -58,7 +58,7 @@ const checkFileFormat = async (filename) => {
                     rowData[headers[colNumber - 1]] = cell.value;
                 });
 
-                const { error } = ordersValidation.validateCreatingOrder(rowData);console.log(error);
+                const { error } = ordersValidation.validateCreatingOrderByAdmin(rowData);
                 if (error) {
                     errorMessage = `Hàng ${rowNumber} có định dạng dữ liệu không hợp lệ.
                     Lỗi: ${error.message}.`;
