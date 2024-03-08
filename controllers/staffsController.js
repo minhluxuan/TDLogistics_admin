@@ -108,7 +108,7 @@ const getStaffs = async (req, res) => {
 
 			req.body.agency_id = req.user.agency_id;
 
-			const result = await staffsService.getManyStaffs(req.body);
+			const result = await staffsService.getManyStaffs(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,
