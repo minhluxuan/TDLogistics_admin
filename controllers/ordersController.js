@@ -213,6 +213,57 @@ const checkFileFormat = async (req, res) => {
     }
 }
 
+const createOrdersByFile = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(404).json({
+                error: true,
+                message: "File không tồn tại.",
+            });
+        }
+
+        const folderPath = path.join("storage", "business_user", "document", "orders_temp");
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath);
+        }
+        
+        const filePath = path.join(folderPath, req.file.filename);
+        if (!fs.existsSync(filePath)) {
+            throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+        }
+
+        const resultCheckingFileFormat = await ordersService.checkFileFormat(filePath.toString());
+        if (!resultCheckingFileFormat.valid) {
+            return res.status(400).json({
+                error: true,
+                message: resultCheckingFileFormat.message,
+            });
+        }
+
+        const orders = ordersService.getOrdersFromFile(filePath.toString());
+        let successNumber = 0;
+        const successArray = new Array();
+        let failNumber = 0;
+        const failArray = new Array();
+        for (const order of orders) {
+            const areaAgencyIdSubParts = req.user.agency_id.split('_');
+            order.agency_id = req.user.agency_id;
+            order.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
+            const stt = order.STT;
+            
+            const resultCreatingNewOrder = ordersService.createNewOrder(order);
+            if (!resultCreatingNewOrder || resultCreatingNewOrder.affectedRows === 0) {
+                failNumber++;
+                failNumber.push(order)
+            }
+        }
+
+        
+    } catch (error) {
+        
+    }
+}
+
 const updateOrder = async (req, res) => {
     try {
         const { error } = OrderValidation.validateQueryUpdatingOrder(req.query) || OrderValidation.validateUpdatingOrder(req.body);

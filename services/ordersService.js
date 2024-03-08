@@ -1,5 +1,6 @@
 const Orders = require("../database/Orders");
 const ExcelJS = require("exceljs");
+const { OrderValidation } = require("../lib/validation");
 
 const checkFileFormat = async (filename) => {
     try {
@@ -7,7 +8,7 @@ const checkFileFormat = async (filename) => {
         await workbook.xlsx.readFile(filename);
         const worksheet = workbook.getWorksheet(1);
         const row1 = worksheet.getRow(1);
-        const cellsInRow1 = row1.values.filter(value => value !== null && value !== undefined && value !== '').map(value => value.toString());
+        const headers = row1.values.filter(value => value !== null && value !== undefined && value !== '').map(value => value.toString());
         
         const mandatoryFields = ["STT", "name_sender", "phone_sender", "name_receiver", "phone_receiver",
         "mass", "height", "width", "length", "province_source", "district_source", "ward_source", "detail_source",
@@ -16,7 +17,7 @@ const checkFileFormat = async (filename) => {
 
         const mandatoryFieldsAddress = ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1", "J1", "K1", "L1", "M1", "N1", "O1", "P1", "Q1", "R1", "S1", "T1", "U1", "V1", "W1"];
         
-        for (const cell of cellsInRow1) {
+        for (const cell of headers) {
             if (!mandatoryFields.includes(cell)) {
                 return new Object({
                     valid: false,
@@ -26,7 +27,7 @@ const checkFileFormat = async (filename) => {
         }
 
         for (let i = 0; i < 22; i++) {
-            if (!cellsInRow1.includes(mandatoryFields[i])) {
+            if (!headers.includes(mandatoryFields[i])) {
                 return new Object({
                     valid: false,
                     message: `Thiếu trường ${mandatoryFields[i]}.`,
@@ -41,7 +42,38 @@ const checkFileFormat = async (filename) => {
             }
         }
 
-        
+        const ordersValidation = new OrderValidation();
+
+        let errorFlag = false;
+        let errorMessage;
+
+        worksheet.eachRow((row, rowNumber) => {
+            if (errorFlag) {
+                return;
+            }
+
+            const rowData = new Object();
+            if (rowNumber !== 1) {
+                row.eachCell((cell, colNumber) => {
+                    rowData[headers[colNumber - 1]] = cell.value;
+                });
+
+                const { error } = ordersValidation.validateCreatingOrder(rowData);console.log(error);
+                if (error) {
+                    errorMessage = `Hàng ${rowNumber} có định dạng dữ liệu không hợp lệ.
+                    Lỗi: ${error.message}.`;
+                    errorFlag = true;
+                    return;
+                }
+            }
+        });
+
+        if (errorFlag) {
+            return new Object({
+                valid: false,
+                message: errorMessage,
+            });
+        }
 
         return new Object({
             valid: true,
@@ -53,6 +85,37 @@ const checkFileFormat = async (filename) => {
     }
 }
 
+const getOrdersFromFile = async (filename) => {
+    try {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filename);
+        const worksheet = workbook.getWorksheet(1);
+        const row1 = worksheet.getRow(1);
+        const headers = row1.values.filter(value => value !== null && value !== undefined && value !== '').map(value => value.toString());
+        
+        const mandatoryFields = ["STT", "name_sender", "phone_sender", "name_receiver", "phone_receiver",
+        "mass", "height", "width", "length", "province_source", "district_source", "ward_source", "detail_source",
+        "province_dest", "district_dest", "ward_dest", "detail_dest", "long_source", "lat_source", "long_dest", "lat_dest",
+        "COD", "service_type"];
+
+        const orders = new Array();
+        worksheet.eachRow((row, rowNumber) => {
+            const rowData = new Object();
+            if (rowNumber !== 1) {
+                row.eachCell((cell, colNumber) => {
+                    rowData[headers[colNumber - 1]] = cell.value;
+                });
+
+                orders.push(rowData);
+            }
+        });
+
+        return orders;
+    } catch (error) {
+        console.log(error);
+        throw new Error("Lỗi khi lấy đơn hàng từ file.");
+    }
+}
 
 const checkExistOrder = async (info) => {
     return Orders.checkExistOrder(info);
@@ -120,6 +183,7 @@ module.exports = {
     getOneOrder,
     getOrders,
     checkFileFormat,
+    getOrdersFromFile,
     createNewOrder,
     updateOrder,
     cancelOrderWithTimeConstraint,
