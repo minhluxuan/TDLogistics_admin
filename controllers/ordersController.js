@@ -7,6 +7,8 @@ const libMap = require("../lib/map");
 const utils = require("../lib/utils");
 const eventManager = require("../lib/eventManager");
 const { object } = require("joi");
+const fs = require("fs");
+const path = require("path");
 const servicesStatus = require("../lib/servicesStatus");
 
 const OrderValidation = new Validation.OrderValidation();
@@ -177,6 +179,120 @@ const getOrders = async (req, res) => {
     }
 }
 
+const checkFileFormat = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(404).json({
+                error: true,
+                message: "File không tồn tại.",
+            });
+        }
+
+        const folderPath = path.join("storage", "business_user", "document", "orders_temp");
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath);
+        }
+        
+        const filePath = path.join(folderPath, req.file.filename);
+        if (!fs.existsSync(filePath)) {
+            throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+        }
+
+        const resultCheckingFileFormat = await ordersService.checkFileFormat(filePath.toString());
+
+        fs.unlinkSync(filePath);
+
+        return res.status(200).json({
+            error: false,
+            valid: resultCheckingFileFormat.valid,
+            message: resultCheckingFileFormat.message,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const createOrdersByFile = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(404).json({
+                error: true,
+                message: "File không tồn tại.",
+            });
+        }
+
+        const folderPath = path.join("storage", "business_user", "document", "orders_temp");
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath);
+        }
+        
+        const filePath = path.join(folderPath, req.file.filename);
+        if (!fs.existsSync(filePath)) {
+            throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+        }
+
+        const resultCheckingFileFormat = await ordersService.checkFileFormat(filePath.toString());
+        if (!resultCheckingFileFormat.valid) {
+            return res.status(400).json({
+                error: true,
+                message: resultCheckingFileFormat.message,
+            });
+        }
+
+        const orders = await ordersService.getOrdersFromFile(filePath.toString());
+        
+        let successNumber = 0;
+        const successArray = new Array();
+        let failNumber = 0;
+        const failArray = new Array();
+        
+        for (const order of orders) {
+            const orderTime = new Date();
+            order.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
+            
+            const areaAgencyIdSubParts = req.user.agency_id.split('_');
+            order.agency_id = req.user.agency_id;
+            order.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
+            
+            const stt = order.STT;
+            delete order.STT;
+
+            const resultCreatingNewOrder = ordersService.createNewOrder(order);
+            if (!resultCreatingNewOrder || resultCreatingNewOrder.affectedRows === 0) {
+                failNumber++;
+                failArray.push(stt);
+            }
+            else {
+                successNumber++;
+                successArray.push(stt);
+            }
+        }
+
+        fs.unlinkSync(filePath);
+
+        return res.status(201).json({
+            error: false,
+            info: new Object({
+                successNumber,
+                successArray,
+                failNumber,
+                failArray,
+            }),
+            message: `Tạo đơn hàng từ file ${req.file.filename} thành công.`,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 const updateOrder = async (req, res) => {
     try {
         const { error } = OrderValidation.validateQueryUpdatingOrder(req.query) || OrderValidation.validateUpdatingOrder(req.body);
@@ -298,7 +414,9 @@ const cancelOrder = async (req, res) => {
 module.exports = {
     checkExistOrder,
     getOrders,
+    checkFileFormat,
     createNewOrder,
+    createOrdersByFile,
     updateOrder,
     cancelOrder,
     // calculateFee,

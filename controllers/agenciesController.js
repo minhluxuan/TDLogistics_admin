@@ -6,6 +6,8 @@ const validation = require("../lib/validation");
 
 const agencyValidation = new validation.AgencyValidation();
 
+const agencyCannotBeAffected = ["TD_00000_077165007713"];
+
 const checkExistAgency = async (req, res) => {
 	try {
 		const { error } = agencyValidation.validateCheckingExistAgency(req.query);
@@ -263,6 +265,13 @@ const updateAgency = async (req, res) => {
 				message: error.message,
 			});
 		}
+
+		if (agencyCannotBeAffected.includes(req.query.agency_id)) {
+			return res.status(400).json({
+				error: true,
+				message: `Bưu cục có mã ${req.query.agency_id} không thể bị tác động.`,
+			});
+		}
 		
 		const result = await agenciesService.updateAgency(req.body, req.query);
 		
@@ -295,6 +304,13 @@ const deleteAgency = async (req, res) => {
 			return res.status(400).json({
 				error: true,
 				message: error.message,
+			});
+		}
+
+		if (agencyCannotBeAffected.includes(req.query.agency_id)) {
+			return res.status(400).json({
+				error: true,
+				message: `Bưu cục có mã ${req.query.agency_id} không thể bị tác động.`,
 			});
 		}
 
