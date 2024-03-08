@@ -72,6 +72,13 @@ router.post(
     auth.isAuthorized(["USER", "ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
     ordersController.createNewOrder
 );
+router.post(
+    "/create_by_file",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["USER", "ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    upload.single("file"),
+    ordersController.createOrdersByFile,
+);
 router.put(
     "/update",
     auth.isAuthenticated(),

@@ -240,27 +240,53 @@ const createOrdersByFile = async (req, res) => {
             });
         }
 
-        const orders = ordersService.getOrdersFromFile(filePath.toString());
+        const orders = await ordersService.getOrdersFromFile(filePath.toString());
+        
         let successNumber = 0;
         const successArray = new Array();
         let failNumber = 0;
         const failArray = new Array();
+        
         for (const order of orders) {
+            const orderTime = new Date();
+            order.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
+            
             const areaAgencyIdSubParts = req.user.agency_id.split('_');
             order.agency_id = req.user.agency_id;
             order.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
-            const stt = order.STT;
             
+            const stt = order.STT;
+            delete order.STT;
+
             const resultCreatingNewOrder = ordersService.createNewOrder(order);
             if (!resultCreatingNewOrder || resultCreatingNewOrder.affectedRows === 0) {
                 failNumber++;
-                failNumber.push(order)
+                failArray.push(stt);
+            }
+            else {
+                successNumber++;
+                successArray.push(stt);
             }
         }
 
-        
+        fs.unlinkSync(filePath);
+
+        return res.status(201).json({
+            error: false,
+            info: new Object({
+                successNumber,
+                successArray,
+                failNumber,
+                failArray,
+            }),
+            message: `Tạo đơn hàng từ file ${req.file.filename} thành công.`,
+        });
     } catch (error) {
-        
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
     }
 }
 
@@ -386,6 +412,7 @@ module.exports = {
     getOrders,
     checkFileFormat,
     createNewOrder,
+    createOrdersByFile,
     updateOrder,
     cancelOrder,
     // calculateFee,

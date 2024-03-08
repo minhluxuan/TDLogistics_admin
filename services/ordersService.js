@@ -10,9 +10,9 @@ const checkFileFormat = async (filename) => {
         const row1 = worksheet.getRow(1);
         const headers = row1.values.filter(value => value !== null && value !== undefined && value !== '').map(value => value.toString());
         
-        const mandatoryFields = ["STT", "name_sender", "phone_sender", "name_receiver", "phone_receiver",
+        const mandatoryFields = ["STT", "name_sender", "phone_number_sender", "name_receiver", "phone_number_receiver",
         "mass", "height", "width", "length", "province_source", "district_source", "ward_source", "detail_source",
-        "province_dest", "district_dest", "ward_dest", "detail_dest", "long_source", "lat_source", "long_dest", "lat_dest",
+        "province_dest", "district_dest", "ward_dest", "detail_dest", "long_source", "lat_source", "long_destination", "lat_destination",
         "COD", "service_type"];
 
         const mandatoryFieldsAddress = ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1", "J1", "K1", "L1", "M1", "N1", "O1", "P1", "Q1", "R1", "S1", "T1", "U1", "V1", "W1"];
@@ -92,11 +92,6 @@ const getOrdersFromFile = async (filename) => {
         const worksheet = workbook.getWorksheet(1);
         const row1 = worksheet.getRow(1);
         const headers = row1.values.filter(value => value !== null && value !== undefined && value !== '').map(value => value.toString());
-        
-        const mandatoryFields = ["STT", "name_sender", "phone_sender", "name_receiver", "phone_receiver",
-        "mass", "height", "width", "length", "province_source", "district_source", "ward_source", "detail_source",
-        "province_dest", "district_dest", "ward_dest", "detail_dest", "long_source", "lat_source", "long_dest", "lat_dest",
-        "COD", "service_type"];
 
         const orders = new Array();
         worksheet.eachRow((row, rowNumber) => {
