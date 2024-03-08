@@ -88,7 +88,7 @@ const getStaffs = async (req, res) => {
 				});
 			}
 
-			const result = await staffsService.getManyStaffs(req.body);
+			const result = await staffsService.getManyStaffs(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,
@@ -97,7 +97,7 @@ const getStaffs = async (req, res) => {
 		}
 
 		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = staffValidation.validateFindingStaffByAdmin(req.body);
+			const { error } = staffValidation.validateFindingStaffByAdmin(req.body, paginationConditions);
 
 			if (error) {
 				return res.status(400).json({
@@ -108,7 +108,7 @@ const getStaffs = async (req, res) => {
 
 			req.body.agency_id = req.user.agency_id;
 
-			const result = await staffsService.getManyStaffs(req.body);
+			const result = await staffsService.getManyStaffs(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,
