@@ -73,6 +73,10 @@ Content-Type: application/json
 
 ###
 
+GET http://localhost:5000/api/v1/shipments/get_orders?shipment_id=BC_71000_202422224138948
+
+###
+
 DELETE http://localhost:5000/api/v1/shipments/delete?shipment_id=BC_71000_202422224138948
 Content-Type: application/json 
 

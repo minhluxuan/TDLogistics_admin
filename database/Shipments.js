@@ -162,6 +162,24 @@ const updateParentAndDecreaseMass = async (shipment_id, order_id, postal_code = 
     return true;
 }
 
+const getOrdersFromShipment = async (order_ids) => {
+    const orders = new Array();
+
+    for (const order_id of order_ids) {
+        const resultGettingOneOrder = await Orders.getOneOrder({ order_id });
+        if (resultGettingOneOrder && resultGettingOneOrder.length > 0) {
+            try {
+                resultGettingOneOrder[0].journey = JSON.parse(resultGettingOneOrder[0].journey);
+                orders.push(resultGettingOneOrder[0]);
+            } catch (error) {
+                orders.push(resultGettingOneOrder[0]);
+            }
+        }
+    }
+
+    return orders;
+}
+
 const addOrdersToShipment = async (shipment, order_ids, postal_code = null) => {
     let acceptedNumber = 0;
     const acceptedArray = new Array();
@@ -521,6 +539,7 @@ module.exports = {
     getDataForShipmentCode,
     updateShipment,
     receiveShipment,
+    getOrdersFromShipment,
     addOrdersToShipment,
     deleteOrdersFromShipment,
     updateOrderToDatabase,
