@@ -9,11 +9,6 @@ router.post("/create",
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),   
     shipmentController.createNewShipment);
 
-router.post("/update",
-    auth.isAuthenticated(), 
-    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.updateShipment);
-
 router.post("/get",
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),

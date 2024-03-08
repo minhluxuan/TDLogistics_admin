@@ -12,8 +12,8 @@ const getOnePartnerStaff = async (info) => {
     return await PartnerStaffs.getOnePartnerStaff(info);
 }
 
-const getManyPartnerStaffs = async (info) => {
-  	return await PartnerStaffs.getManyPartnerStaffs(info);
+const getManyPartnerStaffs = async (info, paginationConditions) => {
+  	return await PartnerStaffs.getManyPartnerStaffs(info, paginationConditions);
 }
 
 const updatePartnerStaff = async (info, conditions, postal_code) => {

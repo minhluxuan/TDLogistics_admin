@@ -24,8 +24,8 @@ const getOneBusinessUser = async (conditions) => {
     return await Business.getOneBusinessUser(conditions);
 }
 
-const getManyBusinessUsers = async (conditions) => {
-  	return await Business.getManyBussinessUsers(conditions);
+const getManyBusinessUsers = async (conditions, paginationConditions) => {
+  	return await Business.getManyBussinessUsers(conditions, paginationConditions);
 }
 
 const getOneRepresentor = async (conditions) => {

@@ -76,25 +76,76 @@ const createNewStaff = async (info, postal_code = null) => {
 	return await dbUtils.insert(pool, table, fields, values);
 };
 
-const getManyStaffs = async (info, postal_code) => {
+const getManyStaffs = async (info, paginationConditions, postal_code) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
+	const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+	
 	let query;
 	if (!postal_code) {
 		if (fields.length === 0 || values.length === 0) {
 			query = `SELECT agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff`;
+			if (offset && typeof offset === "number") {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?, ?`;
+					values.push(offset, limit);
+				}
+			}
+			else {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?`;
+					values.push(limit);
+				}
+			}
 		}
 		else {
 			query = `SELECT agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+			if (offset && typeof offset === "number") {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` AND LIMIT ?, ?`;
+					values.push(offset, limit);
+				}
+			}
+			else {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` AND LIMIT ?`;
+					values.push(limit);
+				}
+			}
 		}
 	}
 	else {
 		if (fields.length === 0 || values.length === 0) {
 			query = `SELECT agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"}`;
+			if (offset && typeof offset === "number") {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?, ?`;
+					values.push(offset, limit);
+				}
+			}
+			else {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?`;
+					values.push(limit);
+				}
+			}
 		}
 		else {
 			query = `SELECT agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"} WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+			if (offset && typeof offset === "number") {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` AND LIMIT ?, ?`;
+					values.push(offset, limit);
+				}
+			}
+			else {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` AND LIMIT ?`;
+					values.push(limit);
+				}
+			}
 		}
 	}
 

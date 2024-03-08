@@ -64,11 +64,11 @@ Content-Type: application/json
 }
 
 ### Lấy thông tin lô hàng cho bưu cục 
-POST http://localhost:5000/api/v1/shipments/search
+POST http://localhost:5000/api/v1/shipments/search?rows=1&page=1
 Content-Type: application/json
 
 {
-    "shipment_id": "BC_71000_202422224138948"
+    
 }
 
 ###

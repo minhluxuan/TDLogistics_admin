@@ -46,11 +46,14 @@ const createNewPartnerStaff = async (info) => {
   return await dbUtils.insert(pool, table, fields, values);
 };
 
-const getManyPartnerStaffs = async (info) => {
+const getManyPartnerStaffs = async (info, paginationConditions) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
-	const result = await dbUtils.find(pool, table, fields, values);
+	const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
+	const result = await dbUtils.find(pool, table, fields, values, limit, offset);
 	return result;
 };
 

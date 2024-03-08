@@ -13,21 +13,14 @@ const getOneVehicle = async (conditions) => {
     return await Vehicle.getOneVehicle(conditions);
 }
 
-const getVehicle = async (conditions) => {
-    return await Vehicle.getManyVehicles(conditions);
+const getVehicle = async (conditions, paginationConditions) => {
+    return await Vehicle.getManyVehicles(conditions, paginationConditions);
 };
 
 const getVehicleOrderIds = async (vehicle) => {
     return await Vehicle.getVehicleOrderIds(vehicle);
 };
 
-// const addOrders = async (vehicle, order_ids) => {
-//     return await Vehicle.addOrders(vehicle, order_ids);
-// }
-
-// const deleteOrders = async (vehicle, order_ids) => {
-//     return await Vehicle.deleteOrders(vehicle, order_ids);
-// }
 
 const updateVehicle = async (info, conditions) => {
     return await Vehicle.updateVehicle(info, conditions);

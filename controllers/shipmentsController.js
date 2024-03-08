@@ -311,6 +311,23 @@ const confirmCreateShipment = async (req, res) => {
 
 const getShipments = async (req, res) => {
     try {
+        const paginationConditions = { rows: 0, page: 0 };
+
+        if (req.query.rows) {
+            paginationConditions.rows = parseInt(req.query.rows);
+        }
+
+        if (req.query.page) {
+            paginationConditions.page = parseInt(req.query.page);
+        }
+
+        const { error: paginationError } = shipmentRequestValidation.validatePaginationConditions(paginationConditions);
+        if (paginationError) {
+            return res.status(400).json({
+                error: true,
+                message: paginationError.message,
+            });
+        }
         if(["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
             const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
             const { error } = shipmentRequestValidation.validateFindingShipment(req.body);
@@ -322,7 +339,7 @@ const getShipments = async (req, res) => {
                 });
             }
 
-            const result = await shipmentService.getShipments(req.body, postalCode);
+            const result = await shipmentService.getShipments(req.body, paginationConditions, postalCode);
             
             return res.status(200).json({
                 error: false,
@@ -340,7 +357,7 @@ const getShipments = async (req, res) => {
                 });
             }
 
-            const result = await shipmentService.getShipments(req.body);
+            const result = await shipmentService.getShipments(req.body, paginationConditions);
             
             return res.status(200).json({
                 error: false,

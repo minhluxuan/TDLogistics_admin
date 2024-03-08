@@ -61,6 +61,24 @@ const getAgencies = async (req, res) => {
 		}
 		
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(2)) {
+			const paginationConditions = { rows: 0, page: 0 };
+
+			if (req.query.rows) {
+				paginationConditions.rows = parseInt(req.query.rows);
+			}
+
+			if (req.query.page) {
+				paginationConditions.page = parseInt(req.query.page);
+			}
+
+			const { error: paginationError } = agencyValidation.validatePaginationConditions(paginationConditions);
+			if (paginationError) {
+				return res.status(400).json({
+					error: true,
+					message: paginationError.message,
+				});
+			}
+			
 			const { error } = agencyValidation.validateFindingAgencyByAdmin(req.body);
 
 			if (error) {
@@ -70,7 +88,7 @@ const getAgencies = async (req, res) => {
 				});
 			}
 
-			const result = await agenciesService.getAgencies(req.body);
+			const result = await agenciesService.getAgencies(req.body, paginationConditions);
 
 			if (!result) {
 				throw new Error("Đã xảy ra lỗi. Lấy thông tin đại lý không thành công. Vui lòng thử lại.");

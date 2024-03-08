@@ -37,6 +37,24 @@ const checkExistBusiness = async (req, res) => {
 
 const getBusiness = async (req, res) => {
 	try {
+		const paginationConditions = { rows: 0, page: 0 };
+
+		if (req.query.rows) {
+			paginationConditions.rows = parseInt(req.query.rows);
+		}
+
+		if (req.query.page) {
+			paginationConditions.page = parseInt(req.query.page);
+		}
+
+		const { error: paginationError } = businessValidation.validatePaginationConditions(paginationConditions);
+		if (paginationError) {
+			return res.status(400).json({
+				error: true,
+				message: paginationError.message,
+			});
+		}
+
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingBusinessByAdmin(req.body);
 
@@ -47,7 +65,9 @@ const getBusiness = async (req, res) => {
 				});
 			}
 
-			const result = await businessService.getManyBusinessUsers(req.body);
+			
+
+			const result = await businessService.getManyBusinessUsers(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,
@@ -67,7 +87,7 @@ const getBusiness = async (req, res) => {
 
 			req.body.agency_id = req.user.agency_id;
 
-			const result = await businessService.getManyBusinessUsers(req.body);
+			const result = await businessService.getManyBusinessUsers(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,

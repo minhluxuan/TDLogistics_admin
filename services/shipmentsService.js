@@ -16,8 +16,8 @@ const getOneShipment = async (conditions, postal_code = null) => {
     return await Shipment.getOneShipment(conditions, postal_code);
 }
 
-const getShipments = async (conditions, postal_code) => {
-    return await Shipment.getShipments(conditions, postal_code);
+const getShipments = async (conditions, paginationConditions, postal_code = null) => {
+    return await Shipment.getShipments(conditions, paginationConditions, postal_code);
 }
 
 const updateParentForGlobalOrders = async (order_ids, shipment_id) => {

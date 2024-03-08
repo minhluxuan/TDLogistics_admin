@@ -268,10 +268,14 @@ const getOneAgency = async (info) => {
     return await dbUtils.findOneIntersect(pool, table, fields, values);
 };
 
-const getManyAgencies = async (info) => {
+const getManyAgencies = async (info, paginationConditions) => {
 	const fields = Object.keys(info) || new Array();
 	const values = Object.values(info) || new Array();
-	const result = await dbUtils.find(pool, table, fields, values);
+
+	const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
+	const result = await dbUtils.find(pool, table, fields, values, limit, offset);
 
 	for (const agency of result) {
 		if (agency.hasOwnProperty("managed_areas")) {

@@ -38,11 +38,14 @@ const createNewVehicle = async (info) => {
     return await dbUtils.insert(pool, table, allFields, allValues);
 };
 
-const getManyVehicles = async (conditions) => {
+const getManyVehicles = async (conditions, paginationConditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
-    return await dbUtils.find(pool, table, fields, values);
+    const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
+    return await dbUtils.find(pool, table, fields, values, limit, offset);
 };
 
 const getOneVehicle = async (conditions) => {

@@ -274,12 +274,15 @@ const updateShipment = async (info, conditions, postalCode) => {
     return dbUtils.updateOne(pool, shipmentTable, fields, values, conditionFields, conditionValues);
 };
 
-const getShipments = async (conditions, postal_code = null) => {
+const getShipments = async (conditions, paginationConditions, postal_code) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
+    const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
     const shipmentTable = postal_code ? postal_code + '_' + table : table;
-    const shipments = await dbUtils.find(pool, shipmentTable, fields, values);
+    const shipments = await dbUtils.find(pool, shipmentTable, fields, values, limit, offset);
     for (const shipment of shipments) {
         try {
             if (shipment.order_ids) {

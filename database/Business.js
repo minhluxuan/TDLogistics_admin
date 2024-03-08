@@ -88,11 +88,14 @@ const createNewRepresentor = async (info) => {
 	return await dbUtils.insert(pool, businessRepresentorTable, fields, values);
 };
 
-const getManyBussinessUsers = async (info) => {
+const getManyBussinessUsers = async (info, paginationConditions) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
-  	return await dbUtils.find(pool, table, fields, values);
+	const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
+  	return await dbUtils.find(pool, table, fields, values, limit, offset);
 };
 
 const getOneBusinessUser = async (info) => {
