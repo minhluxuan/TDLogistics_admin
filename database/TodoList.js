@@ -15,42 +15,19 @@ const table = "schedule"; //schedule/postalcode_schedule
 const suffix = "_" + table;
 const pool = mysql.createPool(dbOptions).promise();
 
-// create new by agency
-// const example = new Object({
-//     postal_code: "11145",
-//     task: "Create new task",
-//     prioity: 1,
-//     created_at: "",
-// });
 const createNewTaskAgency = async (info, postalCode) => {
     const agencyScheuleTable = postalCode + suffix;
     const fields = Object.keys(info);
     const values = Object.values(info);
     return await dbUtils.insert(pool, agencyScheuleTable, fields, values);
 };
-// create new by admin
-// const example = new Object({
-//     task: "Create new task",
-//     prioity: 1,
-//     created_at: "",
-// });
+
 const createNewTaskByAdmin = async (info) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
     return await dbUtils.insert(pool, table, fields, values);
 };
-//update by agency
-// const conditions = new Object({
-//     postal_code: "11454",
-//     created_at: "",
-//     completed_at: "", // if this has complete then complete cant be in the updating, this logic is handle in the controller layers
-//     priority: 1,
-// });
-// const updating = new Object({
-//     task: "Additional changes for agency",
-//     priority: 1,
-//     completed_at:""
-// });
+
 const updateTaskByAgency = async (info, conditions, postalCode) => {
     const agencyScheuleTable = postalCode + suffix;
     const fields = Object.keys(info);
@@ -60,17 +37,6 @@ const updateTaskByAgency = async (info, conditions, postalCode) => {
     return await dbUtils.update(pool, agencyScheuleTable, fields, values, conditionFields, conditionValues);
 };
 
-//update by admin
-// const conditions = new Object({
-//     created_at: "",
-//     completed_at: "",
-//     priority: 1,
-// });
-// const updating = new Object({
-//     task: "Additional changes for agency",
-//     priority: 1,
-//     completed_at:""
-// });
 const updateTaskByAdmin = async (info, conditions) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
@@ -79,13 +45,14 @@ const updateTaskByAdmin = async (info, conditions) => {
     return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
-//get by agency
-// const conditions = new Object({
-//     postal_code: "11454",
-//     task: "do the commit",
-//     priority: 1,
-//     deadline: 11/6/2024
-// });
+const getOneTask = async (condition, postal_code = null) => {
+    const fields = Object.keys(condition);
+    const values = Object.values(condition);
+
+    const scheduleTable = postal_code ? postal_code + '_' + table : table;
+    return await dbUtils.findOneIntersect(pool, scheduleTable, fields, values);
+}
+
 const getTasksByAgency = async (conditions, postalCode) => {
     const agencyScheduleTable = postalCode + suffix;
     let query = `SELECT * FROM ${agencyScheduleTable}`;
@@ -113,11 +80,7 @@ const getTasksByAgency = async (conditions, postalCode) => {
     const result = await pool.query(query, values);
     return result[0];
 };
-//get by admin
-// const conditions = new Object({
-//     task: ""
-//      priority: 1,
-// });
+
 const getTasksByAdmin = async (conditions) => {
     let query = `SELECT * FROM ${table}`;
     let values = [];
@@ -144,11 +107,7 @@ const getTasksByAdmin = async (conditions) => {
     const result = await pool.query(query, values);
     return result[0];
 };
-//delete by agency
-// const conditions = new Object({
-//     postal_code: "12233",
-//     id: 123,
-// });
+
 const deleteTaskByAgency = async (conditions) => {
     if (conditions.postal_code) {
         const agencyScheuleTable = conditions.postal_code + suffix;
@@ -160,10 +119,7 @@ const deleteTaskByAgency = async (conditions) => {
         throw new Error("Không xác định được postal code");
     }
 };
-//delete by admin
-// const conditions = new Object({
-//     id: 123,
-// });
+
 const deleteTaskByAdmin = async (conditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
@@ -174,6 +130,7 @@ module.exports = {
     createNewTaskByAdmin,
     updateTaskByAgency,
     updateTaskByAdmin,
+    getOneTask,
     getTasksByAgency,
     getTasksByAdmin,
     deleteTaskByAgency,

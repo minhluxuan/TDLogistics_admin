@@ -8,6 +8,10 @@ const createScheduleByAgency = async (info, postalCode) => {
     return await Schedule.createNewTaskAgency(info, postalCode);
 };
 
+const getOneTask = async (condition, postalCode = null) => {
+    return await Schedule.getOneTask(condition, postalCode);
+}
+
 const getScheduleByAdmin = async (conditions) => {
     return await Schedule.getTasksByAdmin(conditions);
 };
@@ -35,6 +39,7 @@ const deleteScheduleByAgency = async (conditions) => {
 module.exports = {
     createScheduleByAdmin,
     createScheduleByAgency,
+    getOneTask,
     getScheduleByAdmin,
     getScheduleByAgency,
     updateScheduleByAdmin,

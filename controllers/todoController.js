@@ -137,10 +137,26 @@ const updateSchedule = async (req, res) => {
         }
 
         if (req.body.completed) {
-            //if completed is update a gain, this will still pass
+            //if completed is update again, this will still pass
             req.body.complete_at = moment(new Date()).format("YYYY-MM-DD HH:MM:SS");
         }
+
         if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER".includes(req.user.role)]) {
+            const resultGettingOneTask = await scheduleService.getOneTask(req.query);
+            if (!resultGettingOneTask || resultGettingOneTask.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Công việc có mã ${req.query.id} không tồn tại.`,
+                });
+            }
+
+            if (resultGettingOneTask[0].completed) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Công việc có mã ${req.query.id} đã hoàn thành trước đó.`,
+                });
+            }
+            
             const result = await scheduleService.updateScheduleByAdmin(req.body, req.query);
             if (!result || result[0].affetedRows <= 0) {
                 return res.status(404).json({
@@ -159,9 +175,23 @@ const updateSchedule = async (req, res) => {
             )
         ) {
             const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
+            const resultGettingOneTask = await scheduleService.getOneTask(req.query, postalCode);
+            if (!resultGettingOneTask || resultGettingOneTask.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Công việc có mã ${req.query.id} không tồn tại.`,
+                });
+            }
+
+            if (resultGettingOneTask[0].completed) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Công việc có mã ${req.query.id} đã hoàn thành trước đó.`,
+                });
+            }
 
             const result = await scheduleService.updateScheduleByAgency(req.body, req.query, postalCode);
-            if (!result || result[0].affetedRows <= 0) {
+            if (!result || result[0].affetedRows === 0) {
                 return res.status(404).json({
                     error: true,
                     message: "Task không tồn tại.",
@@ -184,6 +214,8 @@ const updateSchedule = async (req, res) => {
 const deleteSchedule = async (req, res) => {
     try {
         const { error } = scheduleValidation.validateIDSchedule(req.body);
+        
+
         if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER".includes(req.user.role)]) {
             const tempSchedule = new Object({
                 id: req.body.id,
