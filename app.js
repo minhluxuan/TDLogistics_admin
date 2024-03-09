@@ -32,6 +32,7 @@ const agenciesRouter = require("./routes/agenciesRoute");
 const usersRouter = require("./routes/usersRoute");
 const ordersRouter = require("./routes/ordersRoute");
 const shippersRouter = require("./routes/shippersRoute");
+const scheduleRouter = require("./routes/scheduleRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -109,6 +110,7 @@ app.use("/api/v1/authorization", authorizationRouter);
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/orders", ordersRouter);
 app.use("/api/v1/shippers", shippersRouter);
+app.use("/api/v1/schedules", scheduleRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({

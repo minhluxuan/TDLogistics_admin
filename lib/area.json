@@ -1,0 +1,149 @@
+{
+    "CPN": {
+      "T60": [
+        "Hà Nội",
+        "Quảng Ninh",
+        "Thái Bình",
+        "Ninh Bình",
+        "Nam Định",
+        "Hải Dương",
+        "Hải Phòng",
+        "Hưng Yên",
+        "Bắc Ninh",
+        "Hà Nam",
+        "Vĩnh Phúc",
+        "Phú Thọ",
+        "Thái Nguyên",
+        "Bắc Giang",
+        "Thanh Hóa",
+        "Nghệ An",
+        "Hà Tĩnh",
+        "Đà Nẵng",
+        "Thừa Thiên-Huế",
+        "Quảng Bình",
+        "Quảng Trị",
+        "Quảng Nam",
+        "Quảng Ngãi",
+        "Gia Lai",
+        "Kon Tum",
+        "Bình Định",
+        "Phú Yên",
+        "Khánh Hòa",
+        "Ninh Thuận",
+        "Bình Thuận",
+        "Đồng Nai",
+        "Bình Dương",
+        "Bà Rịa-Vũng Tàu",
+        "Hồ Chí Minh",
+        "Long An",
+        "Tiền Giang",
+        "Tây Ninh"
+      ]
+  
+    },
+  
+    "TTK": {
+      "NORTH_AREA": [
+        "Lai Châu",
+        "Lào Cai",
+        "Hà Giang",
+        "Cao bằng",
+        "Lạng Sơn",
+        "Quảng Ninh",
+        "Điện Biên",
+        "Yên Bái",
+        "Tuyên Quang",
+        "Bắc Kạn",
+        "Phú Thọ",
+        "Sơn La",
+        "Bắc Giang",
+        "Thái Nguyên",
+        "Vĩnh Phúc",
+        "Bắc Ninh",
+        "Hòa Bình",
+        "Hải Dương",
+        "Hà Nam",
+        "Hải Phòng",
+        "Hưng Yên",
+        "Nam Định",
+        "Ninh Bình",
+        "Thái Bình",
+        "Hà Nội",
+        "Hà Tĩnh",
+        "Nghệ An",
+        "Thanh Hóa"
+      ],
+  
+      "MIDDLE_AREA": [
+        "Quảng Bình",
+        "Quảng Trị",
+        "Thừa Thiên-Huế",
+        "Đà Nẵng",
+        "Quảng Nam",
+        "Quảng Ngãi",
+        "Bình Định",
+        "Phú Yên",
+        "Khánh Hòa",
+        "Kon Tum",
+        "Gia Lai"
+      ],
+  
+      "SOUTH_AREA": [
+        "Bình Thuận",
+        "Ninh Thuận",
+        "Đắk Lắk",
+        "Lâm Đồng",
+        "Bình Dương",
+        "Bình Phước",
+        "Bến Tre",
+        "Đắk Nông",
+        "Đồng Nai",
+        "Long An",
+        "Tiền Giang",
+        "Tây Ninh",
+        "Bà Rịa-Vũng Tàu",
+        "TP.Hồ Chí Minh",
+        "Trà Vinh",
+        "Vĩnh Long",
+        "An Giang",
+        "Bạc Liêu",
+        "Cà Mau",
+        "Cần Thơ",
+        "Đồng Tháp",
+        "Hậu Giang",
+        "Kiên Giang",
+        "Sóc Trăng"
+      ]
+    },
+  
+    "HTT": {
+      "HN": ["Hà Nội"],
+  
+      "HCM": ["TP.Hồ Chí Minh"],
+  
+      "DN": ["Đà Nẵng"],
+  
+      "HN_OUTER": [
+        "Vĩnh Phúc",
+        "Thái Nguyên",
+        "Bắc Ninh",
+        "Hưng Yên",
+        "Hải Dương",
+        "Hải Phòng",
+        "Hà Nam",
+        "Nam Định",
+        "Thái Bình",
+        "Ninh Bình",
+        "Hòa Bình"
+      ],
+  
+      "HCM_OUTER": [
+        "Đồng Nai",
+        "Bình Dương",
+        "Bà Rịa - Vũng Tàu",
+        "Tây Ninh",
+        "Long An",
+        "Bến Tre"
+      ]
+    }
+  }

@@ -75,8 +75,6 @@ const getTasksByAgency = async (conditions, postalCode) => {
         query += " WHERE " + whereClauses.join(" AND ");
     }
 
-    console.log(pool.format(query, values));
-
     const result = await pool.query(query, values);
     return result[0];
 };
