@@ -19,4 +19,20 @@ Content-Type: application/json
    "priority": 2,
    "task": "Create the universe 1"
 }
+
+
+
  ###
+
+PATCH http://localhost:5000/api/v1/schedule/update?id=1
+Content-Type: application/json
+
+{
+   "deadline": "2024-03-15 10:39:27",
+   "priority": 2,
+   "task": "Undo the timer"
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/schedule/update?id=1
