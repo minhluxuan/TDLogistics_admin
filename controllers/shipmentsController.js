@@ -15,11 +15,110 @@ const createNewShipment = async (req, res) => {
         if (error) {
             return res.status(400).json({
                 error: true,
+                message: "Thông tin không hợp lệ!",
+            });
+        }
+
+        let keys, values;
+
+        const createdTime = new Date();
+        const formattedCreatedTime = moment(createdTime).format("YYYY-MM-DD HH:mm:ss");
+
+        const shipmentId =
+            "TD" +
+            createdTime.getFullYear().toString() +
+            createdTime.getMonth().toString() +
+            createdTime.getDay().toString() +
+            createdTime.getHours().toString() +
+            createdTime.getMinutes().toString() +
+            createdTime.getSeconds().toString() +
+            createdTime.getMilliseconds().toString();
+
+        //get address throught coordinate
+        // const map = new servicesUtils.Map();
+
+        const source = {
+            lat: req.body.lat_source,
+            long: req.body.long_source,
+        };
+
+        const destination = {
+            lat: req.body.lat_destination,
+            long: req.body.long_destination,
+        };
+
+        const addressSource = await map.convertCoordinateToAddress(source);
+        const addressDestination = await map.convertCoordinateToAddress(destination);
+
+        //luôn luôn để shipment_id là phần tử đầu tiên để xóa shipment thuận tiện
+        req.body.shipment_id = shipmentId;
+        req.body.address_source = addressSource;
+        req.body.address_destination = addressDestination;
                 message: error.message,
             });
         }
 
         if (req.body.hasOwnProperty("transport_partner_id")) {
+            const data = await shipmentService.getDataForShipmentCode(req.body.staff_id, req.body.transport_partner_id);
+            const partnerName = await utils.shortenName(data.partnerName);
+            const vehicleID = data.vehicleID;
+            const shipmentCode =
+                "TD" +
+                "-" +
+                partnerName +
+                "-" +
+                createdTime.getFullYear().toString() +
+                createdTime.getMonth().toString() +
+                createdTime.getDay().toString() +
+                "-" +
+                req.body.route +
+                "-" +
+                vehicleID;
+
+            if (req.body.hasOwnProperty("route")) {
+                delete req.body.route;
+            }
+
+            req.body.shipment_code = shipmentCode;
+            req.body.vehicle_code = vehicleID;
+
+            keys = Object.keys(req.body);
+            values = Object.values(req.body);
+        } else {
+            const data = await shipmentService.getDataForShipmentCode(req.body.staff_id);
+            const shipperName = await utils.shortenName(data.fullname);
+            const vehicleID = data.vehicleID;
+            const shipmentCode =
+                "TD" +
+                "-" +
+                shipperName +
+                "-" +
+                createdTime.getFullYear().toString() +
+                createdTime.getMonth().toString() +
+                createdTime.getDay().toString() +
+                "-" +
+                req.body.route +
+                "-" +
+                vehicleID;
+
+            if (req.body.hasOwnProperty("route")) {
+                delete req.body.route;
+            }
+
+            req.body.shipment_code = shipmentCode;
+            req.body.vehicle_code = vehicleID;
+
+            keys = Object.keys(req.body);
+            values = Object.values(req.body);
+        }
+
+        await shipmentService.createNewShipment(keys, values, agency_id);
+
+        return res.status(200).json({
+            error: false,
+            message: "Tạo lô hàng thành công!",
+        });
+    } catch (error) {
             if (!(await transportPartnerService.checkExistPartner({ transport_partner_id: req.body.transport_partner_id }))) {
                 return res.status(404).json({
                     error: true,
@@ -68,7 +167,7 @@ const createNewShipment = async (req, res) => {
             message: error.message
         });
     }
-}
+};
 
 const updateShipment = async (req, res) => {
     try {
@@ -121,7 +220,7 @@ const updateShipment = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const addOrderToShipment = async (req, res) => {
     try {
@@ -187,7 +286,7 @@ const addOrderToShipment = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const deleteOrderFromShipment = async (req, res) => {
     try {
@@ -245,7 +344,7 @@ const deleteOrderFromShipment = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const confirmCreateShipment = async (req, res) => {
     try {
@@ -305,7 +404,7 @@ const confirmCreateShipment = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const getShipments = async (req, res) => {
     try {
@@ -352,7 +451,7 @@ const getShipments = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const deleteShipment = async (req, res) => {
     try {
@@ -402,7 +501,7 @@ const deleteShipment = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const decomposeShipment = async (req, res) => {
     try {  
@@ -476,7 +575,7 @@ const decomposeShipment = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const receiveShipment = async (req, res) => {
     try {
@@ -532,7 +631,7 @@ const receiveShipment = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const undertakeShipment = async (req, res) => {
     try {
@@ -612,7 +711,7 @@ const undertakeShipment = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 module.exports = {
     createNewShipment,

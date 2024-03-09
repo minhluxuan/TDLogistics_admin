@@ -1,0 +1,22 @@
+GET  http://localhost:5000/api/v1/schedule/search
+Content-Type: application/json
+
+{
+   "deadline": "2024-03-15 10:39:27",
+   "priority": 4,
+   "completed": false
+}
+
+
+
+###
+
+POST http://localhost:5000/api/v1/schedule/create
+Content-Type: application/json
+
+{
+   "deadline": "2024-03-15 10:39:27",
+   "priority": 2,
+   "task": "Create the universe 1"
+}
+ ###

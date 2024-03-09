@@ -11,7 +11,7 @@ const getTasks = async (req, res) => {
         if (error) {
             return res.status(400).json({
                 error: true,
-                message: error.message
+                message: error.message,
             });
         }
 
@@ -19,7 +19,7 @@ const getTasks = async (req, res) => {
 
         req.body.staff_id = req.user.staff_id;
         const resultGettingTasks = await shippersService.getTasks(req.body, postalCode);
-        
+
         return res.status(200).json({
             error: false,
             data: resultGettingTasks,
@@ -31,7 +31,7 @@ const getTasks = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const confirmCompletedTask = async (req, res) => {
     try {
@@ -45,7 +45,11 @@ const confirmCompletedTask = async (req, res) => {
         }
 
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
-        const resultConfirmingCompletedTask = await shippersService.confirmCompletedTask(req.body.id, req.user.staff_id, postalCode);
+        const resultConfirmingCompletedTask = await shippersService.confirmCompletedTask(
+            req.body.id,
+            req.user.staff_id,
+            postalCode
+        );
         if (!resultConfirmingCompletedTask || resultConfirmingCompletedTask.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
@@ -64,7 +68,7 @@ const confirmCompletedTask = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 const getHistory = async (req, res) => {
     try {
@@ -92,10 +96,10 @@ const getHistory = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
 
 module.exports = {
     getTasks,
     confirmCompletedTask,
     getHistory,
-}
+};
