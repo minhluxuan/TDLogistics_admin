@@ -12,8 +12,8 @@ const getOnePartner = async (info) => {
     return await Partner.getOnePartner(info);
 };
 
-const getManyPartners = async (info) => {
-    return await Partner.getManyPartners(info);
+const getManyPartners = async (info, paginationConditions) => {
+    return await Partner.getManyPartners(info, paginationConditions);
 };
 
 const updatePartner = async (info, conditions) => {

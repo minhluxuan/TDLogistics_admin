@@ -25,10 +25,10 @@ const pool = mysql.createPool(dbOptions).promise();
 const checkExistShipment = async (conditions, postal_code = null) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
-
+    
     const shipmentTable = postal_code ? postal_code + '_' + table : table;
     const resultGettingOneShipment = await dbUtils.findOneIntersect(pool, shipmentTable, fields, values);
-
+    
     return resultGettingOneShipment.length > 0;
 }
 
@@ -134,6 +134,7 @@ const updateParentAndIncreaseMass = async (shipment_id, order_id, postal_code = 
     return true;
 }
 
+
 const updateParentAndDecreaseMass = async (shipment_id, order_id, postal_code = null) => {
     const ordersTable = postal_code ? postal_code + '_' + "orders" : "orders";
     const resultGettingOneOrder = await dbUtils.findOneIntersect(pool, ordersTable, ["order_id"], [order_id]);
@@ -159,6 +160,24 @@ const updateParentAndDecreaseMass = async (shipment_id, order_id, postal_code = 
     await pool.query(orderQuery, [ordersTable, "parent", null, "order_id", order_id]);
 
     return true;
+}
+
+const getOrdersFromShipment = async (order_ids) => {
+    const orders = new Array();
+
+    for (const order_id of order_ids) {
+        const resultGettingOneOrder = await Orders.getOneOrder({ order_id });
+        if (resultGettingOneOrder && resultGettingOneOrder.length > 0) {
+            try {
+                resultGettingOneOrder[0].journey = JSON.parse(resultGettingOneOrder[0].journey);
+                orders.push(resultGettingOneOrder[0]);
+            } catch (error) {
+                orders.push(resultGettingOneOrder[0]);
+            }
+        }
+    }
+
+    return orders;
 }
 
 const addOrdersToShipment = async (shipment, order_ids, postal_code = null) => {
@@ -273,12 +292,15 @@ const updateShipment = async (info, conditions, postalCode) => {
     return dbUtils.updateOne(pool, shipmentTable, fields, values, conditionFields, conditionValues);
 };
 
-const getShipments = async (conditions, postal_code = null) => {
+const getShipments = async (conditions, paginationConditions, postal_code) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
+    const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
     const shipmentTable = postal_code ? postal_code + '_' + table : table;
-    const shipments = await dbUtils.find(pool, shipmentTable, fields, values);
+    const shipments = await dbUtils.find(pool, shipmentTable, fields, values, limit, offset);
     for (const shipment of shipments) {
         try {
             if (shipment.order_ids) {
@@ -371,6 +393,11 @@ const updateOrderToDatabase = async (fields, values, order_id) => {
 
 const receiveShipment = async (shipment_id, postal_code) => {
     const agencyOrdersTable = postal_code + "_orders";
+    const agencyShipmentTable = postal_code + suffix;
+    const getShipmentResult = await getInfoShipment(shipment_id);
+    const cloneShipmentFromGlobal = await dbUtils.insert(pool, agencyShipmentTable, getShipmentResult.fields, getShipmentResult.values);
+
+
     const getOrderIDsQuery = `SELECT order_ids FROM ${table} WHERE shipment_id = ?`;
     const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
 
@@ -512,6 +539,7 @@ module.exports = {
     getDataForShipmentCode,
     updateShipment,
     receiveShipment,
+    getOrdersFromShipment,
     addOrdersToShipment,
     deleteOrdersFromShipment,
     updateOrderToDatabase,

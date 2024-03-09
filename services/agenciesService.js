@@ -36,8 +36,8 @@ const getOneAgency = async (info) => {
     return await Agencies.getOneAgency(info);
 }
 
-const getAgencies = async (info) => {
-    return await Agencies.getManyAgencies(info);
+const getAgencies = async (info, paginationConditions) => {
+    return await Agencies.getManyAgencies(info, paginationConditions);
 }
 
 const updateAgency = async (info, conditions) => {

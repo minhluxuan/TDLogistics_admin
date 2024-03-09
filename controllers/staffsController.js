@@ -60,6 +60,24 @@ const getAuthenticatedStaffInfo = async (req, res) => {
 
 const getStaffs = async (req, res) => {
 	try {
+		const paginationConditions = { rows: 0, page: 0 };
+
+        if (req.query.rows) {
+            paginationConditions.rows = parseInt(req.query.rows);
+        }
+
+        if (req.query.page) {
+            paginationConditions.page = parseInt(req.query.page);
+        }
+
+        const { error: paginationError } = staffValidation.validatePaginationConditions(paginationConditions);
+        if (paginationError) {
+            return res.status(400).json({
+                error: true,
+                message: paginationError.message,
+            });
+        }
+		
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
 			const { error } = staffValidation.validateFindingStaffByAdmin(req.body);
 
@@ -70,7 +88,7 @@ const getStaffs = async (req, res) => {
 				});
 			}
 
-			const result = await staffsService.getManyStaffs(req.body);
+			const result = await staffsService.getManyStaffs(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,
@@ -79,7 +97,7 @@ const getStaffs = async (req, res) => {
 		}
 
 		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = staffValidation.validateFindingStaffByAdmin(req.body);
+			const { error } = staffValidation.validateFindingStaffByAdmin(req.body, paginationConditions);
 
 			if (error) {
 				return res.status(400).json({
@@ -90,7 +108,7 @@ const getStaffs = async (req, res) => {
 
 			req.body.agency_id = req.user.agency_id;
 
-			const result = await staffsService.getManyStaffs(req.body);
+			const result = await staffsService.getManyStaffs(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,
@@ -298,9 +316,9 @@ const updateStaffInfo = async (req, res) => {
 		}
 
 		if (userCannotBeAffected.includes(req.query.staff_id)) {
-			return res.status(403).json({
+			return res.status(400).json({
 				error: true,
-				message: "Người dùng không được phép truy cập tài nguyên này.",
+				message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
 			});
 		}
 
@@ -381,9 +399,9 @@ const deleteStaff = async (req, res) => {
 		}
 
 		if (userCannotBeAffected.includes(req.query.staff_id)) {
-			return res.status(403).json({
+			return res.status(400).json({
 				error: true,
-				message: "Người dùng không được phép truy cập tài nguyên này.",
+				message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
 			});
 		}
 
@@ -443,6 +461,24 @@ const deleteStaff = async (req, res) => {
 	}
 }
 
+const logout = (req, res) => {
+	try {
+		req.logout(() => {
+			req.session.destroy();
+		});
+
+		return res.status(200).json({
+			error: false,
+			message: "Đăng xuất thành công.",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			error: true,
+			message: "Đăng xuất thất bại."
+		});
+	}
+} 
+
 const updatePassword = async (req, res) => {
 	try {
 		const { error } = staffValidation.validateUpdatePassword(req.body);
@@ -455,9 +491,9 @@ const updatePassword = async (req, res) => {
 		}
 
 		if (userCannotBeAffected.includes(req.query.staff_id)) {
-			return res.status(403).json({
+			return res.status(400).json({
 				error: true,
-				message: "Người dùng không được phép truy cập tài nguyên này.",
+				message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
 			});
 		}
 		
@@ -499,9 +535,9 @@ const updateAvatar = async (req, res) => {
 		}
 
 		if (userCannotBeAffected.includes(req.query.staff_id)) {
-			return res.status(403).json({
+			return res.status(400).json({
 				error: true,
-				message: "Người dùng không được phép truy cập tài nguyên này.",
+				message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
 			});
 		}
 
@@ -685,6 +721,7 @@ module.exports = {
 	getStaffs,
 	updateStaffInfo,
 	deleteStaff,
+	logout,
 	updatePassword,
 	updateAvatar,
 	getStaffAvatar

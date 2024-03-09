@@ -16,8 +16,8 @@ const getOneStaff = async (info) => {
     return await Staffs.getOneStaff(info);
 }
 
-const getManyStaffs = async (info) => {
-  	return await Staffs.getManyStaffs(info);
+const getManyStaffs = async (info, paginationConditions) => {
+  	return await Staffs.getManyStaffs(info, paginationConditions);
 }
 
 const updateStaff = async (info, conditions, postal_code) => {

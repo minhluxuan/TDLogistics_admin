@@ -39,11 +39,25 @@ const getOneOrder = async (conditions) => {
     return result;
 }
 
-const getOrders = async (conditions) => {
+const getOrders = async (conditions, paginationConditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
-    const result = await SQLutils.find(pool, table, fields, values);
+    const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
+    const result = await SQLutils.find(pool, table, fields, values, limit, offset);
+
+    for (const elm of result) {
+        try {
+            if (elm.journey) {
+                elm.journey = JSON.parse(elm.journey);
+            }   
+        } catch (error) {
+            // Nothing to do
+        }
+    }
+
     return result;
 }
 
@@ -219,8 +233,8 @@ const getOrderStatus = async (order_id) => {
         status_message: statusMessage
     }
 }
-
 const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false) => {
+
     if(isUpdateJourney) {
         if(!orderInfo.managed_by) {
             return new Object({
@@ -228,12 +242,11 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
                 data: null,
                 message: "Không đủ thông tin để thực hiện thao tác trên!"
             });
-        }
-
+        }        
         const currentTime = new Date();
-        const settingTime = moment(currentTime).format("ss:mm:HH DD-MM-YYYY");
-
-        const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ? LIMIT 1`;
+        const settingTime = moment(currentTime).format("DD-MM-YYYY ss:mm:HH");
+    
+        const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ?`;
         const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
         let journey;
         try {

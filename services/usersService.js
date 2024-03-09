@@ -9,11 +9,15 @@ const createNewUser = async (newUser) => {
 }
 
 const getOneUser = async (conditions) => {
-    return Users.getOneUser(conditions);
+    return await Users.getOneUser(conditions);
 }
 
 const updateUserInfo = async (info, conditions) => {
     return await Users.updateUserInfo(info, conditions);
+}
+
+const getNameUsingPhoneNummber = async (phone_number) => {
+    return await Users.getNameUsingPhoneNummber(phone_number);
 }
 
 
@@ -22,4 +26,5 @@ module.exports = {
     createNewUser,
     getOneUser,
     updateUserInfo,
+    getNameUsingPhoneNummber
 }

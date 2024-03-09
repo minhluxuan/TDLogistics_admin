@@ -4,12 +4,12 @@ const validation = require("../lib/validation");
 const containerRequestValidation = new validation.ContainerValidation();
 
 const createContainer = async (req, res) => {
-    if(!req.isAuthenticated() || req.user.permisson !== 3) {
-        return res.status(401).json({
-            error: true,
-            message: "Bạn không được phép truy cập tài nguyên này.",
-        });
-    }
+    // if(!req.isAuthenticated() || req.user.permisson !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
 
     try {
         const { error } = containerRequestValidation.validateCreatingContainer(req.body);
@@ -50,12 +50,12 @@ const createContainer = async (req, res) => {
 }
 
 const updateContainer = async (req, res) => {
-    if (!req.isAuthenticated() || req.user.permission < 2) {
-        return res.status(401).json({
-            error: true,
-            message: "Bạn không được phép truy cập tài nguyên này.",
-        });
-    }
+    // if (!req.isAuthenticated() || req.user.permission < 2) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
 
     try {
         const { error } = containerRequestValidation.validateUpdatingContainer(req.body);
@@ -117,12 +117,12 @@ const updateContainer = async (req, res) => {
 }
 
 const getContainer = async (req, res) => {
-    if (!req.isAuthenticated() || req.user.permission !== 3) {
-        return res.status(401).json({
-            error: true,
-            message: "Bạn không được phép truy cập tài nguyên này.",
-        });
-    }
+    // if (!req.isAuthenticated() || req.user.permission !== 3) {
+    //     return res.status(401).json({
+    //         error: true,
+    //         message: "Bạn không được phép truy cập tài nguyên này.",
+    //     });
+    // }
     
     try {
         const { error } = containerRequestValidation.validateFindingContainer(req.body);

@@ -6,6 +6,8 @@ const validation = require("../lib/validation");
 
 const agencyValidation = new validation.AgencyValidation();
 
+const agencyCannotBeAffected = ["TD_00000_077165007713"];
+
 const checkExistAgency = async (req, res) => {
 	try {
 		const { error } = agencyValidation.validateCheckingExistAgency(req.query);
@@ -61,6 +63,24 @@ const getAgencies = async (req, res) => {
 		}
 		
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role) || req.user.privileges.includes(2)) {
+			const paginationConditions = { rows: 0, page: 0 };
+
+			if (req.query.rows) {
+				paginationConditions.rows = parseInt(req.query.rows);
+			}
+
+			if (req.query.page) {
+				paginationConditions.page = parseInt(req.query.page);
+			}
+
+			const { error: paginationError } = agencyValidation.validatePaginationConditions(paginationConditions);
+			if (paginationError) {
+				return res.status(400).json({
+					error: true,
+					message: paginationError.message,
+				});
+			}
+			
 			const { error } = agencyValidation.validateFindingAgencyByAdmin(req.body);
 
 			if (error) {
@@ -70,7 +90,7 @@ const getAgencies = async (req, res) => {
 				});
 			}
 
-			const result = await agenciesService.getAgencies(req.body);
+			const result = await agenciesService.getAgencies(req.body, paginationConditions);
 
 			if (!result) {
 				throw new Error("Đã xảy ra lỗi. Lấy thông tin đại lý không thành công. Vui lòng thử lại.");
@@ -245,6 +265,13 @@ const updateAgency = async (req, res) => {
 				message: error.message,
 			});
 		}
+
+		if (agencyCannotBeAffected.includes(req.query.agency_id)) {
+			return res.status(400).json({
+				error: true,
+				message: `Bưu cục có mã ${req.query.agency_id} không thể bị tác động.`,
+			});
+		}
 		
 		const result = await agenciesService.updateAgency(req.body, req.query);
 		
@@ -277,6 +304,13 @@ const deleteAgency = async (req, res) => {
 			return res.status(400).json({
 				error: true,
 				message: error.message,
+			});
+		}
+
+		if (agencyCannotBeAffected.includes(req.query.agency_id)) {
+			return res.status(400).json({
+				error: true,
+				message: `Bưu cục có mã ${req.query.agency_id} không thể bị tác động.`,
 			});
 		}
 

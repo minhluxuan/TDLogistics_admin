@@ -34,6 +34,24 @@ const checkExistPartnerStaff = async (req, res) => {
 };
 
 const getPartnerStaffs = async (req, res) => {
+	const paginationConditions = { rows: 0, page: 0 };
+
+	if (req.query.rows) {
+		paginationConditions.rows = parseInt(req.query.rows);
+	}
+
+	if (req.query.page) {
+		paginationConditions.page = parseInt(req.query.page);
+	}
+
+	const { error: paginationError } = partnerStaffValidation.validatePaginationConditions(paginationConditions);
+	if (paginationError) {
+		return res.status(400).json({
+			error: true,
+			message: paginationError.message,
+		});
+	}
+
 	if (["PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)) {
 		const { error } = partnerStaffValidation.validateFindingPartnerStaffByPartnerStaff(req.body);
 
@@ -71,7 +89,7 @@ const getPartnerStaffs = async (req, res) => {
 
 		req.body.partner_id = req.user.partner_id;
 
-		const result = await partnerStaffsService.getManyPartnerStaffs(req.body);
+		const result = await partnerStaffsService.getManyPartnerStaffs(req.body, paginationConditions);
 		return res.status(200).json({
 			error: false,
 			data: result,
@@ -91,7 +109,7 @@ const getPartnerStaffs = async (req, res) => {
 
 		req.body.agency_id = req.user.agency_id;
 
-		const result = await partnerStaffsService.getManyPartnerStaffs(req.body);
+		const result = await partnerStaffsService.getManyPartnerStaffs(req.body, paginationConditions);
 		return res.status(200).json({
 			error: false,
 			data: result,
@@ -109,7 +127,7 @@ const getPartnerStaffs = async (req, res) => {
 			});
 		}
 
-		const result = await partnerStaffsService.getManyPartnerStaffs(req.body);
+		const result = await partnerStaffsService.getManyPartnerStaffs(req.body, paginationConditions);
 		return res.status(200).json({
 			error: false,
 			data: result,
