@@ -100,6 +100,16 @@ Content-Type: application/json
 
 ###
 
+GET http://localhost:5000/api/v1/shipments/get_orders?shipment_id=BC_78300_20242820443236
+Content-Type: application/json
+
+{
+    
+}
+
+
+###
+
 POST http://localhost:5000/api/v1/shipments/receive
 Content-Type: application/json
 
