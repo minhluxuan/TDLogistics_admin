@@ -30,7 +30,8 @@ const createNewShipment = async (req, res) => {
 
         const areaAgencyIdSubParts = req.user.agency_id.split('_');
         req.body.shipment_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDate().toString() + createdTime.getHours().toString() + createdTime.getMinutes().toString() + createdTime.getSeconds().toString() + createdTime.getMilliseconds().toString();
-        
+        req.body.agency_id_source = req.user.agency_id;
+
         if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
             const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
             const resultCreatingShipmentForAgency = await shipmentService.createNewShipment(req.body, postalCode);
@@ -43,7 +44,7 @@ const createNewShipment = async (req, res) => {
             }
             
             return res.status(201).json({
-                error: true,
+                error: false,
                 message: `Tạo lô hàng có mã lô ${req.body.shipment_id} cho bưu cục ${req.user.agency_id} thành công.`,
             });
         }
@@ -58,7 +59,7 @@ const createNewShipment = async (req, res) => {
             }
             
             return res.status(201).json({
-                error: true,
+                error: false,
                 message: `Tạo lô hàng có mã lô ${req.body.shipment_id} thành công.`,
             });
         }
@@ -287,6 +288,14 @@ const deleteOrderFromShipment = async (req, res) => {
                 return res.status(400).json({
                     error: true,
                     message: error.message,
+                });
+            }
+
+            const resultGettingOneShipment = await shipmentService.getOneShipment(req.query);
+            if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng có mã ${req.query.shipment_id} không tồn tại trong bưu cục có mã ${agency_id}.`,
                 });
             }
 

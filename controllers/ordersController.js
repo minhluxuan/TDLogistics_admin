@@ -20,8 +20,6 @@ try {
                 try {
                     const orderTime = new Date();
         
-                    info.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
-        
                     if (["USER"].includes(socket.request.user.role)) {
                         // const { error } = OrderValidation.validateCreatingOrder(info);
         
@@ -71,7 +69,7 @@ const createNewOrder = async (socket, info, orderTime) => {
         info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
         const addressSource = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
         const addressDest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
-        // info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
+        info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
@@ -252,7 +250,6 @@ const createOrdersByFile = async (req, res) => {
         
         for (const order of orders) {
             const orderTime = new Date();
-            order.order_time = moment(orderTime).format("YYYY-MM-DD HH:mm:ss");
             
             const areaAgencyIdSubParts = req.user.agency_id.split('_');
             order.agency_id = req.user.agency_id;
@@ -328,10 +325,9 @@ const updateOrder = async (req, res) => {
             });
         }
 
-        // const addressSource = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
-        // const addressDest = utils.getAddressFromComponent(updatedRow.province_dest, updatedRow.district_dest, updatedRow.ward_dest, updatedRow.detail_dest);
-        // const updatingFee = servicesFee.calculateExpressFee(updatedRow.service_type, addressSource, addressDest);
-        const updatedFee = 10000;
+        const addressSource = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
+        const addressDest = utils.getAddressFromComponent(updatedRow.province_dest, updatedRow.district_dest, updatedRow.ward_dest, updatedRow.detail_dest);
+        const updatedFee = servicesFee.calculateExpressFee(updatedRow.service_type, addressSource, addressDest);
         
         const resultUpdatingOneOrder = await ordersService.updateOrder({ fee: updatedFee }, req.query);
         if (!resultUpdatingOneOrder || resultUpdatingOneOrder.affectedRows === 0) {

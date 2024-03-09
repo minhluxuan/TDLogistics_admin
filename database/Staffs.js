@@ -22,7 +22,7 @@ const checkExistStaff = async (info) => {
 		throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút.");
 	}
 
-	if (result.length <= 0) {
+	if (result.length === 0) {
 		return new Object({
 			existed: false,
 			message: "Người dùng chưa tồn tại.",
