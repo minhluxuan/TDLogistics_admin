@@ -119,6 +119,10 @@ const getSchedule = async (req, res) => {
 
 const updateSchedule = async (req, res) => {
     try {
+        if (req.query.id) {
+            req.query.id = parseInt(req.query.id);
+        }
+        
         const { error: error2 } = scheduleValidation.validateIDSchedule(req.query);
         if (error2) {
             return res.status(400).json({
@@ -137,7 +141,7 @@ const updateSchedule = async (req, res) => {
 
         if (req.body.completed) {
             //if completed is update again, this will still pass
-            req.body.complete_at = moment(new Date()).format("YYYY-MM-DD HH:MM:SS");
+            req.body.completed_at = moment(new Date()).format("YYYY-MM-DD HH:MM:SS");
         }
 
         if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER".includes(req.user.role)]) {
@@ -156,19 +160,21 @@ const updateSchedule = async (req, res) => {
                 });
             }
             
-            const result = await scheduleService.updateScheduleByAdmin(req.body, req.query);
-            if (!result || result[0].affetedRows <= 0) {
+            const resultUpdatingSchedule = await scheduleService.updateScheduleByAdmin(req.body, req.query);
+            if (!resultUpdatingSchedule || resultUpdatingSchedule.affetedRows <= 0) {
                 return res.status(404).json({
                     error: true,
-                    message: "Task không tồn tại.",
+                    message: `Công việc có mã ${req.query.id} không tồn tại.`,
                 });
             }
-            return res.status(200).json({
+
+            return res.status(201).json({
                 error: false,
-                message: result,
+                message: `Cập nhật công việc có mã ${req.query.id} thành công.`,
             });
         }
-        if (
+
+        else if (
             ["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(
                 req.user.role
             )
@@ -193,12 +199,13 @@ const updateSchedule = async (req, res) => {
             if (!result || result[0].affetedRows === 0) {
                 return res.status(404).json({
                     error: true,
-                    message: "Task không tồn tại.",
+                    message: `Công việc có mã ${req.query.id} không tồn tại.`,
                 });
             }
-            return res.status(200).json({
+
+            return res.status(201).json({
                 error: false,
-                message: result,
+                message: `Cập nhật công việc có mã ${req.query.id} thành công.`,
             });
         }
     } catch (error) {
@@ -210,9 +217,13 @@ const updateSchedule = async (req, res) => {
     }
 };
 
-const deleteSchedule = async (req, res) => {
+const deleteTask = async (req, res) => {
     try {
-        const { error } = scheduleValidation.validateIDSchedule(req.body);
+        if (req.query.id) {
+            req.query.id = parseInt(req.query.id);
+        }
+
+        const { error } = scheduleValidation.validateIDSchedule(req.query);
         if (error) {
             return res.status(400).json({
                 error: true,
@@ -220,13 +231,9 @@ const deleteSchedule = async (req, res) => {
             });
         }
 
-        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER".includes(req.user.role)]) {
-            const tempSchedule = new Object({
-                id: req.body.id,
-            });
-
-            const result = await scheduleService.deleteScheduleByAdmin(tempSchedule);
-            if (!result || result[0].affetedRows <= 0) {
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
+            const resultDeletingTask = await scheduleService.deleteScheduleByAdmin(req.query);
+            if (!resultDeletingTask || resultDeletingTask.affectedRows === 0) {
                 return res.status(404).json({
                     error: true,
                     message: `Công việc có mã ${req.query.id} không tồn tại.`,
@@ -235,7 +242,7 @@ const deleteSchedule = async (req, res) => {
 
             return res.status(201).json({
                 error: false,
-                message: result,
+                message: `Xóa công việc có mã ${req.query.id} thành công.`,
             });
         }
         if (
@@ -245,20 +252,17 @@ const deleteSchedule = async (req, res) => {
         ) {
             const postalCode = utils.getPostalCodeFromAgencyID(req.body.staff_id);
 
-            const tempSchedule = new Object({
-                id: req.body.id,
-            });
-
-            const result = await scheduleService.deleteScheduleByAgency(tempSchedule, postalCode);
-            if (!result || result[0].affetedRows <= 0) {
+            const resultConfirmCompletedTask = await scheduleService.deleteScheduleByAgency(req.query, postalCode);
+            if (!resultConfirmCompletedTask || resultConfirmCompletedTask[0].affetedRows === 0) {
                 return res.status(404).json({
                     error: true,
                     message: `Công việc có mã ${req.query.id} không tồn tại.`,
                 });
             }
+
             return res.status(200).json({
                 error: false,
-                message: result,
+                message: `Xóa công việc có mã ${req.query.id} thành công.`,
             });
         }
     } catch (error) {
@@ -273,5 +277,5 @@ module.exports = {
     createNewSchedule,
     getSchedule,
     updateSchedule,
-    deleteSchedule,
+    deleteTask,
 };

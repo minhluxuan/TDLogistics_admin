@@ -21,7 +21,7 @@ router.post(
     scheduleController.createNewSchedule
 );
 
-router.get(
+router.post(
     "/search",
     auth.isAuthenticated(),
     auth.isAuthorized([
@@ -37,7 +37,7 @@ router.get(
     ]),
     scheduleController.getSchedule
 );
-router.patch(
+router.put(
     "/update",
     auth.isAuthenticated(),
     auth.isAuthorized([
@@ -67,7 +67,7 @@ router.delete(
         "AGENCY_TELLER",
         "AGENCY_COMPLAINTS_SOLVER",
     ]),
-    scheduleController.deleteSchedule
+    scheduleController.deleteTask
 );
 
 module.exports = router;
