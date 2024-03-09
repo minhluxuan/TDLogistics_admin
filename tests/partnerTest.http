@@ -140,6 +140,7 @@ Content-Type: application/json
 
 #TEST for different auth: passed
 ###
+
 POST http://localhost:5000/api/v1/transport_partners/create
 Content-Type: application/json
 
@@ -170,7 +171,41 @@ Content-Type: application/json
     "bin": "050138319579",
     "bank": "Sacombank"
 }
+
 ###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "thanhbuoi345",
+    "user_password": "ThanhBuoi2k24@tdlogistics",
+    "user_fullname": "Nguyễn Thành Nhân",
+    "user_phone_number": "0981430318",
+    "user_email": "nhan.nguyenhcmc@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-05",
+    "user_cccd": "077204005681",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 8",
+    "user_town": "Phường 9",
+    "user_detail_address": "258/135C, Nguyễn Duy",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "06478056032",
+    "user_bank": "TP Bank",
+
+
+    "transport_partner_name": "Thành Bưởi",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 5",
+    "town": "Phường 9",
+    "detail_address": "15, đường Hùng Vương",
+    "phone_number": "0981436417",
+    "email": "buucucquan5@tdlogistics.com",
+    "bin": "06146035058",
+    "bank": "VIB"
+}
+###
+
 //passed
 PUT http://localhost:5000/api/v1/transport_partners/update?transport_partner_id=TD_00000_077204002691
 Content-Type: application/json

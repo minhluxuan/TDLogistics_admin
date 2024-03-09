@@ -8,4 +8,14 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:5000/api/v1/users/verify_otp
+Content-Type: application/json
+
+{
+    "phone_number": "0981430418",
+    "otp": 8647
+}
+
+###
+
 GET http://localhost:5000/get_session
