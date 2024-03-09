@@ -79,8 +79,8 @@ const getTransportPartner = async (req, res) => {
 
 const createNewTransportPartner = async (req, res) => {
     try {
-        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = transportPartnerValidation.validateCreatingPartnerByAdmin(req.body);
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {	
+            const { error } = transportPartnerValidation.validateCreatingPartnerByAdmin(req.body);
 
 			if (error) {
 				return res.status(400).json({
@@ -105,8 +105,6 @@ const createNewTransportPartner = async (req, res) => {
 					message: error.message,
 				});
 			}
-
-			req.body.agency_id = req.user.agency_id;
 		}
 
         const tempUser = new Object({
@@ -126,7 +124,8 @@ const createNewTransportPartner = async (req, res) => {
 
         const creatorIdSubParts = req.user.staff_id.split('_');
         const transportPartnerId = creatorIdSubParts[0] + '_' + creatorIdSubParts[1] + '_' + req.body.user_cccd;
-        
+        const contractName = req.file ? req.file.filename : null;
+
         const newTransportPartner = {
             transport_partner_id: transportPartnerId,
             agency_id: req.body.agency_id,
@@ -140,7 +139,7 @@ const createNewTransportPartner = async (req, res) => {
             email: req.body.email,
             bin: req.body.bin,
             bank: req.body.bank,
-            contract: req.file.filename || null,
+            contract: contractName,
         };
 
         req.body.user_password = utils.hash(req.body.user_password);
