@@ -78,7 +78,7 @@ const sessionMiddleware = session({
 		// secure: false,
 		// sameSite: 'None',
 		httpOnly: false,
-		maxAge: 15 * 60 * 1000,
+		maxAge: 12 * 60 * 60 * 1000,
 	}
 });
 

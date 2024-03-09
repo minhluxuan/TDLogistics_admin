@@ -88,7 +88,7 @@ const getStaffs = async (req, res) => {
 				});
 			}
 
-			const result = await staffsService.getManyStaffs(req.body);
+			const result = await staffsService.getManyStaffs(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,
@@ -97,7 +97,7 @@ const getStaffs = async (req, res) => {
 		}
 
 		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = staffValidation.validateFindingStaffByAdmin(req.body);
+			const { error } = staffValidation.validateFindingStaffByAdmin(req.body, paginationConditions);
 
 			if (error) {
 				return res.status(400).json({
@@ -355,8 +355,8 @@ const updateStaffInfo = async (req, res) => {
 		}
 
 		if (req.body.hasOwnProperty("paid_salary")) {
-			const resultGettingOneStaff = (await staffsService.getOneStaff({ staff_id: req.query.staff_id }))[0];
-			if (!resultGettingOneStaff || resultGettingOneStaff.length <= 0) {
+			const resultGettingOneStaff = await staffsService.getOneStaff({ staff_id: req.query.staff_id });
+			if (!resultGettingOneStaff || resultGettingOneStaff.length === 0) {
 				return res.status(404).json({
 					error: true,
 					message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`
@@ -368,7 +368,7 @@ const updateStaffInfo = async (req, res) => {
 		}
 
 		const resultUpdatingStaff = await staffsService.updateStaff(req.body, { staff_id: req.query.staff_id });
-		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows <= 0) {
+		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows === 0) {
 			return res.status(404).json({
 				error: false,
 				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`,
@@ -380,9 +380,10 @@ const updateStaffInfo = async (req, res) => {
 			message: `Cập nhật thông tin nhân viên có mã nhân viên ${req.query.staff_id} thành công.`,
 		});
 	} catch (error) {
+		console.log(error);
 		res.status(500).json({
 			error: true,
-			message: error,
+			message: error.message,
 		});
 	}
 };

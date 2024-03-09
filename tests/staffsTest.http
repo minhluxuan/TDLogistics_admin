@@ -163,7 +163,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:5000/api/v1/staffs/search
+POST http://localhost:5000/api/v1/staffs/search?rows=1&page=2
 Content-Type: application/json
 
 ###
@@ -206,13 +206,13 @@ Content-Type: application/json
 
 {
     "agency_id": "TD_00000_077165007713",
-    "username": "minhluxuan2k4",
+    "username": "minhluxuan2k16",
     "password": "minhluxuan@TDlogistics2k24",
     "fullname": "Lữ Xuân Minh",
-    "phone_number": "0981430418",
+    "phone_number": "0981430412",
     "email": "minh.luxuanhcmut@hcmut.edu.vn",
     "date_of_birth": "2004-03-03",
-    "cccd": "077204005692",
+    "cccd": "077204005620",
     "province": "Tỉnh Bà Rịa - Vũng Tàu",
     "district": "Huyện Đất Đỏ",
     "town": "Thị trấn Đất Đỏ",

@@ -83,6 +83,10 @@ const receiveShipment = async (shipment_id, postal_code) => {
     return await Shipment.receiveShipment(shipment_id, postal_code);
 }
 
+const getOrdersFromShipment = async (order_ids) => {
+    return await Shipment.getOrdersFromShipment(order_ids);
+}
+
 const addOrdersToShipment = async (shipment, order_ids, postal_code) => {
     return await Shipment.addOrdersToShipment(shipment, order_ids, postal_code);
 }
@@ -108,6 +112,7 @@ module.exports = {
     updateParentForGlobalOrders,
     confirmCreateShipment,
     receiveShipment,
+    getOrdersFromShipment,
     addOrdersToShipment,
     deleteOrdersFromShipment,
     deleteShipment,

@@ -7,34 +7,46 @@ const router = express.Router();
 router.post("/create",
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),   
-    shipmentController.createNewShipment);
+    shipmentController.createNewShipment
+);
 
 router.post("/get",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
+    shipmentController.getShipments
+);
+
+router.get("/get_orders",
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.getShipments);
+    shipmentController.getOrdersFromShipment
+);
 
 router.post("/decompose",
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.decomposeShipment);
+    shipmentController.decomposeShipment
+);
 
 
 router.post("/confirm_create",
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER"]),
-    shipmentController.confirmCreateShipment);
+    shipmentController.confirmCreateShipment
+);
 
 
 router.delete("/delete", 
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.deleteShipment);
+    shipmentController.deleteShipment
+);
 
 router.post("/search", 
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.getShipments);
+    shipmentController.getShipments
+);
 
 router.post("/receive", 
     auth.isAuthenticated(), 
@@ -45,16 +57,19 @@ router.post("/receive",
 router.post("/add_orders",
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.addOrderToShipment);
+    shipmentController.addOrderToShipment
+);
 
 router.post("/remove_orders", 
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
-    shipmentController.deleteOrderFromShipment);
+    shipmentController.deleteOrderFromShipment
+);
 
 router.post("/undertake", 
     auth.isAuthenticated(), 
     auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER", "PARTNER_SHIPPER"]),
-    shipmentController.undertakeShipment);
+    shipmentController.undertakeShipment
+);
 
 module.exports = router;
