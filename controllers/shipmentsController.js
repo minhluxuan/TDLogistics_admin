@@ -162,7 +162,7 @@ const getOrdersFromShipment = async (req, res) => {
             
             return res.status(201).json({
                 error: false,
-                info: result,
+                data: result,
                 message: `Lấy thông tin tất cả đơn hàng từ lô hàng có mã ${req.query.shipment_id} thành công.`,
             });
         }
