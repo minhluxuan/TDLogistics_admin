@@ -45,7 +45,63 @@ const getManyVehicles = async (conditions, paginationConditions) => {
     const limit = paginationConditions.rows || 0;
     const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
 
-    return await dbUtils.find(pool, table, fields, values, limit, offset);
+    let query;
+    if (fields && values && fields.length > 0 && values.length > 0) {
+        query = `SELECT v.*, t.transport_partner_name, p.fullname 
+                FROM vehicle AS v 
+                JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
+                JOIN partner_staff AS p ON v.staff_id = p.staff_id
+                WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != "" AND ${fields.map(field => `${field} = ?`).join(" AND ")}
+                
+                UNION
+                
+                SELECT v.*, NULL AS transport_partner_name, s.fullname 
+                FROM vehicle AS v 
+                JOIN staff AS s ON v.staff_id = s.staff_id 
+                WHERE v.transport_partner_id IS NULL AND ${fields.map(field => `${field} = ?`).join(" AND ")};`;
+    
+                if (offset && typeof offset === "number") {
+                    if (limit && typeof limit === "number" && limit > 0) {
+                        query += ` LIMIT ?, ?`;
+                        values.push(offset, limit);
+                    }
+                }
+                else {
+                    if (limit && typeof limit === "number" && limit > 0) {
+                        query += ` LIMIT ?`;
+                        values.push(limit);
+                    }
+                }
+            }
+    else {
+        query = `SELECT v.*, t.transport_partner_name, p.fullname 
+                FROM vehicle AS v 
+                LEFT JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
+                LEFT JOIN partner_staff AS p ON v.staff_id = p.staff_id
+                WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != ""
+                
+                UNION
+                
+                SELECT v.*, NULL AS transport_partner_name, s.fullname 
+                FROM vehicle AS v 
+                LEFT JOIN staff AS s ON v.staff_id = s.staff_id 
+                WHERE v.transport_partner_id IS NULL OR v.transport_partner_id = "";`;
+
+                if (offset && typeof offset === "number") {
+                    if (limit && typeof limit === "number" && limit > 0) {
+                        query += ` LIMIT ?, ?`;
+                        values.push(offset, limit);
+                    }
+                }
+                else {
+                    if (limit && typeof limit === "number" && limit > 0) {
+                        query += ` LIMIT ?`;
+                        values.push(limit);
+                    }
+                }
+    }
+
+    return (await pool.query(query, values))[0];
 };
 
 const getOneVehicle = async (conditions) => {
