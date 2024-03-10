@@ -302,8 +302,8 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
         affectedRows: result ? result.affectedRows : 0,
         acceptedNumber: acceptedArray.length,
         acceptedArray: acceptedArray,
-        notAcceptedNumber: missingShipmentArray.length,
-        notAcceptedArray: missingShipmentArray,
+        notAcceptedNumber: notAcceptedArray.length,
+        notAcceptedArray: notAcceptedArray,
         overloadShipmentNumber: overloadShipmentArray.length,
         overloadShipmentArray: overloadShipmentArray,
         ShipmentIDs: jsonShipmentIds
@@ -312,7 +312,7 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
 
 const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
     const acceptedArray = new Array();
-    const missingShipmentArray = new Array();
+    const notAcceptedArray = new Array();
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
@@ -328,7 +328,7 @@ const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
             acceptedArray.push(shipment_ids[i]);
         }
         else {
-            missingShipmentArray.push(shipment_ids[i]);
+            notAcceptedArray.push(shipment_ids[i]);
         }
     }
 
@@ -339,8 +339,8 @@ const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
         affectedRows: result ? result.affectedRows : 0,
         acceptedNumber: acceptedArray.length,
         acceptedArray: acceptedArray,
-        missingShipmentNumber: missingShipmentArray.length,
-        missingShipmentArray: missingShipmentArray,
+        notAcceptedNumber: notAcceptedArray.length,
+        notAcceptedArray: notAcceptedArray,
         ShipmentIDs: jsonShipmentIds
     });
 }
@@ -352,8 +352,6 @@ module.exports = {
     getManyVehicles,
     getOneVehicle,
     updateVehicle,
-    // addOrders,
-    // deleteOrders,
     deleteVehicle,
     addShipmentToVehicle,
     deleteShipmentFromVehicle,

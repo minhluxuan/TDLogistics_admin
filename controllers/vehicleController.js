@@ -93,7 +93,7 @@ const createNewVehicle = async (req, res) => {
             if (!resultCheckingExistTransportPartnerAndStaff.existed) {
                 return res.status(404).json({
                     error: true,
-                    message: `Nhân viên có mã ${req.body.staff_id} không tồn tại hoặc không thuộc đối tác vận tải có mã ${req.body.transport_partner_id} không tồn tại.`,
+                    message: `Nhân viên có mã ${req.body.staff_id} không tồn tại hoặc không thuộc đối tác vận tải có mã ${req.body.transport_partner_id}.`,
                 });
             }
         }
@@ -418,12 +418,19 @@ const addShipmentToVehicle = async (req, res) => {
 
 const deleteShipmentFromVehicle = async (req, res) => {
     try {
-        const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateOrderIds(req.body);
-    
-        if (error) {
+        const { error: error1 } = vehicleValidation.validateCheckingExistVehicle(req.query);
+        if (error1) {
             return res.status(400).json({
                 error: true,
-                message: "Thông tin không hợp lệ.",
+                message: error1.message,
+            });
+        }
+
+        const { error: error2 } = vehicleValidation.validateUpdatingVehicle(req.body);
+        if (error2) {
+            return res.status(400).json({
+                error: true,
+                message: error2.message,
             });
         }
 

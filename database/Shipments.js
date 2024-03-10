@@ -397,7 +397,6 @@ const receiveShipment = async (shipment_id, postal_code) => {
     const getShipmentResult = await getInfoShipment(shipment_id);
     const cloneShipmentFromGlobal = await dbUtils.insert(pool, agencyShipmentTable, getShipmentResult.fields, getShipmentResult.values);
 
-
     const getOrderIDsQuery = `SELECT order_ids FROM ${table} WHERE shipment_id = ?`;
     const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
 
@@ -441,8 +440,8 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
 
     const shipmentsQuery = `UPDATE ${agencyShipmentTable} AS q1 JOIN ${table} AS q2
                             ON q1.shipment_id = q2.shipment_id
-                            SET q1.status = ?, q2.status = ?, agency_id_dest = ? WHERE q1.shipment_id = ? `;
-    await pool.query(shipmentsQuery, [true, true, agency_id, shipment_id]);
+                            SET q1.status = ?, q2.status = ?, q1.agency_id_dest = ?, q2.agency_id_dest = ? WHERE q1.shipment_id = ? `;
+    await pool.query(shipmentsQuery, [true, true, agency_id, agency_id, shipment_id]);
 
     return new Object({
         updatedNumber,
