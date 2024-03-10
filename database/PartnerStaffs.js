@@ -14,8 +14,8 @@ const table = "partner_staff";
 const pool = mysql.createPool(dbOptions).promise();
 
 const checkExistPartnerStaffIntersect = async (conditions) => {
-	const fields = Object.keys(info);
-	const values = Object.values(info);
+	const fields = Object.keys(conditions);
+	const values = Object.values(conditions);
 	const result = await dbUtils.findOneIntersect(pool, table, fields, values);
 
 	if (!result) {
