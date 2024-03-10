@@ -262,12 +262,11 @@ const deleteVehicle = async (conditions) => {
 
 const addShipmentToVehicle = async (vehicle, shipment_ids) => {
     const acceptedArray = new Array();
-    const missingShipmentArray = new Array();
-    const overloadShipmentArray = new Array();
+    const notAcceptedArray = new Array();
+    const overloadArray = new Array();
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
-
 
     for (let i = 0; i < shipment_ids.length; i++) {
         const getShipmentQuery = `SELECT mass, order_ids FROM shipment WHERE shipment_id = ?`;
@@ -275,10 +274,10 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
         const shipmentMass  = shipmentRow[0].mass;
     
         if (prevShipmentIds.includes(shipment_ids[i])) { 
-            missingShipmentArray.push(shipment_ids[i]);
+            notAcceptedArray.push(shipment_ids[i]);
         }
         else if(shipmentMass + currentMass > vehicle.max_load) {
-            overloadShipmentArray.push(shipment_ids[i]);
+            overloadArray.push(shipment_ids[i]);
         }
         else {
             prevShipmentIds.push(shipment_ids[i]);
@@ -303,13 +302,12 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
         affectedRows: result ? result.affectedRows : 0,
         acceptedNumber: acceptedArray.length,
         acceptedArray: acceptedArray,
-        missingShipmentNumber: missingShipmentArray.length,
-        missingShipmentArray: missingShipmentArray,
+        notAcceptedNumber: missingShipmentArray.length,
+        notAcceptedArray: missingShipmentArray,
         overloadShipmentNumber: overloadShipmentArray.length,
         overloadShipmentArray: overloadShipmentArray,
         ShipmentIDs: jsonShipmentIds
     });
-    
 }
 
 const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {

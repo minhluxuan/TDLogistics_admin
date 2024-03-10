@@ -2,7 +2,7 @@ POST http://localhost:5000/api/v1/vehicles/search
 Content-Type: application/json
 
 {
-    "type": "motorbike"
+    
 }
 
 ###
