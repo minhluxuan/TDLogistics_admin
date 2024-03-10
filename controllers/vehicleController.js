@@ -228,7 +228,7 @@ const getVehicle = async (req, res) => {
     }
 };
 
-const getVehicleOrderIds = async (req, res) => {
+const getVehicleShipmentIds = async (req, res) => {
     try {
         const { error } = vehicleValidation.validateGettingOrderIds(req.query);
 
@@ -248,7 +248,7 @@ const getVehicleOrderIds = async (req, res) => {
             });
         }
 
-        const result = await vehicleService.getVehicleOrderIds(resultGettingOneVehicle[0]);
+        const result = await vehicleService.getVehicleShipmentIds(resultGettingOneVehicle[0]);
 
         return res.status(200).json({
             error: true,
@@ -482,7 +482,7 @@ module.exports = {
     checkExistVehicle,
     createNewVehicle,
     getVehicle,
-    getVehicleOrderIds,
+    getVehicleShipmentIds,
     updateVehicle,
     deleteVehicle,
     addShipmentToVehicle,
