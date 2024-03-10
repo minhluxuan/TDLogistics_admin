@@ -397,7 +397,6 @@ const receiveShipment = async (shipment_id, postal_code) => {
     const getShipmentResult = await getInfoShipment(shipment_id);
     const cloneShipmentFromGlobal = await dbUtils.insert(pool, agencyShipmentTable, getShipmentResult.fields, getShipmentResult.values);
 
-
     const getOrderIDsQuery = `SELECT order_ids FROM ${table} WHERE shipment_id = ?`;
     const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
 

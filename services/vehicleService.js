@@ -17,8 +17,8 @@ const getVehicle = async (conditions, paginationConditions) => {
     return await Vehicle.getManyVehicles(conditions, paginationConditions);
 };
 
-const getVehicleOrderIds = async (vehicle) => {
-    return await Vehicle.getVehicleOrderIds(vehicle);
+const getVehicleShipmentIds = async (vehicle) => {
+    return await Vehicle.getVehicleShipmentIds(vehicle);
 };
 
 
@@ -47,7 +47,7 @@ module.exports = {
     deleteVehicle,
     getVehicle,
     getOneVehicle,
-    getVehicleOrderIds,
+    getVehicleShipmentIds,
     addShipmentToVehicle,
     deleteShipmentFromVehicle
 };

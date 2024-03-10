@@ -1,7 +1,6 @@
 const mysql = require("mysql2");
-const moment = require("moment");
 const dbUtils = require("../lib/dbUtils");
-const Orders = require("./Orders");
+const Shipments = require("./Shipments");
 const { setStatusToOrder } = require("./Orders");
 const servicesStatus = require("../lib/servicesStatus");
 
@@ -45,7 +44,71 @@ const getManyVehicles = async (conditions, paginationConditions) => {
     const limit = paginationConditions.rows || 0;
     const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
 
-    return await dbUtils.find(pool, table, fields, values, limit, offset);
+    let query;
+    if (fields && values && fields.length > 0 && values.length > 0) {
+        query = `SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+                v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, t.transport_partner_name, p.fullname 
+                FROM vehicle AS v
+                LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
+                LEFT JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
+                LEFT JOIN partner_staff AS p ON v.staff_id = p.staff_id
+                WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != "" AND ${fields.map(field => `${field} = ?`).join(" AND ")}
+                
+                UNION
+                
+                SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+                v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, NULL AS transport_partner_name, s.fullname 
+                FROM vehicle AS v 
+                LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
+                LEFT JOIN staff AS s ON v.staff_id = s.staff_id 
+                WHERE v.transport_partner_id IS NULL OR v.transport_partner_id = "" AND ${fields.map(field => `${field} = ?`).join(" AND ")};`;
+    
+                if (offset && typeof offset === "number") {
+                    if (limit && typeof limit === "number" && limit > 0) {
+                        query += ` LIMIT ?, ?`;
+                        values.push(offset, limit);
+                    }
+                }
+                else {
+                    if (limit && typeof limit === "number" && limit > 0) {
+                        query += ` LIMIT ?`;
+                        values.push(limit);
+                    }
+                }
+            }
+    else {
+        query = `SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+                v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, t.transport_partner_name, p.fullname 
+                FROM vehicle AS v 
+                LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
+                LEFT JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
+                LEFT JOIN partner_staff AS p ON v.staff_id = p.staff_id
+                WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != ""
+                
+                UNION
+                
+                SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+                v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, NULL AS transport_partner_name, s.fullname 
+                FROM vehicle AS v 
+                LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
+                LEFT JOIN staff AS s ON v.staff_id = s.staff_id 
+                WHERE v.transport_partner_id IS NULL OR v.transport_partner_id = "";`;
+
+                if (offset && typeof offset === "number") {
+                    if (limit && typeof limit === "number" && limit > 0) {
+                        query += ` LIMIT ?, ?`;
+                        values.push(offset, limit);
+                    }
+                }
+                else {
+                    if (limit && typeof limit === "number" && limit > 0) {
+                        query += ` LIMIT ?`;
+                        values.push(limit);
+                    }
+                }
+    }
+
+    return (await pool.query(query, [...values, ...values]))[0];
 };
 
 const getOneVehicle = async (conditions) => {
@@ -55,26 +118,26 @@ const getOneVehicle = async (conditions) => {
     return await dbUtils.findOneIntersect(pool, table, fields, values);
 };
 
-const getVehicleOrderIds = async (vehicle) => {
-    let order_ids = vehicle.order_ids;
+const getVehicleShipmentIds = async (vehicle) => {
+    let shipment_ids = vehicle.shipment_ids;
 
-    if (!order_ids) {
+    if (!shipment_ids) {
         return new Array();
     }
 
-    order_ids = JSON.parse(order_ids);
+    shipment_ids = JSON.parse(shipment_ids);
 
-    if (typeof order_ids !== "object") {
+    if (typeof shipment_ids !== "object") {
         return new Array();
     }
 
     const result = new Array();
 
-    for (const order_id of order_ids) {
-        const order = await Orders.getOneOrder({ order_id: order_id });
+    for (const shipment_id of shipment_ids) {
+        const shipment = await Shipments.getOneShipment({ shipment_id });
 
-        if (order && order.length > 0) {
-            result.push(order[0]);
+        if (shipment && shipment.length > 0) {
+            result.push(shipment[0]);
         }
     }
 
@@ -91,104 +154,6 @@ const updateVehicle = async (info, conditions) => {
     return await dbUtils.updateOne(pool, table, fields, values, conditionFields, conditionValues);
 };
 
-// const addOrders = async (vehicle, order_ids) => {
-//     let acceptedNumber = 0;
-//     const acceptedArray = new Array();
-//     let notAcceptedNumber = 0;
-//     const notAcceptedArray = new Array();
-//     let jsonOrderIds;
-
-//     if (vehicle.order_ids) {
-//         const prevOrderIds = JSON.parse(vehicle.order_ids);
-//         for (let i = 0; i < order_ids.length; i++) {
-//             if (!prevOrderIds.includes(order_ids[i]) && await increaseMass(vehicle.vehicle_id, order_ids[i])) {
-//                 prevOrderIds.push(order_ids[i]);
-//                 ++acceptedNumber;
-//                 acceptedArray.push(order_ids[i]);
-//             }
-//             else {
-//                 ++notAcceptedNumber;
-//                 notAcceptedArray.push(order_ids[i]);
-//             }
-//         }
-
-//         jsonOrderIds = JSON.stringify(prevOrderIds);
-//     }
-//     else {
-//         jsonOrderIds = JSON.stringify(order_ids);
-//     }
-
-//     const result = await dbUtils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle.vehicle_id]);
-
-//     return new Object({
-//         affectedRows: result ? result.affectedRows : 0,
-//         acceptedNumber: acceptedNumber,
-//         acceptedArray: acceptedArray,
-//         notAcceptedNumber: notAcceptedNumber,
-//         notAcceptedArray: notAcceptedArray,
-//     });
-// }
-
-// const deleteOrders = async (vehicle, order_ids) => {
-//     let acceptedNumber = 0;
-//     const acceptedArray = new Array();
-//     let notAcceptedNumber = 0;
-//     const notAcceptedArray = new Array();
-//     let jsonOrderIds;
-
-//     if (vehicle.order_ids) {
-//         const prevOrderIds = JSON.parse(vehicle.order_ids);
-//         for (let i = 0; i < order_ids.length; i++) {
-//             const orderIndex = prevOrderIds.indexOf(order_ids[i]);
-//             if (orderIndex >= 0 && await decreaseMass(vehicle.vehicle_id, order_ids[i])) {
-//                 ++acceptedNumber;
-//                 acceptedArray.push(order_ids[i]);
-//                 prevOrderIds.splice(orderIndex, 1);
-//             }
-//             else {
-//                 ++notAcceptedNumber;
-//                 notAcceptedArray.push(order_ids[i]);
-//             }
-//         }
-
-//         jsonOrderIds = JSON.stringify(prevOrderIds);
-//     }
-//     else {
-//         jsonOrderIds = JSON.stringify(new Array());
-//     }
-
-//     const result = await dbUtils.updateOne(pool, table, ["order_ids"], [jsonOrderIds], ["vehicle_id"], [vehicle.vehicle_id]);
-
-//     return new Object({
-//         affectedRows: result ? result.affectedRows : 0,
-//         acceptedNumber: acceptedNumber,
-//         acceptedArray: acceptedArray,
-//         notAcceptedNumber: notAcceptedNumber,
-//         notAcceptedArray: notAcceptedArray,
-//     });
-// }
-
-// const increaseMass = async (vehicle_id, order_id) => {
-//     const order = await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [order_id]);
-
-//     if (!order || order.length <= 0) {
-//         console.log("Order does not exist.");
-//         return false;
-//     }
-
-//     const orderMass = order[0].mass ? order[0].mass : 0;
-
-//     const vehicleQuery = 'UPDATE ?? SET ?? = ?? + ? WHERE ?? = ?';
-//     const result = await pool.query(vehicleQuery, ["vehicle", "mass", "mass", orderMass, "vehicle_id", vehicle_id]);
-
-//     if (!result || result.length <= 0) {
-//         console.log("Vehicle does not exist.");
-//         throw new Error("Phương tiện không tồn tại.");
-//     }
-
-//     return true;
-// }
-
 const deleteVehicle = async (conditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
@@ -198,12 +163,11 @@ const deleteVehicle = async (conditions) => {
 
 const addShipmentToVehicle = async (vehicle, shipment_ids) => {
     const acceptedArray = new Array();
-    const missingShipmentArray = new Array();
-    const overloadShipmentArray = new Array();
+    const notAcceptedArray = new Array();
+    const overloadArray = new Array();
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
-
 
     for (let i = 0; i < shipment_ids.length; i++) {
         const getShipmentQuery = `SELECT mass, order_ids FROM shipment WHERE shipment_id = ?`;
@@ -211,10 +175,10 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
         const shipmentMass  = shipmentRow[0].mass;
     
         if (prevShipmentIds.includes(shipment_ids[i])) { 
-            missingShipmentArray.push(shipment_ids[i]);
+            notAcceptedArray.push(shipment_ids[i]);
         }
         else if(shipmentMass + currentMass > vehicle.max_load) {
-            overloadShipmentArray.push(shipment_ids[i]);
+            overloadArray.push(shipment_ids[i]);
         }
         else {
             prevShipmentIds.push(shipment_ids[i]);
@@ -239,18 +203,17 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
         affectedRows: result ? result.affectedRows : 0,
         acceptedNumber: acceptedArray.length,
         acceptedArray: acceptedArray,
-        missingShipmentNumber: missingShipmentArray.length,
-        missingShipmentArray: missingShipmentArray,
+        notAcceptedNumber: notAcceptedArray.length,
+        notAcceptedArray: notAcceptedArray,
         overloadShipmentNumber: overloadShipmentArray.length,
         overloadShipmentArray: overloadShipmentArray,
         ShipmentIDs: jsonShipmentIds
     });
-    
 }
 
 const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
     const acceptedArray = new Array();
-    const missingShipmentArray = new Array();
+    const notAcceptedArray = new Array();
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
@@ -266,7 +229,7 @@ const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
             acceptedArray.push(shipment_ids[i]);
         }
         else {
-            missingShipmentArray.push(shipment_ids[i]);
+            notAcceptedArray.push(shipment_ids[i]);
         }
     }
 
@@ -277,8 +240,8 @@ const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
         affectedRows: result ? result.affectedRows : 0,
         acceptedNumber: acceptedArray.length,
         acceptedArray: acceptedArray,
-        missingShipmentNumber: missingShipmentArray.length,
-        missingShipmentArray: missingShipmentArray,
+        notAcceptedNumber: notAcceptedArray.length,
+        notAcceptedArray: notAcceptedArray,
         ShipmentIDs: jsonShipmentIds
     });
 }
@@ -286,12 +249,9 @@ const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
 module.exports = {
     checkExistVehicle,
     createNewVehicle,
-    getVehicleOrderIds,
     getManyVehicles,
     getOneVehicle,
     updateVehicle,
-    // addOrders,
-    // deleteOrders,
     deleteVehicle,
     addShipmentToVehicle,
     deleteShipmentFromVehicle,

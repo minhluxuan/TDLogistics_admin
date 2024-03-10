@@ -161,7 +161,7 @@ const getOrdersFromShipment = async (req, res) => {
 
             const result = await shipmentService.getOrdersFromShipment(order_ids);
             
-            return res.status(201).json({
+            return res.status(200).json({
                 error: false,
                 data: result,
                 message: `Lấy thông tin tất cả đơn hàng từ lô hàng có mã ${req.query.shipment_id} thành công.`,
