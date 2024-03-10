@@ -249,7 +249,6 @@ const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
 module.exports = {
     checkExistVehicle,
     createNewVehicle,
-    getVehicleOrderIds,
     getManyVehicles,
     getOneVehicle,
     updateVehicle,
