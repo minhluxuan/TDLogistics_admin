@@ -193,7 +193,7 @@ const getVehicle = async (req, res) => {
 
             req.body.agency_id = req.user.agency_id;
 
-            const vehicles = await vehicleService.getVehicle(req.body);
+            const vehicles = await vehicleService.getVehicle(req.body, paginationConditions);
 
             return res.status(200).json({
                 error: false,
@@ -212,7 +212,7 @@ const getVehicle = async (req, res) => {
                 });
             }
 
-            const vehicles = await vehicleService.getVehicle(req.body);
+            const vehicles = await vehicleService.getVehicle(req.body, paginationConditions);
 
             return res.status(200).json({
                 error: true,

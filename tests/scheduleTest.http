@@ -13,12 +13,13 @@ POST http://localhost:5000/api/v1/schedules/search
 Content-Type: application/json
 
 {
-    "priority": 2
+    "priority": 1,
+    "deadline": "2024-03-11 08:00:00"
 }
 
 ###
 
-PUT http://localhost:5000/api/v1/schedules/update?id=1
+PUT http://localhost:5000/api/v1/schedules/update?id=5
 Content-Type: application/json
 
 {
@@ -27,5 +28,5 @@ Content-Type: application/json
 
 ###
 
-DELETE http://localhost:5000/api/v1/schedules/delete?id=2
+DELETE http://localhost:5000/api/v1/schedules/delete?id=5
 Content-Type: application/json

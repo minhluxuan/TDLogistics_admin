@@ -46,7 +46,6 @@ const createNewSchedule = async (req, res) => {
                 task: req.body.task,
                 priority: req.body.priority,
                 deadline: req.body.deadline,
-                created_at: moment(new Date()).format("YYYY-MM-DD HH:MM:SS"),
                 completed: false,
             });
 
@@ -83,7 +82,7 @@ const getSchedule = async (req, res) => {
             });
         }
 
-        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER".includes(req.user.role)]) {
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
             const result = await scheduleService.getScheduleByAdmin(req.body);
             
             return res.status(200).json({
@@ -100,7 +99,7 @@ const getSchedule = async (req, res) => {
         ) {
             const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
 
-            const result = await scheduleService.updateScheduleByAgency(req.body, postalCode);
+            const result = await scheduleService.getScheduleByAgency(req.body, postalCode);
             
             return res.status(200).json({
                 error: false,
@@ -141,10 +140,10 @@ const updateSchedule = async (req, res) => {
 
         if (req.body.completed) {
             //if completed is update again, this will still pass
-            req.body.completed_at = moment(new Date()).format("YYYY-MM-DD HH:MM:SS");
+            req.body.completed_at = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
         }
 
-        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER".includes(req.user.role)]) {
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
             const resultGettingOneTask = await scheduleService.getOneTask(req.query);
             if (!resultGettingOneTask || resultGettingOneTask.length === 0) {
                 return res.status(404).json({
@@ -161,7 +160,7 @@ const updateSchedule = async (req, res) => {
             }
             
             const resultUpdatingSchedule = await scheduleService.updateScheduleByAdmin(req.body, req.query);
-            if (!resultUpdatingSchedule || resultUpdatingSchedule.affetedRows <= 0) {
+            if (!resultUpdatingSchedule || resultUpdatingSchedule.affectedRows === 0) {
                 return res.status(404).json({
                     error: true,
                     message: `Công việc có mã ${req.query.id} không tồn tại.`,
@@ -195,8 +194,8 @@ const updateSchedule = async (req, res) => {
                 });
             }
 
-            const result = await scheduleService.updateScheduleByAgency(req.body, req.query, postalCode);
-            if (!result || result[0].affetedRows === 0) {
+            const resultUpdatingSchedule = await scheduleService.updateScheduleByAgency(req.body, req.query, postalCode);
+            if (!resultUpdatingSchedule || resultUpdatingSchedule.affectedRows === 0) {
                 return res.status(404).json({
                     error: true,
                     message: `Công việc có mã ${req.query.id} không tồn tại.`,
@@ -250,10 +249,10 @@ const deleteTask = async (req, res) => {
                 req.user.role
             )
         ) {
-            const postalCode = utils.getPostalCodeFromAgencyID(req.body.staff_id);
+            const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
 
             const resultConfirmCompletedTask = await scheduleService.deleteScheduleByAgency(req.query, postalCode);
-            if (!resultConfirmCompletedTask || resultConfirmCompletedTask[0].affetedRows === 0) {
+            if (!resultConfirmCompletedTask || resultConfirmCompletedTask.affetedRows === 0) {
                 return res.status(404).json({
                     error: true,
                     message: `Công việc có mã ${req.query.id} không tồn tại.`,
