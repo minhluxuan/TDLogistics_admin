@@ -219,3 +219,19 @@ Content-Type: application/json
     "shipment_id": "BC_78300_202421221351231",
     "status_code": 3
 }
+
+###
+POST http://localhost:5000/api/v1/shipments/get
+Content-Type: application/json
+
+{
+    
+}
+
+###
+GET http://localhost:5000/api/v1/shipments/get_orders?shipment_id=BC_78300_20242820443236 
+Content-Type: application/json
+
+{
+    
+}

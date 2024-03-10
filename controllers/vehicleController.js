@@ -172,7 +172,7 @@ const getVehicle = async (req, res) => {
 
             req.body.transport_partner_id = req.user.transport_partner_id;
 
-            const vehicles = await vehicleService.getVehicle(req.body);
+            const vehicles = await vehicleService.getVehicle(req.body, paginationConditions);
 
             return res.status(200).json({
                 error: false,
