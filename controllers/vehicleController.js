@@ -422,18 +422,6 @@ const deleteShipmentFromVehicle = async (req, res) => {
             });
         }
 
-        const deletorIdSubParts = req.user.staff_id.split('_');
-		const vehicleIdSubParts = req.query.vehicle_id.split('_');
-
-		if ((["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role))
-		&& (deletorIdSubParts[0] !== vehicleIdSubParts[0] ||
-            deletorIdSubParts[1] !== vehicleIdSubParts[1])) {
-			return res.status(404).json({
-				error: true,
-				message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại hoặc không thuộc quyền kiểm soát của bạn.`,
-			});
-		}
-
         const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.query.vehicle_id });
 
         if (!resultGettingOneVehicle || resultGettingOneVehicle.length <= 0) {
