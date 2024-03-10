@@ -19,7 +19,6 @@ const createNewSchedule = async (req, res) => {
                 task: req.body.task,
                 priority: req.body.priority,
                 deadline: req.body.deadline,
-                created_at: moment(new Date()).format("YYYY-MM-DD HH:MM:SS"),
                 completed: false,
             });
 
@@ -214,20 +213,27 @@ const updateSchedule = async (req, res) => {
 const deleteSchedule = async (req, res) => {
     try {
         const { error } = scheduleValidation.validateIDSchedule(req.body);
-        
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
 
         if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER".includes(req.user.role)]) {
             const tempSchedule = new Object({
                 id: req.body.id,
             });
+
             const result = await scheduleService.deleteScheduleByAdmin(tempSchedule);
             if (!result || result[0].affetedRows <= 0) {
                 return res.status(404).json({
                     error: true,
-                    message: "Task không tồn tại.",
+                    message: `Công việc có mã ${req.query.id} không tồn tại.`,
                 });
             }
-            return res.status(200).json({
+
+            return res.status(201).json({
                 error: false,
                 message: result,
             });
@@ -242,11 +248,12 @@ const deleteSchedule = async (req, res) => {
             const tempSchedule = new Object({
                 id: req.body.id,
             });
+
             const result = await scheduleService.deleteScheduleByAgency(tempSchedule, postalCode);
             if (!result || result[0].affetedRows <= 0) {
                 return res.status(404).json({
                     error: true,
-                    message: "Task không tồn tại.",
+                    message: `Công việc có mã ${req.query.id} không tồn tại.`,
                 });
             }
             return res.status(200).json({
