@@ -62,7 +62,7 @@ const getManyVehicles = async (conditions, paginationConditions) => {
                 FROM vehicle AS v 
                 LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
                 LEFT JOIN staff AS s ON v.staff_id = s.staff_id 
-                WHERE v.transport_partner_id IS NULL AND ${fields.map(field => `${field} = ?`).join(" AND ")};`;
+                WHERE v.transport_partner_id IS NULL OR v.transport_partner_id = "" AND ${fields.map(field => `${field} = ?`).join(" AND ")};`;
     
                 if (offset && typeof offset === "number") {
                     if (limit && typeof limit === "number" && limit > 0) {
@@ -109,7 +109,7 @@ const getManyVehicles = async (conditions, paginationConditions) => {
                 }
     }
 
-    return (await pool.query(query, values))[0];
+    return (await pool.query(query, [...values, ...values]))[0];
 };
 
 const getOneVehicle = async (conditions) => {
