@@ -114,16 +114,16 @@ POST http://localhost:5000/api/v1/shipments/receive
 Content-Type: application/json
 
 {
-    "shipment_id": "BC_71000_202422224138948"
+    "shipment_id": "BC_78300_20242820443236"
 }
 
 ###
 
-POST http://localhost:5000/api/v1/shipments/decompose?shipment_id=BC_78300_202428204443125
+POST http://localhost:5000/api/v1/shipments/decompose?shipment_id=BC_71000_2024210161498
 Content-Type: application/json
 
 {
-    "order_ids": ["BC_78300_2024223163234692","BC_78300_2024223163234271","BC_78300_2024223162829291"]
+    "order_ids": ["BC_78300_202422301010550","BC_78300_202422301019566","BC_78300_202422302245693"]
 }
 
 ###
@@ -207,7 +207,7 @@ POST http://localhost:5000/api/v1/staffs/login
 Content-Type: application/json
 
 {
-    "username": "buucucdatdo",
+    "username": "buucucquan1",
     "password": "Buucucquan1@tdlogistics"
 }
 
