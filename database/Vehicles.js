@@ -47,17 +47,21 @@ const getManyVehicles = async (conditions, paginationConditions) => {
 
     let query;
     if (fields && values && fields.length > 0 && values.length > 0) {
-        query = `SELECT v.*, t.transport_partner_name, p.fullname 
-                FROM vehicle AS v 
-                JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
-                JOIN partner_staff AS p ON v.staff_id = p.staff_id
+        query = `SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+                v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, t.transport_partner_name, p.fullname 
+                FROM vehicle AS v
+                LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
+                LEFT JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
+                LEFT JOIN partner_staff AS p ON v.staff_id = p.staff_id
                 WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != "" AND ${fields.map(field => `${field} = ?`).join(" AND ")}
                 
                 UNION
                 
-                SELECT v.*, NULL AS transport_partner_name, s.fullname 
+                SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+                v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, NULL AS transport_partner_name, s.fullname 
                 FROM vehicle AS v 
-                JOIN staff AS s ON v.staff_id = s.staff_id 
+                LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
+                LEFT JOIN staff AS s ON v.staff_id = s.staff_id 
                 WHERE v.transport_partner_id IS NULL AND ${fields.map(field => `${field} = ?`).join(" AND ")};`;
     
                 if (offset && typeof offset === "number") {
@@ -74,16 +78,20 @@ const getManyVehicles = async (conditions, paginationConditions) => {
                 }
             }
     else {
-        query = `SELECT v.*, t.transport_partner_name, p.fullname 
+        query = `SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+                v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, t.transport_partner_name, p.fullname 
                 FROM vehicle AS v 
+                LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
                 LEFT JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
                 LEFT JOIN partner_staff AS p ON v.staff_id = p.staff_id
                 WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != ""
                 
                 UNION
                 
-                SELECT v.*, NULL AS transport_partner_name, s.fullname 
+                SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+                v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, NULL AS transport_partner_name, s.fullname 
                 FROM vehicle AS v 
+                LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
                 LEFT JOIN staff AS s ON v.staff_id = s.staff_id 
                 WHERE v.transport_partner_id IS NULL OR v.transport_partner_id = "";`;
 
