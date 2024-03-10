@@ -100,8 +100,6 @@ const getTasksByAdmin = async (conditions) => {
         query += " WHERE " + whereClauses.join(" AND ");
     }
 
-    console.log(pool.format(query, values));
-
     const result = await pool.query(query, values);
     return result[0];
 };
@@ -121,8 +119,11 @@ const deleteTaskByAgency = async (conditions) => {
 const deleteTaskByAdmin = async (conditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
+
     return await dbUtils.deleteOne(pool, table, fields, values);
 };
+
+
 module.exports = {
     createNewTaskAgency,
     createNewTaskByAdmin,
