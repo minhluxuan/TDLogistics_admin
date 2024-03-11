@@ -128,11 +128,11 @@ DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=BC_70001_72H12476
 DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=invalid_vehicle_id
 
 ###
-PATCH http://localhost:5000/api/v1/vehicles/delete_shipments?vehicle_id=BC_78300_67H112345
+PATCH http://localhost:5000/api/v1/vehicles/delete_shipments?vehicle_id=BC_71000_42H124768
 Content-Type: application/json
 
 {
-    "shipment_ids": ["TD202412112533216", "TD20240522616352", "TD20241211922797"]
+    "shipment_ids": ["BC_71000_202422224138948"]
 }
 
 ###
