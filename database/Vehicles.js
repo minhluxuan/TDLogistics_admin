@@ -205,8 +205,8 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
         acceptedArray: acceptedArray,
         notAcceptedNumber: notAcceptedArray.length,
         notAcceptedArray: notAcceptedArray,
-        overloadShipmentNumber: overloadShipmentArray.length,
-        overloadShipmentArray: overloadShipmentArray,
+        overloadShipmentNumber: overloadArray.length,
+        overloadShipmentArray: overloadArray,
         ShipmentIDs: jsonShipmentIds
     });
 }

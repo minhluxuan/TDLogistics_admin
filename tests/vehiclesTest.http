@@ -136,9 +136,10 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:5000/api/v1/vehicles/add_shipments?vehicle_id=BC_78300_67H112345
+
+PATCH http://localhost:5000/api/v1/vehicles/add_shipments?vehicle_id=BC_71000_42H124768
 Content-Type: application/json
 
 {
-    "shipment_ids": ["TD202412112533216", "TD20240522616352", "TD202412112533216", "TD20241211922797"]
+    "shipment_ids": ["BC_71000_202422224138948"]
 }
