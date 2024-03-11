@@ -128,6 +128,7 @@ DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=BC_70001_72H12476
 DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=invalid_vehicle_id
 
 ###
+
 PATCH http://localhost:5000/api/v1/vehicles/delete_shipments?vehicle_id=BC_71000_42H124768
 Content-Type: application/json
 

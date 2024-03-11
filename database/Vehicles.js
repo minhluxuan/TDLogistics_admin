@@ -217,14 +217,13 @@ const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
-    for (let i = 0; i < shipment_ids.length; i++) {
+    for (let i = 0; i < prevShipmentIds.length; i++) {
         const getShipmentQuery = `SELECT mass FROM shipment WHERE shipment_id = ?`;
         const [shipmentRow] = await pool.query(getShipmentQuery, [shipment_ids[i]]);
         const { mass: shipmentMass } = shipmentRow[0];
 
-        if (!prevShipmentIds.includes(shipment_ids[i]) && (currentMass - shipmentMass >= 0)) {
-            const shipmentIndex = prevShipmentIds.indexOf(shipment_ids[i]);
-            prevShipmentIds.splice(shipmentIndex, 1);
+        if (shipment_ids.includes(shipment_ids[i])) {
+            prevShipmentIds.splice(i, 1);
             currentMass = currentMass - shipmentMass;
             acceptedArray.push(shipment_ids[i]);
         }
