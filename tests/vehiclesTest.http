@@ -143,3 +143,7 @@ Content-Type: application/json
 {
     "shipment_ids": ["BC_71000_202422224138948"]
 }
+
+###
+
+GET http://localhost:5000/api/v1/vehicles/get_shipments?vehicle_id=BC_71000_42H124768

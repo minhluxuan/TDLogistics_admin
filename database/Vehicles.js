@@ -134,7 +134,7 @@ const getVehicleShipmentIds = async (vehicle) => {
     const result = new Array();
 
     for (const shipment_id of shipment_ids) {
-        const shipment = await Shipments.getOneShipment({ shipment_id });
+        const shipment = await dbUtils.findOneIntersect(pool, "shipment", ["shipment_id"], [shipment_id]);
 
         if (shipment && shipment.length > 0) {
             result.push(shipment[0]);
