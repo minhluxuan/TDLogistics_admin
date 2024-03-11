@@ -7,6 +7,31 @@ const shippersService = require("../services/shippersService");
 const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
 
+const checkExistShipment = async (req, res) => {
+    try {
+        const { error } = shipmentRequestValidation.validateShipmentID(req.query);
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const existed = await shipmentService.checkExistShipment(req.query);
+        return res.status(200).json({
+            error: false,
+            existed: existed,
+            message: existed ? `Lô hàng có mã ${req.query.shipment_id} đã tồn tại.` : `Lô hàng có mã ${req.query.shipment_id} không tồn tại.`
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 const createNewShipment = async (req, res) => {
     try {
         const createdTime = new Date();
@@ -701,6 +726,7 @@ const undertakeShipment = async (req, res) => {
 }
 
 module.exports = {
+    checkExistShipment,
     createNewShipment,
     updateShipment,
     getShipments,
