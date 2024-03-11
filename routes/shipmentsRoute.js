@@ -4,6 +4,8 @@ const shipmentController = require("../controllers/shipmentsController");
 
 const router = express.Router();
 
+router.get("/check", shipmentController.checkExistShipment);
+
 router.post("/create",
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),   
