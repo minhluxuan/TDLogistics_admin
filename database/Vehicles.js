@@ -253,6 +253,7 @@ module.exports = {
     getOneVehicle,
     updateVehicle,
     deleteVehicle,
+    getVehicleShipmentIds,
     addShipmentToVehicle,
     deleteShipmentFromVehicle,
 };
