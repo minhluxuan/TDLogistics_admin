@@ -649,6 +649,338 @@ const logout = async (req, res) => {
 	}
 };
 
+const getPartnerAvatar = async (req, res) => {
+	try {
+		const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.query);
+	
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		if (["PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)) {
+			if (req.user.staff_id !== req.body.staff_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+	
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const fileName = partner.avatar ? partner.avatar : null;
+				
+			if (fileName) {
+				const file = path.join(__dirname,"..","storage", "partner_staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});			
+		}
+
+		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
+			req.body.partner_id = req.user.partner_id;
+	
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const fileName = partner.avatar ? partner.avatar : null;
+	
+			if (fileName) {
+				const file = path.join(__dirname,"..", "storage", "partner_staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});
+		}
+	
+		if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			req.body.agency_id = req.user.agency_id;
+	
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const fileName = partner.avatar ? partner.avatar : null;
+	
+			if (fileName) {
+				const file = path.join(__dirname,"..", "storage", "partner_staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});			
+		}
+	
+		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const fileName = partner.avatar ? partner.avatar : null;
+			
+			if (fileName) {
+				const file = path.join(__dirname,"..", "storage", "partner_staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
+				}	
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
+		}
+	} 
+	catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
+const getPartnerLicenseBefore = async (req, res) => {
+	try {
+		const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.query);
+	
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		if (["PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)) {
+			if (req.user.staff_id !== req.body.staff_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
+	
+			if (imageLicense) {
+				if (imageLicense.before)
+				{
+					const fileName = path.join(__dirname,"..","storage", "partner_staff", "img", "license", imageLicense.before);
+					if (fs.existsSync(fileName)) {
+						return res.status(200).sendFile(fileName);
+					}
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});			
+		}
+
+		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
+			req.body.partner_id = req.user.partner_id;
+	
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
+	
+			if (imageLicense) {
+				if (imageLicense.before)
+				{
+					const fileName = path.join(__dirname,"..","storage", "partner_staff", "img", "license", imageLicense.before);
+					if (fs.existsSync(fileName)) {
+						return res.status(200).sendFile(fileName);
+					}
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});			
+		}
+	
+		if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			req.body.agency_id = req.user.agency_id;
+	
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
+	
+			if (imageLicense) {
+				if (imageLicense.before)
+				{
+					const fileName = path.join(__dirname,"..","storage", "partner_staff", "img", "license", imageLicense.before);
+					if (fs.existsSync(fileName)) {
+						return res.status(200).sendFile(fileName);
+					}
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
+		}
+	
+		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
+			
+			if (imageLicense) {
+				if (imageLicense.before)
+				{
+					const fileName = path.join(__dirname,"..","storage", "partner_staff", "img", "license", imageLicense.before);
+					if (fs.existsSync(fileName)) {
+						return res.status(200).sendFile(fileName);
+					}
+				}
+			}
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
+		}
+	} 
+	catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
+const getPartnerLicenseAfter = async (req, res) => {
+	try {
+		const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		if (["PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)) {
+			if (req.user.staff_id !== req.body.staff_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
+	
+			if (imageLicense) {
+				if (imageLicense.after)
+				{
+					const fileName = path.join(__dirname,"..","storage", "partner_staff", "img", "license", imageLicense.after);
+					if (fs.existsSync(fileName)) {
+						return res.status(200).sendFile(fileName);
+					}
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
+		}
+
+		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
+			req.body.partner_id = req.user.partner_id;
+	
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
+	
+			if (imageLicense) {
+				if (imageLicense.after)
+				{
+					const fileName = path.join(__dirname,"..","storage", "partner_staff", "img", "license", imageLicense.after);
+					if (fs.existsSync(fileName)) {
+						return res.status(200).sendFile(fileName);
+					}
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
+		}
+	
+		if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			req.body.agency_id = req.user.agency_id;
+	
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
+	
+			if (imageLicense) {
+				if (imageLicense.after)
+				{
+					const fileName = path.join(__dirname,"..","storage", "partner_staff", "img", "license", imageLicense.after);
+					if (fs.existsSync(fileName)) {
+						return res.status(200).sendFile(fileName);
+					}
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
+		}
+	
+		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
+			const partner = resultGettingOnePartnerStaff[0];
+			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
+	
+			if (imageLicense) {
+				if (imageLicense.after)
+				{
+					const fileName = path.join(__dirname,"..","storage", "partner_staff", "img", "license", imageLicense.after);
+					if (fs.existsSync(fileName)) {
+						return res.status(200).sendFile(fileName);
+					}
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
+		}
+	} 
+	catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
 module.exports = {
 	checkExistPartnerStaff,
 	createNewPartnerStaff,
@@ -659,4 +991,7 @@ module.exports = {
 	updatePartnerAvatar,
 	updatePartnerLicenseImg,
 	logout,
+	getPartnerAvatar,
+	getPartnerLicenseBefore,
+	getPartnerLicenseAfter,
 };

@@ -609,6 +609,88 @@ const updateAvatar = async (req, res) => {
 	}
 }
 
+const getStaffAvatar = async (req, res) => {
+	try {
+		const { error } = staffValidation.validateGettingStaffAvatar(req.query);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
+			const resultGettingOneStaff = await staffsService.getOneStaff(req.body); 
+			const staff = resultGettingOneStaff[0];
+			const fileName = staff.avatar ? staff.avatar : null;
+			
+			if (fileName) {
+				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});
+		}
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			req.body.agency_id = req.user.agency_id;
+
+			const resultGettingOneStaff = await staffsService.getOneStaff(req.body); 
+			const staff = resultGettingOneStaff[0];
+			const fileName = staff.avatar ? staff.avatar : null;
+	
+			if (fileName) {
+				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});
+		}
+		else {
+			if (req.user.staff_id !== req.body.staff_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+	
+			const resultGettingOneStaff = await staffsService.getOneStaff(req.body); 
+			const staff = resultGettingOneStaff[0];
+			const fileName = staff.avatar ? staff.avatar : null;
+	
+			if (fileName) {
+				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				if (fs.existsSync(file)) {
+						return res.status(200).sendFile(file);
+				}
+			}
+			
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});
+		}
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
+
 module.exports = {
 	checkExistStaff,
 	createNewStaff,
@@ -619,4 +701,5 @@ module.exports = {
 	logout,
 	updatePassword,
 	updateAvatar,
+	getStaffAvatar,
 };
