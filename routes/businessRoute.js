@@ -105,6 +105,7 @@ router.post(
     "/create",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isActive(),
     upload.single("contract"),
     businessController.createNewBusinessUser
 );
@@ -113,6 +114,7 @@ router.post(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
     "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    auth.isActive(),
     businessController.getBusiness
 );
 router.post(
@@ -120,18 +122,21 @@ router.post(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
     "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    auth.isActive(),
     businessController.getRepresentor
 );
 router.put(
     "/update",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isActive(),
     businessController.updateBusinessInfo
 );
 router.patch(
     "/update_business_representor",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isActive(),
     businessController.updateBusinessRepresentor
 );
 router.patch(
@@ -139,13 +144,21 @@ router.patch(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
     upload.single("contract"),
+    auth.isActive(),
     businessController.updateContract
 );
 router.delete(
     "/delete",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isActive(),
     businessController.deleteBusinessUser
 );
-
+router.get(
+    "/get_contract",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    businessController.getBusinessContract
+);
 module.exports = router;
