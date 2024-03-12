@@ -14,7 +14,7 @@ content-type: application/json
     "province_source": "Thành phố Hồ Chí Minh",
     "district_source": "Quận 1",
     "ward_source": "Phường Đa Kao",
-    "detail_source": "Quốc lô 1A",
+    "detail_source": "123 Đường Võ Thị Sáu",
     "province_dest": "Tỉnh An Giang", 
     "district_dest": "Thành phố Long Xuyên",
     "ward_dest": "Phường Mỹ Long",
@@ -24,9 +24,11 @@ content-type: application/json
     "long_destination": 105.442062,
     "lat_destination": 10.377187,
     "COD": 32000,
-    "service_type": 1
+    "service_type": "CPN"
 }
 
+###
+POST http://localhost:5000/api/v1/orders/create
 ###
 
 POST http://localhost:5000/api/v1/orders/calculatefee
