@@ -69,19 +69,20 @@ const createNewOrder = async (socket, info, orderTime) => {
         info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
         const addressSource = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
         const addressDest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
-        info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
+        // info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
+        info.fee = 23000;
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
-        if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
+        if (!resultCreatingNewOrder || resultCreatingNewOrder.affectedRows === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
 
         const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(info, resultFindingManagedAgency.postal_code);
-        if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
+        if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.affectedRows === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
-
+    
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
         
         eventManager.emit("notifyNewOrderToAgency", {
