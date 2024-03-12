@@ -72,3 +72,23 @@ Content-Type: application/json
 ###
 
 DELETE http://localhost:5000/api/v1/business/delete?business_id=BC_70001_077204005692&agency_id=BC_70001_077204005691
+
+### minhluxuan AlphaSolutions@alphasolutions2k24
+
+POST http://localhost:5000/api/v1/business/login 
+Content-Type: application/json 
+
+{
+    "username": "minhluxuan",
+    "password": "AlphaSolutions@alphasolutions2k24"
+
+}
+
+### 
+
+GET http://localhost:5000/api/v1/business/get_contract 
+Content-Type: application/json 
+
+{
+    "business_id": "BC_71000_077204005692"
+}

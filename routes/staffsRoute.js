@@ -179,14 +179,14 @@ router.get("/logout",
     staffsController.logout
 );
 
-router.get(
-    "/get_avatar",
-    auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
-    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER",
-    "DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER"]),
-    staffsController.getStaffAvatar
-);
+// router.get(
+//     "/get_avatar",
+//     auth.isAuthenticated(),
+//     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
+//     "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER",
+//     "DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER"]),
+//     staffsController.getStaffAvatar
+// );
 
 router.get("/login", (req, res) => {
     res.render("staffLogin");
