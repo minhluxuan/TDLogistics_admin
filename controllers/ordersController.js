@@ -259,7 +259,7 @@ const createOrdersByFile = async (req, res) => {
             const stt = order.STT;
             delete order.STT;
 
-            const resultCreatingNewOrder = ordersService.createNewOrder(order);
+            const resultCreatingNewOrder = await ordersService.createNewOrder(order);
             if (!resultCreatingNewOrder || resultCreatingNewOrder.affectedRows === 0) {
                 failNumber++;
                 failArray.push(stt);
