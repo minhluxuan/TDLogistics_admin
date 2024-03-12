@@ -50,6 +50,7 @@ const sessionStrategy = new LocalStrategy({
             active,
         });
     } catch (error) {
+        console.log(error);
         done(error);
     }
 });
