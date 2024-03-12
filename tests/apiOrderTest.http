@@ -5,16 +5,16 @@ POST http://localhost:5000/api/v1/orders/create
 content-type: application/json
 
 {
-    "name_reciever": "NguyenVanB",
-    "phone_reciever": "0787919943",
+    "name_receiver": "NguyenVanB",
+    "phone_number_receiver": "0787919943",
     "mass": 24,
     "height": 30,
     "width": 25,
     "length": 60,
-    "province_source": "Tỉnh Bà Rịa - Vũng Tàu",
-    "district_source": "Huyện Đất Đỏ",
-    "ward_source": "Thị trấn Đất Đỏ",
-    "detail_source": "Đường tỉnh 52, tổ 6 Khu phố Hiệp Hòa",
+    "province_source": "Thành phố Hồ Chí Minh",
+    "district_source": "Quận 1",
+    "ward_source": "Phường Đa Kao",
+    "detail_source": "Quốc lô 1A",
     "province_dest": "Tỉnh An Giang", 
     "district_dest": "Thành phố Long Xuyên",
     "ward_dest": "Phường Mỹ Long",

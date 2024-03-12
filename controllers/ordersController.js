@@ -15,7 +15,7 @@ const OrderValidation = new Validation.OrderValidation();
 
 try {
     eventManager.once("ioInitialize", io => {
-        io.sockets.on("connection", (socket) => {
+        io.sockets.on("connection", (socket) => {            
             socket.on("notifyNewOrderFromUser", (info) => {
                 try {
                     const orderTime = new Date();
@@ -69,7 +69,8 @@ const createNewOrder = async (socket, info, orderTime) => {
         info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
         const addressSource = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
         const addressDest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
-        info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
+        //info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
+        info.fee = 10000;
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
