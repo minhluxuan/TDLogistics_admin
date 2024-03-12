@@ -53,12 +53,14 @@ router.post(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
     "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "TRANSPORT_PARTNER_REPRESENTOR"]),
+    auth.isActive(),
     transportPartnerController.getTransportPartner);
 router.post(
     "/create",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
     upload.single("contract"),
+    auth.isActive(),
     transportPartnerController.createNewTransportPartner
 );
 router.put(
@@ -66,6 +68,7 @@ router.put(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []),
     upload.single("contract"),
+    auth.isActive(),
     transportPartnerController.updateTransportPartner
 );
 router.patch(
@@ -73,12 +76,14 @@ router.patch(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []),
     upload.single("contract"),
+    auth.isActive(),
     transportPartnerController.updateContract,
 );
 router.delete(
     "/delete",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []),
+    auth.isActive(),
     transportPartnerController.deleteTransportPartner
 );
 

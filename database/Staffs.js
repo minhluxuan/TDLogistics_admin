@@ -41,7 +41,6 @@ const checkExistStaff = async (info) => {
 
 const checkExistStaffIntersect = async (info) => {
 	const fields = Object.keys(info);
-	const values = Object.values(info);
 	const result = await dbUtils.findOneIntersect(pool, table, fields, values);
 
 	if (!result) {
@@ -86,7 +85,7 @@ const getManyStaffs = async (info, paginationConditions, postal_code) => {
 	let query;
 	if (!postal_code) {
 		if (fields.length === 0 || values.length === 0) {
-			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff`;
+			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff ORDER BY created_at DESC`;
 			if (offset && typeof offset === "number") {
 				if (limit && typeof limit === "number" && limit > 0) {
 					query += ` LIMIT ?, ?`;
@@ -101,16 +100,16 @@ const getManyStaffs = async (info, paginationConditions, postal_code) => {
 			}
 		}
 		else {
-			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff WHERE ${fields.map(field => `${field} = ?`).join(" AND ")} ORDER BY created_at DESC`;
 			if (offset && typeof offset === "number") {
 				if (limit && typeof limit === "number" && limit > 0) {
-					query += ` AND LIMIT ?, ?`;
+					query += ` LIMIT ?, ?`;
 					values.push(offset, limit);
 				}
 			}
 			else {
 				if (limit && typeof limit === "number" && limit > 0) {
-					query += ` AND LIMIT ?`;
+					query += ` LIMIT ?`;
 					values.push(limit);
 				}
 			}
@@ -118,7 +117,7 @@ const getManyStaffs = async (info, paginationConditions, postal_code) => {
 	}
 	else {
 		if (fields.length === 0 || values.length === 0) {
-			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"}`;
+			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"} ORDER BY created_at DESC`;
 			if (offset && typeof offset === "number") {
 				if (limit && typeof limit === "number" && limit > 0) {
 					query += ` LIMIT ?, ?`;
@@ -133,7 +132,7 @@ const getManyStaffs = async (info, paginationConditions, postal_code) => {
 			}
 		}
 		else {
-			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"} WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"} WHERE ${fields.map(field => `${field} = ?`).join(" AND ")} ORDER BY created_at DESC`;
 			if (offset && typeof offset === "number") {
 				if (limit && typeof limit === "number" && limit > 0) {
 					query += ` AND LIMIT ?, ?`;

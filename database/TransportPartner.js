@@ -48,7 +48,7 @@ const getManyPartners = async (info, paginationConditions) => {
     const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
 
 
-    return await dbUtils.find(pool, table, fields, values, limit, offset);
+    return await dbUtils.find(pool, table, fields, values, true, limit, offset);
 };
 
 const getOnePartner = async (info) => {

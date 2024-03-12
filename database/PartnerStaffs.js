@@ -79,7 +79,7 @@ const getManyPartnerStaffs = async (info, paginationConditions) => {
 	const limit = paginationConditions.rows || 0;
     const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
 
-	const result = await dbUtils.find(pool, table, fields, values, limit, offset);
+	const result = await dbUtils.find(pool, table, fields, values, true, limit, offset);
 	return result;
 };
 

@@ -95,7 +95,7 @@ const getManyBussinessUsers = async (info, paginationConditions) => {
 	const limit = paginationConditions.rows || 0;
     const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
 
-  	return await dbUtils.find(pool, table, fields, values, limit, offset);
+  	return await dbUtils.find(pool, table, fields, values, true, limit, offset);
 };
 
 const getOneBusinessUser = async (info) => {
@@ -133,7 +133,7 @@ const getManyRepresentors = async (info) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
-	return await dbUtils.find(pool, businessRepresentorTable, fields, values);
+	return await dbUtils.find(pool, businessRepresentorTable, fields, values, true);
 }
 
 const updateBusinessUser = async (info, conditions) => {

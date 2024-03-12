@@ -18,6 +18,7 @@ router.post(
         "AGENCY_TELLER",
         "AGENCY_COMPLAINTS_SOLVER",
     ]),
+    auth.isActive(),
     scheduleController.createNewSchedule
 );
 
@@ -35,6 +36,7 @@ router.post(
         "AGENCY_TELLER",
         "AGENCY_COMPLAINTS_SOLVER",
     ]),
+    auth.isActive(),
     scheduleController.getSchedule
 );
 router.put(
@@ -51,6 +53,7 @@ router.put(
         "AGENCY_TELLER",
         "AGENCY_COMPLAINTS_SOLVER",
     ]),
+    auth.isActive(),
     scheduleController.updateSchedule
 );
 router.delete(
@@ -67,6 +70,7 @@ router.delete(
         "AGENCY_TELLER",
         "AGENCY_COMPLAINTS_SOLVER",
     ]),
+    auth.isActive(),
     scheduleController.deleteTask
 );
 

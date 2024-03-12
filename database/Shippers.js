@@ -43,6 +43,7 @@ const getTasks = async (conditions, postal_code) => {
         query += ` AND DATE(s.created_at) > ? AND DATE(s.created_at) < ?`
         queryParams.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
     }
+    query += ` ORDER BY s.created_at DESC`;
     
     const result = (await pool.query(query, queryParams))[0];
 
@@ -106,7 +107,7 @@ const getHistory = async (conditions, postal_code) => {
     const shipperTasksTable = postal_code + '_' + defaultTasksTable;
     const queryParams = [conditions.staff_id];
 
-    let query = `SELECT s.*, o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ?`;
+    let query = `SELECT s.*, o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ? ORDER BY s.created_at DESC`;
     
     if (conditions.option === 1) {
         const today = moment(new Date()).format("YYYY-MM-DD");
@@ -145,6 +146,7 @@ const getHistory = async (conditions, postal_code) => {
         query += ` AND DATE(s.created_at) > ? AND DATE(s.created_at) < ?`
         queryParams.push(firstDayOfMonthFormatted, lastDayOfMonthFormatted);
     }
+    query += ` ORDER BY s.created_at DESC`;
     
     const result = (await pool.query(query, queryParams))[0];
 

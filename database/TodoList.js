@@ -76,6 +76,7 @@ const getTasksByAgency = async (conditions, postalCode) => {
     if (whereClauseArray.length > 0) {
         query += " WHERE " + whereClauseArray.join(" AND ");
     }
+    query += ` ORDER BY s.created_at DESC`;
 
     const result = await pool.query(query, values);
     return result[0];
