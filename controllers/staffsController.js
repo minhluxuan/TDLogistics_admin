@@ -690,7 +690,6 @@ const getStaffAvatar = async (req, res) => {
 	}
 };
 
-
 module.exports = {
 	checkExistStaff,
 	createNewStaff,

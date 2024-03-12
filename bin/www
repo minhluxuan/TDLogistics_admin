@@ -61,7 +61,7 @@ io.engine.use(
     if (req.user) {
       next();
     } else {
-      res.writeHead(401);
+      // res.writeHead(401);
       res.end();
     }
   }),
