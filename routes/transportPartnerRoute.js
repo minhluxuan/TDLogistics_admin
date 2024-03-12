@@ -81,5 +81,11 @@ router.delete(
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"], []),
     transportPartnerController.deleteTransportPartner
 );
+router.post(
+    "/get_contract",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "TRANSPORT_PARTNER_REPRESENTOR"]),
+    transportPartnerController.getPartnerContract);
 
 module.exports = router;
