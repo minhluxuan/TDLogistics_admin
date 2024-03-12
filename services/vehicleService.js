@@ -30,7 +30,7 @@ const deleteVehicle = async (conditions) => {
     return await Vehicle.deleteVehicle(conditions);
 };
 
-const addShipmentToVehicle = async(vehicle, shipment_ids) => {
+const addShipmentToVehicle = async (vehicle, shipment_ids) => {
     return await Vehicle.addShipmentToVehicle(vehicle, shipment_ids);
 }
 

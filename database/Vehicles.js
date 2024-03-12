@@ -134,7 +134,7 @@ const getVehicleShipmentIds = async (vehicle) => {
     const result = new Array();
 
     for (const shipment_id of shipment_ids) {
-        const shipment = await Shipments.getOneShipment({ shipment_id });
+        const shipment = await dbUtils.findOneIntersect(pool, "shipment", ["shipment_id"], [shipment_id]);
 
         if (shipment && shipment.length > 0) {
             result.push(shipment[0]);
@@ -164,7 +164,6 @@ const deleteVehicle = async (conditions) => {
 const addShipmentToVehicle = async (vehicle, shipment_ids) => {
     const acceptedArray = new Array();
     const notAcceptedArray = new Array();
-    const overloadArray = new Array();
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
@@ -176,9 +175,6 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
     
         if (prevShipmentIds.includes(shipment_ids[i])) { 
             notAcceptedArray.push(shipment_ids[i]);
-        }
-        else if(shipmentMass + currentMass > vehicle.max_load) {
-            overloadArray.push(shipment_ids[i]);
         }
         else {
             prevShipmentIds.push(shipment_ids[i]);
@@ -205,8 +201,6 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
         acceptedArray: acceptedArray,
         notAcceptedNumber: notAcceptedArray.length,
         notAcceptedArray: notAcceptedArray,
-        overloadShipmentNumber: overloadShipmentArray.length,
-        overloadShipmentArray: overloadShipmentArray,
         ShipmentIDs: jsonShipmentIds
     });
 }
@@ -217,19 +211,22 @@ const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
-    for (let i = 0; i < shipment_ids.length; i++) {
-        const getShipmentQuery = `SELECT mass FROM shipment WHERE shipment_id = ?`;
-        const [shipmentRow] = await pool.query(getShipmentQuery, [shipment_ids[i]]);
-        const { mass: shipmentMass } = shipmentRow[0];
-
-        if (!prevShipmentIds.includes(shipment_ids[i]) && (currentMass - shipmentMass >= 0)) {
-            const shipmentIndex = prevShipmentIds.indexOf(shipment_ids[i]);
-            prevShipmentIds.splice(shipmentIndex, 1);
-            currentMass = currentMass - shipmentMass;
-            acceptedArray.push(shipment_ids[i]);
+    for (let i = 0; i < prevShipmentIds.length; i++) {
+        if (shipment_ids.includes(shipment_ids[i])) {
+            const getShipmentQuery = `SELECT mass FROM shipment WHERE shipment_id = ?`;
+            const [shipmentRow] = await pool.query(getShipmentQuery, [prevShipmentIds[i]]);
+            if (shipmentRow && shipmentRow.length > 0) {
+                const { mass: shipmentMass } = shipmentRow[0];
+                acceptedArray.push(prevShipmentIds[i]);
+                prevShipmentIds.splice(i, 1);
+                currentMass = currentMass - shipmentMass;
+            }
+            else {
+                notAcceptedArray.push(prevShipmentIds[i]);
+            }
         }
         else {
-            notAcceptedArray.push(shipment_ids[i]);
+            notAcceptedArray.push(prevShipmentIds[i]);
         }
     }
 
@@ -253,6 +250,7 @@ module.exports = {
     getOneVehicle,
     updateVehicle,
     deleteVehicle,
+    getVehicleShipmentIds,
     addShipmentToVehicle,
     deleteShipmentFromVehicle,
 };

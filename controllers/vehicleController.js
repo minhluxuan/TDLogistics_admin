@@ -352,7 +352,6 @@ const deleteVehicle = async (req, res) => {
     }
 };
 
-
 const addShipmentToVehicle = async (req, res) => {
     try {
         const { error: error1 } = vehicleValidation.validateCheckingExistVehicle(req.query);
@@ -363,7 +362,7 @@ const addShipmentToVehicle = async (req, res) => {
             });
         }
 
-        const { error: error2 } = vehicleValidation.validateUpdatingVehicle(req.body);
+        const { error: error2 } = vehicleValidation.validateShipmentIds(req.body);
         if (error2) {
             return res.status(400).json({
                 error: true,
@@ -396,7 +395,7 @@ const addShipmentToVehicle = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error.message);
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message
@@ -414,7 +413,7 @@ const deleteShipmentFromVehicle = async (req, res) => {
             });
         }
 
-        const { error: error2 } = vehicleValidation.validateUpdatingVehicle(req.body);
+        const { error: error2 } = vehicleValidation.validateShipmentIds(req.body);
         if (error2) {
             return res.status(400).json({
                 error: true,

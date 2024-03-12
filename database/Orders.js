@@ -283,7 +283,7 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
 
     } else {
         const result = await SQLutils.updateOne(pool, table, ["status_code"], [orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result[0].affectedRows <= 0) {
+        if(result.affectedRows <= 0) {
             return new Object({
                 success: false,
                 data: null,
