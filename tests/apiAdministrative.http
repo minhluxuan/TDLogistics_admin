@@ -1,0 +1,23 @@
+###
+GET http://localhost:5000/api/v1/administrative/search
+Content-Type: application/json
+
+{
+    
+}
+###
+GET http://localhost:5000/api/v1/administrative/search
+Content-Type: application/json
+
+{
+    "province": "Tỉnh Thái Nguyên"
+}
+
+###
+GET http://localhost:5000/api/v1/administrative/search
+Content-Type: application/json
+
+{
+    "province": "Tỉnh Thái Nguyên",
+    "district": "Thành phố Thái Nguyên"
+}
