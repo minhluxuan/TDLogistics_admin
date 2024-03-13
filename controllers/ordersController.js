@@ -11,7 +11,7 @@ const fs = require("fs");
 const path = require("path");
 const servicesStatus = require("../lib/servicesStatus");
 
-const OrderValidation = new Validation.OrderValidation();
+const orderValidation = new Validation.OrderValidation();
 
 try {
     eventManager.once("ioInitialize", io => {
@@ -21,25 +21,25 @@ try {
                     const orderTime = new Date();
         
                     if (["USER"].includes(socket.request.user.role)) {
-                        // const { error } = OrderValidation.validateCreatingOrder(info);
+                        const { error } = orderValidation.validateCreatingOrder(info);
         
-                        // if (error) {
-                        //     return socket.emit("notifyError", error.message);
-                        // }
+                        if (error) {
+                            return socket.emit("notifyError", error.message);
+                        }
 
                         info.user_id = socket.request.user.user_id;
                         info.phone_number_sender = socket.request.user.phone_number;
                         info.name_sender = socket.request.user.fullname;
                     }
                     else if (["MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
-                        // const { error } = OrderValidation.validateCreatingOrderByAgency(info);
+                        const { error } = orderValidation.validateCreatingOrderByAdmin(info);
         
-                        // if (error) {
-                        //     return socket.emit("notifyError", error.message);
-                        // }
+                        if (error) {
+                            return socket.emit("notifyError", error.message);
+                        }
                     }
         
-                    if (info.service_type === 2 || info.service_type === 3) {
+                    if (info.service_type === "NNT") {
                         if(info.province_source !== info.province_dest) {
                             const errorMessage = "Đơn hàng phải được giao nội tỉnh!";
                             return socket.emit("notifyError", errorMessage);
@@ -60,29 +60,41 @@ try {
 
 const createNewOrder = async (socket, info, orderTime) => {
     try {
-        const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);
+        const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);   
         
         info.journey = JSON.stringify(new Array());
         const agencies = resultFindingManagedAgency.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
         info.agency_id = agencies;
         info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
-        const addressSource = info.detail_source + ", " + info.ward_source + ", " + info.district_source + ", " + info.province_source; 
-        const addressDest = info.detail_dest + ", " + info.ward_dest + ", " + info.district_dest + ", " + info.province_dest; 
-        // info.fee = await servicesFee.calculateExpressFee(info.service_type, addressSource, addressDest);
-        info.fee = 23000;
+        const provinceSource = info.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
+        const provinceDest = info.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
+
+        const mass = (info.length * info.width * info.height) / 6000;
+        const map = new libMap.Map();
+        const addressSoure = utils.getAddressFromComponent(info.province_source, info.district_source, info.ward_source, info.detail_source);
+        const addressDest = utils.getAddressFromComponent(info.province_dest, info.district_dest, info.ward_dest, info.detail_dest);
+        const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
+        
+        let optionService = null;
+        if(info.service_type === "T60") {
+            optionService = "T60";
+            info.service_type = "CPN";
+        }
+
+        info.fee = servicesFee.calculteFee(info.service_type, provinceSource, provinceDest, distance, mass * 1000, 0.15, optionService, false);
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
-        if (!resultCreatingNewOrder || resultCreatingNewOrder.affectedRows === 0) {
+        if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
 
         const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(info, resultFindingManagedAgency.postal_code);
-        if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.affectedRows === 0) {
+        if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
-    
+
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
         
         eventManager.emit("notifyNewOrderToAgency", {
@@ -92,6 +104,45 @@ const createNewOrder = async (socket, info, orderTime) => {
     } catch (error) {
         console.log(error);
         return socket.emit("notifyError", error.message);
+    }
+}
+
+const calculateServiceFee = async (req, res) => {
+    try {
+        const { error } = orderValidation.validateCalculatingFee(req.body);
+
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const provinceSource = req.body.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
+        const provinceDest = req.body.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
+        const mass = (req.body.length * req.body.width * req.body.height) / 6000;
+        const map = new libMap.Map();
+        const addressSoure = utils.getAddressFromComponent(req.body.province_source, req.body.district_source, req.body.ward_source, req.body.detail_source);
+        const addressDest = utils.getAddressFromComponent(req.body.province_dest, req.body.district_dest, req.body.ward_dest, req.body.detail_dest);
+        const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
+        
+        let optionService = null;
+        if(req.body.service_type === "T60") {
+            optionService = "T60";
+            req.body.service_type = "CPN";
+        }
+
+        const fee = servicesFee.calculteFee(req.body.service_type, provinceSource, provinceDest, distance, mass * 1000, 0.15, optionService, false);
+        return res.status(200).json({
+            error: false,
+            data: fee,
+            message: `Phí vận chuyển là ${fee} VND.`
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        }); 
     }
 }
 
@@ -124,7 +175,7 @@ const getOrders = async (req, res) => {
             paginationConditions.page = parseInt(req.query.page);
         }
 
-        const { error: paginationError } = OrderValidation.validatePaginationConditions(paginationConditions);
+        const { error: paginationError } = orderValidation.validatePaginationConditions(paginationConditions);
         if (paginationError) {
             return res.status(400).json({
                 error: true,
@@ -132,7 +183,7 @@ const getOrders = async (req, res) => {
             });
         }
 
-        const { error } = OrderValidation.validateFindingOrders(req.body);
+        const { error } = orderValidation.validateFindingOrders(req.body);
 
         if (error) {
             return res.status(400).json({
@@ -293,12 +344,19 @@ const createOrdersByFile = async (req, res) => {
 
 const updateOrder = async (req, res) => {
     try {
-        const { error } = OrderValidation.validateQueryUpdatingOrder(req.query) || OrderValidation.validateUpdatingOrder(req.body);
-        
-        if (error) {
+        const { error: error1 } = orderValidation.validateQueryUpdatingOrder(req.query);
+        if (error1) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: error1.message,
+            });
+        }
+
+        const { error: error2 } = orderValidation.validateUpdatingOrder(req.body);
+        if (error2) {
+            return res.status(400).json({
+                error: true,
+                message: error2.message,
             });
         }
 
@@ -416,5 +474,5 @@ module.exports = {
     createOrdersByFile,
     updateOrder,
     cancelOrder,
-    // calculateFee,
+    calculateServiceFee,
 }
