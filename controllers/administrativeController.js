@@ -20,7 +20,7 @@ const getUnits = async (req, res) => {
             message: (result.success ? "Lấy thông tin đơn vị hành chính thành công" : "Lấy thông tin đơn vị hành chính thất bại")
         });
     }
-    else if(req.body.province && !req.body.district && !req.body.ward) {
+    else if (req.body.province && !req.body.district && !req.body.ward) {
         const result = await adminstrativeService.getUnits(2, req.body.province);
         return res.status(200).json({
             error: (result.success ? false : true),
