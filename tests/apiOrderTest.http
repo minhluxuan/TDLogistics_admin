@@ -110,3 +110,26 @@ content-type: application/json
 {
     
 }
+
+
+###"address_source": "Đường tỉnh 52, tổ 6 Khu phố Hiệp Hòa, Thị trấn Đất Đỏ, Huyện Đất Đỏ, Tỉnh Bà Rịa - Vũng Tàu, Việt Nam",
+###"address_dest": "979 Đường 2 Tháng 9, Phường 11, Thành phố Vũng Tàu, Tỉnh Bà Rịa - Vũng Tàu, Việt Nam",
+POST http://localhost:5000/api/v1/orders/calculatefee
+content-type: application/json
+
+{
+
+    "mass": 5,
+    "height": 30,
+    "width": 25,
+    "length": 30,
+    "province_source": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district_source": "Huyện Đất Đỏ",
+    "ward_source": "Thị trấn Đất Đỏ",
+    "detail_source": "Đường tỉnh 52, tổ 6 Khu phố Hiệp Hòa",
+    "province_dest": "Tỉnh An Giang", 
+    "district_dest": "Thành phố Long Xuyên",
+    "ward_dest": "Phường Mỹ Long",
+    "detail_dest": "20 Lý Thái Tổ",    
+    "service_type": "HTT"
+}

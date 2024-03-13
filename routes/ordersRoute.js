@@ -60,6 +60,12 @@ router.post(
     "AGENCY_SHIPPER", "PARTNER_SHIPPER", "SHIPPER"]),
     ordersController.getOrders);
 router.post(
+    "/calculatefee",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["USER", "ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    ordersController.calculateServiceFee
+)
+router.post(
     "/check_file_format",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),

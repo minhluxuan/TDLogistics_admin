@@ -102,6 +102,38 @@ const createNewOrder = async (socket, info, orderTime) => {
     }
 }
 
+const calculateServiceFee = async (req, res) => {
+    try{
+        if((["USER", "ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]).includes(req.user.role)) {
+            const provinceSource = req.body.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
+            const provinceDest = req.body.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
+
+            const mass = (req.body.length * req.body.width * req.body.height) / 6000;
+            const map = new libMap.Map();
+            const addressSoure = utils.getAddressFromComponent(req.body.province_source, req.body.district_source, req.body.ward_source, req.body.detail_source);
+            const addressDest = utils.getAddressFromComponent(req.body.province_dest, req.body.district_dest, req.body.ward_dest, req.body.detail_dest);
+            const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
+            
+            let optionService = null;
+            if(req.body.service_type === "T60") {
+                optionService = "T60";
+                req.body.service_type = "CPN";
+            }
+            const fee = servicesFee.calculteFee(req.body.service_type, provinceSource, provinceDest, distance, mass * 1000, 0.15, optionService, false);
+            return res.status(200).json({
+                error: false,
+                data: fee,
+                message: `Phí vận chuyển là ${fee} VND.`
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        }); 
+    }
+}
+
 const checkExistOrder = async (req, res) => {
     try {
         const existed = await ordersService.checkExistOrder({ order_id: req.query.order_id });
@@ -423,5 +455,5 @@ module.exports = {
     createOrdersByFile,
     updateOrder,
     cancelOrder,
-    // calculateFee,
+    calculateServiceFee
 }
