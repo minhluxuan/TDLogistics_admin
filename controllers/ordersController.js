@@ -13,7 +13,7 @@ const orderValidation = new Validation.OrderValidation();
 try {
     eventManager.once("ioInitialize", io => {
         io.sockets.on("connection", (socket) => {
-            socket.on("notifyNewOrderFromUser", (info) => {
+            socket.on("notifyNewOrder", (info) => {
                 try {
                     const orderTime = new Date();
         
