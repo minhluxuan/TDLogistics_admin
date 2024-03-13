@@ -17,6 +17,14 @@ try {
                 try {
                     const orderTime = new Date();
         
+                    if (info.service_type === "T60") {
+                        if (info.length && info.width && info.height
+                            && (info.length * info.width * info.height) / 6000 < 5) {
+                                return socket.emit("notifyError", `Đơn hàng với kích thước ${info.length} x ${info.width} x ${info.height} không phù hợp với dịch vụ T60.
+                                Yêu cầu: (chiều dài x chiều rộng x chiều cao)/6000 >= 5.`);
+                            }
+                    }
+
                     if (["USER"].includes(socket.request.user.role)) {
                         const { error } = orderValidation.validateCreatingOrder(info);
         
@@ -24,17 +32,10 @@ try {
                             return socket.emit("notifyError", error.message);
                         }
 
-                        if (info.service_type === "T60") {
-                            if (info.length && info.width && info.height
-                                && (info.length * info.width * info.height) / 6000 < 5) {
-                                    return socket.emit("notifyError", `Đơn hàng với kích thước ${info.length} x ${info.width} * ${info.height} không phù hợp với dịch vụ T60.
-                                    Yêu cầu: (chiều dài x chiều rộng x chiều cao)/6000 >= 5.`);
-                                }
-                        }
-
                         info.user_id = socket.request.user.user_id;
                         info.phone_number_sender = socket.request.user.phone_number;
                         info.name_sender = socket.request.user.fullname;
+                        info.status_code = servicesStatus.processing.code;
                     }
                     else if (["MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
                         const { error } = orderValidation.validateCreatingOrderByAdmin(info);
@@ -42,6 +43,8 @@ try {
                         if (error) {
                             return socket.emit("notifyError", error.message);
                         }
+
+                        info.status_code = servicesStatus.received.code;
                     }
         
                     if (info.service_type === "NNT") {

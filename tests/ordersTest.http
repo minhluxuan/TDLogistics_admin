@@ -33,16 +33,16 @@ POST http://localhost:5000/api/v1/orders/calculate_fee
 Content-Type: application/json
 
 {
-    "province_source": "Hà Nội",
-    "district_source": "Quận Ba Đình",
-    "ward_source": "Phường Phúc Xá",
+    "province_source": "Thành phố Hồ Chí Minh",
+    "district_source": "Quận 1",
+    "ward_source": "Phường Đa Kao",
     "detail_source": "Phố Đội Cấn",
     "province_dest": "Thành phố Hồ Chí Minh",
     "district_dest": "Quận 1",
     "ward_dest": "Phường Phạm Ngũ Lão",
     "detail_dest": "đường Phạm Ngũ Lão",
     "service_type": "T60",
-    "length": 12,
-    "width": 4,
+    "length": 30,
+    "width": 20,
     "height": 10
 }
