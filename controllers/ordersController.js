@@ -76,7 +76,7 @@ const createNewOrder = async (socket, info, orderTime) => {
             optionService = "T60";
             info.service_type = "CPN";
         }
-        info.fee = servicesFee.calculteFee(info.service_type, provinceSource, provinceDest, distance, mass * 1000, 0.15, optionService, false);
+        info.fee = servicesFee.calculteFee(info.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         
         console.log(info.fee, mass, distance);
@@ -119,7 +119,7 @@ const calculateServiceFee = async (req, res) => {
                 optionService = "T60";
                 req.body.service_type = "CPN";
             }
-            const fee = servicesFee.calculteFee(req.body.service_type, provinceSource, provinceDest, distance, mass * 1000, 0.15, optionService, false);
+            const fee = servicesFee.calculteFee(req.body.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
             return res.status(200).json({
                 error: false,
                 data: fee,
