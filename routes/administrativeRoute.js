@@ -4,7 +4,7 @@ const auth = require("../lib/auth");
 
 const router = express.Router();
 
-router.get(
+router.post(
     "/search",
     auth.isAuthenticated(),
     administrativeController.getUnits
