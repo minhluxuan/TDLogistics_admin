@@ -24,6 +24,14 @@ try {
                             return socket.emit("notifyError", error.message);
                         }
 
+                        if (info.service_type === "T60") {
+                            if (info.length && info.width && info.height
+                                && (info.length * info.width * info.height) / 6000 < 5) {
+                                    return socket.emit("notifyError", `Đơn hàng với kích thước ${info.length} x ${info.width} * ${info.height} không phù hợp với dịch vụ T60.
+                                    Yêu cầu: (chiều dài x chiều rộng x chiều cao)/6000 >= 5.`);
+                                }
+                        }
+
                         info.user_id = socket.request.user.user_id;
                         info.phone_number_sender = socket.request.user.phone_number;
                         info.name_sender = socket.request.user.fullname;
@@ -122,7 +130,7 @@ const calculateServiceFee = async (req, res) => {
         const addressSoure = utils.getAddressFromComponent(req.body.province_source, req.body.district_source, req.body.ward_source, req.body.detail_source);
         const addressDest = utils.getAddressFromComponent(req.body.province_dest, req.body.district_dest, req.body.ward_dest, req.body.detail_dest);
         const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
-        
+
         let optionService = null;
         if(req.body.service_type === "T60") {
             optionService = "T60";
