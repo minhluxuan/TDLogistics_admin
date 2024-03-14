@@ -16,7 +16,7 @@ try {
             socket.on("notifyNewOrder", (info) => {
                 try {
                     const orderTime = new Date();
-        
+                    
                     if (info.service_type === "T60") {
                         if (info.length && info.width && info.height
                             && (info.length * info.width * info.height) / 6000 < 5) {
@@ -31,7 +31,7 @@ try {
                         if (error) {
                             return socket.emit("notifyError", error.message);
                         }
-
+                        
                         info.user_id = socket.request.user.user_id;
                         info.phone_number_sender = socket.request.user.phone_number;
                         info.name_sender = socket.request.user.fullname;
@@ -40,20 +40,22 @@ try {
                     else if (["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
                         const { error } = orderValidation.validateCreatingOrderByAdmin(info);
         
-                        if (error) {
+                        if (error) {console.log(error.message);
                             return socket.emit("notifyError", error.message);
                         }
-
-                        info.status_code = servicesStatus.received.code;
+                        
+                        // info.status_code = servicesStatus.received.code;
                     }
-        
+
                     if (info.service_type === "NNT") {
                         if(info.province_source !== info.province_dest) {
                             const errorMessage = "Đơn hàng phải được giao nội tỉnh!";
                             return socket.emit("notifyError", errorMessage);
                         }
                     }
-        
+                    
+                    console.log(info);
+
                     createNewOrder(socket, info, orderTime);
                 } catch (error) {
                     return eventManager.emit("notifyError", error.message);
@@ -69,7 +71,7 @@ try {
 const createNewOrder = async (socket, info, orderTime) => {
     try {
         const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);   
-        
+
         info.journey = JSON.stringify(new Array());
         const agencies = resultFindingManagedAgency.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
@@ -83,7 +85,7 @@ const createNewOrder = async (socket, info, orderTime) => {
         const addressSoure = utils.getAddressFromComponent(info.province_source, info.district_source, info.ward_source, info.detail_source);
         const addressDest = utils.getAddressFromComponent(info.province_dest, info.district_dest, info.ward_dest, info.detail_dest);
         const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
-        
+
         let optionService = null;
         if(info.service_type === "T60") {
             optionService = "T60";
@@ -104,7 +106,7 @@ const createNewOrder = async (socket, info, orderTime) => {
         }
 
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
-        
+
         eventManager.emit("notifyNewOrderToAgency", {
             order: info,
             room: resultFindingManagedAgency.agency_id,
