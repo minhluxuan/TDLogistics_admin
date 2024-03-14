@@ -119,7 +119,7 @@ function parseLogMessage(message) {
 		responseTime: parts[8],
 	};
 }
-app.use(morganMiddleware);
+app.use(morgan("combined"));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(sessionMiddleware);
