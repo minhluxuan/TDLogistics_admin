@@ -62,6 +62,8 @@ const createNewOrder = async (socket, info, orderTime) => {
         const areaAgencyIdSubParts = agencies.split('_');
         info.agency_id = agencies;
         info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
+        
+        
         const provinceSource = info.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
         const provinceDest = info.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
 
@@ -70,13 +72,15 @@ const createNewOrder = async (socket, info, orderTime) => {
         const addressSoure = utils.getAddressFromComponent(info.province_source, info.district_source, info.ward_source, info.detail_source);
         const addressDest = utils.getAddressFromComponent(info.province_dest, info.district_dest, info.ward_dest, info.detail_dest);
         const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
-        
         let optionService = null;
         if(info.service_type === "T60") {
             optionService = "T60";
             info.service_type = "CPN";
         }
-        info.fee = servicesFee.calculteFee(info.service_type, provinceSource, provinceDest, distance, mass * 1000, 0.15, optionService, false);
+        
+        info.fee = servicesFee.calculteFee(info.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
+        
+        
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         
         console.log(info.fee, mass, distance);
@@ -113,13 +117,15 @@ const calculateServiceFee = async (req, res) => {
             const addressSoure = utils.getAddressFromComponent(req.body.province_source, req.body.district_source, req.body.ward_source, req.body.detail_source);
             const addressDest = utils.getAddressFromComponent(req.body.province_dest, req.body.district_dest, req.body.ward_dest, req.body.detail_dest);
             const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
-            
+            console.log(distance);
+            console.log(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
             let optionService = null;
             if(req.body.service_type === "T60") {
                 optionService = "T60";
                 req.body.service_type = "CPN";
             }
-            const fee = servicesFee.calculteFee(req.body.service_type, provinceSource, provinceDest, distance, mass * 1000, 0.15, optionService, false);
+            const fee = servicesFee.calculteFee(req.body.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
+
             return res.status(200).json({
                 error: false,
                 data: fee,

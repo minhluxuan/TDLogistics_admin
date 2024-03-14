@@ -131,5 +131,46 @@ content-type: application/json
     "district_dest": "Thành phố Long Xuyên",
     "ward_dest": "Phường Mỹ Long",
     "detail_dest": "20 Lý Thái Tổ",    
-    "service_type": "HTT"
+    "service_type": "CPN"
+}
+
+###
+
+POST http://localhost:5000/api/v1/orders/calculatefee
+content-type: application/json
+
+{
+
+    "mass": 12,
+    "height": 12,
+    "width": 4,
+    "length": 10,
+    "province_source": "Thành phố Hà Nội, Việt Nam",
+    "district_source": "Quận Ba Đình",
+    "ward_source": "Phường Phúc Xá",
+    "detail_source": "35 Lương Thanh",
+    "province_dest": "Thành phố Hồ Chí Minh, Việt Nam", 
+    "district_dest": "Quận 1",
+    "ward_dest": "Phường Phạm Ngũ Lão",
+    "detail_dest": "155 Bùi Viện",    
+    "service_type": "T60"
+}
+
+###
+POST http://localhost:5000/api/v1/orders/calculate_fee
+Content-Type: application/json
+
+{
+    "province_source": "Hà Nội",
+    "district_source": "Quận Ba Đình",
+    "ward_source": "Phường Phúc Xá",
+    "detail_source": "Phố Đội Cấn",
+    "province_dest": "Thành phố Hồ Chí Minh",
+    "district_dest": "Quận 1",
+    "ward_dest": "Phường Phạm Ngũ Lão",
+    "detail_dest": "đường Phạm Ngũ Lão",
+    "service_type": "T60",
+    "length": 1,
+    "width": 1,
+    "height": 1
 }
