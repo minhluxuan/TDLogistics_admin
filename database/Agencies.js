@@ -137,9 +137,9 @@ const createTablesForAgency = async (postal_code) => {
 	}
 
 	const addPrimaryKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD PRIMARY KEY (order_id)`;
-	const addForeignKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE`;
+	const addForeignKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD CONSTRAINT fk_${ordersTable}_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE`;
 	const addPrimaryKeyForShipperTasksTableQuery = `ALTER TABLE ${shipperTasksTable}
-	ADD CONSTRAINT fk_order_id_${shipperTasksTable} FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE`
+	ADD CONSTRAINT fk_${shipperTasksTable}_order_id_ FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE`
 
 	await pool.query(addPrimaryKeyForOrdersTableQuery);
 	await pool.query(addForeignKeyForOrdersTableQuery);

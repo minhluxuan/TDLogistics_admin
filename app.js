@@ -91,12 +91,34 @@ morgan.token("remote-user", function (req) {
 morgan.token("remote-user-role", function(req) {
 	return req.user ? req.user.role : "undefined";
 })
-app.use(morgan('[:date[iso]] :remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms', {
-	stream: {
-		// Configure Morgan to use our custom logger with the http severity
-		write: (message) => logger.http(message.trim()),
-	},
-}));
+const morganMiddleware = morgan(
+	':remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms',
+	{
+	  stream: {
+		write: (message) => {
+		  const logObject = parseLogMessage(message);
+		  logger.info(logObject);
+		},
+	  },
+	}
+);
+  
+function parseLogMessage(message) {
+	const parts = message.split(' ');
+  
+	return {
+		remoteAddr: parts[0],
+		remoteUser: parts[1],
+		remoteUserRole: parts[2],
+		method: parts[2],
+		url: parts[3],
+		httpVersion: parts[4],
+		status: parts[5],
+		contentLength: parts[6],
+		responseTime: parts[8],
+	};
+}
+app.use(morganMiddleware);
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(sessionMiddleware);
