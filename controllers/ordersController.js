@@ -37,7 +37,7 @@ try {
                         info.name_sender = socket.request.user.fullname;
                         info.status_code = servicesStatus.processing.code;
                     }
-                    else if (["MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
+                    else if (["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
                         const { error } = orderValidation.validateCreatingOrderByAdmin(info);
         
                         if (error) {

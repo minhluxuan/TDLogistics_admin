@@ -96,8 +96,9 @@ const morganMiddleware = morgan(
 	{
 	  stream: {
 		write: (message) => {
-		  const logObject = parseLogMessage(message);
-		  logger.info(logObject);
+			const logObject = parseLogMessage(message);
+			console.log(logObject);
+			logger.http(logObject);
 		},
 	  },
 	}

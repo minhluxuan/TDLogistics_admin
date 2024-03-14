@@ -1,4 +1,4 @@
-[2024-03-14 01:29:55.266 PM] [32minfo[39m: 	[32m{[39m
+[2024-03-14 01:49:17.776 PM] [32mhttp[39m: 	[32m{[39m
 [32m  remoteAddr: '::ffff:127.0.0.1',[39m
 [32m  remoteUser: 'TD_00000_077165007713',[39m
 [32m  remoteUserRole: 'POST',[39m
@@ -7,49 +7,5 @@
 [32m  httpVersion: 'HTTP/1.1',[39m
 [32m  status: '200',[39m
 [32m  contentLength: '66',[39m
-[32m  responseTime: '47.826'[39m
-[32m}[39m
-[2024-03-14 01:32:48.657 PM] [32minfo[39m: 	[32m{[39m
-[32m  remoteAddr: '::ffff:127.0.0.1',[39m
-[32m  remoteUser: 'TD_00000_077165007713',[39m
-[32m  remoteUserRole: 'DELETE',[39m
-[32m  method: 'DELETE',[39m
-[32m  url: '/api/v1/agencies/delete?agency_id=BC_71000_077204005691',[39m
-[32m  httpVersion: 'HTTP/1.1',[39m
-[32m  status: '201',[39m
-[32m  contentLength: '374',[39m
-[32m  responseTime: '84.756'[39m
-[32m}[39m
-[2024-03-14 01:32:55.212 PM] [32minfo[39m: 	[32m{[39m
-[32m  remoteAddr: '::ffff:127.0.0.1',[39m
-[32m  remoteUser: 'TD_00000_077165007713',[39m
-[32m  remoteUserRole: 'POST',[39m
-[32m  method: 'POST',[39m
-[32m  url: '/api/v1/agencies/create',[39m
-[32m  httpVersion: 'HTTP/1.1',[39m
-[32m  status: '200',[39m
-[32m  contentLength: '586',[39m
-[32m  responseTime: '249.300'[39m
-[32m}[39m
-[2024-03-14 01:34:31.000 PM] [32minfo[39m: 	[32m{[39m
-[32m  remoteAddr: '::ffff:127.0.0.1',[39m
-[32m  remoteUser: 'TD_00000_077165007713',[39m
-[32m  remoteUserRole: 'DELETE',[39m
-[32m  method: 'DELETE',[39m
-[32m  url: '/api/v1/agencies/delete?agency_id=BC_71000_077204005691',[39m
-[32m  httpVersion: 'HTTP/1.1',[39m
-[32m  status: '201',[39m
-[32m  contentLength: '374',[39m
-[32m  responseTime: '75.448'[39m
-[32m}[39m
-[2024-03-14 01:34:34.823 PM] [32minfo[39m: 	[32m{[39m
-[32m  remoteAddr: '::ffff:127.0.0.1',[39m
-[32m  remoteUser: 'TD_00000_077165007713',[39m
-[32m  remoteUserRole: 'POST',[39m
-[32m  method: 'POST',[39m
-[32m  url: '/api/v1/agencies/create',[39m
-[32m  httpVersion: 'HTTP/1.1',[39m
-[32m  status: '200',[39m
-[32m  contentLength: '586',[39m
-[32m  responseTime: '242.011'[39m
+[32m  responseTime: '44.168'[39m
 [32m}[39m
