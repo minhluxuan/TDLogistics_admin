@@ -52,10 +52,12 @@ const getAuthenticatedStaffInfo = async (req, res) => {
 			fullname: staff.fullname,
 			role: req.user.role,
 			position: staff.position,
+			cccd: staff.cccd,
+			phone_number: staff.phone_number,
 			agency_id: req.user.agency_id,
 			privileges: req.user.privileges,
 			active: req.user.active,
-		})
+		});
 		return res.status(200).json(new Object({
 			error: false,
 			info: info,
