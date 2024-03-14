@@ -47,7 +47,7 @@ const sessionStrategy = new LocalStrategy({
             phone_number,
         });
     } catch (error) {
-        
+        console.log(error);
         return done(null, false);
     }
 });
