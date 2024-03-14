@@ -44,7 +44,7 @@ try {
                             return socket.emit("notifyError", error.message);
                         }
                         
-                        // info.status_code = servicesStatus.received.code;
+                        info.status_code = servicesStatus.received.code;
                     }
 
                     if (info.service_type === "NNT") {
