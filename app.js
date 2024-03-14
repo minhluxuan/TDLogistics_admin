@@ -17,7 +17,6 @@ dotenv.config();
 
 const indexRouter = require('./routes/index');
 
-
 const otpRouter = require("./routes/otpRoute");
 const staffsRouter = require("./routes/staffsRoute");
 const businessRouter = require("./routes/businessRoute");
@@ -86,7 +85,18 @@ const sessionMiddleware = session({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(morgan("combined"));
+morgan.token("remote-user", function (req) {
+    return req.user ? req.user.staff_id : "Guest";
+});
+morgan.token("remote-user-role", function(req) {
+	return req.user ? req.user.role : "undefined";
+})
+app.use(morgan('[:date[iso]] :remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms', {
+	stream: {
+		// Configure Morgan to use our custom logger with the http severity
+		write: (message) => logger.http(message.trim()),
+	},
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(sessionMiddleware);
@@ -150,7 +160,7 @@ app.use(function(err, req, res, next) {
 	res.status(err.status || 500);
 	res.render('error');
 });
-// console.log(require("./lib/utils").hash("NTDung@tdlogistics2k24"));
+
 const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
 	try {
 		const currentTime = new Date();

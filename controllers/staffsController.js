@@ -36,7 +36,7 @@ const checkExistStaff = async (req, res) => {
 }
 
 const getAuthenticatedStaffInfo = async (req, res) => {
-	try {
+	try {req.remoteUser = req.user.staff_id;
 		const info = new Object({
 			staff_id: req.user.staff_id,
 			role: req.user.role,
