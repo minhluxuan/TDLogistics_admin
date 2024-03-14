@@ -41,12 +41,21 @@ const getPermissionByRole = async (req, res) => {
 
 const grantPermissions = async (req, res) => {
     try {
-        const { error } = authorizationValidation.validateFindingAuthorization(req.query) || authorizationValidation.validateUpdatingAuthorization(req.body);
+        const { error: conditionError } = authorizationValidation.validateFindingAuthorization(req.query);
 
-        if (error) {
+        if (conditionError) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: conditionError.message,
+            });
+        }
+
+        const { error: infoError } = authorizationValidation.validateUpdatingAuthorization(req.body);
+
+        if (infoError) {
+            return res.status(400).json({
+                error: true,
+                message: infoError.message,
             });
         }
 
@@ -158,12 +167,21 @@ const grantPermissions = async (req, res) => {
 
 const revokePermissions = async (req, res) => {
     try {
-        const { error } = authorizationValidation.validateFindingAuthorization(req.query) || authorizationValidation.validateUpdatingAuthorization(req.body);
+        const { error: conditionError } = authorizationValidation.validateFindingAuthorization(req.query);
 
-        if (error) {
+        if (conditionError) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: conditionError.message,
+            });
+        }
+
+        const { error: infoError } = authorizationValidation.validateUpdatingAuthorization(req.body);
+
+        if (infoError) {
+            return res.status(400).json({
+                error: true,
+                message: infoError.message,
             });
         }
 

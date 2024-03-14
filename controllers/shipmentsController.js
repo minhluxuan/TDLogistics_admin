@@ -72,9 +72,18 @@ const createNewShipment = async (req, res) => {
 
 const updateShipment = async (req, res) => {
     try {
-        const { error } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query) && shipmentRequestValidation.validateUpdatingShipment(req.body);
+        const { error: conditionError } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query);
             
-        if (error) {
+        if (conditionError) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const { error: infoError } = shipmentRequestValidation.validateUpdatingShipment(req.body);
+            
+        if (infoError) {
             return res.status(400).json({
                 error: true,
                 message: error.message,
@@ -125,12 +134,21 @@ const updateShipment = async (req, res) => {
 
 const addOrderToShipment = async (req, res) => {
     try {
-        const { error } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query) && shipmentRequestValidation.validateOperationWithOrder(req.body);
+        const { error: conditionError } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query);
 
-        if (error) {
+        if (conditionError) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: conditionError.message,
+            });
+        }
+
+        const { error: infoError } = shipmentRequestValidation.validateOperationWithOrder(req.body);
+
+        if (infoError) {
+            return res.status(400).json({
+                error: true,
+                message: infoError.message,
             });
         }
 
@@ -191,12 +209,21 @@ const addOrderToShipment = async (req, res) => {
 
 const deleteOrderFromShipment = async (req, res) => {
     try {
-        const { error } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query) && shipmentRequestValidation.validateOperationWithOrder(req.body);
+        const { error: conditionError } = shipmentRequestValidation.validateQueryUpdatingShipment(req.query);
 
-        if (error) {
+        if (conditionError) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: conditionError.message,
+            });
+        }
+
+        const { error: infoError } = shipmentRequestValidation.validateOperationWithOrder(req.body);
+
+        if (infoError) {
+            return res.status(400).json({
+                error: true,
+                message: infoError.message,
             });
         }
 
@@ -406,12 +433,21 @@ const deleteShipment = async (req, res) => {
 
 const decomposeShipment = async (req, res) => {
     try {  
-        const { error } = shipmentRequestValidation.validateShipmentID(req.query) && shipmentRequestValidation.validateDecomposingShipment(req.body);
+        const { error: conditionError } = shipmentRequestValidation.validateShipmentID(req.query);
 
-        if (error) {
+        if (conditionError) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: conditionError.message,
+            });
+        }
+
+        const { error: infoError } = shipmentRequestValidation.validateDecomposingShipment(req.body);
+
+        if (infoError) {
+            return res.status(400).json({
+                error: true,
+                message: infoError.message,
             });
         }
 

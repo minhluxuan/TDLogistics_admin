@@ -255,12 +255,21 @@ const createNewPartnerStaff = async (req, res) => {
 
 const updatePartnerStaffInfo = async (req, res) => {
 	try {
-		const { error } = partnerStaffValidation.validateFindingPartnerStaffByPartnerStaff(req.query) || partnerStaffValidation.validateUpdatingPartnerStaff(req.body);
+		const { error: conditionError } = partnerStaffValidation.validateFindingPartnerStaffByPartnerStaff(req.query);
 
-		if (error) {
+		if (conditionError) {
 			return res.status(400).json({
 				error: true,
-				message: error.message,
+				message: conditionError.message,
+			});
+		}
+
+		const { error: infoError } = partnerStaffValidation.validateUpdatingPartnerStaff(req.body);
+
+		if (infoError) {
+			return res.status(400).json({
+				error: true,
+				message: infoError.message,
 			});
 		}
 		

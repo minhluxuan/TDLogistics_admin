@@ -317,12 +317,21 @@ const createNewBusinessUser = async (req, res) => {
 
 const updateBusinessInfo = async (req, res) => {
 	try {
-		const { error } = businessValidation.validateQueryUpdatingBusiness(req.query) || businessValidation.validateUpdatingBusiness(req.body);
+		const { error: conditionError } = businessValidation.validateQueryUpdatingBusiness(req.query);
 
-		if (error) {
+		if (conditionError) {
 			return res.status(400).json({
 				error: true,
-				message: error.message,
+				message: conditionError.message,
+			});
+		}
+
+		const { error: infoError } = businessValidation.validateUpdatingBusiness(req.body);
+
+		if (infoError) {
+			return res.status(400).json({
+				error: true,
+				message: infoError.message,
 			});
 		}
 
@@ -394,12 +403,21 @@ const updateBusinessInfo = async (req, res) => {
 };
 
 const updateBusinessRepresentor = async (req, res) => {
-	const { error } = businessValidation.validateQueryUpdatingBusiness(req.query) || businessValidation.validateUpdatingBusinessRepresentor(req.body);
+	const { error: conditionError } = businessValidation.validateQueryUpdatingBusiness(req.query);
 
-	if (error) {
+	if (conditionError) {
 		return res.status(400).json({
 			error: true,
-			message: error.message,
+			message: conditionError.message,
+		});
+	}
+
+	const { error: infoError } = businessValidation.validateUpdatingBusinessRepresentor(req.body);
+
+	if (infoError) {
+		return res.status(400).json({
+			error: true,
+			message: infoError.message,
 		});
 	}
 

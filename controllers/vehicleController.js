@@ -248,9 +248,17 @@ const getVehicleOrderIds = async (req, res) => {
 
 const addOrders = async (req, res) => {
     try {
-        const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateOrderIds(req.body);
+        const { error: conditionError } = vehicleValidation.validateCheckingExistVehicle(req.query);
     
-        if (error) {
+        if (conditionError) {
+            return res.status(400).json({
+                error: true,
+                message: "Thông tin không hợp lệ.",
+            });
+        }
+        const { error: infoError } = vehicleValidation.validateOrderIds(req.body);
+    
+        if (infoError) {
             return res.status(400).json({
                 error: true,
                 message: "Thông tin không hợp lệ.",
@@ -303,9 +311,17 @@ const addOrders = async (req, res) => {
 
 const deleteOrders = async (req, res) => {
     try {
-        const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateOrderIds(req.body);
+        const { error: conditionError } = vehicleValidation.validateCheckingExistVehicle(req.query);
     
-        if (error) {
+        if (conditionError) {
+            return res.status(400).json({
+                error: true,
+                message: "Thông tin không hợp lệ.",
+            });
+        }
+        const { error: infoError } = vehicleValidation.validateOrderIds(req.body);
+    
+        if (infoError) {
             return res.status(400).json({
                 error: true,
                 message: "Thông tin không hợp lệ.",
@@ -358,12 +374,20 @@ const deleteOrders = async (req, res) => {
 
 const updateVehicle = async (req, res) => {
     try {
-        const { error } = vehicleValidation.validateCheckingExistVehicle(req.query) || vehicleValidation.validateUpdatingVehicle(req.body);
+        const { error: conditionError } = vehicleValidation.validateCheckingExistVehicle(req.query);
         
-        if (error) {
+        if (conditionError) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: conditionError.message,
+            });
+        }
+        const { error: infoError } = vehicleValidation.validateUpdatingVehicle(req.body);
+        
+        if (infoError) {
+            return res.status(400).json({
+                error: true,
+                message: infoError.message,
             });
         }
 

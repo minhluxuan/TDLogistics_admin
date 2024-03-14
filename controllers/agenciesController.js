@@ -239,12 +239,21 @@ const createNewAgency = async (req, res) => {
 
 const updateAgency = async (req, res) => {
 	try {
-		const { error } = agencyValidation.validateFindingAgencyByAgency(req.query) || agencyValidation.validateUpdatingAgency(req.body);
+		const { error: conditionError } = agencyValidation.validateFindingAgencyByAgency(req.query);
 
-		if (error) {
+		if (conditionError) {
 			return res.status(400).json({
 				error: true,
-				message: error.message,
+				message: conditionError.message,
+			});
+		}
+
+		const { error: infoError } = agencyValidation.validateUpdatingAgency(req.body);
+
+		if (infoError) {
+			return res.status(400).json({
+				error: true,
+				message: infoError.message,
 			});
 		}
 

@@ -121,21 +121,21 @@ const getOrders = async (req, res) => {
             req.query.page = parseInt(req.query.page);
         }
 
-        const { error1 } = OrderValidation.validatePaginationConditions(req.query);
+        const { error: paginationError } = OrderValidation.validatePaginationConditions(req.query);
 
-        if (error1) {
+        if (paginationError) {
             return res.status(400).json({
                 error: true,
-                message: error1.message,
+                message: paginationError.message,
             });
         }
 
-        const { error2 } = OrderValidation.validateFindingOrders(req.body);
+        const { error: infoError } = OrderValidation.validateFindingOrders(req.body);
 
-        if (error2) {
+        if (infoError) {
             return res.status(400).json({
                 error: true,
-                message: error1.message,
+                message: infoError.message,
             });
         }
 
@@ -292,12 +292,21 @@ const createOrdersByFile = async (req, res) => {
 
 const updateOrder = async (req, res) => {
     try {
-        const { error } = OrderValidation.validateQueryUpdatingOrder(req.query) || OrderValidation.validateUpdatingOrder(req.body);
-        
-        if (error) {
+
+        const { error: conditionError } = OrderValidation.validateQueryUpdatingOrder(req.query);
+        if (conditionError) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: conditionError.message,
+            });
+        }
+
+        const { error: infoError } = OrderValidation.validateUpdatingOrder(req.body);
+        
+        if (infoError) {
+            return res.status(400).json({
+                error: true,
+                message: infoError.message,
             });
         }
 

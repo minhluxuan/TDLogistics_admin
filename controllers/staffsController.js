@@ -288,12 +288,20 @@ const createNewStaff = async (req, res) => {
 
 const updateStaffInfo = async (req, res) => {
 	try {
-		const { error } = staffValidation.validateQueryUpdatingStaff(req.query) || staffValidation.validateUpdatingStaff(req.body);
+		const { error: conditionError } = staffValidation.validateQueryUpdatingStaff(req.query);
 
-		if (error) {
+		if (conditionError) {
 			return res.status(400).json({
 				error: true,
-				message: error.message,
+				message: conditionError.message,
+			});
+		}
+		const { error: infoError } = staffValidation.validateUpdatingStaff(req.body);
+
+		if (infoError) {
+			return res.status(400).json({
+				error: true,
+				message: infoError.message,
 			});
 		}
 

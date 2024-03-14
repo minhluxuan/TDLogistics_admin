@@ -220,14 +220,20 @@ const createNewTransportPartner = async (req, res) => {
 
 const updateTransportPartner = async (req, res) => {
     try {
-        const { error } =
-            transportPartnerValidation.validateFindingPartnerByPartner(req.query) ||
-            transportPartnerValidation.validateUpdatePartner(req.body);
+        const { error: conditionError } = transportPartnerValidation.validateFindingPartnerByPartner(req.query);
 
-        if (error) {
+        if (conditionError) {
             return res.status(400).json({
                 error: true,
-                message: error.message,
+                message: conditionError.message,
+            });
+        }
+        const { error: infoError } = transportPartnerValidation.validateUpdatePartner(req.body);
+
+        if (infoError) {
+            return res.status(400).json({
+                error: true,
+                message: infoError.message,
             });
         }
 
