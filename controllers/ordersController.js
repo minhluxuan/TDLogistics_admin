@@ -394,11 +394,23 @@ const updateOrder = async (req, res) => {
             });
         }
 
-        const addressSource = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
+        const updatedRow = resultGettingOneOrder[0];
+
+        const mass = (updatedRow.length * updatedRow.width * updatedRow.height) / 6000;
+        const map = new libMap.Map();
+        const addressSoure = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
         const addressDest = utils.getAddressFromComponent(updatedRow.province_dest, updatedRow.district_dest, updatedRow.ward_dest, updatedRow.detail_dest);
-        const updatedFee = servicesFee.calculateExpressFee(updatedRow.service_type, addressSource, addressDest);
+        const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
         
-        const resultUpdatingOneOrder = await ordersService.updateOrder({ fee: updatedFee }, req.query);
+        let optionService = null;
+        if(updatedRow.service_type === "T60") {
+            optionService = "T60";
+            updatedRow.service_type = "CPN";
+        }
+        
+        updatedRow.fee = servicesFee.calculteFee(updatedRow.service_type, updatedRow.province_source, updatedRow.province_dest, distance.distance, mass * 1000, 0.15, optionService, false);
+        
+        const resultUpdatingOneOrder = await ordersService.updateOrder({ fee: updatedRow.fee }, req.query);
         if (!resultUpdatingOneOrder || resultUpdatingOneOrder.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
@@ -413,7 +425,7 @@ const updateOrder = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             error: true,
-            message: error,
+            message: error.message,
         });
     }
 };

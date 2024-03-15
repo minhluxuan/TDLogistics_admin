@@ -25,20 +25,31 @@ const sessionStrategy = new LocalStrategy({
             return done(null, false);
         }
 
-        const resultGettingOneUser = await Users.getOneUser({ phone_number: phone_number });
+        const resultGettingOneUser = await Users.getOneUser({ phone_number });
         if (!resultGettingOneUser || resultGettingOneUser.length === 0) {
             return done(null, false);
         }
         
+        const role = "USER";
+
         const user = resultGettingOneUser[0];
         if (!user) {
-            return done(null, false);
+            const user_id = `TD_00000_${phone_number}`;
+            const resultCreatingNewUser = await Users.createNewUser({ user_id, phone_number });
+            if (!resultCreatingNewUser || resultCreatingNewUser.affectedRows === 0 ) {
+                return done(null, false);
+            }
+
+            return done(null, {
+                role: role,
+                user_id: user_id,
+                fullname: null,
+                phone_number: phone_number,
+            });
         }
 
         const user_id = user.user_id;
         const fullname = user.fullname;
-
-        const role = "USER";
 
         return done(null, {
             role,
