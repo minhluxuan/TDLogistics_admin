@@ -549,12 +549,12 @@ const updateAvatar = async (req, res) => {
 			});
 		}
 
-		if (userCannotBeAffected.includes(req.query.staff_id)) {
-			return res.status(400).json({
-				error: true,
-				message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
-			});
-		}
+		// if (userCannotBeAffected.includes(req.query.staff_id)) {
+		// 	return res.status(400).json({
+		// 		error: true,
+		// 		message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
+		// 	});
+		// }
 
 		const updatorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
