@@ -640,9 +640,9 @@ const getStaffAvatar = async (req, res) => {
 			const fileName = staff.avatar ? staff.avatar : null;
 			
 			if (fileName) {
-				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				const file = path.join(__dirname, "..", "storage", "staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
-						return res.status(200).sendFile(file);
+					return res.status(200).sendFile(file);
 				}
 			}
 
@@ -684,7 +684,7 @@ const getStaffAvatar = async (req, res) => {
 			const fileName = staff.avatar ? staff.avatar : null;
 	
 			if (fileName) {
-				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				const file = path.join(__dirname, "..", "storage", "staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
 				}
