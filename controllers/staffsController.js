@@ -60,7 +60,7 @@ const getAuthenticatedStaffInfo = async (req, res) => {
 		});
 		return res.status(200).json(new Object({
 			error: false,
-			info: info,
+			info: staff,
 			message: `Lấy thông tin người dùng thành công`,
 		}));
 	} catch (error) {
