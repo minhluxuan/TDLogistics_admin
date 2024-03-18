@@ -132,8 +132,8 @@ const getOrders = async (conditions, paginationConditions) => {
     return await Orders.getOrders(conditions, paginationConditions);
 }
 
-const updateOrder = async (info, conditions) => {
-    return await Orders.updateOrder(info, conditions);
+const updateOrder = async (info, conditions, postal_code = null) => {
+    return await Orders.updateOrder(info, conditions, postal_code);
 };
 
 const createNewOrder = async (newOrder) => {

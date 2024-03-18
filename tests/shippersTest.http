@@ -9,6 +9,16 @@ Content-Type: application/json
 
 ###
 
+PATCH http://localhost:5000/api/v1/staffs/update_password
+Content-Type: application/json
+
+{
+    "new_password": "minhluxuan@TDlogistics2k24",
+    "confirm_password": "minhluxuan@TDlogistics2k24"
+}
+
+###
+
 POST http://localhost:5000/api/v1/shippers/get_tasks
 Content-Type: application/json
 

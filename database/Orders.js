@@ -71,14 +71,15 @@ const createNewOrder = async (newOrder, postalCode = null) => {
     return await SQLutils.insert(pool, ordersTable, Object.keys(newOrder), Object.values(newOrder));
 }
 
-const updateOrder = async (info, conditions) => {
+const updateOrder = async (info, conditions, postal_code = null) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
 
     const conditionFields = Object.keys(conditions);
     const conditionValues = Object.values(conditions);
 
-    return await SQLutils.updateOne(pool, table, fields, values, conditionFields, conditionValues);
+    const ordersTable = postal_code ? postal_code + '_orders' : table;
+    return await SQLutils.updateOne(pool, ordersTable, fields, values, conditionFields, conditionValues);
 };
 
 const cancelOrderWithTimeConstraint = async (conditions) => {
