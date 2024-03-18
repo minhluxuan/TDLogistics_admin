@@ -95,7 +95,7 @@ const getBusiness = async (req, res) => {
 			});
 		}
 
-		if (["BUSINESS_USER"].includes(req.user.role)) {
+		if (["BUSINESS"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingBusinessByBusiness(req.body);
 
 			if (error) {
@@ -167,7 +167,7 @@ const getRepresentor = async (req, res) => {
 			});
 		}
 
-		if (["BUSINESS_USER"].includes(req.user.role)) {
+		if (["BUSINESS"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingRepresentorByBusiness(req.body);
 			if (error) {
 				return res.status(400).json({
@@ -635,16 +635,16 @@ const updateContract = async (req, res) => {
 
 const getBusinessContract = async (req, res) => {
 	try {
+		const { error } = businessValidation.validateGettingBusinessContract(req.query);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = businessValidation.validateGettingBusinessContract(req.body);
-
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-
 			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
 			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
 				return res.status(404).json({
@@ -656,30 +656,19 @@ const getBusinessContract = async (req, res) => {
 			const contract = business.contract ? business.contract : null;
 
 			if (contract) {
-				const filePath = path.join(__dirname, "..","storage", "business_user", "document", "contract", contract);
+				const filePath = path.join(__dirname, "..", "storage", "business_user", "document", "contract", contract);
 				if (fs.existsSync(filePath)) {
 					return res.status(200).sendFile(filePath);
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: `File hợp đồng của khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
+			});	
 		}
 
 		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = businessValidation.validateGettingBusinessContract(req.body);
-
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-
 			req.body.agency_id = req.user.agency_id;
 
 			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
@@ -691,7 +680,7 @@ const getBusinessContract = async (req, res) => {
 			}
 
 			const business = resultGettingOneBusiness[0];
-			const contract = business.contract ? business.contract : null;
+			const contract = business.contract || null;
 			
 			if (contract) {
 				const filePath = path.join(__dirname, "..","storage", "business_user", "document", "contract", contract);
@@ -699,25 +688,14 @@ const getBusinessContract = async (req, res) => {
 					return res.status(200).sendFile(filePath);
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: `File hợp đồng của khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
+			});			
 		}
 
-		if (["BUSINESS_USER"].includes(req.user.role)) {
-			const { error } = businessValidation.validateGettingBusinessContract(req.body);
-
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-
+		if (["BUSINESS"].includes(req.user.role)) {
 			if (req.body.business_id !== req.user.business_id) {
 				return res.status(403).json({
 					error: true,
@@ -737,18 +715,16 @@ const getBusinessContract = async (req, res) => {
 			const contract = business.contract ? business.contract : null;
 			
 			if (contract) {
-				const filePath = path.join(__dirname, "..","storage", "business_user", "document", "contract", contract);
+				const filePath = path.join(__dirname, "..", "storage", "business_user", "document", "contract", contract);
 				if (fs.existsSync(filePath)) {
 					return res.status(200).sendFile(filePath);
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: `File hợp đồng của khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
+			});			
 		}
 	} catch (error) {
 		res.status(500).json({
@@ -758,6 +734,42 @@ const getBusinessContract = async (req, res) => {
 	}
 };
 
+const updatePassword = async (req, res) => {
+	try {
+		const { error } = businessValidation.validateUpdatePassword(req.body);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+		
+		const updatedInfo = new Object({
+			password: utils.hash(req.body.new_password),
+			active: true,
+		});
+
+		const result = await businessService.updatePassword(updatedInfo, { business_id: req.user.business_id });
+		
+		if (!result || result.affectedRows <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Người dùng doanh nghiệp có mã ${req.user.staff_id} không tồn tại.`,
+			});
+		}
+
+		return res.status(201).json({
+			error: false,
+			message: "Cập nhật mật khẩu thành công.",
+		});
+	} catch (error) {
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
 
 module.exports = {
 	createNewBusinessUser,
@@ -768,5 +780,6 @@ module.exports = {
 	updateBusinessRepresentor,
 	updateBusinessInfo,
 	deleteBusinessUser,
-	getBusinessContract
+	getBusinessContract,
+	updatePassword,
 }

@@ -91,6 +91,7 @@ router.delete(
     auth.isAuthorized(["USER", "ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
     ordersController.cancelOrder
 );
+router.post("/calculate_fee", ordersController.calculateServiceFee);
 router.get("/", (req, res) => {
     res.render("order");
 });

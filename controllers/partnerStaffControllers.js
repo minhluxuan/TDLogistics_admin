@@ -651,16 +651,16 @@ const logout = async (req, res) => {
 
 const getPartnerAvatar = async (req, res) => {
 	try {
+		const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.query);
+	
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
 		if (["PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)) {
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
 			if (req.user.staff_id !== req.body.staff_id) {
 				return res.status(403).json({
 					error: true,
@@ -678,25 +678,14 @@ const getPartnerAvatar = async (req, res) => {
 						return res.status(200).sendFile(file);
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});			
 		}
 
 		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-
 			req.body.partner_id = req.user.partner_id;
 	
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
@@ -704,30 +693,19 @@ const getPartnerAvatar = async (req, res) => {
 			const fileName = partner.avatar ? partner.avatar : null;
 	
 			if (fileName) {
-				const file = path.join(__dirname,"..","storage", "partner_staff", "img", "avatar", fileName);
+				const file = path.join(__dirname,"..", "storage", "partner_staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});
 		}
 	
 		if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
 			req.body.agency_id = req.user.agency_id;
 	
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
@@ -735,47 +713,34 @@ const getPartnerAvatar = async (req, res) => {
 			const fileName = partner.avatar ? partner.avatar : null;
 	
 			if (fileName) {
-				const file = path.join(__dirname,"..","storage", "partner_staff", "img", "avatar", fileName);
+				const file = path.join(__dirname,"..", "storage", "partner_staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});			
 		}
 	
 		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
 			const partner = resultGettingOnePartnerStaff[0];
 			const fileName = partner.avatar ? partner.avatar : null;
 			
 			if (fileName) {
-				const file = path.join(__dirname,"..","storage", "partner_staff", "img", "avatar", fileName);
+				const file = path.join(__dirname,"..", "storage", "partner_staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
-				}
+				}	
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
 		}
 	} 
 	catch (error) {
@@ -789,16 +754,16 @@ const getPartnerAvatar = async (req, res) => {
 
 const getPartnerLicenseBefore = async (req, res) => {
 	try {
+		const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.query);
+	
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
 		if (["PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)) {
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
 			if (req.user.staff_id !== req.body.staff_id) {
 				return res.status(403).json({
 					error: true,
@@ -819,25 +784,14 @@ const getPartnerLicenseBefore = async (req, res) => {
 					}
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});			
 		}
 
 		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-
 			req.body.partner_id = req.user.partner_id;
 	
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
@@ -853,25 +807,14 @@ const getPartnerLicenseBefore = async (req, res) => {
 					}
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});			
 		}
 	
 		if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
 			req.body.agency_id = req.user.agency_id;
 	
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
@@ -887,25 +830,14 @@ const getPartnerLicenseBefore = async (req, res) => {
 					}
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
 		}
 	
 		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
 			const partner = resultGettingOnePartnerStaff[0];
 			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
@@ -919,13 +851,10 @@ const getPartnerLicenseBefore = async (req, res) => {
 					}
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
 		}
 	} 
 	catch (error) {
@@ -939,16 +868,16 @@ const getPartnerLicenseBefore = async (req, res) => {
 
 const getPartnerLicenseAfter = async (req, res) => {
 	try {
+		const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
 		if (["PARTNER_DRIVER", "PARTNER_SHIPPER"].includes(req.user.role)) {
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
 			if (req.user.staff_id !== req.body.staff_id) {
 				return res.status(403).json({
 					error: true,
@@ -969,25 +898,14 @@ const getPartnerLicenseAfter = async (req, res) => {
 					}
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
 		}
 
 		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) { 
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-
 			req.body.partner_id = req.user.partner_id;
 	
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
@@ -1003,25 +921,14 @@ const getPartnerLicenseAfter = async (req, res) => {
 					}
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
 		}
 	
 		if (["AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
 			req.body.agency_id = req.user.agency_id;
 	
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
@@ -1037,25 +944,14 @@ const getPartnerLicenseAfter = async (req, res) => {
 					}
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
 		}
 	
 		if (["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = partnerStaffValidation.validateGetPartnerAvatarAndLicense(req.body);
-	
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
 			const resultGettingOnePartnerStaff = await partnerStaffsService.getOnePartnerStaff(req.body); 
 			const partner = resultGettingOnePartnerStaff[0];
 			const imageLicense = partner.image_license ? JSON.parse(partner.image_license) : null;
@@ -1069,13 +965,11 @@ const getPartnerLicenseAfter = async (req, res) => {
 					}
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});		
 		}
 	} 
 	catch (error) {
@@ -1086,7 +980,6 @@ const getPartnerLicenseAfter = async (req, res) => {
 		});
 	}
 };
-
 
 module.exports = {
 	checkExistPartnerStaff,
@@ -1100,5 +993,5 @@ module.exports = {
 	logout,
 	getPartnerAvatar,
 	getPartnerLicenseBefore,
-	getPartnerLicenseAfter
+	getPartnerLicenseAfter,
 };

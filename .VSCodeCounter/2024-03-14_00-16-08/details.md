@@ -1,0 +1,132 @@
+# Details
+
+Date : 2024-03-14 00:16:08
+
+Directory d:\\TDLogistics\\tdlogistics_real_time\\tdlogistics_real_time
+
+Total : 117 files,  23180 codes, 427 comments, 2995 blanks, all 26602 lines
+
+[Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
+
+## Files
+| filename | language | code | comment | blank | total |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| [README.md](/README.md) | Markdown | 2 | 0 | 1 | 3 |
+| [app.js](/app.js) | JavaScript | 137 | 11 | 22 | 170 |
+| [app.test.js](/app.test.js) | JavaScript | 23 | 16 | 5 | 44 |
+| [controllers/administrativeController.js](/controllers/administrativeController.js) | JavaScript | 45 | 0 | 4 | 49 |
+| [controllers/agenciesController.js](/controllers/agenciesController.js) | JavaScript | 312 | 0 | 61 | 373 |
+| [controllers/authorizationController.js](/controllers/authorizationController.js) | JavaScript | 229 | 0 | 34 | 263 |
+| [controllers/businessController.js](/controllers/businessController.js) | JavaScript | 659 | 0 | 127 | 786 |
+| [controllers/containersController.js](/controllers/containersController.js) | JavaScript | 115 | 18 | 25 | 158 |
+| [controllers/ordersController.js](/controllers/ordersController.js) | JavaScript | 414 | 0 | 72 | 486 |
+| [controllers/otpController.js](/controllers/otpController.js) | JavaScript | 53 | 0 | 9 | 62 |
+| [controllers/partnerStaffControllers.js](/controllers/partnerStaffControllers.js) | JavaScript | 829 | 0 | 168 | 997 |
+| [controllers/shipmentsController.js](/controllers/shipmentsController.js) | JavaScript | 641 | 0 | 100 | 741 |
+| [controllers/shippersController.js](/controllers/shippersController.js) | JavaScript | 88 | 0 | 15 | 103 |
+| [controllers/staffsController.js](/controllers/staffsController.js) | JavaScript | 592 | 0 | 113 | 705 |
+| [controllers/todoController.js](/controllers/todoController.js) | JavaScript | 247 | 1 | 32 | 280 |
+| [controllers/transportPartnerController.js](/controllers/transportPartnerController.js) | JavaScript | 369 | 0 | 78 | 447 |
+| [controllers/usersController.js](/controllers/usersController.js) | JavaScript | 184 | 0 | 33 | 217 |
+| [controllers/utils.js](/controllers/utils.js) | JavaScript | 668 | 2 | 111 | 781 |
+| [controllers/vehicleController.js](/controllers/vehicleController.js) | JavaScript | 388 | 0 | 78 | 466 |
+| [database/AdministrativeUnit.js](/database/AdministrativeUnit.js) | JavaScript | 56 | 0 | 4 | 60 |
+| [database/Agencies.js](/database/Agencies.js) | JavaScript | 292 | 0 | 76 | 368 |
+| [database/Authorization.js](/database/Authorization.js) | JavaScript | 33 | 0 | 8 | 41 |
+| [database/Business.js](/database/Business.js) | JavaScript | 147 | 0 | 43 | 190 |
+| [database/Containers.js](/database/Containers.js) | JavaScript | 96 | 2 | 19 | 117 |
+| [database/OTP.js](/database/OTP.js) | JavaScript | 40 | 1 | 11 | 52 |
+| [database/Orders.js](/database/Orders.js) | JavaScript | 269 | 5 | 45 | 319 |
+| [database/PartnerStaffs.js](/database/PartnerStaffs.js) | JavaScript | 102 | 0 | 27 | 129 |
+| [database/Shipments.js](/database/Shipments.js) | JavaScript | 460 | 5 | 93 | 558 |
+| [database/Shippers.js](/database/Shippers.js) | JavaScript | 137 | 3 | 35 | 175 |
+| [database/Staffs.js](/database/Staffs.js) | JavaScript | 180 | 0 | 32 | 212 |
+| [database/TodoList.js](/database/TodoList.js) | JavaScript | 109 | 0 | 27 | 136 |
+| [database/TransportPartner.js](/database/TransportPartner.js) | JavaScript | 66 | 10 | 22 | 98 |
+| [database/Users.js](/database/Users.js) | JavaScript | 46 | 0 | 15 | 61 |
+| [database/Vehicles.js](/database/Vehicles.js) | JavaScript | 211 | 2 | 48 | 261 |
+| [database/utils.js](/database/utils.js) | JavaScript | 170 | 0 | 27 | 197 |
+| [lib/area.json](/lib/area.json) | JSON | 140 | 0 | 9 | 149 |
+| [lib/auth.js](/lib/auth.js) | JavaScript | 51 | 0 | 9 | 60 |
+| [lib/dbUtils.js](/lib/dbUtils.js) | JavaScript | 271 | 0 | 43 | 314 |
+| [lib/eventManager.js](/lib/eventManager.js) | JavaScript | 32 | 0 | 10 | 42 |
+| [lib/fee.json](/lib/fee.json) | JSON | 1,166 | 0 | 3 | 1,169 |
+| [lib/feeDebugger.js](/lib/feeDebugger.js) | JavaScript | 158 | 4 | 22 | 184 |
+| [lib/logger.js](/lib/logger.js) | JavaScript | 15 | 0 | 2 | 17 |
+| [lib/map.js](/lib/map.js) | JavaScript | 139 | 1 | 14 | 154 |
+| [lib/servicesFee.js](/lib/servicesFee.js) | JavaScript | 234 | 2 | 30 | 266 |
+| [lib/servicesStatus.js](/lib/servicesStatus.js) | JavaScript | 97 | 0 | 17 | 114 |
+| [lib/testfee.json](/lib/testfee.json) | JSON | 481 | 0 | 1 | 482 |
+| [lib/utils.js](/lib/utils.js) | JavaScript | 30 | 0 | 6 | 36 |
+| [lib/validation.js](/lib/validation.js) | JavaScript | 1,211 | 10 | 199 | 1,420 |
+| [package-lock.json](/package-lock.json) | JSON | 6,974 | 0 | 1 | 6,975 |
+| [package.json](/package.json) | JSON | 44 | 0 | 1 | 45 |
+| [public/javascripts/order.js](/public/javascripts/order.js) | JavaScript | 44 | 0 | 6 | 50 |
+| [public/javascripts/staff.js](/public/javascripts/staff.js) | JavaScript | 10 | 5 | 4 | 19 |
+| [public/javascripts/staffsLogin.js](/public/javascripts/staffsLogin.js) | JavaScript | 29 | 10 | 5 | 44 |
+| [public/stylesheets/style.css](/public/stylesheets/style.css) | CSS | 7 | 0 | 2 | 9 |
+| [routes/administrativeRoute.js](/routes/administrativeRoute.js) | JavaScript | 10 | 0 | 3 | 13 |
+| [routes/agenciesRoute.js](/routes/agenciesRoute.js) | JavaScript | 35 | 0 | 3 | 38 |
+| [routes/authorizationRoute.js](/routes/authorizationRoute.js) | JavaScript | 8 | 0 | 3 | 11 |
+| [routes/businessRoute.js](/routes/businessRoute.js) | JavaScript | 144 | 0 | 23 | 167 |
+| [routes/containersRoute.js](/routes/containersRoute.js) | JavaScript | 7 | 0 | 3 | 10 |
+| [routes/feeDebugger.js](/routes/feeDebugger.js) | JavaScript | 8 | 0 | 3 | 11 |
+| [routes/index.js](/routes/index.js) | JavaScript | 6 | 1 | 3 | 10 |
+| [routes/ordersRoute.js](/routes/ordersRoute.js) | JavaScript | 87 | 1 | 13 | 101 |
+| [routes/otpPartnerStaffRoute.js](/routes/otpPartnerStaffRoute.js) | JavaScript | 35 | 0 | 10 | 45 |
+| [routes/otpRoute.js](/routes/otpRoute.js) | JavaScript | 60 | 0 | 15 | 75 |
+| [routes/partnerStaffsRoute.js](/routes/partnerStaffsRoute.js) | JavaScript | 191 | 0 | 30 | 221 |
+| [routes/scheduleRoute.js](/routes/scheduleRoute.js) | JavaScript | 73 | 0 | 4 | 77 |
+| [routes/shipmentsRoute.js](/routes/shipmentsRoute.js) | JavaScript | 72 | 0 | 16 | 88 |
+| [routes/shippersRoute.js](/routes/shippersRoute.js) | JavaScript | 25 | 0 | 2 | 27 |
+| [routes/staffsRoute.js](/routes/staffsRoute.js) | JavaScript | 172 | 0 | 27 | 199 |
+| [routes/transportPartnerRoute.js](/routes/transportPartnerRoute.js) | JavaScript | 78 | 0 | 13 | 91 |
+| [routes/users.js](/routes/users.js) | JavaScript | 6 | 1 | 3 | 10 |
+| [routes/usersRoute.js](/routes/usersRoute.js) | JavaScript | 66 | 0 | 14 | 80 |
+| [routes/utils.js](/routes/utils.js) | JavaScript | 0 | 0 | 1 | 1 |
+| [routes/vehicleRoute.js](/routes/vehicleRoute.js) | JavaScript | 60 | 0 | 5 | 65 |
+| [services/administrativeService.js](/services/administrativeService.js) | JavaScript | 7 | 0 | 2 | 9 |
+| [services/agenciesService.js](/services/agenciesService.js) | JavaScript | 55 | 0 | 14 | 69 |
+| [services/authorizationService.js](/services/authorizationService.js) | JavaScript | 15 | 0 | 4 | 19 |
+| [services/businessService.js](/services/businessService.js) | JavaScript | 55 | 0 | 14 | 69 |
+| [services/containersService.js](/services/containersService.js) | JavaScript | 19 | 0 | 7 | 26 |
+| [services/ordersService.js](/services/ordersService.js) | JavaScript | 164 | 1 | 32 | 197 |
+| [services/otpService.js](/services/otpService.js) | JavaScript | 11 | 0 | 3 | 14 |
+| [services/partnerStaffsService.js](/services/partnerStaffsService.js) | JavaScript | 35 | 0 | 9 | 44 |
+| [services/scheduleService.js](/services/scheduleService.js) | JavaScript | 39 | 0 | 10 | 49 |
+| [services/shipmentsService.js](/services/shipmentsService.js) | JavaScript | 104 | 0 | 23 | 127 |
+| [services/shippersService.js](/services/shippersService.js) | JavaScript | 19 | 0 | 4 | 23 |
+| [services/staffsService.js](/services/staffsService.js) | JavaScript | 38 | 0 | 10 | 48 |
+| [services/transportPartnerService.js](/services/transportPartnerService.js) | JavaScript | 27 | 0 | 8 | 35 |
+| [services/usersService.js](/services/usersService.js) | JavaScript | 23 | 0 | 8 | 31 |
+| [services/vehicleService.js](/services/vehicleService.js) | JavaScript | 40 | 2 | 12 | 54 |
+| [supertest/agency.test.js](/supertest/agency.test.js) | JavaScript | 10 | 83 | 7 | 100 |
+| [tests/administrative.http](/tests/administrative.http) | HTTP | 5 | 0 | 1 | 6 |
+| [tests/agencyTest.http](/tests/agencyTest.http) | HTTP | 48 | 4 | 11 | 63 |
+| [tests/apiAgencyTest.http](/tests/apiAgencyTest.http) | HTTP | 42 | 5 | 13 | 60 |
+| [tests/apiCloudTest.http](/tests/apiCloudTest.http) | HTTP | 64 | 13 | 35 | 112 |
+| [tests/apiLocalTest.http](/tests/apiLocalTest.http) | HTTP | 287 | 41 | 114 | 442 |
+| [tests/apiOrderTest.http](/tests/apiOrderTest.http) | HTTP | 95 | 9 | 27 | 131 |
+| [tests/apiShipmentTest.http](/tests/apiShipmentTest.http) | HTTP | 121 | 26 | 49 | 196 |
+| [tests/apiTest.http](/tests/apiTest.http) | HTTP | 81 | 13 | 30 | 124 |
+| [tests/businessTest.http](/tests/businessTest.http) | HTTP | 54 | 5 | 15 | 74 |
+| [tests/ordersTest.http](/tests/ordersTest.http) | HTTP | 30 | 4 | 14 | 48 |
+| [tests/partnerStaffsTest.http](/tests/partnerStaffsTest.http) | HTTP | 42 | 9 | 25 | 76 |
+| [tests/partnerTest.http](/tests/partnerTest.http) | HTTP | 175 | 12 | 25 | 212 |
+| [tests/scheduleTest.http](/tests/scheduleTest.http) | HTTP | 20 | 3 | 9 | 32 |
+| [tests/shipmentTest.http](/tests/shipmentTest.http) | HTTP | 124 | 28 | 58 | 210 |
+| [tests/shippersTest.http](/tests/shippersTest.http) | HTTP | 21 | 3 | 12 | 36 |
+| [tests/staffsTest.http](/tests/staffsTest.http) | HTTP | 344 | 36 | 106 | 486 |
+| [tests/usersTest.http](/tests/usersTest.http) | HTTP | 13 | 2 | 6 | 21 |
+| [tests/vehiclesTest.http](/tests/vehiclesTest.http) | HTTP | 95 | 17 | 38 | 150 |
+| [utils.js](/utils.js) | JavaScript | 49 | 0 | 10 | 59 |
+| [views/error.jade](/views/error.jade) | Pug | 5 | 0 | 2 | 7 |
+| [views/feeDebugger.jade](/views/feeDebugger.jade) | Pug | 9 | 0 | 2 | 11 |
+| [views/index.jade](/views/index.jade) | Pug | 4 | 0 | 2 | 6 |
+| [views/layout.jade](/views/layout.jade) | Pug | 7 | 0 | 1 | 8 |
+| [views/order.jade](/views/order.jade) | Pug | 71 | 0 | 22 | 93 |
+| [views/staff.jade](/views/staff.jade) | Pug | 9 | 0 | 1 | 10 |
+| [views/staffLogin.jade](/views/staffLogin.jade) | Pug | 10 | 0 | 1 | 11 |
+| [views/userLogin.jade](/views/userLogin.jade) | Pug | 9 | 0 | 1 | 10 |
+
+[Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)

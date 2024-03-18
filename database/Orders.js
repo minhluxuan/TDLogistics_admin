@@ -27,7 +27,7 @@ const getOrdersOfAgency = async (postalCode, conditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
-    const result = await SQLutils.find(pool, postalCode + '_' + table, fields, values);
+    const result = await SQLutils.find(pool, postalCode + '_' + table, fields, values, true);
     return result;
 }
 
@@ -46,7 +46,7 @@ const getOrders = async (conditions, paginationConditions) => {
     const limit = paginationConditions.rows || 0;
     const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
 
-    const result = await SQLutils.find(pool, table, fields, values, limit, offset);
+    const result = await SQLutils.find(pool, table, fields, values, true, limit, offset);
 
     for (const elm of result) {
         try {
@@ -283,7 +283,7 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
 
     } else {
         const result = await SQLutils.updateOne(pool, table, ["status_code"], [orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result[0].affectedRows <= 0) {
+        if(result.affectedRows <= 0) {
             return new Object({
                 success: false,
                 data: null,

@@ -475,7 +475,7 @@
         ]
       },
       "T60": {
-        "condition_mass": 500,
+        "condition_mass": 5000,
         "feeRate": 60
       }
     },

@@ -37,16 +37,30 @@ const checkExistStaff = async (req, res) => {
 
 const getAuthenticatedStaffInfo = async (req, res) => {
 	try {
+		const resultGettingStaffInfo = await staffsService.getOneStaff({ staff_id: req.user.staff_id });
+		if (!resultGettingStaffInfo || resultGettingStaffInfo.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã ${req.user.staff_id} không tồn tại.`,
+			});
+		}
+		
+		const staff = resultGettingStaffInfo[0];
+
 		const info = new Object({
 			staff_id: req.user.staff_id,
+			fullname: staff.fullname,
 			role: req.user.role,
+			position: staff.position,
+			cccd: staff.cccd,
+			phone_number: staff.phone_number,
 			agency_id: req.user.agency_id,
 			privileges: req.user.privileges,
 			active: req.user.active,
-		})
+		});
 		return res.status(200).json(new Object({
 			error: false,
-			info: info,
+			info: staff,
 			message: `Lấy thông tin người dùng thành công`,
 		}));
 	} catch (error) {
@@ -355,8 +369,8 @@ const updateStaffInfo = async (req, res) => {
 		}
 
 		if (req.body.hasOwnProperty("paid_salary")) {
-			const resultGettingOneStaff = (await staffsService.getOneStaff({ staff_id: req.query.staff_id }))[0];
-			if (!resultGettingOneStaff || resultGettingOneStaff.length <= 0) {
+			const resultGettingOneStaff = await staffsService.getOneStaff({ staff_id: req.query.staff_id });
+			if (!resultGettingOneStaff || resultGettingOneStaff.length === 0) {
 				return res.status(404).json({
 					error: true,
 					message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`
@@ -368,7 +382,7 @@ const updateStaffInfo = async (req, res) => {
 		}
 
 		const resultUpdatingStaff = await staffsService.updateStaff(req.body, { staff_id: req.query.staff_id });
-		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows <= 0) {
+		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows === 0) {
 			return res.status(404).json({
 				error: false,
 				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`,
@@ -380,9 +394,10 @@ const updateStaffInfo = async (req, res) => {
 			message: `Cập nhật thông tin nhân viên có mã nhân viên ${req.query.staff_id} thành công.`,
 		});
 	} catch (error) {
+		console.log(error);
 		res.status(500).json({
 			error: true,
-			message: error,
+			message: error.message,
 		});
 	}
 };
@@ -534,12 +549,12 @@ const updateAvatar = async (req, res) => {
 			});
 		}
 
-		if (userCannotBeAffected.includes(req.query.staff_id)) {
-			return res.status(400).json({
-				error: true,
-				message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
-			});
-		}
+		// if (userCannotBeAffected.includes(req.query.staff_id)) {
+		// 	return res.status(400).json({
+		// 		error: true,
+		// 		message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
+		// 	});
+		// }
 
 		const updatorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
@@ -610,45 +625,34 @@ const updateAvatar = async (req, res) => {
 
 const getStaffAvatar = async (req, res) => {
 	try {
+		const { error } = staffValidation.validateGettingStaffAvatar(req.query);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
-			const { error } = staffValidation.validateGettingStaffAvatar(req.body);
-
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: "Thông tin không hợp lệ.",
-				});
-			}
-
 			const resultGettingOneStaff = await staffsService.getOneStaff(req.body); 
 			const staff = resultGettingOneStaff[0];
 			const fileName = staff.avatar ? staff.avatar : null;
 			
 			if (fileName) {
-				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				const file = path.join(__dirname, "..", "storage", "staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
-						return res.status(200).sendFile(file);
+					return res.status(200).sendFile(file);
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});
 		}
 
 		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = staffValidation.validateGettingStaffAvatar(req.body);
-
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					error: error.message,
-				});
-			}
-
 			req.body.agency_id = req.user.agency_id;
 
 			const resultGettingOneStaff = await staffsService.getOneStaff(req.body); 
@@ -661,25 +665,13 @@ const getStaffAvatar = async (req, res) => {
 						return res.status(200).sendFile(file);
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
-		}
-		else
-		{
-			const { error } = staffValidation.validateGettingStaffAvatar(req.body);
 
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-	
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});
+		}
+		else {
 			if (req.user.staff_id !== req.body.staff_id) {
 				return res.status(403).json({
 					error: true,
@@ -692,18 +684,16 @@ const getStaffAvatar = async (req, res) => {
 			const fileName = staff.avatar ? staff.avatar : null;
 	
 			if (fileName) {
-				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				const file = path.join(__dirname, "..", "storage", "staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
 				}
 			}
-			else
-			{
-				return res.status(404).json({
-					error: true,
-					message: "Không tìm thấy dữ liệu",
-				});			
-			}
+			
+			return res.status(404).json({
+				error: true,
+				message: "Không tìm thấy dữ liệu",
+			});
 		}
 	} catch (error) {
 		console.log(error);
@@ -724,5 +714,5 @@ module.exports = {
 	logout,
 	updatePassword,
 	updateAvatar,
-	getStaffAvatar
+	getStaffAvatar,
 };

@@ -7,6 +7,31 @@ const shippersService = require("../services/shippersService");
 const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
 
+const checkExistShipment = async (req, res) => {
+    try {
+        const { error } = shipmentRequestValidation.validateShipmentID(req.query);
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const existed = await shipmentService.checkExistShipment(req.query);
+        return res.status(200).json({
+            error: false,
+            existed: existed,
+            message: existed ? `Lô hàng có mã ${req.query.shipment_id} đã tồn tại.` : `Lô hàng có mã ${req.query.shipment_id} không tồn tại.`
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 const createNewShipment = async (req, res) => {
     try {
         const createdTime = new Date();
@@ -30,7 +55,8 @@ const createNewShipment = async (req, res) => {
 
         const areaAgencyIdSubParts = req.user.agency_id.split('_');
         req.body.shipment_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDate().toString() + createdTime.getHours().toString() + createdTime.getMinutes().toString() + createdTime.getSeconds().toString() + createdTime.getMilliseconds().toString();
-        
+        req.body.agency_id_source = req.user.agency_id;
+
         if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
             const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
             const resultCreatingShipmentForAgency = await shipmentService.createNewShipment(req.body, postalCode);
@@ -43,7 +69,7 @@ const createNewShipment = async (req, res) => {
             }
             
             return res.status(201).json({
-                error: true,
+                error: false,
                 message: `Tạo lô hàng có mã lô ${req.body.shipment_id} cho bưu cục ${req.user.agency_id} thành công.`,
             });
         }
@@ -58,7 +84,7 @@ const createNewShipment = async (req, res) => {
             }
             
             return res.status(201).json({
-                error: true,
+                error: false,
                 message: `Tạo lô hàng có mã lô ${req.body.shipment_id} thành công.`,
             });
         }
@@ -160,9 +186,9 @@ const getOrdersFromShipment = async (req, res) => {
 
             const result = await shipmentService.getOrdersFromShipment(order_ids);
             
-            return res.status(201).json({
+            return res.status(200).json({
                 error: false,
-                info: result,
+                data: result,
                 message: `Lấy thông tin tất cả đơn hàng từ lô hàng có mã ${req.query.shipment_id} thành công.`,
             });
         }
@@ -287,6 +313,14 @@ const deleteOrderFromShipment = async (req, res) => {
                 return res.status(400).json({
                     error: true,
                     message: error.message,
+                });
+            }
+
+            const resultGettingOneShipment = await shipmentService.getOneShipment(req.query);
+            if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng có mã ${req.query.shipment_id} không tồn tại trong bưu cục có mã ${agency_id}.`,
                 });
             }
 
@@ -692,6 +726,7 @@ const undertakeShipment = async (req, res) => {
 }
 
 module.exports = {
+    checkExistShipment,
     createNewShipment,
     updateShipment,
     getShipments,
