@@ -48,6 +48,47 @@ const upload = multer({
     fileFilter: fileFilter,
 });
 
+const orderImagesStorage = multer.diskStorage({	
+    destination: async function (req, file, done) {
+        const folderPath = path.join("storage", "order", "image", "order_temp");
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
+        }
+        
+        return done(null, folderPath);
+    },
+
+    filename: function (req, file, done) {
+        done(null,  Date.now() + "_" + file.originalname);
+    }
+});
+
+const orderImagesFileFilter = (req, file, done) => {
+    if (!file) {
+        return done(new Error("File không tồn tại."));
+    }
+
+    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png") { 
+       return done(new Error("Hình ảnh không hợp lệ."));
+    }
+
+    const maxFileSize = 5 * 1024 * 1024;
+    if (file.size > maxFileSize) {
+        done(new Error("File có kích thước quá lớn. Tối đa 5MB được cho phép"));
+    }
+
+    if (file.originalname.length > 100) {
+        done(new Error("Tên file quá dài. Tối đa 100 ký tự được cho phép."));
+    }
+
+    return done(null, true);
+};
+
+const orderImagesUpload = multer({
+    storage: orderImagesStorage,
+    fileFilter: orderImagesFileFilter,
+});
+
 router.get(
     "/check",
     ordersController.checkExistOrder
@@ -95,7 +136,8 @@ router.post("/calculate_fee", ordersController.calculateServiceFee);
 router.get("/", (req, res) => {
     res.render("order");
 });
-
+router.post("/update_images", auth.isAuthenticated(), auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER"]), auth.isActive(), orderImagesUpload.array("images", 5), ordersController.updateImages);
+router.get("/get_images", auth.isAuthenticated(), auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER"]), auth.isActive(), ordersController.getImages);
 //router.post("/agency_create", ordersController.createOrderForAgency);
 
 module.exports = router;

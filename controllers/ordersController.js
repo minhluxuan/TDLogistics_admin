@@ -6,7 +6,9 @@ const utils = require("../lib/utils");
 const eventManager = require("../lib/eventManager");
 const fs = require("fs");
 const path = require("path");
+const archiver = require("archiver");
 const servicesStatus = require("../lib/servicesStatus");
+const shippersService = require("../services/shippersService");
 
 const orderValidation = new Validation.OrderValidation();
 
@@ -487,6 +489,175 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+const updateImages = async (req, res) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({
+                error: true,
+                message: "Ảnh không được để trống.",
+            });
+        }
+
+        const { error } = orderValidation.validateQueryUpdatingOrderImages(req.query);
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+
+        const resultGettingOneShipperTasks = await shippersService.getTasks({ order_id: req.query.order_id, staff_id: req.user.staff_id }, postalCode);
+        if (!resultGettingOneShipperTasks || resultGettingOneShipperTasks.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+
+        if (resultGettingOneShipperTasks[0].completed) {
+            return res.status(409).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không còn khả năng cập nhật.`,
+            });
+        }
+
+        const resultGettingOneOrder = await ordersService.getOneOrder({ order_id: req.query.order_id });
+        if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+
+        let images;
+        try {
+            if (req.query.type === "send") {
+                images = resultGettingOneOrder[0].send_images ? JSON.parse(resultGettingOneOrder[0].send_images) : new Array();
+            }
+            else {
+                images = resultGettingOneOrder[0].receive_images ? JSON.parse(resultGettingOneOrder[0].receive_images) : new Array();
+            }
+        } catch (error) {
+            images = new Array();
+        }
+        console.log(images.length + req.files.length);
+        if (images.length + req.files.length > 2) {
+            return res.status(409).json({
+                error: true,
+                message: `Quá số lượng ảnh cho phép. Số lượng ảnh còn lại được cho phép: ${ 2 - images.length > 0 ? 2 - images.length : 0 }.`,
+            });
+        }
+
+        req.files.forEach(file => {
+            images.push(file.filename);
+        });
+
+        const updatedImages = new Object();
+        if (req.query.type === "send") {
+            updatedImages.send_images = JSON.stringify(images);
+        }
+        else if (req.query.type === "receive") {
+            updatedImages.receive_images = JSON.stringify(images);
+        }
+
+        const resultUpdatingOneOrderInAgency = await ordersService.updateOrder(updatedImages, { order_id: req.query.order_id }, postalCode);
+        if (!resultUpdatingOneOrderInAgency || resultUpdatingOneOrderInAgency.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+        await ordersService.updateOrder(updatedImages, { order_id: req.query.order_id });
+        
+        const tempFolderPath = path.join("storage", "order", "image", "order_temp");
+        if (!fs.existsSync(tempFolderPath)) {
+            fs.mkdirSync(tempFolderPath);
+        }
+        
+        const officialFolderPath = path.join("storage", "order", "image", "order");
+        if (!fs.existsSync(officialFolderPath)) {
+            fs.mkdirSync(officialFolderPath);
+        }
+
+        req.files.forEach(file => {
+            const tempFilePath = path.join(tempFolderPath, file.filename);
+            if (fs.existsSync(tempFilePath)) {
+                const officialFilePath = path.join(officialFolderPath, file.filename);
+                fs.renameSync(tempFilePath, officialFilePath);
+            }
+        });
+
+        return res.status(201).json({
+            error: false,
+            message: `Cập nhật ảnh đơn hàng ${req.query.order_id} thành công.`,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const getImages = async (req, res) => {
+    try {
+        const { error } = orderValidation.validateQueryUpdatingOrderImages(req.query);
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const resultGettingOneOrder = await ordersService.getOneOrder({ order_id: req.query.order_id });
+        if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+
+        let images;
+        try {
+            if (req.query.type === "send") {
+                images = resultGettingOneOrder[0].send_images ? JSON.parse(resultGettingOneOrder[0].send_images) : new Array();
+            }
+            else if (req.query.type === "receive") {
+                images = resultGettingOneOrder[0].receive_images ? JSON.parse(resultGettingOneOrder[0].receive_images) : new Array();
+            }
+        } catch (error) {
+            images = new Array();
+        }
+
+        const folderPath = "storage/order/image/order/";
+        images = images.map(image => folderPath + image);
+
+        const archive = archiver("zip");
+        archive.on('error', function(err) {
+            res.status(500).send({error: err.message});
+        });
+    
+        res.attachment('images.zip');
+    
+        archive.pipe(res);
+    
+        images.forEach(image => {
+            archive.file(image, { name: image });
+        });
+    
+        archive.finalize();
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
 
 module.exports = {
     checkExistOrder,
@@ -497,4 +668,6 @@ module.exports = {
     updateOrder,
     cancelOrder,
     calculateServiceFee,
+    updateImages,
+    getImages,
 }
