@@ -312,7 +312,7 @@ const getManyAgencies = async (info, paginationConditions) => {
 	const values = Object.values(info) || new Array();
 
 	const limit = paginationConditions.rows || 0;
-    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+  const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
 
 	const result = await dbUtils.find(pool, table, fields, values, true, limit, offset);
 
@@ -359,7 +359,7 @@ module.exports = {
 	createTablesForAgency,
 	dropTableForAgency,
 	locateAgencyInArea,
-    getOneAgency,
+  getOneAgency,
 	getManyAgencies,
 	createNewAgency,
 	deleteAgency,

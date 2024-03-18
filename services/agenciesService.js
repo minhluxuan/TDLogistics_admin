@@ -12,6 +12,7 @@ const checkWardsOccupation = async (province, district, wards) => {
     return await Agencies.checkWardsOccupation(province, district, wards);
 }
 
+
 const createNewAgency = async (info) => {
     return await Agencies.createNewAgency(info);
 }
