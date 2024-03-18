@@ -434,7 +434,7 @@ const updateOrder = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const { error } = OrderValidation.validateCancelingOrder(req.query);
+        const { error } = orderValidation.validateCancelingOrder(req.query);
 
         if (error) {
             return res.status(404).json({
