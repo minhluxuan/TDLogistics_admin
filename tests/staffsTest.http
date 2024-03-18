@@ -1,4 +1,3 @@
-
 POST http://localhost:5000/api/v1/staffs/login
 Content-Type: application/json
 
@@ -203,6 +202,543 @@ Content-Type: application/json
     "role": "MANAGER",
     "salary": 25000000
 }
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "minhluxuan2k",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430421",
+    "email": "minh.luxuanhcmus@hcmus.edu.vn",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204005693",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Giám đốc",
+    "role": "MANAGER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "nhannguyen2k",
+    "password": "nhanguyen@TDlogistics2k24",
+    "fullname": "Nguyễn Thành Nhân",
+    "phone_number": "0981431421",
+    "email": "nhan.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-06-01",
+    "cccd": "077204105693",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Quản lý nhân sự",
+    "role": "HUMAN_RESOURCE_MANAGER",
+    "salary": 25000000
+}
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "username": "annguyen2k",
+    "password": "anguyen@TDlogistics2k24",
+    "fullname": "Nguyễn Thành An",
+    "phone_number": "0981432421",
+    "email": "an.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-09-01",
+    "cccd": "077204104693",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "Phường 9",
+    "detail_address": "244, Nguyễn Duy",
+    "position": "Nhân viên giao hàng bưu cục",
+    "role": "SHIPPER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "username": "khangdinh2k",
+    "password": "khangdinh@TDlogistics2k24",
+    "fullname": "Đinh Minh Khang",
+    "phone_number": "0991432421",
+    "email": "khang.dinh@hcmut.edu.vn",
+    "date_of_birth": "2004-09-21",
+    "cccd": "077204104694",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "Phường 9",
+    "detail_address": "246, Nguyễn Duy",
+    "position": "Nhân viên giao hàng bưu cục",
+    "role": "SHIPPER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "username": "huynguyen2k",
+    "password": "huynguyen@TDlogistics2k24",
+    "fullname": "Nguyễn Anh Huy",
+    "phone_number": "0981432521",
+    "email": "huy.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-09-22",
+    "cccd": "077205104693",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "Phường 9",
+    "detail_address": "254, Nguyễn Duy",
+    "position": "Nhân viên giao hàng bưu cục",
+    "role": "SHIPPER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "username": "ducnguyen2k",
+    "password": "ducnguyen@TDlogistics2k24",
+    "fullname": "Nguyễn Anh Đức",
+    "phone_number": "0981492521",
+    "email": "duc.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-09-25",
+    "cccd": "077205104793",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "Phường 9",
+    "detail_address": "222, Nguyễn Duy",
+    "position": "Tài xế bưu cục",
+    "role": "DRIVER",
+    "salary": 25000000
+}
+
+###
+
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "username": "bacdinh2k",
+    "password": "bacdinh@TDlogistics2k24",
+    "fullname": "Nguyễn Đình Bắc",
+    "phone_number": "0981492511",
+    "email": "bac.dinh@hcmut.edu.vn",
+    "date_of_birth": "2004-09-25",
+    "cccd": "077215104793",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "Phường 9",
+    "detail_address": "258/135c, Nguyễn Duy",
+    "position": "Tài xế bưu cục",
+    "role": "DRIVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "username": "tunguyen2k",
+    "password": "tunguyen@TDlogistics2k24",
+    "fullname": "Nguyễn Anh Tú",
+    "phone_number": "0989432521",
+    "email": "tu.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-09-22",
+    "cccd": "076204105693",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "Phường 9",
+    "detail_address": "238, Hưng Phú",
+    "position": "Tài xế bưu cục",
+    "role": "DRIVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "username": "tunguyen2k",
+    "password": "tunguyen@TDlogistics2k24",
+    "fullname": "Nguyễn Anh Tú",
+    "phone_number": "0989432521",
+    "email": "tu.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-09-22",
+    "cccd": "076204105693",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "Phường 9",
+    "detail_address": "238, Hưng Phú",
+    "position": "Tài xế bưu cục",
+    "role": "DRIVER",
+    "salary": 25000000
+}
+
+###
+
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "hoangduc2k",
+    "password": "duchoang@TDlogistics2k24",
+    "fullname": "Nguyễn Hoàng Dức",
+    "phone_number": "0971431421",
+    "email": "duc.nguyenhoang@hcmut.edu.vn",
+    "date_of_birth": "1992-06-02",
+    "cccd": "077205105693",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 5",
+    "town": "Phường 9",
+    "detail_address": "16, Phú Đinh",
+    "position": "Quản lý nhân sự",
+    "role": "HUMAN_RESOURCE_MANAGER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "nguyenvanA2k",
+    "password": "anguyenvan@TDlogistics2k24",
+    "fullname": "Nguyễn Văn A",
+    "phone_number": "0981441421",
+    "email": "van.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-06-01",
+    "cccd": "077204106693",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giao hàng",
+    "role": "SHIPPER",
+    "salary": 25000000
+}
+
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "hotanphat2k",
+    "password": "tanphatho@TDlogistics2k24",
+    "fullname": "Hồ Tấn Phát",
+    "phone_number": "0981442421",
+    "email": "phat.ho@hcmut.edu.vn",
+    "date_of_birth": "2004-08-01",
+    "cccd": "077204106633",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giao hàng",
+    "role": "SHIPPER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "phucnguyen2k",
+    "password": "phucnguyenthien@TDlogistics2k24",
+    "fullname": "Nguyễn Thiên Phúc",
+    "phone_number": "0981542421",
+    "email": "phuc.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-08-01",
+    "cccd": "077204126633",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 6",
+    "town": "Phường 6",
+    "detail_address": "326, Hậu Giang",
+    "position": "Nhân viên giao hàng",
+    "role": "SHIPPER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "hoxuanviet2k",
+    "password": "xuanvietho@TDlogistics2k24",
+    "fullname": "Hồ Xuân Việt",
+    "phone_number": "0981342421",
+    "email": "viet.ho@hcmut.edu.vn",
+    "date_of_birth": "2004-08-09",
+    "cccd": "077214106633",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "phường 2",
+    "detail_address": "326, Dương Bá Trạc",
+    "position": "Tài xế lái xe",
+    "role": "DRIVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "nguyenvanB2k",
+    "password": "bnguyenvan@TDlogistics2k24",
+    "fullname": "Nguyễn Văn B",
+    "phone_number": "0981444421",
+    "email": "bvan.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-07-01",
+    "cccd": "077214106693",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Tài xế",
+    "role": "DRIVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "quangtranvi2k",
+    "password": "quangtranvi@TDlogistics2k24",
+    "fullname": "Trần Vĩ Quang",
+    "phone_number": "0981344421",
+    "email": "quangtranvi.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-07-01",
+    "cccd": "077714106693",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên khiếu nại",
+    "role": "COMPLAINTS_SOLVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "minhnhat2k",
+    "password": "minhnhatdang@TDlogistics2k24",
+    "fullname": "Đặng Minh Nhật",
+    "phone_number": "0971344421",
+    "email": "nhatmih.dang@hcmut.edu.vn",
+    "date_of_birth": "2004-07-02",
+    "cccd": "077714116693",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "20, đường Phạm Ngũ Lão",
+    "position": "Nhân viên khiếu nại",
+    "role": "COMPLAINTS_SOLVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "hainguyen2k",
+    "password": "hainguyen@TDlogistics2k24",
+    "fullname": "Nguyễn Quang Hải",
+    "phone_number": "0981344461",
+    "email": "haiquang.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-07-06",
+    "cccd": "067714106693",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "Phường 9",
+    "detail_address": "244, Nguyễn Duy",
+    "position": "Nhân viên khiếu nại",
+    "role": "COMPLAINTS_SOLVER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "quangtranvi2k",
+    "password": "quangtranvi@TDlogistics2k24",
+    "fullname": "Trần Vĩ Quang",
+    "phone_number": "0981344421",
+    "email": "quangtranvi.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-07-01",
+    "cccd": "077714106693",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên khiếu nại",
+    "role": "COMPLAINTS_SOLVER",
+    "salary": 25000000
+}
+
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "hothanhnha2k",
+    "password": "nhahothanh@TDlogistics2k24",
+    "fullname": "Hồ Thanh Nhã",
+    "phone_number": "0981344431",
+    "email": "nhahothanh.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-07-06",
+    "cccd": "077714106692",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giao dịch",
+    "role": "TELLER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "hothanhnhan2k",
+    "password": "nhanhothanh@TDlogistics2k24",
+    "fullname": "Hồ Thành Nhân",
+    "phone_number": "0981344451",
+    "email": "nhanhothanh.nguyen@hcmut.edu.vn",
+    "date_of_birth": "2004-07-08",
+    "cccd": "077714196692",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giao dịch",
+    "role": "TELLER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "tranthenhan2k",
+    "password": "nhantranthe@TDlogistics2k24",
+    "fullname": "Trần Thế Nhân",
+    "phone_number": "0981374451",
+    "email": "nhantran.the@hcmut.edu.vn",
+    "date_of_birth": "2004-07-09",
+    "cccd": "077714197692",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giao dịch",
+    "role": "TELLER",
+    "salary": 25000000
+}
+
+###
+
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00000_077165007713",
+    "username": "duynguyen2k",
+    "password": "vutranduynguyen@TDlogistics2k24",
+    "fullname": "Vũ Trần Duy Nguyên",
+    "phone_number": "0981344456",
+    "email": "duynguyen.vu@hcmut.edu.vn",
+    "date_of_birth": "2004-07-08",
+    "cccd": "077714196892",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Nhân viên giao dịch",
+    "role": "TELLER",
+    "salary": 25000000
+}
+
+###
+
+
+
 
 ###
 

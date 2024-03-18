@@ -113,7 +113,7 @@ POST http://localhost:5000/api/v1/business/create
 Content-Type: application/json
 
 {
-    "agency_id": "BC_70001_077204005691",
+    "agency_id": "BC_71000_077204005691",
     "user_fullname": "Nguyễn Thành Nhân",
     "user_phone_number": "0908339096",
     "user_email": "nhan.nguyen1606@hcmut.edu.vn",
@@ -130,7 +130,7 @@ Content-Type: application/json
     "business_name": "Quang Trung",
     "email": "QuangTrung@gmail.com",
     "phone_number": "0981430417",
-    "tax_number": "1234567871",
+    "tax_number": "1234867871",
     "province": "Thành phố Hồ Chí Minh",
     "district": "8",
     "town": "9",
@@ -209,7 +209,7 @@ POST http://localhost:5000/api/v1/business/create
 Content-Type: application/json
 
 {
-    "agency_id": "BC_70001_077204005691",
+    "agency_id": "BC_71000_077204005691",
     "user_fullname": "Lữ Xuân Minh",
     "user_phone_number": "0981430418",
     "user_email": "minh.luxuanhcmut@hcmut.edu.vn",
@@ -241,7 +241,7 @@ POST http://localhost:5000/api/v1/business/create
 Content-Type: application/json
 
 {
-    "agency_id": "BC_70001_077204005691",
+    "agency_id": "BC_71000_077204005691",
     "user_fullname": "Nguyễn Văn A",
     "user_phone_number": "0907339096",
     "user_email": "nhan.nguyen1606@hcmut.edu.vn",
@@ -273,7 +273,7 @@ POST http://localhost:5000/api/v1/business/create
 Content-Type: application/json
 
 {
-    "agency_id": "BC_70001_077204005691",
+    "agency_id": "BC_71000_077204005691",
     "user_fullname": "Phạm Văn B",
     "user_phone_number": "0907339097",
     "user_email": "nhan.nguyen1605@hcmut.edu.vn",
@@ -297,6 +297,550 @@ Content-Type: application/json
     "detail_address": "37 Tôn Đức Thắng",
     "bin": "050139329579",
     "bank": "BIDV"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Phạm Nhật Vượng",
+    "user_phone_number": "0917339097",
+    "user_email": "vuong.pham1615@hcmut.edu.vn",
+    "user_date_of_birth": "2004-06-01",
+    "user_cccd": "079204102597",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 3",
+    "user_town": "phường 2",
+    "user_detail_address": "29, Mạc Đĩnh Chi",
+    "user_bin": "06488031000",
+    "user_bank": "TPBank",
+    "username": "vuongpham",
+    "password": "Vuongpham@2k4",
+    "business_name": "Vin Big Data",
+    "email": "vinbigdata@gmail.com",
+    "phone_number": "0908339197",
+    "tax_number": "1335557893",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "1",
+    "town": "Đa Kao",
+    "detail_address": "37 Tôn Đức Thắng",
+    "bin": "050139329579",
+    "bank": "BIDV"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Phạm Nhật Vượng",
+    "user_phone_number": "0917339097",
+    "user_email": "vuong.pham1615@hcmut.edu.vn",
+    "user_date_of_birth": "2004-06-01",
+    "user_cccd": "079204102597",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 3",
+    "user_town": "phường 2",
+    "user_detail_address": "29, Mạc Đĩnh Chi",
+    "user_bin": "06488031000",
+    "user_bank": "TPBank",
+    "username": "vuongpham",
+    "password": "Vuongpham@2k4",
+    "business_name": "Vin Big Data",
+    "email": "vinbigdata@gmail.com",
+    "phone_number": "0908339197",
+    "tax_number": "1335557893",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "1",
+    "town": "Đa Kao",
+    "detail_address": "37 Tôn Đức Thắng",
+    "bin": "050139329589",
+    "bank": "BIDV"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Nguyễn Văn Linh",
+    "user_phone_number": "0917337197",
+    "user_email": "linh.nguyen1615@hcmut.edu.vn",
+    "user_date_of_birth": "2000-06-18",
+    "user_cccd": "079204102598",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 3",
+    "user_town": "phường 2",
+    "user_detail_address": "29, Mạc Đĩnh Chi",
+    "user_bin": "06488331000",
+    "user_bank": "TPBank",
+    "username": "linhnguyen",
+    "password": "Linhnguyen@2k4",
+    "business_name": "VNPay",
+    "email": "VNPay@gmail.com",
+    "phone_number": "0908539197",
+    "tax_number": "1335557803",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "1",
+    "town": "Đa Kao",
+    "detail_address": "38 Tôn Đức Thắng",
+    "bin": "050139329989",
+    "bank": "EXIMBANK"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Nguyễn Văn Hai",
+    "user_phone_number": "0918337197",
+    "user_email": "hai.nguyen1615@hcmut.edu.vn",
+    "user_date_of_birth": "1980-06-18",
+    "user_cccd": "079203102578",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 3",
+    "user_town": "phường 2",
+    "user_detail_address": "29, Điện Biên Phủ",
+    "user_bin": "06488331026",
+    "user_bank": "TPBank",
+    "username": "hainguyen",
+    "password": "HaiNguyen@2k4",
+    "business_name": "Nesttech",
+    "email": "Nesttech@gmail.com",
+    "phone_number": "0908598197",
+    "tax_number": "1335557834",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "38 Tôn Thất Hiệp",
+    "bin": "053139329989",
+    "bank": "EXIMBANK"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Nguyễn Văn Ba",
+    "user_phone_number": "0918337187",
+    "user_email": "ba.nguyen161@hcmut.edu.vn",
+    "user_date_of_birth": "1980-06-17",
+    "user_cccd": "079203102519",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 3",
+    "user_town": "phường 2",
+    "user_detail_address": "30, Điện Biên Phủ",
+    "user_bin": "06488331036",
+    "user_bank": "TPBank",
+    "username": "banguyen",
+    "password": "BaNguyen@2k4",
+    "business_name": "Petrolimex",
+    "email": "Petrolimex@gmail.com",
+    "phone_number": "0908510197",
+    "tax_number": "1335537834",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "5B Lê Thánh Tôn",
+    "bin": "054135329989",
+    "bank": "EXIMBANK"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Nguyễn Thị Bé Tư",
+    "user_phone_number": "0918557187",
+    "user_email": "tu.nguyen161@hcmut.edu.vn",
+    "user_date_of_birth": "1980-06-19",
+    "user_cccd": "079203103619",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 3",
+    "user_town": "phường 2",
+    "user_detail_address": "3, Điện Biên Phủ",
+    "user_bin": "06488331076",
+    "user_bank": "TPBank",
+    "username": "tunguyen",
+    "password": "TuNguyen@2k4",
+    "business_name": "Exness",
+    "email": "Exness@gmail.com",
+    "phone_number": "0908490197",
+    "tax_number": "1335537844",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "218 Lý Tự Trọng",
+    "bin": "0541355829989",
+    "bank": "EXIMBANK"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Trần Anh Tú",
+    "user_phone_number": "0918568187",
+    "user_email": "tu.tran@hcmut.edu.vn",
+    "user_date_of_birth": "1985-06-19",
+    "user_cccd": "079203104619",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "1, Võ Văn Ngân",
+    "user_bin": "06466331076",
+    "user_bank": "TPBank",
+    "username": "tunguyen",
+    "password": "TuNguyen@2k4",
+    "business_name": "XTB",
+    "email": "XTB@gmail.com",
+    "phone_number": "0908491197",
+    "tax_number": "1335537856",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "218 Nguyễn Bỉnh Khiêm",
+    "bin": "05412555829989",
+    "bank": "BIDV"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Trần Anh Tín",
+    "user_phone_number": "0919568187",
+    "user_email": "tin.tran@hcmut.edu.vn",
+    "user_date_of_birth": "1985-06-20",
+    "user_cccd": "079203204619",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "4, Võ Văn Ngân",
+    "user_bin": "06466341076",
+    "user_bank": "TPBank",
+    "username": "tintran",
+    "password": "TinTRan@2k4",
+    "business_name": "LifeFinance",
+    "email": "LifeFinance@gmail.com",
+    "phone_number": "0908391197",
+    "tax_number": "1334537856",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "228 Nguyễn Bỉnh Khiêm",
+    "bin": "054125558299189",
+    "bank": "VIB"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Vũ Văn Thanh",
+    "user_phone_number": "0919558187",
+    "user_email": "thanh.vu@hcmut.edu.vn",
+    "user_date_of_birth": "1986-06-20",
+    "user_cccd": "079204204619",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "5, Võ Văn Ngân",
+    "user_bin": "06466341036",
+    "user_bank": "TPBank",
+    "username": "thanhvu",
+    "password": "TThanhVu@2k4",
+    "business_name": "VBA",
+    "email": "VBA@gmail.com",
+    "phone_number": "0908391297",
+    "tax_number": "1334537896",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "236 Bùi Thị Xuân",
+    "bin": "054125558287189",
+    "bank": "VPBank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Vũ Tiến Thịnh",
+    "user_phone_number": "0919556487",
+    "user_email": "thinh.vu@hcmut.edu.vn",
+    "user_date_of_birth": "1986-06-21",
+    "user_cccd": "079304204619",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "7, Võ Văn Ngân",
+    "user_bin": "06466343036",
+    "user_bank": "TPBank",
+    "username": "thinhvu",
+    "password": "ThinhVu@2k4",
+    "business_name": "NBA",
+    "email": "NBA@gmail.com",
+    "phone_number": "0907391297",
+    "tax_number": "1334536496",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "238 Bùi Thị Xuân",
+    "bin": "054125458287189",
+    "bank": "VPBank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Nguyễn Minh Mẫn",
+    "user_phone_number": "0929556487",
+    "user_email": "man.nguyen@hcmut.edu.vn",
+    "user_date_of_birth": "1986-07-21",
+    "user_cccd": "079304194619",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "8, Võ Văn Ngân",
+    "user_bin": "06466343016",
+    "user_bank": "TPBank",
+    "username": "manminh",
+    "password": "ManNguyen@2k4",
+    "business_name": "HiTeach",
+    "email": "HiTeach@gmail.com",
+    "phone_number": "0907451297",
+    "tax_number": "1333336496",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "228 Bùi Thị Xuân",
+    "bin": "0541258287189",
+    "bank": "Vietcombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Nguyễn Quang Sáng",
+    "user_phone_number": "0929566487",
+    "user_email": "sang.nguyen@hcmut.edu.vn",
+    "user_date_of_birth": "1986-09-21",
+    "user_cccd": "079304194630",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "81, Võ Văn Ngân",
+    "user_bin": "06466343216",
+    "user_bank": "TPBank",
+    "username": "sangnguyen",
+    "password": "SangNguyen@2k4",
+    "business_name": "Nhà xuất bản trẻ",
+    "email": "NXBT@gmail.com",
+    "phone_number": "0908451297",
+    "tax_number": "1336636496",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "258 Bùi Thị Xuân",
+    "bin": "0541272287189",
+    "bank": "Viettinbank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Trương Phúc Ơn Thiên",
+    "user_phone_number": "0937566487",
+    "user_email": "thien.truong@hcmut.edu.vn",
+    "user_date_of_birth": "1986-09-23",
+    "user_cccd": "079304194790",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "23, Võ Văn Ngân",
+    "user_bin": "0937566487",
+    "user_bank": "OCB",
+    "username": "thientruong",
+    "password": "ThienTruong@2k4",
+    "business_name": "Nhà xuất bản Kim Đồng",
+    "email": "NXBKD@gmail.com",
+    "phone_number": "0908431297",
+    "tax_number": "1337636496",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "279 Bùi Thị Xuân",
+    "bin": "0541272277189",
+    "bank": "Viettinbank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Ho Trong Tin",
+    "user_phone_number": "0937766487",
+    "user_email": "tin.ho@hcmut.edu.vn",
+    "user_date_of_birth": "2000-09-23",
+    "user_cccd": "079404194790",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "23, Lê Văn Việt",
+    "user_bin": "0937766487",
+    "user_bank": "OCB",
+    "username": "tinho",
+    "password": "HoTin@2k4",
+    "business_name": "Hòa Phát",
+    "email": "HPG@gmail.com",
+    "phone_number": "0918431297",
+    "tax_number": "1337666496",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "279 Cống Quỳnh",
+    "bin": "0541273477189",
+    "bank": "BIDV"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Đặng Vĩ Đạt",
+    "user_phone_number": "0937676487",
+    "user_email": "dat.dang@hcmut.edu.vn",
+    "user_date_of_birth": "2004-09-23",
+    "user_cccd": "079454194790",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "13, Lê Văn Việt",
+    "user_bin": "093778967487",
+    "user_bank": "VIB",
+    "username": "datdang",
+    "password": "DangDat@2k4",
+    "business_name": "EntradeX",
+    "email": "EntradeX@gmail.com",
+    "phone_number": "0915481297",
+    "tax_number": "1337676496",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "279 Nguyễn Thị Minh Khai",
+    "bin": "054127347718956",
+    "bank": "Vietcombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Nguyễn Tuấn Kiệt",
+    "user_phone_number": "0937697487",
+    "user_email": "kiet.nguyen@hcmut.edu.vn",
+    "user_date_of_birth": "2004-09-13",
+    "user_cccd": "079454186790",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "25, Lê Văn Việt",
+    "user_bin": "093778967497",
+    "user_bank": "VIB",
+    "username": "kietnguyen",
+    "password": "KietNguyen@2k4",
+    "business_name": "Thép miền nam",
+    "email": "HSG@gmail.com",
+    "phone_number": "0917491297",
+    "tax_number": "1337678496",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "phường Phạm Ngũ Lão",
+    "detail_address": "19 Nguyễn Thị Minh Khai",
+    "bin": "0541273477186",
+    "bank": "Eximbank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/business/create
+Content-Type: application/json
+
+{
+    "agency_id": "BC_71000_077204005691",
+    "user_fullname": "Hồ Xuân Việt",
+    "user_phone_number": "0937695497",
+    "user_email": "viet.hoxuan@hcmut.edu.vn",
+    "user_date_of_birth": "2004-09-19",
+    "user_cccd": "079454186791",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Thành phố Thủ Đức",
+    "user_town": "phường Linh Chiểu",
+    "user_detail_address": "28, Lê Văn Việt",
+    "user_bin": "093736967497",
+    "user_bank": "VIB",
+    "username": "vietho",
+    "password": "VietHo@2k4",
+    "business_name": "Tdtel",
+    "email": "Tdtel@gmail.com",
+    "phone_number": "0917591296",
+    "tax_number": "2337678496",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "phường 3",
+    "detail_address": "19 Hưng Phú",
+    "bin": "0541273357186",
+    "bank": "Eximbank"
 }
 
 ###

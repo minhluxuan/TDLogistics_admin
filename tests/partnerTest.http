@@ -1,24 +1,288 @@
+
 POST http://localhost:5000/api/v1/transport_partners/create
 Content-Type: application/json
 
 {
-    "username": "phuongtrang123",
-    "user_password": "PhuongTrang2k24@tdlogistics",
-    "user_fullname": "Lữ Xuân Minh",
-    "user_phone_number": "0981430417",
-    "user_email": "minh.luxuanhcmc@hcmut.edu.vn",
-    "user_date_of_birth": "2004-03-03",
-    "user_cccd": "077204005691",
+    "username": "viettel123",
+    "user_password": "Viettel2k24@tdlogistics",
+    "user_fullname": "Hồ Thanh Nhã",
+    "user_phone_number": "0981430427",
+    "user_email": "nha.hothanh@hcmut.edu.vn",
+    "user_date_of_birth": "2004-02-03",
+    "user_cccd": "076204005691",
     "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
     "user_district": "Huyện Đất Đỏ",
     "user_town": "Thị trấn Đất Đỏ",
     "user_detail_address": "326, ĐT44A",
     "user_position": "Quản lý bưu cục",
-    "user_bin": "050138319579",
-    "user_bank": "Sacombank",
+    "user_bin": "050138419579",
+    "user_bank": "BIDV",
 
-    "agency_id": "BC_70001_077204005691",
-    "transport_partner_name": "Phương Trang",
+    "agency_id": "BC_71000_077204005691",
+    "transport_partner_name": "Viettel",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "GHTK123",
+    "user_password": "GHTK2k24@tdlogistics",
+    "user_fullname": "Trần Vĩ Quang",
+    "user_phone_number": "0981430428",
+    "user_email": "quang.tranvi@hcmut.edu.vn",
+    "user_date_of_birth": "2004-01-03",
+    "user_cccd": "076204105692",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050138418579",
+    "user_bank": "EXIMBANK",
+
+    "agency_id": "BC_71000_077204005691",
+    "transport_partner_name": "Giao Hàng Tiết Kiệm",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "shopee123",
+    "user_password": "Shopee2k24@tdlogistics",
+    "user_fullname": "Đặng Minh Nhật",
+    "user_phone_number": "0981460428",
+    "user_email": "nhat.minhdang@hcmut.edu.vn",
+    "user_date_of_birth": "2004-06-03",
+    "user_cccd": "076204105682",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050132418579",
+    "user_bank": "TPBANK",
+
+    "agency_id": "BC_71000_077204005691",
+    "transport_partner_name": "Shopee",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "lazada123",
+    "user_password": "Lazada2k24@tdlogistics",
+    "user_fullname": "Trần Thế Nhân",
+    "user_phone_number": "0982460428",
+    "user_email": "nhan.tranthe@hcmut.edu.vn",
+    "user_date_of_birth": "2004-07-03",
+    "user_cccd": "076204105683",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050135418579",
+    "user_bank": "TPBANK",
+
+    "agency_id": "BC_71000_077204005691",
+    "transport_partner_name": "Lazada",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "nhattin123",
+    "user_password": "Nhattin2k24@tdlogistics",
+    "user_fullname": "Hồ Thành Nhân",
+    "user_phone_number": "0981460328",
+    "user_email": "nhan.hothanh@hcmut.edu.vn",
+    "user_date_of_birth": "2004-06-05",
+    "user_cccd": "076204105688",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050132418529",
+    "user_bank": "TPBANK",
+
+    "agency_id": "BC_71000_077204005691",
+    "transport_partner_name": "Nhất Tín",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "JandT123",
+    "user_password": "JandT2k24@tdlogistics",
+    "user_fullname": "Hồ Tấn Phát",
+    "user_phone_number": "0981480328",
+    "user_email": "phat.hotan@hcmut.edu.vn",
+    "user_date_of_birth": "2004-09-03",
+    "user_cccd": "076204105623",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050132418679",
+    "user_bank": "VIB",
+
+    "agency_id": "BC_71000_077204005691",
+    "transport_partner_name": "J&T",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "grab123",
+    "user_password": "Grab2k24@tdlogistics",
+    "user_fullname": "Vũ Trần Duy Nguyên",
+    "user_phone_number": "0981461328",
+    "user_email": "nguyen.vutran@hcmut.edu.vn",
+    "user_date_of_birth": "2004-08-03",
+    "user_cccd": "076204105672",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050132418569",
+    "user_bank": "VIETCOMBANK",
+
+    "agency_id": "BC_71000_077204005691",
+    "transport_partner_name": "Grab",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "Uber123",
+    "user_password": "Uber2k24@tdlogistics",
+    "user_fullname": "Nguyễn Thành Nhân",
+    "user_phone_number": "0281460428",
+    "user_email": "nhan.nguyen@hcmut.edu.vn",
+    "user_date_of_birth": "2004-01-06",
+    "user_cccd": "076204185682",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "056132418579",
+    "user_bank": "TPBANK",
+
+    "agency_id": "BC_71000_077204005691",
+    "transport_partner_name": "Uber",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "Ahamove123",
+    "user_password": "Ahamove2k24@tdlogistics",
+    "user_fullname": "Phan Thanh Huy",
+    "user_phone_number": "0282460428",
+    "user_email": "huy.phanthanh@hcmut.edu.vn",
+    "user_date_of_birth": "2004-01-07",
+    "user_cccd": "076204185683",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "056132518579",
+    "user_bank": "AGRIBANK",
+
+    "agency_id": "BC_71000_077204005691",
+    "transport_partner_name": "Ahamove",
     "province": "Thành phố Hồ Chí Minh",
     "district": "Quận 1",
     "town": "Phường Phạm Ngũ Lão",
@@ -193,7 +457,7 @@ Content-Type: application/json
     "user_bin": "06478056032",
     "user_bank": "TP Bank",
 
-
+    "agency_id": "TD_00000_077165007713",
     "transport_partner_name": "Thành Bưởi",
     "province": "Thành phố Hồ Chí Minh",
     "district": "Quận 5",
@@ -204,6 +468,339 @@ Content-Type: application/json
     "bin": "06146035058",
     "bank": "VIB"
 }
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "thanhlong345",
+    "user_password": "ThanhLong2k24@tdlogistics",
+    "user_fullname": "Nguyễn Thành Long",
+    "user_phone_number": "0281430318",
+    "user_email": "long.nguyenhcmc@hcmut.edu.vn",
+    "user_date_of_birth": "2004-06-05",
+    "user_cccd": "077304005691",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 8",
+    "user_town": "Phường 9",
+    "user_detail_address": "258/135C, Nguyễn Duy",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "06478256032",
+    "user_bank": "VIETTINBANK",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "Thành Long",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 6",
+    "town": "Phường 2",
+    "detail_address": "15, đường Hậu Giang",
+    "phone_number": "0981436417",
+    "email": "buucucquan@tdlogistics.com",
+    "bin": "06146036058",
+    "bank": "EXIMBANK"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "thanhbuoi345",
+    "user_password": "ThanhBuoi2k24@tdlogistics",
+    "user_fullname": "Nguyễn Thành Nhân",
+    "user_phone_number": "0981430318",
+    "user_email": "nhan.nguyenhcmc@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-05",
+    "user_cccd": "077204005681",
+    "user_province": "Thành phố Hồ Chí Minh",
+    "user_district": "Quận 8",
+    "user_town": "Phường 9",
+    "user_detail_address": "258/135C, Nguyễn Duy",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "06478056032",
+    "user_bank": "TP Bank",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "Thành Bưởi",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 5",
+    "town": "Phường 9",
+    "detail_address": "15, đường Hùng Vương",
+    "phone_number": "0981436417",
+    "email": "buucucquan5@tdlogistics.com",
+    "bin": "06146035058",
+    "bank": "VIB"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "phuongtrang123",
+    "user_password": "PhuongTrang2k24@tdlogistics",
+    "user_fullname": "Lữ Xuân Minh",
+    "user_phone_number": "0981430417",
+    "user_email": "minh.luxuanhcmc@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-03",
+    "user_cccd": "077204005691",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050138319579",
+    "user_bank": "Sacombank",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "Phương Trang",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 1",
+    "town": "Phường Phạm Ngũ Lão",
+    "detail_address": "15, đường Phạm Ngũ Lão",
+    "phone_number": "0981430417",
+    "email": "buucucquan1@tdlogistics.com",
+    "bin": "050138319579",
+    "bank": "Sacombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "Philip123",
+    "user_password": "Philip2k24@tdlogistics",
+    "user_fullname": "Lữ Xuân Sáng",
+    "user_phone_number": "0991430417",
+    "user_email": "sang.luxuanhcmc@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-09",
+    "user_cccd": "077204105691",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050138319573",
+    "user_bank": "Sacombank",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "PhiLip",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 10",
+    "town": "Phường 2",
+    "detail_address": "15, đường Lê Hồng Phong",
+    "phone_number": "0971430417",
+    "email": "philip@tdlogistics.com",
+    "bin": "050138319578",
+    "bank": "Sacombank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "anhtu123",
+    "user_password": "Anhtu2k24@tdlogistics",
+    "user_fullname": "Trần Anh Tú",
+    "user_phone_number": "0992430417",
+    "user_email": "tu.trananh@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-19",
+    "user_cccd": "076254105671",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050148319573",
+    "user_bank": "Ocean Bank",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "Anh Tú",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 10",
+    "town": "Phường 2",
+    "detail_address": "19, đường Lê Hồng Phong",
+    "phone_number": "0971430417",
+    "email": "anhtu@tdlogistics.com",
+    "bin": "050148319573",
+    "bank": "Ocean Bank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "tranlong123",
+    "user_password": "Tranlong2k24@tdlogistics",
+    "user_fullname": "Trần Anh Long",
+    "user_phone_number": "0992440417",
+    "user_email": "tran.anhlong@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-18",
+    "user_cccd": "076254106671",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "050148419573",
+    "user_bank": "Ocean Bank",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "Trần Long",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 8",
+    "town": "Phường 2",
+    "detail_address": "19, đường Tạ Quang Bửu",
+    "phone_number": "0972430417",
+    "email": "tranlong@tdlogistics.com",
+    "bin": "050148419573",
+    "bank": "Ocean Bank"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "tuanhung123",
+    "user_password": "Tuanhung2k24@tdlogistics",
+    "user_fullname": "Lê Tuấn Hưng",
+    "user_phone_number": "0992330417",
+    "user_email": "hung.letuan@hcmut.edu.vn",
+    "user_date_of_birth": "2004-03-28",
+    "user_cccd": "076254106672",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "150148419573",
+    "user_bank": "EXIMBANK",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "Tuấn Hưng",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 6",
+    "town": "Phường 10",
+    "detail_address": "85, đường Lý Chiêu Hoàng",
+    "phone_number": "0982430417",
+    "email": "tuanhung@tdlogistics.com",
+    "bin": "150148419573",
+    "bank": "EXIMBANK"
+}
+
+###
+
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "minhtri123",
+    "user_password": "MinhTri2k24@tdlogistics",
+    "user_fullname": "Nguyễn Minh Trí",
+    "user_phone_number": "0892330417",
+    "user_email": "tri.nguyenminh@hcmut.edu.vn",
+    "user_date_of_birth": "2004-04-28",
+    "user_cccd": "076784106672",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "150148417573",
+    "user_bank": "EXIMBANK",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "Minh Trí",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 10",
+    "town": "Phường 14",
+    "detail_address": "Khu C30 Lô B5, 230 Thành Thái",
+    "phone_number": "0982430417",
+    "email": "tuanhung@tdlogistics.com",
+    "bin": "150148417573",
+    "bank": "EXIMBANK"
+}
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "tanlap123",
+    "user_password": "TanLap2k24@tdlogistics",
+    "user_fullname": "Nguyễn Đức Trí",
+    "user_phone_number": "0892450417",
+    "user_email": "tri.nguyenminh@hcmut.edu.vn",
+    "user_date_of_birth": "2004-04-28",
+    "user_cccd": "076894106672",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "150248417573",
+    "user_bank": "EXIMBANK",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "Tân Lập",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 5",
+    "town": "Phường 12",
+    "detail_address": "157 Nguyễn Chí Thanh",
+    "phone_number": "0283430418",
+    "email": "tanlap@tdlogistics.com",
+    "bin": "150248417573",
+    "bank": "EXIMBANK"
+}
+
+
+###
+
+POST http://localhost:5000/api/v1/transport_partners/create
+Content-Type: application/json
+
+{
+    "username": "hungcuong123",
+    "user_password": "HungCuong2k24@tdlogistics",
+    "user_fullname": "Nguyễn Hùng Cường",
+    "user_phone_number": "0892830417",
+    "user_email": "cuong.nguyenhung@hcmut.edu.vn",
+    "user_date_of_birth": "2004-07-28",
+    "user_cccd": "076784116672",
+    "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "user_district": "Huyện Đất Đỏ",
+    "user_town": "Thị trấn Đất Đỏ",
+    "user_detail_address": "326, ĐT44A",
+    "user_position": "Quản lý bưu cục",
+    "user_bin": "150148817573",
+    "user_bank": "EXIMBANK",
+
+    "agency_id": "TD_00000_077165007713",
+    "transport_partner_name": "Hùng Cường",
+    "province": "Thành phố Hồ Chí Minh",
+    "district": "Quận 10",
+    "town": "Phường 14",
+    "detail_address": "Khu C30 Lô B5, 230 Thành Thá",
+    "phone_number": "0982439417",
+    "email": "hungcuong@tdlogistics.com",
+    "bin": "150148417573",
+    "bank": "EXIMBANK"
+}
+
 ###
 
 //passed
