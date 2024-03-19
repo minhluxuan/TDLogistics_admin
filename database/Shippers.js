@@ -107,7 +107,7 @@ const getHistory = async (conditions, postal_code) => {
     const shipperTasksTable = postal_code + '_' + defaultTasksTable;
     const queryParams = [conditions.staff_id];
 
-    let query = `SELECT s.*, o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ? ORDER BY s.created_at DESC`;
+    let query = `SELECT s.*, o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ?`;
     
     if (conditions.option === 1) {
         const today = moment(new Date()).format("YYYY-MM-DD");

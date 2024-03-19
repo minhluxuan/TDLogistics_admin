@@ -95,7 +95,7 @@ const getBusiness = async (req, res) => {
 			});
 		}
 
-		if (["BUSINESS_USER"].includes(req.user.role)) {
+		if (["BUSINESS"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingBusinessByBusiness(req.body);
 
 			if (error) {
@@ -167,7 +167,7 @@ const getRepresentor = async (req, res) => {
 			});
 		}
 
-		if (["BUSINESS_USER"].includes(req.user.role)) {
+		if (["BUSINESS"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingRepresentorByBusiness(req.body);
 
 			if (error) {
@@ -636,17 +636,17 @@ const updateContract = async (req, res) => {
 
 const getBusinessContract = async (req, res) => {
 	try {
+		const { error } = businessValidation.validateGettingBusinessContract(req.query);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = businessValidation.validateGettingBusinessContract(req.query);
-
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-
-			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.query);
+			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
 			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
 				return res.status(404).json({
 					error: true,
@@ -670,16 +670,7 @@ const getBusinessContract = async (req, res) => {
 		}
 
 		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = businessValidation.validateGettingBusinessContract(req.query);
-
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-
-			req.query.agency_id = req.user.agency_id;
+			req.body.agency_id = req.user.agency_id;
 
 			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.query);
 			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
@@ -705,17 +696,8 @@ const getBusinessContract = async (req, res) => {
 			});			
 		}
 
-		if (["BUSINESS_USER"].includes(req.user.role)) {
-			const { error } = businessValidation.validateGettingBusinessContract(req.query);
-
-			if (error) {
-				return res.status(400).json({
-					error: true,
-					message: error.message,
-				});
-			}
-
-			if (req.query.business_id !== req.user.business_id) {
+		if (["BUSINESS"].includes(req.user.role)) {
+			if (req.body.business_id !== req.user.business_id) {
 				return res.status(403).json({
 					error: true,
 					message: "Người dùng không được phép truy cập tài nguyên này.",
@@ -739,7 +721,7 @@ const getBusinessContract = async (req, res) => {
 					return res.status(200).sendFile(filePath);
 				}
 			}
-			
+
 			return res.status(404).json({
 				error: true,
 				message: `File hợp đồng của khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
@@ -753,6 +735,43 @@ const getBusinessContract = async (req, res) => {
 	}
 };
 
+const updatePassword = async (req, res) => {
+	try {
+		const { error } = businessValidation.validateUpdatePassword(req.body);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+		
+		const updatedInfo = new Object({
+			password: utils.hash(req.body.new_password),
+			active: true,
+		});
+
+		const result = await businessService.updatePassword(updatedInfo, { business_id: req.user.business_id });
+		
+		if (!result || result.affectedRows <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Người dùng doanh nghiệp có mã ${req.user.staff_id} không tồn tại.`,
+			});
+		}
+
+		return res.status(201).json({
+			error: false,
+			message: "Cập nhật mật khẩu thành công.",
+		});
+	} catch (error) {
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
 module.exports = {
 	createNewBusinessUser,
 	getBusiness,
@@ -763,4 +782,5 @@ module.exports = {
 	updateBusinessInfo,
 	deleteBusinessUser,
 	getBusinessContract,
+	updatePassword,
 }

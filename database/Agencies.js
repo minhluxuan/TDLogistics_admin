@@ -92,17 +92,32 @@ const checkWardsOccupation = async (province, district, wards) => {
 const createTablesForAgency = async (postal_code) => {
 	const ordersTable = postal_code + "_orders";
 	const shipmentTable = postal_code + "_shipment";
+	const shipperTasksTable = postal_code + "_shipper_tasks";
+	const scheduleTable = postal_code + "_schedule";
 
 	const createOrdersTable = `CREATE TABLE ${ordersTable} AS SELECT * FROM orders WHERE 1 = 0`;
 	const createShipmentTable = `CREATE TABLE ${shipmentTable} AS SELECT * FROM shipment WHERE 1 = 0`;
+	const createShipperTasksTable = `CREATE TABLE ${shipperTasksTable} (
+		id int(11) NOT NULL,
+		order_id varchar(30) NOT NULL,
+		shipper varchar(25) NOT NULL,
+		created_at datetime NOT NULL,
+		completed_at datetime DEFAULT NULL,
+		completed tinyint(1) NOT NULL
+	  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`
+	const createScheduleTable = `CREATE TABLE ${scheduleTable} AS SELECT * FROM schedule WHERE 1 = 0`;
 
 	await pool.query(createOrdersTable);
 	await pool.query(createShipmentTable);
+	await pool.query(createShipperTasksTable);
+	await pool.query(createScheduleTable);
 
 	const checkingExistOrdersTable = await dbUtils.checkExistTable(pool, ordersTable);
 	const checkingExistShipmentTable = await dbUtils.checkExistTable(pool, shipmentTable);
+	const checkingExistShipperTasksTable = await dbUtils.checkExistTable(pool, shipperTasksTable);
+	const checkingExistScheduleTable = await dbUtils.checkExistTable(pool, scheduleTable);
 
-	const neccessaryTable = [ordersTable, shipmentTable];
+	const neccessaryTable = [ordersTable, shipmentTable, shipperTasksTable, scheduleTable];
 	const successCreatedTable = new Array();
 
 	if (checkingExistOrdersTable.existed) {
@@ -113,12 +128,24 @@ const createTablesForAgency = async (postal_code) => {
 		successCreatedTable.push(shipmentTable);
 	}
 
+	if (checkingExistShipperTasksTable.existed) {
+		successCreatedTable.push(shipperTasksTable);
+	}
+
+	if (checkingExistScheduleTable.existed) {
+		successCreatedTable.push(scheduleTable);
+	}
+
 	const addPrimaryKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD PRIMARY KEY (order_id)`;
-	const addForeignKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE`;
+	const addForeignKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD CONSTRAINT fk_${ordersTable}_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE`;
+	const addPrimaryKeyForShipperTasksTableQuery = `ALTER TABLE ${shipperTasksTable}
+	ADD CONSTRAINT fk_${shipperTasksTable}_order_id_ FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE`
+
 	await pool.query(addPrimaryKeyForOrdersTableQuery);
 	await pool.query(addForeignKeyForOrdersTableQuery);
+	await pool.query(addPrimaryKeyForShipperTasksTableQuery);
 
-	if (successCreatedTable.length !== 2) {
+	if (successCreatedTable.length < 4) {
 		const missedTable = neccessaryTable.filter(table => !successCreatedTable.includes(table));
 
 		return new Object({
@@ -138,11 +165,15 @@ const createTablesForAgency = async (postal_code) => {
 const dropTableForAgency = async (postal_code) => {
 	const ordersTable = postal_code + "_orders";
 	const shipmentTable = postal_code + "_shipment";
+	const shipperTasksTable = postal_code + "_shipper_tasks";
+	const scheduleTable = postal_code + "_schedule";
 
 	const resultDroppingOrdersTable = await dbUtils.dropTable(pool, ordersTable);
 	const resultDroppingShipmentTable = await dbUtils.dropTable(pool, shipmentTable);
+	const resultDroppingShippersTasksTable = await dbUtils.dropTable(pool, shipperTasksTable);
+	const resultDroppingScheduleTable = await dbUtils.dropTable(pool, scheduleTable);
 
-	const neccessaryToDropTable = [ordersTable, shipmentTable];
+	const neccessaryToDropTable = [ordersTable, shipmentTable, shipperTasksTable, scheduleTable];
 	const successDroppedTable = new Array();
 
 	if (resultDroppingOrdersTable.success) {
@@ -153,7 +184,15 @@ const dropTableForAgency = async (postal_code) => {
 		successDroppedTable.push(shipmentTable);
 	}
 
-	if (successDroppedTable.length !== 2) {
+	if (resultDroppingShippersTasksTable.success) {
+		successDroppedTable.push(shipperTasksTable);
+	}
+
+	if (resultDroppingScheduleTable.success) {
+		successDroppedTable.push(scheduleTable);
+	}
+
+	if (successDroppedTable.length < 4) {
 		const missedTable = neccessaryToDropTable.filter(table => !successDroppedTable.includes(table));
 		return new Object({
 			success: false,

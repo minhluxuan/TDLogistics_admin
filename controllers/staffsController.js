@@ -37,16 +37,30 @@ const checkExistStaff = async (req, res) => {
 
 const getAuthenticatedStaffInfo = async (req, res) => {
 	try {
+		const resultGettingStaffInfo = await staffsService.getOneStaff({ staff_id: req.user.staff_id });
+		if (!resultGettingStaffInfo || resultGettingStaffInfo.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã ${req.user.staff_id} không tồn tại.`,
+			});
+		}
+		
+		const staff = resultGettingStaffInfo[0];
+
 		const info = new Object({
 			staff_id: req.user.staff_id,
+			fullname: staff.fullname,
 			role: req.user.role,
+			position: staff.position,
+			cccd: staff.cccd,
+			phone_number: staff.phone_number,
 			agency_id: req.user.agency_id,
 			privileges: req.user.privileges,
 			active: req.user.active,
-		})
+		});
 		return res.status(200).json(new Object({
 			error: false,
-			info: info,
+			info: staff,
 			message: `Lấy thông tin người dùng thành công`,
 		}));
 	} catch (error) {
@@ -535,12 +549,12 @@ const updateAvatar = async (req, res) => {
 			});
 		}
 
-		if (userCannotBeAffected.includes(req.query.staff_id)) {
-			return res.status(400).json({
-				error: true,
-				message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
-			});
-		}
+		// if (userCannotBeAffected.includes(req.query.staff_id)) {
+		// 	return res.status(400).json({
+		// 		error: true,
+		// 		message: `Nhân viên có mã ${req.query.staff_id} không thể bị tác động.`,
+		// 	});
+		// }
 
 		const updatorIdSubParts = req.user.staff_id.split('_');
 		const staffIdSubParts = req.query.staff_id.split('_');
@@ -626,9 +640,9 @@ const getStaffAvatar = async (req, res) => {
 			const fileName = staff.avatar ? staff.avatar : null;
 			
 			if (fileName) {
-				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				const file = path.join(__dirname, "..", "storage", "staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
-						return res.status(200).sendFile(file);
+					return res.status(200).sendFile(file);
 				}
 			}
 
@@ -670,7 +684,7 @@ const getStaffAvatar = async (req, res) => {
 			const fileName = staff.avatar ? staff.avatar : null;
 	
 			if (fileName) {
-				const file = path.join(__dirname,"..","storage", "staff", "img", "avatar", fileName);
+				const file = path.join(__dirname, "..", "storage", "staff", "img", "avatar", fileName);
 				if (fs.existsSync(file)) {
 						return res.status(200).sendFile(file);
 				}
@@ -689,7 +703,6 @@ const getStaffAvatar = async (req, res) => {
 		});
 	}
 };
-
 
 module.exports = {
 	checkExistStaff,

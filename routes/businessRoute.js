@@ -35,7 +35,7 @@ const sessionStrategy = new LocalStrategy({
     }
 
     const business_id = business.business_id;
-    const role = "BUSINESS_USER";
+    const role = "BUSINESS";
     const active = business.active;
 
     return done(null, {
@@ -113,7 +113,7 @@ router.post(
     "/search",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
-    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS"]),
     auth.isActive(),
     businessController.getBusiness
 );
@@ -121,7 +121,7 @@ router.post(
     "/search_representor",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
-    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS"]),
     auth.isActive(),
     businessController.getRepresentor
 );
@@ -158,7 +158,9 @@ router.get(
     "/get_contract",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
-    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS"]),
     businessController.getBusinessContract
 );
+router.patch("/update_password", auth.isAuthenticated(), auth.isAuthorized(["BUSINESS"]), businessController.updatePassword);
+
 module.exports = router;

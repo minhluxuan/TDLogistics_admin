@@ -87,7 +87,7 @@ const fileFilter = (req, file, done) => {
         return done(new Error("File không tồn tại."));
     }
 
-    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype && "image/png") { 
+    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png") { 
        return done(new Error("Hình ảnh không hợp lệ."));
     }
 

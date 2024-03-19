@@ -14,7 +14,6 @@ const provinceTable = "province";
 const districtTable = "district";
 const wardTable = "ward";
 
-
 const getUnits = async (level, province, district) => {
     let result;
     switch (level) {

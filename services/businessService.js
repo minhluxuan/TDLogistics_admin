@@ -48,6 +48,10 @@ const deleteBusinessUser = async(info) => {
     return await Business.deleteBusinessUSer(info);
 }
 
+const updatePassword = async (info, condition) => {
+    return await Business.updatePassword(info, condition);
+}
+
 module.exports = {
     checkExistBusinessUnion,
     checkExistBusiness,
@@ -60,5 +64,6 @@ module.exports = {
     getManyRepresentors,
     updateBusinessUser,
     updateBusinessRepresentor,
-    deleteBusinessUser
+    deleteBusinessUser,
+    updatePassword,
 }

@@ -27,7 +27,7 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-const allowedOrigins = ['http://localhost:5000', 'http://localhost:3000', 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', "https://admin-td-logistics-web.vercel.app"];
+const allowedOrigins = ['https://admin.tdlogistics.net.vn', 'https://app.tdlogistics.net.vn', 'http://localhost:5000', 'http://localhost:3000', 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', "https://admin-td-logistics-web.vercel.app"];
 
 const io = Socket(server, {
   cors: {
@@ -61,7 +61,7 @@ io.engine.use(
     if (req.user) {
       next();
     } else {
-      res.writeHead(401);
+      // res.writeHead(401);
       res.end();
     }
   }),

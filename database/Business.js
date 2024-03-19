@@ -163,6 +163,16 @@ const deleteBusinessUSer= async(info) => {
 	return await dbUtils.deleteOne(pool, table, fields, values);
 };
 
+const updatePassword = async (info, condition) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+
+	const conditionField = Object.keys(condition);
+	const conditionValue = Object.values(condition);
+
+	return await dbUtils.updateOne(pool, table, fields, values, conditionField, conditionValue);
+}
+
 module.exports = {
 	checkExistBusinessUnion,
 	checkExistBusiness,
@@ -175,5 +185,6 @@ module.exports = {
 	getManyRepresentors,
 	updateBusinessUser,
 	updateBusinessRepresentor,
-	deleteBusinessUSer
+	deleteBusinessUSer,
+	updatePassword,
 }
