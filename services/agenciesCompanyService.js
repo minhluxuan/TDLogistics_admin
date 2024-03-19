@@ -12,8 +12,18 @@ const getOneAgencyCompany = async (info) => {
   return await AgenciesCompany.getOneAgencyCompany(info);
 };
 
+const deleteAgencyCompany = async (info) => {
+  return await AgenciesCompany.deleteAgencyCompany(info);
+}
+
+const checkExistAgencyCompany = async (info) => {
+  return await AgenciesCompany.checkExistAgencyCompany(info);
+};
+
 module.exports = {
   createNewAgencyCompany,
   updateAgencyCompany,
   getOneAgencyCompany,
+  deleteAgencyCompany,
+  checkExistAgencyCompany,
 }

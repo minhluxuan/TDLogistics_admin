@@ -94,7 +94,8 @@ router.put(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"]),
     auth.isActive(),
-    agenciesController.updateAgencyCompany
+    upload.array("files"),
+    agenciesController.updateLicenseAgencyCompany
 );
 router.put(
     "/update_agency_company",
@@ -108,7 +109,6 @@ router.post(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "HUMAN_RESOURCE_MANAGER", "MANAGER", "AGENCY_MANAGER"]),
     auth.isActive(),
-    upload.array("files"),
     agenciesController.getLicenseAgencyCompany
 );
 
