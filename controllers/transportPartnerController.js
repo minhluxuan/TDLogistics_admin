@@ -437,10 +437,136 @@ const deleteTransportPartner = async (req, res) => {
     }
 };
 
+const getPartnerContract = async (req, res) => {
+	try {
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const { error } = transportPartnerValidation.validateGettingContract(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			const resultGettingOnePartner = await transportPartnerService.getOnePartner(req.body);
+			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+				});
+			}
+			const partner = resultGettingOnePartner[0];
+			const contract = partner.contract ? partner.contract : null;
+
+			if (contract) {
+				const filePath = path.join(__dirname, "..","storage", "partner_staff", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
+		}
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const { error } = transportPartnerValidation.validateGettingContract(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			req.body.agency_id = req.user.agency_id;
+
+			const resultGettingOnePartner = await partnerStaffsService.getOnePartner(req.body);
+			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+				});
+			}
+
+			const partner = resultGettingOnePartner[0];
+			const contract = partner.contract ? partner.contract : null;
+			
+			if (contract) {
+				const filePath = path.join(__dirname, "..","storage", "partner_staff", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
+		}
+
+		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) {
+			const { error } = transportPartnerValidation.validateGettingContract(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			if (req.body.partner_id !== req.user.partner_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+
+			const resultGettingOnePartner = await transportPartnerService.getOnePartner(req.body);
+			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+				});
+			}
+
+			const partner = resultGettingOnePartner[0];
+			const contract = partner.contract ? partner.contract : null;
+			
+			if (contract) {
+				const filePath = path.join(__dirname, "..","storage", "partner_staff", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
+		}
+	} catch (error) {
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
 module.exports = {
     createNewTransportPartner,
     getTransportPartner,
     updateTransportPartner,
     updateContract,
+    getPartnerContract,
     deleteTransportPartner,
 };

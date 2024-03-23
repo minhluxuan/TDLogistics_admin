@@ -79,6 +79,12 @@ router.patch(
     auth.isActive(),
     transportPartnerController.updateContract,
 );
+router.post(
+    "/get_contract",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "TRANSPORT_PARTNER_REPRESENTOR"]),
+    transportPartnerController.getPartnerContract);
 router.delete(
     "/delete",
     auth.isAuthenticated(),
