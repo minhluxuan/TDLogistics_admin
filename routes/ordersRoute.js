@@ -137,7 +137,7 @@ router.get("/", (req, res) => {
     res.render("order");
 });
 router.post("/update_images", auth.isAuthenticated(), auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER"]), auth.isActive(), orderImagesUpload.array("files", 5), ordersController.updateImages);
-router.get("/get_images", auth.isAuthenticated(), auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER"]), auth.isActive(), ordersController.getImages);
+router.get("/get_images", auth.isAuthenticated(), auth.isActive(), ordersController.getImages);
 //router.post("/agency_create", ordersController.createOrderForAgency);
 
 module.exports = router;
