@@ -644,10 +644,15 @@ const getImages = async (req, res) => {
     
         archive.pipe(res);
     
-        images.forEach(image => {
-            archive.file(image, { name: image });
-        });
-    
+        for (const image of images) {
+            const exists = await fs.access(image).then(() => true).catch(() => false);
+            if (exists) {
+                archive.file(image, { name: path.basename(image) });
+            } else {
+                console.warn(`Image file not found: ${image}`);
+            }
+        }
+
         archive.finalize();
         
     } catch (error) {

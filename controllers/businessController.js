@@ -65,8 +65,6 @@ const getBusiness = async (req, res) => {
 				});
 			}
 
-			
-
 			const result = await businessService.getManyBusinessUsers(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
