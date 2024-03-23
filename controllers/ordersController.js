@@ -490,7 +490,6 @@ const updateImages = async (req, res) => {
                 message: "Ảnh không được để trống.",
             });
         }
-
         const { error } = orderValidation.validateQueryUpdatingOrderImages(req.query);
         if (error) {
             return res.status(400).json({
@@ -498,7 +497,6 @@ const updateImages = async (req, res) => {
                 message: error.message,
             });
         }
-
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
 
         const resultGettingOneShipperTasks = await shippersService.getTasks({ order_id: req.query.order_id, staff_id: req.user.staff_id }, postalCode);
@@ -542,6 +540,7 @@ const updateImages = async (req, res) => {
                 message: `Quá số lượng ảnh cho phép. Số lượng ảnh còn lại được cho phép: ${ 2 - images.length > 0 ? 2 - images.length : 0 }.`,
             });
         }
+        
 
         req.files.forEach(file => {
             images.push(file.filename);
@@ -554,7 +553,7 @@ const updateImages = async (req, res) => {
         else if (req.query.type === "receive") {
             updatedImages.receive_images = JSON.stringify(images);
         }
-
+        
         const resultUpdatingOneOrderInAgency = await ordersService.updateOrder(updatedImages, { order_id: req.query.order_id }, postalCode);
         if (!resultUpdatingOneOrderInAgency || resultUpdatingOneOrderInAgency.affectedRows === 0) {
             return res.status(404).json({

@@ -43,3 +43,11 @@ Content-Type: application/json
 {
     "option": 3
 }
+
+###
+POST http://localhost:5000/api/v1/orders/update_images?order_id=BC_78300_202422301019566&type=send
+Content-Type: application/json
+
+{
+    
+}
