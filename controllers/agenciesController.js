@@ -137,7 +137,7 @@ const getAgencies = async (req, res) => {
 
 			return res.status(200).json({
 				error: false,
-				data: result,
+				data: agenciesInfo,
 				message: "Lấy thông tin đại lý thành công.",
 			});
 		}

@@ -79,7 +79,7 @@ router.patch(
     auth.isActive(),
     transportPartnerController.updateContract,
 );
-router.post(
+router.get(
     "/get_contract",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER",

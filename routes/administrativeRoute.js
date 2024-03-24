@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.post(
     "/search",
-    auth.isAuthenticated(),
     administrativeController.getUnits
 );
 
