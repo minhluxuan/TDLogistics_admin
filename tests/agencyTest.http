@@ -45,17 +45,30 @@ Content-Type: application/json
     "email": "buucucquan1@tdlogistics.com",
     "commission_rate": 0.4,
     "bin": "050138319579",
-    "bank": "Sacombank"
+    "bank": "Sacombank",
+    "individual_company": true,
+    "company_name": "Công ty Cổ phần Bất động sản Tiến Dũng",
+    "tax_number": "0123456789",
+    "business_number": "01234"
 }
 
 ###
 
-PUT http://localhost:5000/api/v1/agencies/update?agency_id=BC_70001_077204005691
+PUT http://localhost:5000/api/v1/agencies/update?agency_id=BC_71000_077204005691
 Content-Type: application/json
 
 {
     "bin": "0981430418",
     "bank": "MB Bank"
+}
+
+###
+
+PUT http://localhost:5000/api/v1/agencies//update_agency_company?agency_id=BC_71000_077204005691
+Content-Type: application/json
+
+{
+    "company_name": "Công ty TNHH Viễn thông Tiến Dũng"
 }
 
 ###

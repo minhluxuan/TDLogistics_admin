@@ -65,8 +65,6 @@ const getBusiness = async (req, res) => {
 				});
 			}
 
-			
-
 			const result = await businessService.getManyBusinessUsers(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
@@ -730,7 +728,7 @@ const getBusinessContract = async (req, res) => {
 	} catch (error) {
 		res.status(500).json({
 			error: true,
-			message: error,
+			message: error.message,
 		});
 	}
 };

@@ -2,5 +2,5 @@ POST http://localhost:5000/api/v1/administrative/search
 Content-Type: application/json
 
 {
-    "province": "Thành phố Hồ Chí Minh"
+    
 }

@@ -174,3 +174,6 @@ Content-Type: application/json
     "width": 1,
     "height": 1
 }
+
+###
+GET http://localhost:5000/api/v1/orders/get_images?order_id=BC_71000_202431304411798&type=send
