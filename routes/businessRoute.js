@@ -132,7 +132,7 @@ router.put(
     auth.isActive(),
     businessController.updateBusinessInfo
 );
-router.patch(
+router.put(
     "/update_business_representor",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
