@@ -113,7 +113,7 @@ router.post(
 router.post(
     "/approve",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER"]),
     auth.isActive(),
     businessController.approveNewBusiness
 );
