@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const randomstring = require("randomstring");
 const otpService = require("../services/otpService");
+const { error } = require("winston");
 
 const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -39,7 +40,7 @@ const createOTP = async (req, res) => {
 
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
-                return res.status(500).send("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút.");
+                return res.status(500).send(error.message);
             }
 
             return res.status(200).send("OTP được gửi thành công. Vui lòng kiểm tra số điện thoại và email để xác thực.");
@@ -47,7 +48,7 @@ const createOTP = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             error: true,
-            message: "Đã xảy ra lỗi. Vui lòng thử lại sau ít phút.",
+            message: error.message,
         });
     }
 }

@@ -36,7 +36,7 @@ try {
                         
                         info.user_id = socket.request.user.user_id;
                         info.phone_number_sender = socket.request.user.phone_number;
-                        info.name_sender = socket.request.user.fullname;
+                        // info.name_sender = socket.request.user.fullname;
                         info.status_code = servicesStatus.processing.code;
                     }
                     else if (["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
@@ -73,7 +73,7 @@ try {
 const createNewOrder = async (socket, info, orderTime) => {
     try {
         const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);   
-
+        
         info.journey = JSON.stringify(new Array());
         const agencies = resultFindingManagedAgency.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
