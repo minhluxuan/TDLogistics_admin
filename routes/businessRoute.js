@@ -101,13 +101,21 @@ router.post("/login", passport.authenticate("businessLogin"), (req, res, next) =
     })(req, res, next);
 });
 router.get("/check", businessController.checkExistBusiness);
+router.post("/signup", businessController.signup);
 router.post(
     "/create",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
     auth.isActive(),
     upload.single("contract"),
     businessController.createNewBusinessUser
+);
+router.post(
+    "/approve",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER"]),
+    auth.isActive(),
+    businessController.approveNewBusiness
 );
 router.post(
     "/search",
@@ -132,7 +140,7 @@ router.put(
     auth.isActive(),
     businessController.updateBusinessInfo
 );
-router.patch(
+router.put(
     "/update_business_representor",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),

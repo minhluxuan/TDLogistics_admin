@@ -440,7 +440,7 @@ const deleteTransportPartner = async (req, res) => {
 const getPartnerContract = async (req, res) => {
 	try {
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = transportPartnerValidation.validateGettingContract(req.body);
+			const { error } = transportPartnerValidation.validateGettingContract(req.query);
 
 			if (error) {
 				return res.status(400).json({
@@ -450,17 +450,18 @@ const getPartnerContract = async (req, res) => {
 			}
 
 			const resultGettingOnePartner = await transportPartnerService.getOnePartner(req.body);
-			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+			if (!resultGettingOnePartner || resultGettingOnePartner.length <= 0) {
 				return res.status(404).json({
 					error: true,
-					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+					message: `Người dùng doanh nghiệp có mã ${req.query.transport_partner_id} không tồn tại.`,
 				});
 			}
+
 			const partner = resultGettingOnePartner[0];
 			const contract = partner.contract ? partner.contract : null;
 
 			if (contract) {
-				const filePath = path.join(__dirname, "..","storage", "partner_staff", "document", "contract", contract);
+				const filePath = path.join(__dirname, "..", "storage", "transport_partner", "document", "contract", contract);
 				if (fs.existsSync(filePath)) {
 					return res.status(200).sendFile(filePath);
 				}
@@ -486,19 +487,19 @@ const getPartnerContract = async (req, res) => {
 
 			req.body.agency_id = req.user.agency_id;
 
-			const resultGettingOnePartner = await partnerStaffsService.getOnePartner(req.body);
-			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+			const resultGettingOnePartner = await transportPartnerService.getOnePartner(req.body);
+			if (!resultGettingOnePartner || resultGettingOnePartner.length <= 0) {
 				return res.status(404).json({
 					error: true,
-					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+					message: `Người dùng doanh nghiệp có mã ${req.query.transport_partner_id} không tồn tại.`,
 				});
 			}
 
 			const partner = resultGettingOnePartner[0];
 			const contract = partner.contract ? partner.contract : null;
-			
+
 			if (contract) {
-				const filePath = path.join(__dirname, "..","storage", "partner_staff", "document", "contract", contract);
+				const filePath = path.join(__dirname, "..", "storage", "transport_partner", "document", "contract", contract);
 				if (fs.existsSync(filePath)) {
 					return res.status(200).sendFile(filePath);
 				}
@@ -530,18 +531,18 @@ const getPartnerContract = async (req, res) => {
 			}
 
 			const resultGettingOnePartner = await transportPartnerService.getOnePartner(req.body);
-			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+			if (!resultGettingOnePartner || resultGettingOnePartner.length <= 0) {
 				return res.status(404).json({
 					error: true,
-					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+					message: `Người dùng doanh nghiệp có mã ${req.query.transport_partner_id} không tồn tại.`,
 				});
 			}
 
 			const partner = resultGettingOnePartner[0];
 			const contract = partner.contract ? partner.contract : null;
-			
+
 			if (contract) {
-				const filePath = path.join(__dirname, "..","storage", "partner_staff", "document", "contract", contract);
+				const filePath = path.join(__dirname, "..", "storage", "transport_partner", "document", "contract", contract);
 				if (fs.existsSync(filePath)) {
 					return res.status(200).sendFile(filePath);
 				}
