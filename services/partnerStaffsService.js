@@ -4,6 +4,10 @@ const checkExistPartnerStaff = async (info) => {
     return await PartnerStaffs.checkExistPartnerStaff(info);
 }
 
+const checkExistPartnerStaffIntersect = async (conditions) => {
+    return await PartnerStaffs.checkExistPartnerStaffIntersect(conditions);
+}
+
 const createNewPartnerStaff = async (info, postal_code) => {
     return await PartnerStaffs.createNewPartnerStaff(info, postal_code);
 }
@@ -12,8 +16,8 @@ const getOnePartnerStaff = async (info) => {
     return await PartnerStaffs.getOnePartnerStaff(info);
 }
 
-const getManyPartnerStaffs = async (info) => {
-  	return await PartnerStaffs.getManyPartnerStaffs(info);
+const getManyPartnerStaffs = async (info, paginationConditions) => {
+  	return await PartnerStaffs.getManyPartnerStaffs(info, paginationConditions);
 }
 
 const updatePartnerStaff = async (info, conditions, postal_code) => {
@@ -30,6 +34,7 @@ const updatePartnerPassword = async (info, conditions) => {
 
 module.exports = {
     checkExistPartnerStaff,
+    checkExistPartnerStaffIntersect,
     createNewPartnerStaff,
     getOnePartnerStaff,
     getManyPartnerStaffs,

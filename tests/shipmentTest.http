@@ -36,7 +36,16 @@ POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_2024
 Content-Type: application/json
 
 {
-    "order_ids": ["BC_71000_2024225161651124"]
+    "order_ids": ["BC_78300_2024223163234692","BC_78300_2024223163234271", "BC_78300_2024223162829291"]
+}
+
+###
+
+POST http://localhost:5000/api/v1/shipments/remove_orders?shipment_id=BC_71000_202422224138948
+Content-Type: application/json
+
+{
+    "order_ids": ["BC_78300_2024223163234692","BC_78300_2024223163234271", "BC_78300_2024223162829291"]
 }
 
 ### TD2024132126392 TD2024132139335 TD2024132145338
@@ -52,7 +61,7 @@ POST http://localhost:5000/api/v1/shipments/confirm_create
 Content-Type: application/json 
 
 {
-    "shipment_id": "BC_71000_202421221132823"
+    "shipment_id": "BC_78300_202421221351231"
 }
 
 ### Chỉnh sửa database bảng 78300_shipment cột order_ids thêm 1 đơn hàng với 1 order_id đểu vào test chức năng xóa bưu cục 
@@ -64,12 +73,16 @@ Content-Type: application/json
 }
 
 ### Lấy thông tin lô hàng cho bưu cục 
-POST http://localhost:5000/api/v1/shipments/search
+POST http://localhost:5000/api/v1/shipments/search?rows=1&page=1
 Content-Type: application/json
 
 {
-    "shipment_id": "BC_71000_202422224138948"
+    
 }
+
+###
+
+GET http://localhost:5000/api/v1/shipments/get_orders?shipment_id=BC_71000_202422224138948
 
 ###
 
@@ -192,6 +205,6 @@ POST http://localhost:5000/api/v1/shipments/undertake
 Content-Type: application/json
 
 {
-    "shipment_id": "TD202410161859226",
-    "status_code": 1
+    "shipment_id": "BC_78300_202421221351231",
+    "status_code": 3
 }

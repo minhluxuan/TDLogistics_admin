@@ -45,9 +45,16 @@ const updateUserInfo = async (info, conditions) => {
     return await SQLutils.updateOne(pool, table, fields, values, conditionFields, conditionValues);
 }
 
+const getNameUsingPhoneNummber = async (phone_number) => {
+    const query = `SELECT fullname FROM ${table} WHERE phone = ?`;
+    const result = await pool.query(query, phone_number);
+    return result[0][0].fullname;
+}
+
 module.exports = {
     checkExistUser,
     createNewUser,
     getOneUser,
     updateUserInfo,
+    getNameUsingPhoneNummber,
 }

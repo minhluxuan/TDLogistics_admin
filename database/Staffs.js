@@ -22,7 +22,7 @@ const checkExistStaff = async (info) => {
 		throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút.");
 	}
 
-	if (result.length <= 0) {
+	if (result.length === 0) {
 		return new Object({
 			existed: false,
 			message: "Người dùng chưa tồn tại.",
@@ -41,7 +41,6 @@ const checkExistStaff = async (info) => {
 
 const checkExistStaffIntersect = async (info) => {
 	const fields = Object.keys(info);
-	const values = Object.values(info);
 	const result = await dbUtils.findOneIntersect(pool, table, fields, values);
 
 	if (!result) {
@@ -76,25 +75,76 @@ const createNewStaff = async (info, postal_code = null) => {
 	return await dbUtils.insert(pool, table, fields, values);
 };
 
-const getManyStaffs = async (info, postal_code) => {
+const getManyStaffs = async (info, paginationConditions, postal_code) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
+	const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+	
 	let query;
 	if (!postal_code) {
 		if (fields.length === 0 || values.length === 0) {
-			query = `SELECT agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff`;
+			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff ORDER BY created_at DESC`;
+			if (offset && typeof offset === "number") {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?, ?`;
+					values.push(offset, limit);
+				}
+			}
+			else {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?`;
+					values.push(limit);
+				}
+			}
 		}
 		else {
-			query = `SELECT agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM staff WHERE ${fields.map(field => `${field} = ?`).join(" AND ")} ORDER BY created_at DESC`;
+			if (offset && typeof offset === "number") {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?, ?`;
+					values.push(offset, limit);
+				}
+			}
+			else {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?`;
+					values.push(limit);
+				}
+			}
 		}
 	}
 	else {
 		if (fields.length === 0 || values.length === 0) {
-			query = `SELECT agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"}`;
+			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"} ORDER BY created_at DESC`;
+			if (offset && typeof offset === "number") {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?, ?`;
+					values.push(offset, limit);
+				}
+			}
+			else {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` LIMIT ?`;
+					values.push(limit);
+				}
+			}
 		}
 		else {
-			query = `SELECT agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"} WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+			query = `SELECT role, agency_id, username, phone_number, email, fullname, date_of_birth, cccd, province, district, town, detail_address, staff_id, position, bin, bank, deposit, salary, paid_salary, active FROM ${postal_code + '_' + "staff"} WHERE ${fields.map(field => `${field} = ?`).join(" AND ")} ORDER BY created_at DESC`;
+			if (offset && typeof offset === "number") {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` AND LIMIT ?, ?`;
+					values.push(offset, limit);
+				}
+			}
+			else {
+				if (limit && typeof limit === "number" && limit > 0) {
+					query += ` AND LIMIT ?`;
+					values.push(limit);
+				}
+			}
 		}
 	}
 

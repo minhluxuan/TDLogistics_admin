@@ -88,11 +88,14 @@ const createNewRepresentor = async (info) => {
 	return await dbUtils.insert(pool, businessRepresentorTable, fields, values);
 };
 
-const getManyBussinessUsers = async (info) => {
+const getManyBussinessUsers = async (info, paginationConditions) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
-  	return await dbUtils.find(pool, table, fields, values);
+	const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
+  	return await dbUtils.find(pool, table, fields, values, true, limit, offset);
 };
 
 const getOneBusinessUser = async (info) => {
@@ -130,7 +133,7 @@ const getManyRepresentors = async (info) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
-	return await dbUtils.find(pool, businessRepresentorTable, fields, values);
+	return await dbUtils.find(pool, businessRepresentorTable, fields, values, true);
 }
 
 const updateBusinessUser = async (info, conditions) => {
@@ -160,6 +163,16 @@ const deleteBusinessUSer= async(info) => {
 	return await dbUtils.deleteOne(pool, table, fields, values);
 };
 
+const updatePassword = async (info, condition) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+
+	const conditionField = Object.keys(condition);
+	const conditionValue = Object.values(condition);
+
+	return await dbUtils.updateOne(pool, table, fields, values, conditionField, conditionValue);
+}
+
 module.exports = {
 	checkExistBusinessUnion,
 	checkExistBusiness,
@@ -172,5 +185,6 @@ module.exports = {
 	getManyRepresentors,
 	updateBusinessUser,
 	updateBusinessRepresentor,
-	deleteBusinessUSer
+	deleteBusinessUSer,
+	updatePassword,
 }

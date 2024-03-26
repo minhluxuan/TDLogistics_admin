@@ -13,6 +13,32 @@ const table = "partner_staff";
 
 const pool = mysql.createPool(dbOptions).promise();
 
+const checkExistPartnerStaffIntersect = async (conditions) => {
+	const fields = Object.keys(conditions);
+	const values = Object.values(conditions);
+	const result = await dbUtils.findOneIntersect(pool, table, fields, values);
+
+	if (!result) {
+		throw new Error("Đã xảy ra lỗi. Vui lòng thử lại sau ít phút.");
+	}
+
+	if (result.length <= 0) {
+		return new Object({
+		existed: false,
+		message: "Người dùng chưa tồn tại.",
+		});
+	}
+
+	for (let i = 0; i < fields.length; i++) {
+		if (result[0][fields[i]] === values[i]) {
+			return new Object({
+				existed: true,
+				message: `Người dùng có ${fields[i]}: ${values[i]} đã tồn tại.`,
+			});
+		}
+	}
+}
+
 const checkExistPartnerStaff = async (info) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
@@ -31,10 +57,10 @@ const checkExistPartnerStaff = async (info) => {
 
 	for (let i = 0; i < fields.length; i++) {
 		if (result[0][fields[i]] === values[i]) {
-		return new Object({
-			existed: true,
-			message: `Người dùng có ${fields[i]}: ${values[i]} đã tồn tại.`,
-		});
+			return new Object({
+				existed: true,
+				message: `Người dùng có ${fields[i]}: ${values[i]} đã tồn tại.`,
+			});
 		}
 	}
 };
@@ -46,11 +72,14 @@ const createNewPartnerStaff = async (info) => {
   return await dbUtils.insert(pool, table, fields, values);
 };
 
-const getManyPartnerStaffs = async (info) => {
+const getManyPartnerStaffs = async (info, paginationConditions) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
 
-	const result = await dbUtils.find(pool, table, fields, values);
+	const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
+	const result = await dbUtils.find(pool, table, fields, values, true, limit, offset);
 	return result;
 };
 
@@ -89,6 +118,7 @@ const updatePartnerPassword = async (info, conditions) => {
 
 module.exports = {
 	checkExistPartnerStaff,
+	checkExistPartnerStaffIntersect,
 	createNewPartnerStaff,
 	getManyPartnerStaffs,
 	getOnePartnerStaff,

@@ -40,11 +40,15 @@ const checkExistPartner = async (info) => {
     return result.length > 0;
 };
 
-const getManyPartners = async (info) => {
+const getManyPartners = async (info, paginationConditions) => {
     const fields = Object.keys(info);
-    const values = Object.values(info);console.log(info);
+    const values = Object.values(info);
 
-    return await dbUtils.find(pool, table, fields, values);
+    const limit = paginationConditions.rows || 0;
+    const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
+
+
+    return await dbUtils.find(pool, table, fields, values, true, limit, offset);
 };
 
 const getOnePartner = async (info) => {

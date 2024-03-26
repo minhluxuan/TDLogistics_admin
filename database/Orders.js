@@ -27,7 +27,7 @@ const getOrdersOfAgency = async (postalCode, conditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
-    const result = await SQLutils.find(pool, postalCode + '_' + table, fields, values);
+    const result = await SQLutils.find(pool, postalCode + '_' + table, fields, values, true);
     return result;
 }
 
@@ -46,7 +46,7 @@ const getOrders = async (conditions, paginationConditions) => {
     const limit = paginationConditions.rows || 0;
     const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
 
-    const result = await SQLutils.find(pool, table, fields, values, limit, offset);
+    const result = await SQLutils.find(pool, table, fields, values, true, limit, offset);
 
     for (const elm of result) {
         try {
@@ -71,14 +71,15 @@ const createNewOrder = async (newOrder, postalCode = null) => {
     return await SQLutils.insert(pool, ordersTable, Object.keys(newOrder), Object.values(newOrder));
 }
 
-const updateOrder = async (info, conditions) => {
+const updateOrder = async (info, conditions, postal_code = null) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
 
     const conditionFields = Object.keys(conditions);
     const conditionValues = Object.values(conditions);
 
-    return await SQLutils.updateOne(pool, table, fields, values, conditionFields, conditionValues);
+    const ordersTable = postal_code ? postal_code + '_orders' : table;
+    return await SQLutils.updateOne(pool, ordersTable, fields, values, conditionFields, conditionValues);
 };
 
 const cancelOrderWithTimeConstraint = async (conditions) => {
@@ -233,8 +234,8 @@ const getOrderStatus = async (order_id) => {
         status_message: statusMessage
     }
 }
-
 const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false) => {
+
     if(isUpdateJourney) {
         if(!orderInfo.managed_by) {
             return new Object({
@@ -242,12 +243,11 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
                 data: null,
                 message: "Không đủ thông tin để thực hiện thao tác trên!"
             });
-        }
-
+        }        
         const currentTime = new Date();
-        const settingTime = moment(currentTime).format("ss:mm:HH DD-MM-YYYY");
-
-        const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ? LIMIT 1`;
+        const settingTime = moment(currentTime).format("DD-MM-YYYY ss:mm:HH");
+    
+        const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ?`;
         const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
         let journey;
         try {
@@ -284,7 +284,7 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
 
     } else {
         const result = await SQLutils.updateOne(pool, table, ["status_code"], [orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result[0].affectedRows <= 0) {
+        if(result.affectedRows <= 0) {
             return new Object({
                 success: false,
                 data: null,

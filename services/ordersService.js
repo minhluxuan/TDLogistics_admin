@@ -132,8 +132,8 @@ const getOrders = async (conditions, paginationConditions) => {
     return await Orders.getOrders(conditions, paginationConditions);
 }
 
-const updateOrder = async (info, conditions) => {
-    return await Orders.updateOrder(info, conditions);
+const updateOrder = async (info, conditions, postal_code = null) => {
+    return await Orders.updateOrder(info, conditions, postal_code);
 };
 
 const createNewOrder = async (newOrder) => {
@@ -171,6 +171,10 @@ const distributeOrder = async (agency_id, address_source) => {
     return await Orders.distributeOrder(agency_id, address_source);
 }
 
+const  setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false) => {
+    return await Orders.setStatusToOrder(orderInfo, orderStatus, isUpdateJourney);
+}
+
 module.exports = {
     checkExistOrder,
     getOrderForUpdating,
@@ -188,5 +192,6 @@ module.exports = {
     findingManagedAgency,
     createOrderInAgencyTable,
     getOrderStatus,
-    distributeOrder
+    distributeOrder,
+    setStatusToOrder
 };

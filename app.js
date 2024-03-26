@@ -16,6 +16,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const indexRouter = require('./routes/index');
+
 const otpRouter = require("./routes/otpRoute");
 const staffsRouter = require("./routes/staffsRoute");
 const businessRouter = require("./routes/businessRoute");
@@ -30,6 +31,8 @@ const agenciesRouter = require("./routes/agenciesRoute");
 const usersRouter = require("./routes/usersRoute");
 const ordersRouter = require("./routes/ordersRoute");
 const shippersRouter = require("./routes/shippersRoute");
+const scheduleRouter = require("./routes/scheduleRoute");
+const administrativeRouter = require("./routes/administrativeRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -51,7 +54,7 @@ app.set('view engine', 'jade');
 app.enable('trust proxy');
 
 // Chỉ định danh sách các trang web được phép truy cập
-const allowedOrigins = ['http://localhost:5000', 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', "https://admin-td-logistics-web.vercel.app"];
+const allowedOrigins = ['https://admin.tdlogistics.net.vn', 'https://app.tdlogistics.net.vn', 'http://localhost:5000', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', "https://admin-td-logistics-web.vercel.app"];
 
 // Sử dụng cors middleware với tùy chọn chỉ cho phép các trang web trong danh sách
 app.use(cors({
@@ -76,12 +79,46 @@ const sessionMiddleware = session({
 		// secure: false,
 		// sameSite: 'None',
 		httpOnly: false,
-		maxAge: 15 * 60 * 1000,
+		maxAge: 12 * 60 * 60 * 1000,
 	}
 });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+morgan.token("remote-user", function (req) {
+    return req.user ? req.user.staff_id : "Guest";
+});
+morgan.token("remote-user-role", function(req) {
+	return req.user ? req.user.role : "undefined";
+})
+const morganMiddleware = morgan(
+	':remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms',
+	{
+	  stream: {
+		write: (message) => {
+			const logObject = parseLogMessage(message);
+			console.log(logObject);
+			logger.http(logObject);
+		},
+	  },
+	}
+);
+  
+function parseLogMessage(message) {
+	const parts = message.split(' ');
+  
+	return {
+		remoteAddr: parts[0],
+		remoteUser: parts[1],
+		remoteUserRole: parts[2],
+		method: parts[2],
+		url: parts[3],
+		httpVersion: parts[4],
+		status: parts[5],
+		contentLength: parts[6],
+		responseTime: parts[8],
+	};
+}
 app.use(morgan("combined"));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -91,6 +128,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', indexRouter);
+
+
 app.use("/api/v1/staffs", staffsRouter);
 app.use("/api/v1/otp", otpRouter);
 app.use("/api/v1/business", businessRouter);
@@ -105,6 +144,8 @@ app.use("/api/v1/authorization", authorizationRouter);
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/orders", ordersRouter);
 app.use("/api/v1/shippers", shippersRouter);
+app.use("/api/v1/schedules", scheduleRouter);
+app.use("/api/v1/administrative", administrativeRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({
@@ -142,7 +183,7 @@ app.use(function(err, req, res, next) {
 	res.status(err.status || 500);
 	res.render('error');
 });
-// console.log(require("./lib/utils").hash("NTDung@tdlogistics2k24"));
+
 const cleanUpExpiredSession = new cron.CronJob("0 */12 * * *", async () => {
 	try {
 		const currentTime = new Date();

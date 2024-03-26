@@ -35,7 +35,7 @@ const sessionStrategy = new LocalStrategy({
     }
 
     const business_id = business.business_id;
-    const role = "BUSINESS_USER";
+    const role = "BUSINESS";
     const active = business.active;
 
     return done(null, {
@@ -101,37 +101,50 @@ router.post("/login", passport.authenticate("businessLogin"), (req, res, next) =
     })(req, res, next);
 });
 router.get("/check", businessController.checkExistBusiness);
+router.post("/signup", businessController.signup);
 router.post(
     "/create",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isActive(),
     upload.single("contract"),
     businessController.createNewBusinessUser
+);
+router.post(
+    "/approve",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER"]),
+    auth.isActive(),
+    businessController.approveNewBusiness
 );
 router.post(
     "/search",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
-    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS"]),
+    auth.isActive(),
     businessController.getBusiness
 );
 router.post(
     "/search_representor",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
-    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS_USER"]),
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS"]),
+    auth.isActive(),
     businessController.getRepresentor
 );
 router.put(
     "/update",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isActive(),
     businessController.updateBusinessInfo
 );
-router.patch(
+router.put(
     "/update_business_representor",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isActive(),
     businessController.updateBusinessRepresentor
 );
 router.patch(
@@ -139,13 +152,23 @@ router.patch(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
     upload.single("contract"),
+    auth.isActive(),
     businessController.updateContract
 );
 router.delete(
     "/delete",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isActive(),
     businessController.deleteBusinessUser
 );
+router.get(
+    "/get_contract",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "BUSINESS"]),
+    businessController.getBusinessContract
+);
+router.patch("/update_password", auth.isAuthenticated(), auth.isAuthorized(["BUSINESS"]), businessController.updatePassword);
 
 module.exports = router;

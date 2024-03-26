@@ -37,6 +37,24 @@ const checkExistBusiness = async (req, res) => {
 
 const getBusiness = async (req, res) => {
 	try {
+		const paginationConditions = { rows: 0, page: 0 };
+
+		if (req.query.rows) {
+			paginationConditions.rows = parseInt(req.query.rows);
+		}
+
+		if (req.query.page) {
+			paginationConditions.page = parseInt(req.query.page);
+		}
+
+		const { error: paginationError } = businessValidation.validatePaginationConditions(paginationConditions);
+		if (paginationError) {
+			return res.status(400).json({
+				error: true,
+				message: paginationError.message,
+			});
+		}
+
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingBusinessByAdmin(req.body);
 
@@ -47,7 +65,7 @@ const getBusiness = async (req, res) => {
 				});
 			}
 
-			const result = await businessService.getManyBusinessUsers(req.body);
+			const result = await businessService.getManyBusinessUsers(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,
@@ -67,7 +85,7 @@ const getBusiness = async (req, res) => {
 
 			req.body.agency_id = req.user.agency_id;
 
-			const result = await businessService.getManyBusinessUsers(req.body);
+			const result = await businessService.getManyBusinessUsers(req.body, paginationConditions);
 			return res.status(200).json({
 				error: false,
 				data: result,
@@ -75,7 +93,7 @@ const getBusiness = async (req, res) => {
 			});
 		}
 
-		if (["BUSINESS_USER"].includes(req.user.role)) {
+		if (["BUSINESS"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingBusinessByBusiness(req.body);
 
 			if (error) {
@@ -147,7 +165,7 @@ const getRepresentor = async (req, res) => {
 			});
 		}
 
-		if (["BUSINESS_USER"].includes(req.user.role)) {
+		if (["BUSINESS"].includes(req.user.role)) {
 			const { error } = businessValidation.validateFindingRepresentorByBusiness(req.body);
 
 			if (error) {
@@ -174,6 +192,87 @@ const getRepresentor = async (req, res) => {
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
+const signup = async (req, res) => {
+	try {
+		const { error } = businessValidation.validateSigningUp(req.body);
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message
+			});
+		}
+
+		const business = new Object({
+			business_id: "TD_00000_" + req.body.user_cccd,
+			agency_id: "TD_00000_077165007713",
+			username: req.body.username,
+			password: req.body.password,
+			business_name: req.body.business_name,
+			email: req.body.email,
+			phone_number: req.body.phone_number,
+			tax_number: req.body.tax_number || null,
+			province: req.body.province,
+			district: req.body.district,
+			town: req.body.town,
+			detail_address: req.body.detail_address,
+			contract: req.file ? req.file.filename : null,
+			bin: req.body.bin,
+			bank: req.body.bank,
+			active: false,
+			approved: false
+		});
+
+		const representor = new Object({
+			business_id: "TD_00000_" + req.body.user_cccd,
+			fullname: req.body.user_fullname,
+			phone_number: req.body.user_phone_number,
+			email: req.body.user_email,
+			phone_number: req.body.user_phone_number,
+			date_of_birth: req.body.user_date_of_birth || null,
+			cccd: req.body.user_cccd,
+			province: req.body.user_province,
+			district: req.body.user_district,
+			town: req.body.user_town,
+			detail_address: req.body.user_detail_address,
+			bin: req.body.user_bin || null,
+			bank: req.body.bank || null,
+		});
+
+		let textResultCreatingNewBusiness;
+		const resultCreatingNewBusiness = await businessService.createNewBusinessUser(business);
+		if (!resultCreatingNewBusiness || resultCreatingNewBusiness.affectedRows <= 0) {
+			textResultCreatingNewBusiness = `
+			Tạo người dùng doanh nghiệp không thành công.`;
+		}
+		else {
+			textResultCreatingNewBusiness = `Tạo người dùng doanh nghiệp thành công.`;
+		}
+
+		let textResultCreatingNewRepresentor;
+		const resultCreatingNewRepresentor = await businessService.createNewRepresentor(representor);
+		if (!resultCreatingNewRepresentor || resultCreatingNewRepresentor.length <= 0) {
+			textResultCreatingNewRepresentor = `
+			Tạo người đại diện cho doanh nghiệp không thành công.`
+		}
+		else {
+			textResultCreatingNewRepresentor = `Tạo người đại diện cho doanh nghiệp thành công.`;
+		}
+
+		return res.status(201).json({
+			error: false,
+			message: `Kết quả:\n
+			${textResultCreatingNewBusiness}\n
+			${textResultCreatingNewRepresentor}`,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
 			error: true,
 			message: error.message,
 		});
@@ -245,6 +344,7 @@ const createNewBusinessUser = async (req, res) => {
 			bin: req.body.bin,
 			bank: req.body.bank,
 			active: false,
+			approved: false
 		});
 
 		const representor = new Object({
@@ -315,6 +415,85 @@ const createNewBusinessUser = async (req, res) => {
 	}
 };
 
+const approveNewBusiness = async (req, res) => {
+	try {
+		const { error: error1 } = businessValidation.validateQueryUpdatingBusiness(req.query);
+
+		if (error1) {
+			return res.status(400).json({
+				error: true,
+				message: error1.message,
+			});
+		}
+
+		const { error: error2 } = businessValidation.validateApprovingNewBusiness(req.body);
+
+		if (error2) {
+			return res.status(400).json({
+				error: true,
+				message: error2.message,
+			});
+		}
+
+		const resultCheckingExistAgency = await agenciesService.checkExistAgency(req.body);
+		if (!resultCheckingExistAgency) {
+			return res.status(404).json({
+				error: true,
+				message: `Bưu cục có mã ${req.body.agency_id} không tồn tại.`,
+			});
+		}
+
+		const resultGettingOneBusinessRepresentor = await businessService.getOneRepresentor(req.query);
+		if(!resultGettingOneBusinessRepresentor || resultGettingOneBusinessRepresentor.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
+			});
+		}
+
+		const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.query);
+		if(!resultGettingOneBusiness || resultGettingOneBusiness.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
+			});
+		}
+
+		if (resultGettingOneBusiness[0].approved) {
+			return res.status(409).json({
+				error: true,
+				message: `Khách hàng doanh nghiệp có mã ${req.query.business_id} đã được phê duyệt trước đó.`,
+			});
+		}
+
+		const agencyIdSubParts = req.body.agency_id.split('_');
+		req.body.business_id = agencyIdSubParts[0] + '_' + agencyIdSubParts[1] + '_' + resultGettingOneBusinessRepresentor[0].cccd;
+		req.body.active = true;
+		req.body.approved = true;
+
+		const resultUpdatingBusiness = await businessService.updateBusinessUser(req.body, req.query);
+		if (!resultUpdatingBusiness || resultUpdatingBusiness.affectedRows === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
+			});
+		}
+
+		return res.status(201).json({
+			error: false,
+			message: `Phê duyệt khách hàng doanh nghiệp có mã ${req.body.business_id} thành công.
+			Đã chuyển giao quyền quản lý khách hàng doanh nghiệp cho bưu cục có mã ${req.body.agency_id}.`,
+		});
+		
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
 const updateBusinessInfo = async (req, res) => {
 	try {
 		const { error } = businessValidation.validateQueryUpdatingBusiness(req.query) || businessValidation.validateUpdatingBusiness(req.body);
@@ -368,7 +547,8 @@ const updateBusinessInfo = async (req, res) => {
 			}
 
 			const business = resultGettingOneBusiness[0];
-			req.body.debit += business.debit || 0;
+			req.body.debit = parseFloat(req.body.debit);
+			req.body.debit += parseFloat(business.debit) || 0;
 		}
 
 		const resultUpdatingBusiness = await businessService.updateBusinessUser(req.body, req.query);
@@ -614,6 +794,144 @@ const updateContract = async (req, res) => {
 	}
 }
 
+const getBusinessContract = async (req, res) => {
+	try {
+		const { error } = businessValidation.validateGettingBusinessContract(req.query);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
+			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+				});
+			}
+			const business = resultGettingOneBusiness[0];
+			const contract = business.contract ? business.contract : null;
+
+			if (contract) {
+				const filePath = path.join(__dirname, "..", "storage", "business_user", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: `File hợp đồng của khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
+			});	
+		}
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			req.body.agency_id = req.user.agency_id;
+
+			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
+			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+				});
+			}
+
+			const business = resultGettingOneBusiness[0];
+			const contract = business.contract || null;
+			
+			if (contract) {
+				const filePath = path.join(__dirname, "..","storage", "business_user", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: `File hợp đồng của khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
+			});			
+		}
+
+		if (["BUSINESS"].includes(req.user.role)) {
+			if (req.body.business_id !== req.user.business_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+
+			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
+			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.body.business_id} không tồn tại.`,
+				});
+			}
+
+			const business = resultGettingOneBusiness[0];
+			const contract = business.contract ? business.contract : null;
+			
+			if (contract) {
+				const filePath = path.join(__dirname, "..", "storage", "business_user", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+
+			return res.status(404).json({
+				error: true,
+				message: `File hợp đồng của khách hàng doanh nghiệp có mã ${req.query.business_id} không tồn tại.`,
+			});			
+		}
+	} catch (error) {
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
+const updatePassword = async (req, res) => {
+	try {
+		const { error } = businessValidation.validateUpdatePassword(req.body);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+		
+		const updatedInfo = new Object({
+			password: utils.hash(req.body.new_password),
+			active: true,
+		});
+
+		const result = await businessService.updatePassword(updatedInfo, { business_id: req.user.business_id });
+		
+		if (!result || result.affectedRows <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Người dùng doanh nghiệp có mã ${req.user.staff_id} không tồn tại.`,
+			});
+		}
+
+		return res.status(201).json({
+			error: false,
+			message: "Cập nhật mật khẩu thành công.",
+		});
+	} catch (error) {
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
 module.exports = {
 	createNewBusinessUser,
 	getBusiness,
@@ -623,4 +941,8 @@ module.exports = {
 	updateBusinessRepresentor,
 	updateBusinessInfo,
 	deleteBusinessUser,
+	getBusinessContract,
+	updatePassword,
+	signup,
+	approveNewBusiness,
 }

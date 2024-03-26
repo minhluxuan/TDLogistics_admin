@@ -87,7 +87,7 @@ const fileFilter = (req, file, done) => {
         return done(new Error("File không tồn tại."));
     }
 
-    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype && "image/png") { 
+    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png") { 
        return done(new Error("Hình ảnh không hợp lệ."));
     }
 
@@ -131,25 +131,30 @@ router.post(
             name: 'license_before', maxCount: 1
         }, {
             name: 'license_after', maxCount: 1
-        }]), partnerStaffsController.createNewPartnerStaff);
+        }]),
+        auth.isActive(),
+        partnerStaffsController.createNewPartnerStaff);
 router.post(
     "/search",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
     "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER",
     "TRANSPORT_PARTNER_REPRESENTOR", "PARTNER_DRIVER", "PARTNER_SHIPPER"], []),
+    auth.isActive(),
     partnerStaffsController.getPartnerStaffs
 );
 router.delete(
     "/delete",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isActive(),
     partnerStaffsController.deletePartnerStaff
 );
 router.put(
     "/update",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isActive(),
     partnerStaffsController.updatePartnerStaffInfo
 );
 router.patch(
@@ -163,6 +168,7 @@ router.patch(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE"]),
     upload.single("avatar"),
+    auth.isActive(),
     partnerStaffsController.updatePartnerAvatar
 );
 router.patch(
@@ -170,15 +176,44 @@ router.patch(
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
     upload.fields([{
-    name: 'license_before', maxCount: 1
-}, {
-    name: 'license_after', maxCount: 1
-}]), partnerStaffsController.updatePartnerLicenseImg);
+        name: 'license_before', maxCount: 1
+    }, {
+        name: 'license_after', maxCount: 1
+    }]),
+    auth.isActive(),
+    partnerStaffsController.updatePartnerLicenseImg);
 router.get(
     "/logout",
     auth.isAuthenticated(),
     auth.isAuthorized(["PARTNER_DRIVER", "PARTNER_SHIPPER"]),
     partnerStaffsController.logout
+);
+
+router.get(
+    "/get_avatar",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER",
+    "TRANSPORT_PARTNER_REPRESENTOR", "PARTNER_DRIVER", "PARTNER_SHIPPER"]),
+    partnerStaffsController.getPartnerAvatar
+);
+
+router.get(
+    "/get_license_before",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER",
+    "TRANSPORT_PARTNER_REPRESENTOR", "PARTNER_DRIVER", "PARTNER_SHIPPER"]),
+    partnerStaffsController.getPartnerLicenseBefore
+);
+
+router.get(
+    "/get_license_after",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER",
+    "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER",
+    "TRANSPORT_PARTNER_REPRESENTOR", "PARTNER_DRIVER", "PARTNER_SHIPPER"]),
+    partnerStaffsController.getPartnerLicenseAfter
 );
 
 module.exports = router;

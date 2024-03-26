@@ -43,6 +43,7 @@ const getTasks = async (conditions, postal_code) => {
         query += ` AND DATE(s.created_at) > ? AND DATE(s.created_at) < ?`
         queryParams.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
     }
+    query += ` ORDER BY s.created_at DESC`;
     
     const result = (await pool.query(query, queryParams))[0];
 
@@ -145,6 +146,7 @@ const getHistory = async (conditions, postal_code) => {
         query += ` AND DATE(s.created_at) > ? AND DATE(s.created_at) < ?`
         queryParams.push(firstDayOfMonthFormatted, lastDayOfMonthFormatted);
     }
+    query += ` ORDER BY s.created_at DESC`;
     
     const result = (await pool.query(query, queryParams))[0];
 

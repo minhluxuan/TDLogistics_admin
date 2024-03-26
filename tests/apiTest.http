@@ -1,0 +1,123 @@
+###
+POST http://localhost:5000/api/v1/shipment/create
+Content-Type: application/json
+
+{
+    "staff_id": "HCM_DVMH_001",
+    "transport_partner_id": "TB001",
+    "long_source": 103.44532323,
+    "lat_source": 72.45353343,
+    "long_destination": 80.34342321,
+    "lat_destination": 34.553453453,
+    "route": "HANOI-TP.HCM"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/update
+Content-Type: application/json
+
+{
+    "mass": 123,
+    "shipment_id": "TD20240423370236"
+}
+
+###
+
+GET http://localhost:5000/api/v1/shipment/search
+Content-Type: application/json
+
+{
+    "shipment_id": "TD202405036131"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/confirm
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240423370236"
+}
+
+###
+DELETE http://localhost:5000/api/v1/shipment/delete
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240421161296"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/updatedb
+Content-Type: application/json 
+
+{
+    "shipment_id": "TD20240423370236"
+}
+
+###
+POST http://localhost:5000/api/v1/shipment/decompose
+Content-Type: application/json
+
+{
+    "shipment_id": "TD20240423370236"
+}
+
+###
+POST http://localhost:5000/api/v1/container/create
+Content-Type: application/json
+
+{
+    "type" : "plane",
+    "shipment_id": "TD202405188565",
+    "container_id": "VNAIR3004"
+}
+
+###
+
+POST http://localhost:5000/api/v1/container/update
+Content-Type: application/json
+
+{
+    "choice" : "out",
+    "shipment_id": "TD20240511925",
+    "container_id": "50A-B1-56789"
+}
+
+###
+
+POST http://localhost:5000/api/v1/container/update
+Content-Type: application/json
+
+{
+    "choice" : "in",
+    "shipment_id": "TD202405036131",
+    "container_id": "50A-B1-56789"
+}
+
+###
+GET http://localhost:5000/api/v1/container/search
+Content-Type: application/json
+
+{
+    "container_id": "50A-B1-56789"
+}
+
+###
+
+POST http://localhost:5000/api/v1/container/create
+Content-Type: application/json
+
+{
+    "type" : "truck",
+    "shipment_id": "TD202405188565",
+    "container_id": "VNAIR3004"
+}
+
+###
+POST https://tdlogistics.govt.hu/api/v1/staffs/login 
+Content-Type: application/json
+
+{
+    "username": "ntdung@tdlogistics",
+    "password": "NTDung@tdlogistics2k24"
+}

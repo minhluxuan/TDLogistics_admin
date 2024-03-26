@@ -1,0 +1,1169 @@
+{
+    "CPN": {
+      "block_step_incre": 500,
+  
+      "inner_province": [
+        {
+          "from_mass": 0,
+          "to_mass": 50,
+          "fee": 8000
+        },
+        {
+          "from_mass": 50,
+          "to_mass": 100,
+          "fee": 8500
+        },
+        {
+          "from_mass": 100,
+          "to_mass": 250,
+          "fee": 10000
+        },
+        {
+          "from_mass": 250,
+          "to_mass": 500,
+          "fee": 12500
+        },
+        {
+          "from_mass": 500,
+          "to_mass": 1000,
+          "fee": 16000
+        },
+        {
+          "from_mass": 1000,
+          "to_mass": 1500,
+          "fee": 19000
+        },
+        {
+          "from_mass": 1500,
+          "to_mass": 2000,
+          "fee": 21000
+        },
+        {
+          "from_mass": 2000,
+          "to_mass": "INFINITY",
+          "base_fee": 21000,
+          "increment_per_kilogram": 1700
+        }
+      ],
+      "outer_province": {
+        "special_case": [
+          {
+            "from_province": "Thành phố Hồ Chí Minh",
+            "to_province": "Đà Nẵng",
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 50,
+                "fee": 9000
+              },
+              {
+                "from_mass": 50,
+                "to_mass": 100,
+                "fee": 13000
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 250,
+                "fee": 21500
+              },
+              {
+                "from_mass": 250,
+                "to_mass": 500,
+                "fee": 28000
+              },
+              {
+                "from_mass": 500,
+                "to_mass": 1000,
+                "fee": 40900
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 1500,
+                "fee": 52800
+              },
+              {
+                "from_mass": 1500,
+                "to_mass": 2000,
+                "fee": 64100
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 64100,
+                "increment_per_kilogram": 7100
+              }
+            ]
+          },
+          {
+            "from_province": "Đà Nẵng",
+            "to_province": "Thành phố Hồ Chí Minh",
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 50,
+                "fee": 9000
+              },
+              {
+                "from_mass": 50,
+                "to_mass": 100,
+                "fee": 13000
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 250,
+                "fee": 21500
+              },
+              {
+                "from_mass": 250,
+                "to_mass": 500,
+                "fee": 28000
+              },
+              {
+                "from_mass": 500,
+                "to_mass": 1000,
+                "fee": 40900
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 1500,
+                "fee": 52800
+              },
+              {
+                "from_mass": 1500,
+                "to_mass": 2000,
+                "fee": 64100
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 64100,
+                "increment_per_kilogram": 7100
+              }
+            ]
+          },
+          {
+            "from_province": "Đà Nẵng",
+            "to_province": "Hà Nội",
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 50,
+                "fee": 9000
+              },
+              {
+                "from_mass": 50,
+                "to_mass": 100,
+                "fee": 13000
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 250,
+                "fee": 21500
+              },
+              {
+                "from_mass": 250,
+                "to_mass": 500,
+                "fee": 28000
+              },
+              {
+                "from_mass": 500,
+                "to_mass": 1000,
+                "fee": 40900
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 1500,
+                "fee": 52800
+              },
+              {
+                "from_mass": 1500,
+                "to_mass": 2000,
+                "fee": 64100
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 64100,
+                "increment_per_kilogram": 7100
+              }
+            ]
+          },
+          {
+            "from_province": "Hà Nội",
+            "to_province": "Đà Nẵng",
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 50,
+                "fee": 9000
+              },
+              {
+                "from_mass": 50,
+                "to_mass": 100,
+                "fee": 13000
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 250,
+                "fee": 21500
+              },
+              {
+                "from_mass": 250,
+                "to_mass": 500,
+                "fee": 28000
+              },
+              {
+                "from_mass": 500,
+                "to_mass": 1000,
+                "fee": 40900
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 1500,
+                "fee": 52800
+              },
+              {
+                "from_mass": 1500,
+                "to_mass": 2000,
+                "fee": 64100
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 64100,
+                "increment_per_kilogram": 7100
+              }
+            ]
+          },
+          {
+            "from_province": "Hà Nội",
+            "to_province": "Thành phố Hồ Chí Minh",
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 50,
+                "fee": 9091
+              },
+              {
+                "from_mass": 50,
+                "to_mass": 100,
+                "fee": 13300
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 250,
+                "fee": 22000
+              },
+              {
+                "from_mass": 250,
+                "to_mass": 500,
+                "fee": 28600
+              },
+              {
+                "from_mass": 500,
+                "to_mass": 1000,
+                "fee": 41800
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 1500,
+                "fee": 53900
+              },
+              {
+                "from_mass": 1500,
+                "to_mass": 2000,
+                "fee": 65500
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 65500,
+                "increment_per_kilogram": 8100
+              }
+            ]
+          },
+          {
+            "from_province": "Thành phố Hồ Chí Minh",
+            "to_province": "Hà Nội",
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 50,
+                "fee": 9091
+              },
+              {
+                "from_mass": 50,
+                "to_mass": 100,
+                "fee": 13300
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 250,
+                "fee": 22000
+              },
+              {
+                "from_mass": 250,
+                "to_mass": 500,
+                "fee": 28600
+              },
+              {
+                "from_mass": 500,
+                "to_mass": 1000,
+                "fee": 41800
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 1500,
+                "fee": 53900
+              },
+              {
+                "from_mass": 1500,
+                "to_mass": 2000,
+                "fee": 65500
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 65500,
+                "increment_per_kilogram": 8100
+              }
+            ]
+          }
+        ],
+        "ordinary_case": [
+          {
+            "from_distance": 0,
+            "to_distance": 100,
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 50,
+                "fee": 8000
+              },
+              {
+                "from_mass": 50,
+                "to_mass": 100,
+                "fee": 11800
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 250,
+                "fee": 16500
+              },
+              {
+                "from_mass": 250,
+                "to_mass": 500,
+                "fee": 23900
+              },
+              {
+                "from_mass": 500,
+                "to_mass": 1000,
+                "fee": 33200
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 1500,
+                "fee": 40000
+              },
+              {
+                "from_mass": 1500,
+                "to_mass": 2000,
+                "fee": 48400
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 48400,
+                "increment_per_kilogram": 3500
+              }
+            ]
+          },
+          {
+            "from_distance": 100,
+            "to_distance": 300,
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 50,
+                "fee": 8500
+              },
+              {
+                "from_mass": 50,
+                "to_mass": 100,
+                "fee": 12500
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 250,
+                "fee": 18200
+              },
+              {
+                "from_mass": 250,
+                "to_mass": 500,
+                "fee": 25300
+              },
+              {
+                "from_mass": 500,
+                "to_mass": 1000,
+                "fee": 34000
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 1500,
+                "fee": 41800
+              },
+              {
+                "from_mass": 1500,
+                "to_mass": 2000,
+                "fee": 51700
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 51700,
+                "increment_per_kilogram": 4300
+              }
+            ]
+          },
+          {
+            "from_distance": 300,
+            "to_distance": "INFINITY",
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 50,
+                "fee": 10000
+              },
+              {
+                "from_mass": 50,
+                "to_mass": 100,
+                "fee": 14000
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 250,
+                "fee": 23000
+              },
+              {
+                "from_mass": 250,
+                "to_mass": 500,
+                "fee": 29900
+              },
+              {
+                "from_mass": 500,
+                "to_mass": 1000,
+                "fee": 43700
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 1500,
+                "fee": 56400
+              },
+              {
+                "from_mass": 1500,
+                "to_mass": 2000,
+                "fee": 68500
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 68500,
+                "increment_per_kilogram": 8500
+              }
+            ]
+          }
+        ]
+      },
+      "T60": {
+        "condition_mass": 5000,
+        "feeRate": 60
+      }
+    },
+    "TTK": {
+      "block_step_incre": 1000,
+  
+      "INNER_AREA": [
+        {
+          "from_mass": 0,
+          "to_mass": 100,
+          "fee": 8000
+        },
+        {
+          "from_mass": 100,
+          "to_mass": 250,
+          "fee": 9600
+        },
+        {
+          "from_mass": 250,
+          "to_mass": 500,
+          "fee": 13200
+        },
+        {
+          "from_mass": 500,
+          "to_mass": 1000,
+          "fee": 16800
+        },
+        {
+          "from_mass": 1000,
+          "to_mass": 1500,
+          "fee": 25500
+        },
+        {
+          "from_mass": 1500,
+          "to_mass": 2000,
+          "fee": 30000
+        },
+        {
+          "increme_per_kilogram": {
+            "base_fee": 30000,
+            "increme_fee": [
+              {
+                "from_mass": 2,
+                "to_mass": 100,
+                "fee": 2800
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 1000,
+                "fee": 2400
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 3000,
+                "fee": 2200
+              },
+              {
+                "from_mass": 3000,
+                "to_mass": 10000,
+                "fee": 2000
+              },
+              {
+                "from_mass": 10000,
+                "to_mass": "INFINITY",
+                "fee": 1800
+              }
+            ]
+          }
+        }
+      ],
+      "OUTER_AREA": [
+        {
+          "from_mass": 0,
+          "to_mass": 100,
+          "fee": 8000
+        },
+        {
+          "from_mass": 100,
+          "to_mass": 250,
+          "fee": 9600
+        },
+        {
+          "from_mass": 250,
+          "to_mass": 500,
+          "fee": 13200
+        },
+        {
+          "from_mass": 500,
+          "to_mass": 1000,
+          "fee": 16800
+        },
+        {
+          "from_mass": 1000,
+          "to_mass": 1500,
+          "fee": 25500
+        },
+        {
+          "from_mass": 1500,
+          "to_mass": 2000,
+          "fee": 30000
+        },
+        {
+          "increme_per_kilogram": {
+            "base_fee": 30000,
+            "increme_fee": [
+              {
+                "from_mass": 2,
+                "to_mass": 100,
+                "fee": 3900
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 1000,
+                "fee": 3200
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 3000,
+                "fee": 3000
+              },
+              {
+                "from_mass": 3000,
+                "to_mass": 10000,
+                "fee": 2800
+              },
+              {
+                "from_mass": 10000,
+                "to_mass": "INFINITY",
+                "fee": 2500
+              }
+            ]
+          }
+        }
+      ],
+      "SEPERATE_AREA": [
+        {
+          "from_mass": 0,
+          "to_mass": 100,
+          "fee": 8000
+        },
+        {
+          "from_mass": 100,
+          "to_mass": 250,
+          "fee": 9600
+        },
+        {
+          "from_mass": 250,
+          "to_mass": 500,
+          "fee": 13200
+        },
+        {
+          "from_mass": 500,
+          "to_mass": 1000,
+          "fee": 16800
+        },
+        {
+          "from_mass": 1000,
+          "to_mass": 1500,
+          "fee": 25500
+        },
+        {
+          "from_mass": 1500,
+          "to_mass": 2000,
+          "fee": 30000
+        },
+        {
+          "increme_per_kilogram": {
+            "base_fee": 30000,
+            "increme_fee": [
+              {
+                "from_mass": 2,
+                "to_mass": 100,
+                "fee": 5000
+              },
+              {
+                "from_mass": 100,
+                "to_mass": 1000,
+                "fee": 4000
+              },
+              {
+                "from_mass": 1000,
+                "to_mass": 3000,
+                "fee": 3800
+              },
+              {
+                "from_mass": 3000,
+                "to_mass": 10000,
+                "fee": 3600
+              },
+              {
+                "from_mass": 10000,
+                "to_mass": "INFINITY",
+                "fee": 3200
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "HTT": {
+      "block_step_incre": 500,
+  
+      "HN": {
+        "HN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 30000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 30000,
+            "increment_per_kilogram": 3000
+          }
+        ],
+        "HCM": [
+          { "from_mass": 0, "to_mass": 2000, "fee": 150000 },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 150000,
+            "increment_per_kilogram": 12000
+          }
+        ],
+        "DN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 120000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 120000,
+            "increment_per_kilogram": 10000
+          }
+        ],
+        "HN_OUTER": [
+          { "from_mass": 0, "to_mass": 2000, "fee": 70000 },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 70000,
+            "increment_per_kilogram": 7000
+          }
+        ],
+        "HCM_OUTER": [
+          { "from_mass": 0, "to_mass": 2000, "fee": 165000 },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 165000,
+            "increment_per_kilogram": 13200
+          }
+        ],
+        "FLIGHTSTRAIGHT": [
+          { "from_mass": 0, "to_mass": 2000, "fee": 150000 },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 150000,
+            "increment_per_kilogram": 12000
+          }
+        ]
+      },
+      "HCM": {
+        "HN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 150000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 150000,
+            "increment_per_kilogram": 12000
+          }
+        ],
+        "HCM": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 30000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 30000,
+            "increment_per_kilogram": 3000
+          }
+        ],
+        "DN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 120000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 10000,
+            "increment_per_kilogram": 10000
+          }
+        ],
+        "HN_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 165000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 165000,
+            "increment_per_kilogram": 13200
+          }
+        ],
+        "HCM_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 70000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 70000,
+            "increment_per_kilogram": 70000
+          }
+        ],
+        "FLIGHTSTRAIGHT": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 150000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 150000,
+            "increment_per_kilogram": 12000
+          }
+        ]
+      },
+      "DN": {
+        "HN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 120000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 120000,
+            "increment_per_kilogram": 10000
+          }
+        ],
+        "HCM": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 120000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 120000,
+            "increment_per_kilogram": 10000
+          }
+        ],
+        "DN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 30000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 30000,
+            "increment_per_kilogram": 3000
+          }
+        ],
+        "HN_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 132000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 132000,
+            "increment_per_kilogram": 11000
+          }
+        ],
+        "HCM_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 132000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 132000,
+            "increment_per_kilogram": 11000
+          }
+        ],
+        "FLIGHTSTRAIGHT": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 150000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 150000,
+            "increment_per_kilogram": 12000
+          }
+        ]
+      },
+      "HN_OUTER": {
+        "HN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 70000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 70000,
+            "increment_per_kilogram": 7000
+          }
+        ],
+        "HCM": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 165000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 165000,
+            "increment_per_kilogram": 13200
+          }
+        ],
+        "DN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 132000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 132000,
+            "increment_per_kilogram": 11000
+          }
+        ],
+        "HN_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 77000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 77000,
+            "increment_per_kilogram": 7700
+          }
+        ],
+        "HCM_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 189700
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 189700,
+            "increment_per_kilogram": 15200
+          }
+        ],
+        "FLIGHTSTRAIGHT": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 165000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 165000,
+            "increment_per_kilogram": 13200
+          }
+        ]
+      },
+      "HCM_OUTER": {
+        "HN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 165000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 165000,
+            "increment_per_kilogram": 13200
+          }
+        ],
+        "HCM": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 70000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 70000,
+            "increment_per_kilogram": 7000
+          }
+        ],
+        "DN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 132000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 132000,
+            "increment_per_kilogram": 11000
+          }
+        ],
+        "HN_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 189700
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 189700,
+            "increment_per_kilogram": 15200
+          }
+        ],
+        "HCM_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 77000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 77000,
+            "increment_per_kilogram": 7700
+          }
+        ],
+        "FLIGHTSTRAIGHT": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 165000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 165000,
+            "increment_per_kilogram": 13200
+          }
+        ]
+      },
+      "FLIGHTSTRAIGHT": {
+        "HN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 150000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 150000,
+            "increment_per_kilogram": 12000
+          }
+        ],
+        "HCM": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 70000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 70000,
+            "increment_per_kilogram": 7000
+          }
+        ],
+        "DN": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 132000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 132000,
+            "increment_per_kilogram": 11000
+          }
+        ],
+        "HN_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 189700
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 189700,
+            "increment_per_kilogram": 15200
+          }
+        ],
+        "HCM_OUTER": [
+          {
+            "from_mass": 0,
+            "to_mass": 2000,
+            "fee": 77000
+          },
+          {
+            "from_mass": 2000,
+            "to_mass": "INFINITY",
+            "base_fee": 77000,
+            "increment_per_kilogram": 7700
+          }
+        ],
+        "FLIGHTSTRAIGHT": [
+          {
+            "from_distance": 0,
+            "to_distance": 100,
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 2000,
+                "fee": 77000
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 77000,
+                "increment_per_kilogram": 7700
+              }
+            ]
+          },
+          {
+            "from_distance": 100,
+            "to_distance": "INFINITY",
+            "detail_mass": [
+              {
+                "from_mass": 0,
+                "to_mass": 2000,
+                "fee": 165000
+              },
+              {
+                "from_mass": 2000,
+                "to_mass": "INFINITY",
+                "base_fee": 165000,
+                "increment_per_kilogram": 13200
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }

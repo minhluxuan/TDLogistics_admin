@@ -30,6 +30,25 @@ const getTransportPartner = async (req, res) => {
         }
 
         if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER"].includes(req.user.role)) {
+            
+            const paginationConditions = { rows: 0, page: 0 };
+
+			if (req.query.rows) {
+				paginationConditions.rows = parseInt(req.query.rows);
+			}
+
+			if (req.query.page) {
+				paginationConditions.page = parseInt(req.query.page);
+			}
+
+			const { error: paginationError } = transportPartnerValidation.validatePaginationConditions(paginationConditions);
+			if (paginationError) {
+				return res.status(400).json({
+					error: true,
+					message: paginationError.message,
+				});
+			}
+            
             const { error } = transportPartnerValidation.validateFindingPartnerByAdmin(req.body);
 
             if (error) {
@@ -41,7 +60,7 @@ const getTransportPartner = async (req, res) => {
 
             req.query.agency_id = req.user.agency_id;
 
-            const result = await transportPartnerService.getManyPartners(req.body);
+            const result = await transportPartnerService.getManyPartners(req.body, paginationConditions);
 
             return res.status(200).json({
                 error: true,
@@ -51,6 +70,24 @@ const getTransportPartner = async (req, res) => {
         }
 
         if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINT_SOLVER"].includes(req.user.role)) {
+            const paginationConditions = { rows: 0, page: 0 };
+
+			if (req.query.rows) {
+				paginationConditions.rows = parseInt(req.query.rows);
+			}
+
+			if (req.query.page) {
+				paginationConditions.page = parseInt(req.query.page);
+			}
+
+			const { error: paginationError } = transportPartnerValidation.validatePaginationConditions(paginationConditions);
+			if (paginationError) {
+				return res.status(400).json({
+					error: true,
+					message: paginationError.message,
+				});
+			}
+
             const { error } = transportPartnerValidation.validateFindingPartnerByAdmin(req.body);
 
             if (error) {
@@ -60,7 +97,7 @@ const getTransportPartner = async (req, res) => {
                 });
             }
 
-            const result = await transportPartnerService.getManyPartners(req.body);
+            const result = await transportPartnerService.getManyPartners(req.body, paginationConditions);
 
             return res.status(200).json({
                 error: true,
@@ -140,7 +177,7 @@ const createNewTransportPartner = async (req, res) => {
             email: req.body.email,
             bin: req.body.bin,
             bank: req.body.bank,
-            contract: req.file.filename || null,
+            contract: req.file ? req.file.filename : null,
         };
 
         req.body.user_password = utils.hash(req.body.user_password);
@@ -400,10 +437,137 @@ const deleteTransportPartner = async (req, res) => {
     }
 };
 
+const getPartnerContract = async (req, res) => {
+	try {
+		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const { error } = transportPartnerValidation.validateGettingContract(req.query);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			const resultGettingOnePartner = await transportPartnerService.getOnePartner(req.body);
+			if (!resultGettingOnePartner || resultGettingOnePartner.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã ${req.query.transport_partner_id} không tồn tại.`,
+				});
+			}
+
+			const partner = resultGettingOnePartner[0];
+			const contract = partner.contract ? partner.contract : null;
+
+			if (contract) {
+				const filePath = path.join(__dirname, "..", "storage", "transport_partner", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
+		}
+
+		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+			const { error } = transportPartnerValidation.validateGettingContract(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			req.body.agency_id = req.user.agency_id;
+
+			const resultGettingOnePartner = await transportPartnerService.getOnePartner(req.body);
+			if (!resultGettingOnePartner || resultGettingOnePartner.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã ${req.query.transport_partner_id} không tồn tại.`,
+				});
+			}
+
+			const partner = resultGettingOnePartner[0];
+			const contract = partner.contract ? partner.contract : null;
+
+			if (contract) {
+				const filePath = path.join(__dirname, "..", "storage", "transport_partner", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
+		}
+
+		if (["TRANSPORT_PARTNER_REPRESENTOR"].includes(req.user.role)) {
+			const { error } = transportPartnerValidation.validateGettingContract(req.body);
+
+			if (error) {
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+			}
+
+			if (req.body.partner_id !== req.user.partner_id) {
+				return res.status(403).json({
+					error: true,
+					message: "Người dùng không được phép truy cập tài nguyên này.",
+				});
+			}
+
+			const resultGettingOnePartner = await transportPartnerService.getOnePartner(req.body);
+			if (!resultGettingOnePartner || resultGettingOnePartner.length <= 0) {
+				return res.status(404).json({
+					error: true,
+					message: `Người dùng doanh nghiệp có mã ${req.query.transport_partner_id} không tồn tại.`,
+				});
+			}
+
+			const partner = resultGettingOnePartner[0];
+			const contract = partner.contract ? partner.contract : null;
+
+			if (contract) {
+				const filePath = path.join(__dirname, "..", "storage", "transport_partner", "document", "contract", contract);
+				if (fs.existsSync(filePath)) {
+					return res.status(200).sendFile(filePath);
+				}
+			}
+			else
+			{
+				return res.status(404).json({
+					error: true,
+					message: "Không tìm thấy dữ liệu",
+				});			
+			}
+		}
+	} catch (error) {
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
 module.exports = {
     createNewTransportPartner,
     getTransportPartner,
     updateTransportPartner,
     updateContract,
+    getPartnerContract,
     deleteTransportPartner,
 };

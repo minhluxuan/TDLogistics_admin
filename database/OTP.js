@@ -31,7 +31,7 @@ const verifyOTP = async (phone_number, otp) => {
     let currentTime = new Date();
     currentTime = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
 
-    const query = `SELECT * FROM ${table} WHERE phone_number = ? AND otp = ? AND expires > ?`;
+    const query = `SELECT * FROM ${table} WHERE phone_number = ? AND otp = ? AND expires > ? LIMIT 1`;
 
     try {
         const result = await pool.query(query, [phone_number, otp, currentTime]);
