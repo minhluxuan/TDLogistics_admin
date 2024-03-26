@@ -3,9 +3,17 @@ Content-Type: application/json
 
 {
     "phone_number": "0981430418",
-    "otp": 8647
+    "otp": "1234"
 }
 
 ###
 
 GET http://localhost:5000/get_session
+
+###
+GET http://localhost:5000/api/v1/users/get_info
+Content-Type: application/json
+
+{
+    
+}
