@@ -19,3 +19,11 @@ Content-Type: application/json
 ###
 
 GET http://localhost:5000/get_session
+
+###
+GET http://localhost:5000/api/v1/users/get_info
+Content-Type: application/json
+
+{
+    
+}

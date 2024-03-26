@@ -14,7 +14,34 @@ const transporter = nodemailer.createTransport({
         pass: process.env.MAIL_AUTH_PASSWORD,
     }
 });
-
+const getAuthenticatedUserInfo = async (req, res) => {
+	try {
+        const User = await usersService.getOneUser({ user_id: req.user.user_id });
+        if(!User || User.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Người dùng có mã ${req.user.user_id} không tồn tại.`
+            });
+        }
+		const info = new Object({
+			fullname: User[0].fullname,
+            phone_number: User[0].phone_number,
+            email: User[0].email,
+            role: "USER"
+		});
+		return res.status(200).json(new Object({
+			error: false,
+			info: info,
+			message: `Lấy thông tin người dùng thành công`,
+		}));
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
 const createOTP = async (req, res) => {
     const { error } = OTPValidation.validateSendingOTP(req.body);
 
@@ -206,6 +233,7 @@ const logout = async (req, res) => {
 };
 
 module.exports = {
+    getAuthenticatedUserInfo,
     createOTP,
     verifyOTPMiddleware,
     checkExistUser,
