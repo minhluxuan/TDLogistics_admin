@@ -25,7 +25,6 @@ const updateAgencyCompany = async (info, conditions) => {
 	const values = Object.values(info);
 	const conditionFields = Object.keys(conditions);
 	const conditionValues = Object.values(conditions);
-	console.log(info);
 	return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
@@ -70,9 +69,9 @@ const checkExistAgencyCompany = async (info) => {
 };
 
 module.exports = {
-  createNewAgencyCompany,
-  updateAgencyCompany,
-  getOneAgencyCompany,
-	deleteAgencyCompany,
-	checkExistAgencyCompany
+    createNewAgencyCompany,
+    updateAgencyCompany,
+    getOneAgencyCompany,
+    deleteAgencyCompany,
+    checkExistAgencyCompany
 }

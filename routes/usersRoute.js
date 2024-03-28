@@ -88,4 +88,12 @@ router.post("/search", auth.isAuthenticated(), auth.isAuthorized(["USER"]), user
 router.put("/update", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.updateUserInfo);
 router.get("/logout", auth.isAuthenticated(), auth.isAuthorized(["USER"]), usersController.logout);
 
+router.get("/get_info", 
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",
+    "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER",
+    "DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER", "USER"]),
+    usersController.getAuthenticatedUserInfo
+);
+
 module.exports = router;

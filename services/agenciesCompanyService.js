@@ -21,9 +21,9 @@ const checkExistAgencyCompany = async (info) => {
 };
 
 module.exports = {
-  createNewAgencyCompany,
-  updateAgencyCompany,
-  getOneAgencyCompany,
-  deleteAgencyCompany,
-  checkExistAgencyCompany,
+    createNewAgencyCompany,
+    updateAgencyCompany,
+    getOneAgencyCompany,
+    deleteAgencyCompany,
+    checkExistAgencyCompany,
 }

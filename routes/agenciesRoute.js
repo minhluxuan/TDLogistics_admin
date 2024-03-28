@@ -54,8 +54,6 @@ const upload = multer({
     fileFilter: fileFilter,
 });
 
-
-
 const router = express.Router();
 
 router.get("/check", agenciesController.checkExistAgency);
@@ -111,6 +109,5 @@ router.post(
     auth.isActive(),
     agenciesController.getLicenseAgencyCompany
 );
-
 
 module.exports = router;

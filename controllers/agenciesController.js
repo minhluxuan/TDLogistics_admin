@@ -4,10 +4,7 @@ const agencyCompanyService = require("../services/agenciesCompanyService");
 const logger = require("../lib/logger");
 const utils = require("../lib/utils");
 const validation = require("../lib/validation");
-const fs = require("fs-extra");
-const path = require("path");
 const archiver = require("archiver");
-const { object } = require("joi");
 
 const agencyValidation = new validation.AgencyValidation();
 
@@ -38,12 +35,11 @@ const checkExistAgency = async (req, res) => {
   }
 };
 
+
 const getAgencies = async (req, res) => {
-  try {
+	try {
 		if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_DRIVER", "AGENCY_SHIPPER",].includes(req.user.role)) {
-		const { error } = agencyValidation.validateFindingAgencyByAgency(
-			req.query
-		);
+		const { error } = agencyValidation.validateFindingAgencyByAgency(req.query);
 
 		if (error) {
 			return res.status(400).json({
@@ -51,18 +47,18 @@ const getAgencies = async (req, res) => {
 				message: error.message,
 			});
 		}
-
+  
 		req.body.agency_id = req.user.agency_id;
 
 		let result = await agenciesService.getOneAgency(req.body);
 
 		if (!result) {
-			throw new Error("Đã xảy ra lỗi. Lấy thông tin bưu cục không thành công. Vui lòng thử lại.");
+		  throw new Error("Đã xảy ra lỗi. Lấy thông tin bưu cục không thành công. Vui lòng thử lại.");
 		}
 
 		result[0].managed_wards = result[0].managed_wards ? JSON.parse(result[0].managed_wards) : new Array();
 
-		if (result[0].invidual_company !== 0)
+		if (result[0].individual_company)
 		{
 			const agencyCompanyInfo = await agencyCompanyService.getOneAgencyCompany(req.body);
 			if (!agencyCompanyInfo) {
@@ -75,23 +71,23 @@ const getAgencies = async (req, res) => {
 			result.business_number = agencyCompanyInfo[0].business_number;
 			result.license = agencyCompanyInfo[0].license ? JSON.parse(agencyCompanyInfo[0].license) : new Array();
 		}
-
+  
 		return res.status(200).json({
-			error: false,
-			data: result,
-			message: `Lấy thông tin bưu cục thành công.`,
-		});
+				error: false,
+				data: result,
+				message: `Lấy thông tin bưu cục thành công.`,
+			});
 		}
-
+  
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "TELLER", "COMPLAINTS_SOLVER",].includes(req.user.role) || req.user.privileges.includes(2)) {
 			const paginationConditions = { rows: 0, page: 0 };
 
 			if (req.query.rows) {
-				paginationConditions.rows = parseInt(req.query.rows);
+			  	paginationConditions.rows = parseInt(req.query.rows);
 			}
 
 			if (req.query.page) {
-				paginationConditions.page = parseInt(req.query.page);
+			  	paginationConditions.page = parseInt(req.query.page);
 			}
 
 			const { error: paginationError } = agencyValidation.validatePaginationConditions(paginationConditions);
@@ -101,7 +97,7 @@ const getAgencies = async (req, res) => {
 					message: paginationError.message,
 				});
 			}
-
+  
 			const { error } = agencyValidation.validateFindingAgencyByAdmin(req.body);
 
 			if (error) {
@@ -110,15 +106,14 @@ const getAgencies = async (req, res) => {
 					message: error.message,
 				});
 			}
-
+  
 			const agenciesInfo = await agenciesService.getAgencies(req.body, paginationConditions);
 
 			if (!agenciesInfo) {
-				throw new Error("Đã xảy ra lỗi. Lấy thông tin đại lý không thành công. Vui lòng thử lại.");
+			  	throw new Error("Đã xảy ra lỗi. Lấy thông tin đại lý không thành công. Vui lòng thử lại.");
 			}
 
-			const result = new Array();
-			for (let agency of agenciesInfo) {
+			for (const agency of agenciesInfo) {
 				if (agency.managed_wards) {
 					agency.managed_wards = JSON.parse(agency.managed_wards);
 				} 
@@ -126,26 +121,24 @@ const getAgencies = async (req, res) => {
 					agency.managed_wards = new Array();
 				}
 
-				if (agency.invidual_company !== 0)
+				if (agency.individual_company)
 				{
 					const agencyCompanyInfo = await agencyCompanyService.getOneAgencyCompany({agency_id : agency.agency_id});
 					if (!agencyCompanyInfo) {
 						throw new Error("Đã xảy ra lỗi. Lấy thông tin doanh nghiệp không thành công. Vui lòng thử lại.");
 					}
-
-
-
-					agency.company_name = agencyCompanyInfo[0].company_name;
-					agency.tax_number = agencyCompanyInfo[0].tax_number;
-					agency.business_number = agencyCompanyInfo[0].business_number;
-					agency.license = agencyCompanyInfo[0].license ? JSON.parse(agencyCompanyInfo[0].license) : new Array();
-				}
-				result.push(agency);
+					if (agencyCompanyInfo.length > 0) {
+						agency.company_name = agencyCompanyInfo[0].company_name;
+						agency.tax_number = agencyCompanyInfo[0].tax_number;
+						agency.business_number = agencyCompanyInfo[0].business_number;
+						agency.license = agencyCompanyInfo[0].license ? JSON.parse(agencyCompanyInfo[0].license) : new Array();
+					}
+			  	}
 			}
 
 			return res.status(200).json({
 				error: false,
-				data: result,
+				data: agenciesInfo,
 				message: "Lấy thông tin đại lý thành công.",
 			});
 		}
@@ -155,8 +148,8 @@ const getAgencies = async (req, res) => {
 		return res.status(500).json({
 			error: true,
 			message: error.message,
-    	});
-  	}
+		});
+	}
 };
 
 const createNewAgency = async (req, res) => {
@@ -165,6 +158,239 @@ const createNewAgency = async (req, res) => {
 
 		if (error) {
 			console.log(error);
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+  
+		const checkingPostalCode = await agenciesService.checkPostalCode( req.body.province, req.body.district, req.body.postal_code);
+
+		if (!checkingPostalCode.success) {
+			return res.status(400).json({
+				error: true,
+				message: checkingPostalCode.message,
+			});
+		}
+
+		const checkingWardOccupation = await agenciesService.checkWardsOccupation(req.body.province, req.body.district, req.body.managed_wards);
+
+		if (!checkingWardOccupation.success) {
+			return res.status(409).json({
+				error: true,
+				message: checkingWardOccupation.message,
+			});
+		}
+
+		const tempUser = new Object({
+			username: req.body.username,
+			cccd: req.body.user_cccd,
+			phone_number: req.body.user_phone_number,
+			email: req.body.user_phone_number,
+		});
+  
+		const resultCheckingExistStaff = await staffsService.checkExistStaff(tempUser);
+
+		if (resultCheckingExistStaff.existed) {
+			return res.status(409).json({
+				error: true,
+				message: resultCheckingExistStaff.message,
+			});
+		}
+
+		if (req.body.individual_company) 
+		{
+			const tempAgencyCompany = new Object({
+				company_name: req.body.company_name || undefined,
+				tax_number: req.body.tax_number || undefined,
+				business_number: req.body.business_number || undefined,
+			});
+
+			const { error } = agencyValidation.validateCreatingAgencyCompany(tempAgencyCompany);
+
+			if (error) {
+				console.log(error);
+				return res.status(400).json({
+					error: true,
+					message: error.message,
+				});
+		  	}
+
+			const resultCheckingExistAgencyCompany = await agencyCompanyService.checkExistAgencyCompany(tempAgencyCompany);
+
+			if (resultCheckingExistAgencyCompany.existed) {
+				return res.status(409).json({
+					error: true,
+					message: resultCheckingExistAgencyCompany.message,
+				});
+			}
+		}
+
+		const agencyId = req.body.type + "_" + req.body.postal_code + "_" + req.body.user_cccd;
+
+		req.body.user_password = utils.hash(req.body.user_password);
+
+		const newStaff = new Object({
+			agency_id: agencyId,
+			staff_id: agencyId,
+			username: req.body.username,
+			password: req.body.user_password,
+			fullname: req.body.user_fullname || null,
+			phone_number: req.body.user_phone_number || null,
+			email: req.body.user_email || null,
+			date_of_birth: req.body.user_date_of_birth || null,
+			cccd: req.body.user_cccd || null,
+			province: req.body.user_province || null,
+			district: req.body.user_district || null,
+			town: req.body.town || null,
+			detail_address: req.body.user_detail_address || null,
+			role: "AGENCY_MANAGER",
+			position: req.body.user_position || null,
+			bin: req.body.user_bin || null,
+			bank: req.body.user_bank || null,
+			salary: req.body.salary || null,
+			active: false,
+		});
+
+		const newAgency = new Object({
+			level: req.body.level,
+			agency_id: agencyId,
+			postal_code: req.body.postal_code,
+			agency_name: req.body.agency_name,
+			province: req.body.province,
+			district: req.body.district,
+			town: req.body.town,
+			detail_address: req.body.detail_address,
+			latitude: req.body.latitude,
+			longitude: req.body.longitude,
+			managed_wards: req.body.managed_wards
+				? JSON.stringify(req.body.managed_wards)
+				: JSON.stringify(new Array()),
+			phone_number: req.body.phone_number,
+			email: req.body.email,
+			commission_rate: req.body.commission_rate,
+			bin: req.body.bin || null,
+			bank: req.body.bank || null,
+			individual_company: req.body.individual_company
+		});
+
+		const resultCreatingNewAgency = await agenciesService.createNewAgency(newAgency);
+
+		let textResultCreatingNewAgency;
+		if (!resultCreatingNewAgency || resultCreatingNewAgency.affectedRows <= 0) {
+		  	textResultCreatingNewAgency = `Tạo bưu cục có mã bưu cục ${agencyId} trong cơ sở dữ liệu tổng thất bại.`;
+		} 
+		else {
+		  	textResultCreatingNewAgency = `Tạo bưu cục có mã bưu cục ${agencyId} trong cơ sở dữ liệu tổng thành công.`;
+		}
+
+		const resultCreatingNewStaff = await staffsService.createNewStaff(newStaff);
+
+		let textResultCreatingNewStaff;
+		if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
+		  	textResultCreatingNewStaff = `Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu tổng thất bại.`;
+		} 
+		else {
+		  	textResultCreatingNewStaff = `Tạo tài khoản nhân viên quản lý bưu cục có mã nhân viên ${agencyId} trong cơ sở dữ liệu tổng thành công.`;
+		}
+
+		const resultCreatingTablesForAgency = await agenciesService.createTablesForAgency(req.body.postal_code);
+		const textResultCreatingTablesForAgency = resultCreatingTablesForAgency.message;
+
+		const resultLocatingAgencyInArea = await agenciesService.locateAgencyInArea(
+			0,
+			req.body.province,
+			req.body.district,
+			req.body.managed_wards,
+			agencyId,
+			req.body.postal_code
+		);
+
+		const textResultLocatingAgencyInArea = resultLocatingAgencyInArea.message;
+
+		if (req.body.individual_company) {
+			let licenseseImgs = new Array();
+			if (req.files)
+			{	
+				req.files.forEach((file) => {
+					licenseseImgs.push(file.filename);
+				});
+			}
+
+			const newAgencyComapany = new Object({
+				agency_id: agencyId,
+				company_name: req.body.company_name,
+				tax_number: req.body.tax_number,
+				business_number: req.body.business_number,
+				license: JSON.stringify(licenseseImgs)
+			});
+
+			const resultCreatingNewAgencyCompany = await agencyCompanyService.createNewAgencyCompany(newAgencyComapany);
+
+			let textResultCreatingNewAgencyCompany;
+			if (!resultCreatingNewAgencyCompany || resultCreatingNewAgencyCompany.affectedRows <= 0) {
+				textResultCreatingNewAgencyCompany = `Tạo bưu cục doanh nghiệp có mã bưu cục ${agencyId} trong cơ sở dữ liệu agency_company thất bại.`;
+			} 
+			else {
+				textResultCreatingNewAgencyCompany = `Tạo bưu cục doanh nghiệp có mã bưu cục ${agencyId} trong cơ sở dữ liệu agency_company thành công.`;
+			}
+
+			if (req.files) {
+				const tempLicenseFolder = path.join("storage", "agency_company", "license_temp");
+				if (!fs.existsSync(tempLicenseFolder)) {
+					fs.mkdirSync(tempLicenseFolder, { recursive: true });
+				}	
+
+				const officialFolderLicensePath = path.join("storage", "agency_company", "license", `${agencyId}`);
+				if (!fs.existsSync(officialFolderLicensePath)) {
+					fs.mkdirSync(officialFolderLicensePath, { recursive: true });
+				}
+
+				req.files.forEach(file => {
+					const tempLicenseFilePath = path.join(tempLicenseFolder, file.fileName);
+					if (fs.existsSync(tempLicenseFilePath)) {
+						const officialLicenseFilePath = path.join(officialFolderLicensePath, file.fileName);
+						fs.renameSync(tempLicenseFilePath, officialLicenseFilePath);
+					}
+				});
+		  	}
+
+			return res.status(200).json({
+				error: false,
+				message: 
+					`Kết quả:\n
+					${textResultCreatingNewStaff}\n
+					${textResultCreatingNewAgency}\n
+					${textResultCreatingTablesForAgency}\n
+					${textResultLocatingAgencyInArea}\n
+					${textResultCreatingNewAgencyCompany}`,
+			});
+		}
+
+		return res.status(200).json({
+			error: false,
+			message: `
+			Kết quả:\n
+			${textResultCreatingNewStaff}\n
+			${textResultCreatingNewAgency}\n
+			${textResultCreatingTablesForAgency}\n
+			${textResultLocatingAgencyInArea}`,
+		});
+	} 
+	catch (error) {
+		console.log(error);
+		 return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
+const createNewAgencyOld = async (req, res) => {
+	try {
+		const { error } = agencyValidation.validateCreatingAgency(req.body);
+
+		if (error) {console.log(error);
 			return res.status(400).json({
 				error: true,
 				message: error.message,
@@ -650,11 +876,11 @@ const updateLicenseAgencyCompany = async (req, res) => {
 			});
 		}
   
-	  return res.status(200).json({
-		error: false,
-		message: `Cập nhật giấy phép kinh doanh bưu cục doanh nghiệp có mã bưu cục ${req.query.agency_id} thành công.`,
-	  });
-	} 
+		return res.status(200).json({
+			error: false,
+			message: `Cập nhật giấy phép kinh doanh bưu cục doanh nghiệp có mã bưu cục ${req.query.agency_id} thành công.`,
+		});
+	}
   	catch (error) {
 		console.log(error);
 		return res.status(500).json({
@@ -703,7 +929,6 @@ const getLicenseAgencyCompany = async (req, res) => {
 		archive.pipe(res);
 
         licenseImgs.forEach(image => {
-			console.log(image);
             archive.file(image, { name: image });
         });       
     
@@ -719,12 +944,12 @@ const getLicenseAgencyCompany = async (req, res) => {
 };
 
 module.exports = {
-  checkExistAgency,
-  getAgencies,
-  createNewAgency,
-  updateAgency,
-  deleteAgency,
-  updateLicenseAgencyCompany,
-  updateAgencyCompany,
-  getLicenseAgencyCompany
+	checkExistAgency,
+	getAgencies,
+	createNewAgency,
+	updateAgency,
+	deleteAgency,
+	updateLicenseAgencyCompany,
+	updateAgencyCompany,
+	getLicenseAgencyCompany,
 };
