@@ -85,4 +85,18 @@ router.post("/undertake",
     shipmentController.undertakeShipment
 );
 
+router.post("/update_journey",
+    auth.isAuthenticated(), 
+    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
+    auth.isActive(),
+    shipmentController.updateJourney
+);
+
+router.get("/get_journey",
+    auth.isAuthenticated(), 
+    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),
+    auth.isActive(),
+    shipmentController.getJourney
+);
+
 module.exports = router;

@@ -4,8 +4,8 @@ const checkExistShipment = async (conditions, postalCode = null) => {
     return await Shipment.checkExistShipment(conditions, postalCode);
 }
 
-const createNewShipment = async (info, postalCode) => {
-    return await Shipment.createNewShipment(info, postalCode);
+const createNewShipment = async (shipmentInfo, journeyInfo, postalCode = null) => {
+    return await Shipment.createNewShipment(shipmentInfo, journeyInfo, postalCode);
 }
 
 const getDataForShipmentCode = async(staff_id, transport_partner_id = null) => {
@@ -103,6 +103,10 @@ const updateOrders = async (order_ids, staff_ids, postal_code) => {
     return await Shipment.updateOrders(order_ids, staff_ids, postal_code);
 }
 
+const updateJourney = async (shipment_id, updatedTime, message) => {
+    return await Shipment.updateJourney(shipment_id, updatedTime, message);
+}
+
 module.exports = {
     checkExistShipment,
     createNewShipment,
@@ -124,4 +128,5 @@ module.exports = {
     compareOrdersInRequestWithOrdersInShipment,
     addOneShipmentToVehicle,
     updateOrders,
+    updateJourney,
 };

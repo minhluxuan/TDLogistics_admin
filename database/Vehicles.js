@@ -52,7 +52,7 @@ const getManyVehicles = async (conditions, paginationConditions) => {
                 LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
                 LEFT JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
                 LEFT JOIN partner_staff AS p ON v.staff_id = p.staff_id
-                WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != "" AND ${fields.map(field => `${field} = ?`).join(" AND ")}
+                WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != "" AND v.${fields.map(field => `${field} = ?`).join(" AND ")}
                 
                 UNION
                 
@@ -61,7 +61,7 @@ const getManyVehicles = async (conditions, paginationConditions) => {
                 FROM vehicle AS v 
                 LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
                 LEFT JOIN staff AS s ON v.staff_id = s.staff_id 
-                WHERE v.transport_partner_id IS NULL OR v.transport_partner_id = "" AND ${fields.map(field => `${field} = ?`).join(" AND ")}
+                WHERE v.transport_partner_id IS NULL OR v.transport_partner_id = "" AND v.${fields.map(field => `${field} = ?`).join(" AND ")}
                 
                 ORDER BY created_at DESC;`;
     

@@ -1,4 +1,4 @@
-POST http://localhost:5000/api/v1/vehicles/search
+POST https://api.tdlogistics.net.vn/api/v1/vehicles/search
 Content-Type: application/json
 
 {
