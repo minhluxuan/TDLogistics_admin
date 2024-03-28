@@ -41,6 +41,7 @@ const checkExistStaff = async (info) => {
 
 const checkExistStaffIntersect = async (info) => {
 	const fields = Object.keys(info);
+	const values = Object.values(info);
 	const result = await dbUtils.findOneIntersect(pool, table, fields, values);
 
 	if (!result) {
