@@ -3,3 +3,7 @@ package-lock.json
 package.json
 .gitignore
 .env
+temp.js
+.gitignore
+node_modules/.package-lock.json
+tests/agencyTest.http

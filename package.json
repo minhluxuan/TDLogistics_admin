@@ -21,6 +21,7 @@
     "express-flash": "^0.0.2",
     "express-mysql-session": "^3.0.0",
     "express-session": "^1.17.3",
+    "fs-extra": "^11.2.0",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "jest": "^29.7.0",
