@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 const dbUtils = require("../lib/dbUtils");
-const Shipments = require("./Shipments");
+const moment = require("moment");
 const { setStatusToOrder } = require("./Orders");
 const servicesStatus = require("../lib/servicesStatus");
 
@@ -166,18 +166,22 @@ const deleteVehicle = async (conditions) => {
 };
 
 const addShipmentToVehicle = async (vehicle, shipment_ids) => {
+    const formattedTime = moment(new Date()).format("HH:mm:ss DD-MM-YYYY");
     const acceptedArray = new Array();
     const notAcceptedArray = new Array();
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
 
+    const getShipmentIdsTask = await dbUtils.findOneUnion(pool, "driver_tasks", ["vehicle_id"], [vehicle.vehicle_id]);
+    const taskShipmentIds = getShipmentIdsTask.map(task => task.shipment_id);
+
     for (let i = 0; i < shipment_ids.length; i++) {
         const getShipmentQuery = `SELECT mass, order_ids FROM shipment WHERE shipment_id = ?`;
         const [shipmentRow] = await pool.query(getShipmentQuery, [shipment_ids[i]]);
         const shipmentMass  = shipmentRow[0].mass;
     
-        if (prevShipmentIds.includes(shipment_ids[i])) { 
+        if (prevShipmentIds.includes(shipment_ids[i]) || !taskShipmentIds.includes(shipment_ids[i])) { 
             notAcceptedArray.push(shipment_ids[i]);
         }
         else {
@@ -188,11 +192,12 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
             for (const order_id of order_ids) {
                 const orderInfo = new Object({
                     order_id: order_id,
-                    // shipment_id: shipment_ids[i],
-                    // managed_by: vehicle.vehicle_id
+                    shipment_id: shipment_ids[i],
+                    managed_by: vehicle.vehicle_id
                 });
                 await setStatusToOrder(orderInfo, servicesStatus.leave_agency, false);
             }
+            
         }
     }
 
@@ -210,13 +215,17 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
 }
 
 const deleteShipmentFromVehicle = async (vehicle, shipment_ids) => {
+    
     const acceptedArray = new Array();
     const notAcceptedArray = new Array();
+
+    const getShipmentIdsTask = await dbUtils.findOneUnion(pool, "driver_tasks", ["vehicle_id"], [vehicle.vehicle_id]);
+    const taskShipmentIds = getShipmentIdsTask.map(task => task.shipment_id);
    
     let currentMass = vehicle.mass;
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
     for (let i = 0; i < prevShipmentIds.length; i++) {
-        if (shipment_ids.includes(shipment_ids[i])) {
+        if (shipment_ids.includes(shipment_ids[i]) && taskShipmentIds.includes(shipment_ids[i])) {
             const getShipmentQuery = `SELECT mass FROM shipment WHERE shipment_id = ?`;
             const [shipmentRow] = await pool.query(getShipmentQuery, [prevShipmentIds[i]]);
             if (shipmentRow && shipmentRow.length > 0) {

@@ -56,7 +56,7 @@ const createNewShipment = async (req, res) => {
 
         const areaAgencyIdSubParts = req.user.agency_id.split('_');
         req.body.shipment_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDate().toString() + createdTime.getHours().toString() + createdTime.getMinutes().toString() + createdTime.getSeconds().toString() + createdTime.getMilliseconds().toString();
-        req.body.agency_id_source = req.user.agency_id;
+        req.body.agency_id = req.user.agency_id;
 
         if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
             const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);

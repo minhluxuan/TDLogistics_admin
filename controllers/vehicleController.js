@@ -2,6 +2,8 @@ const vehicleService = require("../services/vehicleService");
 const partnerStaffService = require("../services/partnerStaffsService");
 const agenciesService = require("../services/agenciesService");
 const staffsService = require("../services/staffsService");
+const moment = require("moment");
+const shipmentsService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
 const fs = require("fs");
 const path = require("path");
@@ -47,15 +49,51 @@ const createNewVehicle = async (req, res) => {
 				});
 			}
 
-			if (!(await agenciesService.checkExistAgency({ agency_id: req.body.agency_id }))) {
-				return res.status(404).json({
-					error: true,
-					message: `Bưu cục có mã bưu cục ${req.body.agency_id} không tồn tại.`,
-				});
-			}
+			// if (!(await agenciesService.checkExistAgency({ agency_id: req.body.agency_id }))) {
+			// 	return res.status(404).json({
+			// 		error: true,
+			// 		message: `Bưu cục có mã bưu cục ${req.body.agency_id} không tồn tại.`,
+			// 	});
+			// }
+            const existed = await vehicleService.checkExistVehicle({ license_plate: req.body.license_plate });
+
+            if (existed) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Phương tiện có mã hiệu ${req.body.license_plate} đã tồn tại.`,
+                });
+            }
+
+            //const agencyIdSubParts = req.body.agency_id.split('_');
+            const modifiedLicensePlate = req.body.license_plate.replace(new RegExp("[-\\s]", 'g'), '');
+            req.body.vehicle_id = "TD" + '_' + "00000" + '_' + modifiedLicensePlate;
+
+            if (req.body.hasOwnProperty("transport_partner_id")) {
+                const resultCheckingExistTransportPartnerAndStaff = await partnerStaffService.checkExistPartnerStaffIntersect({ partner_id: req.body.transport_partner_id, staff_id: req.body.staff_id });
+                if (!resultCheckingExistTransportPartnerAndStaff.existed) {
+                    return res.status(404).json({
+                        error: true,
+                        message: `Nhân viên có mã ${req.body.staff_id} không tồn tại hoặc không thuộc đối tác vận tải có mã ${req.body.transport_partner_id}.`,
+                    });
+                }
+            }
+
+            const resultCreatingNewVehicle = await vehicleService.createNewVehicle(req.body);
+                
+            if (!resultCreatingNewVehicle || resultCreatingNewVehicle.affectedRows <= 0) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thất bại.`,
+                });
+            }
+
+            return res.status(201).json({
+                error: false,
+                message: `Tạo phương tiện vận tải có mã hiệu ${req.body.license_plate} thành công.`,
+            });
 		}
 		else if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const { error } = businessValidation.validateCreatingVehicleByAgency(req.body);
+			const { error } = vehicleValidation.validateCreatingVehicleByAdmin(req.body);
 
 			if (error) {
 				return res.status(400).json({
@@ -65,15 +103,15 @@ const createNewVehicle = async (req, res) => {
 			}
 
 			req.body.agency_id = req.user.agency_id;
-		}
 
-        const resultCheckingExistAgencyAndStaff = await staffsService.checkExistStaffIntersect({ agency_id: req.body.agency_id, staff_id: req.body.staff_id });
-        if (!resultCheckingExistAgencyAndStaff.existed) {
-            return res.status(404).json({
-                error: true,
-                message: `Nhân viên có mã nhân viên ${req.body.staff_id} không tồn tại trong bưu cục có mã bưu cục ${req.body.agency_id}.`,
-            });
-        }
+            const resultCheckingExistAgencyAndStaff = await staffsService.checkExistStaffIntersect({ agency_id: req.body.agency_id, staff_id: req.body.staff_id });
+            if (!resultCheckingExistAgencyAndStaff.existed) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Nhân viên có mã nhân viên ${req.body.staff_id} không tồn tại trong bưu cục có mã bưu cục ${req.body.agency_id}.`,
+                });
+            }
+		}
 
         const existed = await vehicleService.checkExistVehicle({ license_plate: req.body.license_plate });
 
@@ -354,6 +392,7 @@ const deleteVehicle = async (req, res) => {
 
 const addShipmentToVehicle = async (req, res) => {
     try {
+        const formattedTime = moment(new Date()).format("HH:mm:ss DD-MM-YYYY");
         const { error: error1 } = vehicleValidation.validateCheckingExistVehicle(req.query);
         if (error1) {
             return res.status(400).json({
@@ -387,7 +426,10 @@ const addShipmentToVehicle = async (req, res) => {
                 message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
             });
         }
-
+        for(const shipment_id of result.acceptedArray) {
+            const journeyMessage = `${formattedTime}: Lô hàng được vận chuyển bởi Đối tác ${resultGettingOneVehicle[0].transport_partner_id} trên xe ${resultGettingOneVehicle[0].type} biển hiệu ${resultGettingOneVehicle[0].license_plate} của Nhân viên ${resultGettingOneVehicle[0].staff_id}.`;
+            const updatedJourney = await shipmentsService.updateJourney( shipment_id , formattedTime, journeyMessage);
+        }
         return res.status(201).json({
             error: false,
             info: result,
@@ -405,6 +447,7 @@ const addShipmentToVehicle = async (req, res) => {
 
 const deleteShipmentFromVehicle = async (req, res) => {
     try {
+        const formattedTime = moment(new Date()).format("HH:mm:ss DD-MM-YYYY");
         const { error: error1 } = vehicleValidation.validateCheckingExistVehicle(req.query);
         if (error1) {
             return res.status(400).json({
@@ -437,6 +480,11 @@ const deleteShipmentFromVehicle = async (req, res) => {
                 error: true,
                 message: `Phương tiện có mã phương tiện ${req.query.vehicle_id} không tồn tại.`,
             });
+        }
+
+        for(const shipment_id of result.acceptedArray) {
+            const journeyMessage = `${formattedTime}: Lô hàng được dỡ xuống bởi Đối tác ${resultGettingOneVehicle[0].transport_partner_id} trên xe ${resultGettingOneVehicle[0].type} biển hiệu ${resultGettingOneVehicle[0].license_plate} của Nhân viên ${resultGettingOneVehicle[0].staff_id}.`;
+            const updatedJourney = await shipmentsService.updateJourney( shipment_id , formattedTime, journeyMessage);
         }
 
         return res.status(201).json({

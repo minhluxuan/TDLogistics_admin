@@ -49,14 +49,14 @@ router.delete(
 router.patch(
     "/add_shipments",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isAuthorized(["DRIVER", "SHIPPER", "AGENCY_DRIVER", "PARTNER_DRIVER", "PARTNER_SHIPPER"]),
     auth.isActive(),
     vehicleController.addShipmentToVehicle
 );
 router.patch(
     "/delete_shipments",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isAuthorized(["DRIVER", "SHIPPER", "AGENCY_DRIVER", "PARTNER_DRIVER", "PARTNER_SHIPPER"]),
     auth.isActive(),
     vehicleController.deleteShipmentFromVehicle
 );

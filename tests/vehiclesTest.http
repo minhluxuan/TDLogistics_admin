@@ -6,17 +6,26 @@ Content-Type: application/json
 }
 
 ###
+POST http://localhost:5000/api/v1/partner_staffs/login
+Content-Type: application/json
+
+{
+    "username": "tranthenhan",
+    "password": "Nhaanpartner@123"
+}
+
+###
 
 POST http://localhost:5000/api/v1/vehicles/create
 Content-Type: application/json
 
 {
-    
-    "agency_id": "BC_70001_077204005691",
-    "staff_id": "BC_70001_077204005684",
-    "type": "motorbike",
-    "license_plate": "72-H1 24768",
-    "max_load": 50
+    "transport_partner_id": "BC_71000_077204005691",
+
+    "staff_id": "TD_00000_089204006685",
+    "type": "truck",
+    "license_plate": "67-H1 24768",
+    "max_load": 500
 }
 
 ###
@@ -129,20 +138,20 @@ DELETE http://localhost:5000/api/v1/vehicles/delete?vehicle_id=invalid_vehicle_i
 
 ###
 
-PATCH http://localhost:5000/api/v1/vehicles/delete_shipments?vehicle_id=BC_71000_42H124768
+PATCH http://localhost:5000/api/v1/vehicles/delete_shipments?vehicle_id=TD_00000_67H124768
 Content-Type: application/json
 
 {
-    "shipment_ids": ["BC_71000_202422224138948"]
+    "shipment_ids": ["BC_71000_2024228225740952"]
 }
 
 ###
 
-PATCH http://localhost:5000/api/v1/vehicles/add_shipments?vehicle_id=BC_71000_42H124768
+PATCH http://localhost:5000/api/v1/vehicles/add_shipments?vehicle_id=TD_00000_67H124768
 Content-Type: application/json
 
 {
-    "shipment_ids": ["BC_71000_202422224138948"]
+    "shipment_ids": ["BC_71000_202422822288372"]
 }
 
 ###
