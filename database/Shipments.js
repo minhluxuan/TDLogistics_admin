@@ -90,12 +90,13 @@ const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => 
     }
 }
 
-const createNewShipment = async (info, postalCode = null) => {
+const createNewShipment = async (infoShipment, infoJourney, postalCode = null) => {
     const shipmentTable = postalCode ? postalCode + '_' + table : table;
-    const fields = Object.keys(info);
-    const values = Object.values(info);
-    const defaultFields = ["mass", "order_ids", "parent", "status"];
-    const defaultValues = [0, JSON.stringify([]), null, 0];
+    const fields = Object.keys(infoShipment);
+    const values = Object.values(infoShipment);
+    
+    const defaultFields = ["mass", "order_ids", "parent", "status", "journey"];
+    const defaultValues = [0, JSON.stringify([]), null, 0, JSON.stringify([infoJourney])];
 
     const allFields = [...fields, ...defaultFields];
     const allValues = [...values, ...defaultValues];
@@ -394,8 +395,8 @@ const updateOrderToDatabase = async (fields, values, order_id) => {
 const receiveShipment = async (shipment_id, postal_code) => {
     const agencyOrdersTable = postal_code + "_orders";
     const agencyShipmentTable = postal_code + suffix;
-    const getShipmentResult = await getInfoShipment(shipment_id);
-    const cloneShipmentFromGlobal = await dbUtils.insert(pool, agencyShipmentTable, getShipmentResult.fields, getShipmentResult.values);
+    const getShipmentResult = await getOneShipment({shipment_id: shipment_id});
+    const cloneShipmentFromGlobal = await dbUtils.insert(pool, agencyShipmentTable, getShipmentResult[0].fields, getShipmentResult[0].values);
 
     const getOrderIDsQuery = `SELECT order_ids FROM ${table} WHERE shipment_id = ?`;
     const [rows] = await pool.query(getOrderIDsQuery, shipment_id);
@@ -440,7 +441,7 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
 
     const shipmentsQuery = `UPDATE ${agencyShipmentTable} AS q1 JOIN ${table} AS q2
                             ON q1.shipment_id = q2.shipment_id
-                            SET q1.status = ?, q2.status = ?, q1.agency_id_dest = ?, q2.agency_id_dest = ? WHERE q1.shipment_id = ? `;
+                            SET q1.status = ?, q2.status = ? WHERE q1.shipment_id = ? `;
     await pool.query(shipmentsQuery, [true, true, agency_id, agency_id, shipment_id]);
 
     return new Object({
@@ -465,10 +466,11 @@ const cloneOrdersFromGlobalToAgency = async (order_ids, postalCode) => {
 
     for (const order_id of order_ids) {
         try {
-            const resultGettingOneOrder = await Orders.getOneOrder({ order_id });
+            const resultGettingOneOrder = await Orders.getOneOrder({ order_id: order_id });
             if (resultGettingOneOrder && resultGettingOneOrder.length > 0) {
                 const resultCreatingNewOrder = await Orders.createNewOrder(resultGettingOneOrder[0], postalCode);
                 if (resultCreatingNewOrder && resultCreatingNewOrder.affectedRows > 0) {
+                    console.log("aaaaaaaaa");
                     acceptedNumber++;
                     acceptedArray.push(order_id);
                 }
@@ -478,10 +480,12 @@ const cloneOrdersFromGlobalToAgency = async (order_ids, postalCode) => {
                 }
             }
             else {
+                console.log("bbbbbbbb");
                 notAcceptedNumber++;
                 notAcceptedArray.push(order_id);
             }
         } catch (error) {
+            throw new Error(error.message);
             notAcceptedNumber++;
             notAcceptedArray.push(order_id);
         }
@@ -533,6 +537,29 @@ const updateOrders = async (order_ids, staff_id, postal_code) => {
     });
 }
 
+const updateJourney = async (shipment_id, updatedTime, message) => {
+    const shipment = await getOneShipment({ shipment_id: shipment_id }, null);
+    if(!shipment || shipment.length <= 0) {
+        return {
+            success: false,
+            message: `Không tìm thấy lô hàng mã ${shipment_id}!`
+        }
+    }
+    
+    const journey = JSON.parse(shipment[0].journey);
+    journey.push({
+        time: updatedTime,
+        message: message
+    });
+    
+    const stringifyJourney = JSON.stringify(journey);
+    await updateShipment({ journey : stringifyJourney }, { shipment_id: shipment_id }, null);
+    return {
+        success: true,
+        message: `Cập nhật hành trình cho lô hàng mã ${shipment_id} thành công!`
+    }
+}
+
 module.exports = {
     checkExistShipment,
     createNewShipment,
@@ -555,4 +582,5 @@ module.exports = {
     deleteGlobalShipment,
     addOneShipmentToVehicle,
     updateOrders,
+    updateJourney,
 };
