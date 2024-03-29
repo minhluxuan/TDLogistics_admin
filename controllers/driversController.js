@@ -79,9 +79,10 @@ const getTasks = async (req, res) => {
         return res.status(200).json({
             error: false,
             data: resultGettingTasks,
-            message: `Lấy công việc của tài xế có mã ${req.user.staff_id} thành công.`,
+            message: `Lấy công việc thành công.`,
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message,
@@ -91,7 +92,6 @@ const getTasks = async (req, res) => {
 
 const confirmCompletedTask = async (req, res) => {
     try {
-        const completedTime = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
         const { error } = driversValidation.validateConfirmingCompletedTasks(req.body);
 
         if (error) {
@@ -101,8 +101,7 @@ const confirmCompletedTask = async (req, res) => {
             });
         }
 
-        const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
-        const resultConfirmingCompletedTask = await shippersService.confirmCompletedTask(req.body.id, req.user.staff_id, completedTime, postalCode);
+        const resultConfirmingCompletedTask = await driversService.confirmCompletedTask(req.body.id);
         if (!resultConfirmingCompletedTask || resultConfirmingCompletedTask.affectedRows === 0) {
             return res.status(404).json({
                 error: true,

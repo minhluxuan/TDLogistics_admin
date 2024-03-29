@@ -14,14 +14,26 @@ const tasksTable = "driver_tasks";
 const pool = mysql.createPool(dbOptions).promise();
 
 const getTasks = async (conditions) => {
-    let query = `SELECT d.*, s.* FROM shipment AS s JOIN ${tasksTable} as d ON s.shipment_id = d.shipment_id WHERE `;
+    let query = `SELECT * FROM ${tasksTable} WHERE `;
     
-    if (conditions.option === 1) {
-        const today = moment(new Date()).format("YYYY-MM-DD");
-        query += `DATE(d.created_at) = ?`;
-        queryParams.push(today);
+    const option = conditions.option;
+
+    delete conditions.option;
+
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    if (fields && values && fields.length > 0 && values.length > 0) {
+        query += `${fields.map(field => `${field} = ?`).join(" AND ")}`;
+        query += " AND ";
     }
-    else if (conditions.option === 2) {
+
+    if (option === 1) {
+        const today = moment(new Date()).format("YYYY-MM-DD");
+        query += `DATE(created_at) = ?`;
+        values.push(today);
+    }
+    else if (option === 2) {
         const currentDate = new Date();
 
         const currentDayOfWeek = currentDate.getDay();
@@ -37,20 +49,11 @@ const getTasks = async (conditions) => {
         sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
         const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
 
-        query += `DATE(d.created_at) > ? AND DATE(d.created_at) < ?`
-        queryParams.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
-    }
-    
-    delete conditions.option;
-
-    const fields = Object.keys(conditions);
-    const values = Object.values(conditions);
-
-    if (fields && values && fields.length > 0 && values.length > 0) {
-        query += ` AND ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+        query += `DATE(created_at) > ? AND DATE(created_at) < ?`
+        values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
     }
 
-    query += ` ORDER BY d.created_at DESC`;
+    query += ` ORDER BY created_at DESC`;
     
     const result = (await pool.query(query, values))[0];
 
@@ -58,14 +61,12 @@ const getTasks = async (conditions) => {
         throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
     }
 
-    for (const elm of result) {
-        try {
-            if (elm.journey) {
-                elm.journey = JSON.parse(elm.journey);
-            }
-        } catch (error) {
-            // Nothing to do
+    for (const task of result) {
+        const shipment = (await dbUtils.findOneIntersect(pool, "shipment", ["shipment_id"], task.shipment_id))[0];
+        if (shipment.journey) {
+            delete shipment.journey;
         }
+        task.shipment = shipment;
     }
 
     return result;
@@ -104,8 +105,8 @@ const assignNewTasks = async (shipment_ids, staff_id) => {
     });
 }
 
-const confirmCompletedTask = async (id, driver_id) => {
-    return await dbUtils.deleteOne(pool, tasksTable, ["id", "driver_id"], [id, driver_id]);
+const confirmCompletedTask = async (id) => {
+    return await dbUtils.deleteOne(pool, tasksTable, ["id"], [id]);
 }
 
 module.exports = {
