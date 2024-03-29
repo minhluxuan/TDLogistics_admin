@@ -25,11 +25,10 @@ const getTasks = async (conditions) => {
 
     if (fields && values && fields.length > 0 && values.length > 0) {
         query += ` WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
-        query += " AND ";
 
         if (option === 1) {
             const today = moment(new Date()).format("YYYY-MM-DD");
-            query += `DATE(created_at) = ?`;
+            query += " AND DATE(created_at) = ?";
             values.push(today);
         }
         else if (option === 2) {
@@ -48,7 +47,7 @@ const getTasks = async (conditions) => {
             sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
             const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
     
-            query += `DATE(created_at) > ? AND DATE(created_at) < ?`
+            query += " AND DATE(created_at) > ? AND DATE(created_at) < ?";
             values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
         }    
     }
