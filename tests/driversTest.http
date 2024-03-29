@@ -1,0 +1,16 @@
+POST http://localhost:5000/api/v1/drivers/create_task
+Content-Type: application/json
+
+{
+    "shipment_ids": ["BC_78300_202428205350212", "BC_78300_202428205351331"],
+    "vehicle_id": "BC_70001_72H124767"
+}
+
+###
+
+POST http://localhost:5000/api/v1/drivers/get_tasks
+Content-Type: application/json
+
+{
+    "option": 2
+}

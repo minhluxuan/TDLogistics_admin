@@ -1,9 +1,87 @@
 const moment = require("moment");
 const shippersService = require("../services/shippersService");
+const vehicleService = require("../services/vehicleService");
+const shipmentService = require("../services/shipmentsService");
 const utils = require("../lib/utils");
 const validation = require("../lib/validation");
 
 const shippersValidation = new validation.ShippersValidation();
+
+const createNewTask = async (req, res) => {
+    try {
+        const { error } = shippersValidation.validateCreatingNewTask(req.body);
+
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const staffIdSubParts = req.user.staff_id.split('_');
+        const vehicleIdSubParts = req.body.vehicle_id.split('_');
+
+        if (staffIdSubParts[0] !== vehicleIdSubParts[0] || staffIdSubParts[1] !== vehicleIdSubParts[1]) {
+            return res.status(404).json({
+                error: true,
+                message: `Phương tiện có mã ${req.body.vehicle_id} không tồn tại trong bưu cục có mã ${req.user.agency_id}.`,
+            });
+        }
+
+        const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.body.vehicle_id, agency_id: req.user.agency_id });
+        if (!resultGettingOneVehicle || resultGettingOneVehicle.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Phương tiện có mã ${req.body.vehicle_id} không tồn tại trong bưu cục có mã ${req.user.agency_id}.`,
+            });
+        }
+
+        const staff_id = resultGettingOneVehicle[0].staff_id;
+        if (!staff_id) {
+            return res.status(404).json({
+                error: true,
+                message: `Phương tiện có mã ${req.body.vehicle_id} không được sở hữu bởi bất kỳ nhân viên nào.`,
+            });
+        }
+
+        const resultGettingOneShipment = await shipmentService.getOneShipment({ shipment_id: req.body.shipment_id, agency_id: req.user.agency_id });
+        if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã ${req.body.shipment_id} không tồn tại.`,
+            });
+        }
+
+        let orderIds;
+        try {
+            orderIds = resultGettingOneShipment[0].order_ids ? JSON.parse(resultGettingOneShipment[0].order_ids) : new Array();
+        } catch (error) {
+            orderIds = new Array();
+        }
+
+        if (!orderIds || orderIds.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã ${req.body.shipment_id} không tồn tại đơn hàng nào để có thể phân việc.`,
+            });
+        }
+
+        const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
+        
+        const resultCreatingNewTask = await shippersService.assignNewTasks(orderIds, staff_id, postalCode);
+        
+        return res.status(201).json({
+            error: true,
+            info: resultCreatingNewTask,
+            message: `Phân việc cho shipper có mã ${staff_id} thành công.`,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
 
 const getTasks = async (req, res) => {
     try {
@@ -98,6 +176,7 @@ const getHistory = async (req, res) => {
 
 module.exports = {
     getTasks,
+    createNewTask,
     confirmCompletedTask,
     getHistory,
 }

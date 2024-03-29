@@ -658,7 +658,7 @@ const receiveShipment = async (req, res) => {
 
 const undertakeShipment = async (req, res) => {
     try {
-        const { error } = shipmentRequestValidation.validateUndertakeShipment(req.body);
+        const { error } = shipmentRequestValidation.validateUndertakeShipmentByShipper(req.body);
         if(error) {
             return res.status(400).json({
                 error: true,
