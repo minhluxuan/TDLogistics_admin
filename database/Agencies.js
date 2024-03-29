@@ -98,7 +98,7 @@ const createTablesForAgency = async (postal_code) => {
 	const createOrdersTable = `CREATE TABLE ${ordersTable} AS SELECT * FROM orders WHERE 1 = 0`;
 	const createShipmentTable = `CREATE TABLE ${shipmentTable} AS SELECT * FROM shipment WHERE 1 = 0`;
 	const createShipperTasksTable = `CREATE TABLE ${shipperTasksTable} (
-		id int(11) NOT NULL,
+		id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		order_id varchar(30) NOT NULL,
 		shipper varchar(25) NOT NULL,
 		created_at datetime NOT NULL,
@@ -140,10 +140,14 @@ const createTablesForAgency = async (postal_code) => {
 	const addForeignKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD CONSTRAINT fk_${ordersTable}_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE`;
 	const addPrimaryKeyForShipperTasksTableQuery = `ALTER TABLE ${shipperTasksTable}
 	ADD CONSTRAINT fk_${shipperTasksTable}_order_id_ FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE`
+	const addPrimaryKeyForScheduleTableQuery = `ALTER TABLE ${scheduleTable} ADD PRIMARY KEY (id)`;
+	const addPrimaryKeyForShipmentTableQuery = `ALTER TABLE ${shipmentTable} ADD PRIMARY KEY (shipment_id)`;
 
 	await pool.query(addPrimaryKeyForOrdersTableQuery);
 	await pool.query(addForeignKeyForOrdersTableQuery);
 	await pool.query(addPrimaryKeyForShipperTasksTableQuery);
+	await pool.query(addPrimaryKeyForScheduleTableQuery);
+	await pool.query(addPrimaryKeyForShipmentTableQuery);
 
 	if (successCreatedTable.length < 4) {
 		const missedTable = neccessaryTable.filter(table => !successCreatedTable.includes(table));
