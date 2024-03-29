@@ -101,7 +101,7 @@ const confirmCompletedTask = async (req, res) => {
             });
         }
 
-        const resultConfirmingCompletedTask = await driversService.confirmCompletedTask(req.body.id);
+        const resultConfirmingCompletedTask = await driversService.confirmCompletedTask(req.body);
         if (!resultConfirmingCompletedTask || resultConfirmingCompletedTask.affectedRows === 0) {
             return res.status(404).json({
                 error: true,

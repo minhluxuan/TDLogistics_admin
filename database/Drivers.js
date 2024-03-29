@@ -105,8 +105,11 @@ const assignNewTasks = async (shipment_ids, staff_id) => {
     });
 }
 
-const confirmCompletedTask = async (id) => {
-    return await dbUtils.deleteOne(pool, tasksTable, ["id"], [id]);
+const confirmCompletedTask = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    return await dbUtils.deleteOne(pool, tasksTable, fields, values);
 }
 
 module.exports = {
