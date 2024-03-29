@@ -14,7 +14,7 @@ const tasksTable = "driver_tasks";
 const pool = mysql.createPool(dbOptions).promise();
 
 const getTasks = async (conditions) => {
-    let query = `SELECT * FROM ${tasksTable} WHERE `;
+    let query = `SELECT * FROM ${tasksTable}`;
     
     const option = conditions.option;
 
@@ -24,35 +24,61 @@ const getTasks = async (conditions) => {
     const values = Object.values(conditions);
 
     if (fields && values && fields.length > 0 && values.length > 0) {
-        query += `${fields.map(field => `${field} = ?`).join(" AND ")}`;
+        query += ` WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
         query += " AND ";
+
+        if (option === 1) {
+            const today = moment(new Date()).format("YYYY-MM-DD");
+            query += `DATE(created_at) = ?`;
+            values.push(today);
+        }
+        else if (option === 2) {
+            const currentDate = new Date();
+    
+            const currentDayOfWeek = currentDate.getDay();
+    
+            const daysToAddForMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+            const daysToAddForSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
+    
+            const mondayOfTheWeek = new Date(currentDate);
+            mondayOfTheWeek.setDate(currentDate.getDate() + daysToAddForMonday);
+            const mondayOfTheWeekFormatted = moment(mondayOfTheWeek).format("YYYY-MM-DD");
+    
+            const sundayOfTheWeek = new Date(currentDate);
+            sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
+            const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
+    
+            query += `DATE(created_at) > ? AND DATE(created_at) < ?`
+            values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
+        }    
     }
-
-    if (option === 1) {
-        const today = moment(new Date()).format("YYYY-MM-DD");
-        query += `DATE(created_at) = ?`;
-        values.push(today);
+    else {
+        if (option === 1) {
+            const today = moment(new Date()).format("YYYY-MM-DD");
+            query += ` WHERE DATE(created_at) = ?`;
+            values.push(today);
+        }
+        else if (option === 2) {
+            const currentDate = new Date();
+    
+            const currentDayOfWeek = currentDate.getDay();
+    
+            const daysToAddForMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+            const daysToAddForSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
+    
+            const mondayOfTheWeek = new Date(currentDate);
+            mondayOfTheWeek.setDate(currentDate.getDate() + daysToAddForMonday);
+            const mondayOfTheWeekFormatted = moment(mondayOfTheWeek).format("YYYY-MM-DD");
+    
+            const sundayOfTheWeek = new Date(currentDate);
+            sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
+            const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
+    
+            query += ` WHERE DATE(created_at) > ? AND DATE(created_at) < ?`
+            values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
+        }
+    
     }
-    else if (option === 2) {
-        const currentDate = new Date();
-
-        const currentDayOfWeek = currentDate.getDay();
-
-        const daysToAddForMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-        const daysToAddForSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
-
-        const mondayOfTheWeek = new Date(currentDate);
-        mondayOfTheWeek.setDate(currentDate.getDate() + daysToAddForMonday);
-        const mondayOfTheWeekFormatted = moment(mondayOfTheWeek).format("YYYY-MM-DD");
-
-        const sundayOfTheWeek = new Date(currentDate);
-        sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
-        const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
-
-        query += `DATE(created_at) > ? AND DATE(created_at) < ?`
-        values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
-    }
-
     query += ` ORDER BY created_at DESC`;
     
     const result = (await pool.query(query, values))[0];

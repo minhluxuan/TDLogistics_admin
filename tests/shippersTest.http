@@ -19,10 +19,21 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:5000/api/v1/shippers/create_tasks
+Content-Type: application/json
+
+{
+    "shipment_id": "BC_71000_202422224138948",
+    "vehicle_id": "BC_71000_42H124768"
+}
+
+###
+
 POST http://localhost:5000/api/v1/shippers/get_tasks
 Content-Type: application/json
 
 {
+    "staff_id": "BC_71000_077204005689",
     "option": 1
 }
 

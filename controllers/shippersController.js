@@ -76,6 +76,7 @@ const createNewTask = async (req, res) => {
             message: `Phân việc cho shipper có mã ${staff_id} thành công.`,
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message,
@@ -94,17 +95,33 @@ const getTasks = async (req, res) => {
             });
         }
 
+        if (req.body.staff_id) {
+            const shipperIdSubParts = req.body.staff_id.split('_');
+            const staffIdSubParts = req.user.staff_id.split('_');
+
+            if (staffIdSubParts[0] !== shipperIdSubParts[0] || staffIdSubParts[1] !== shipperIdSubParts[1]) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Nhân viên có mã ${req.body.staff_id} không thuộc quyền kiểm soát của bưu cục ${req.user.agency_id}.`,
+                });
+            }
+        }
+
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
 
-        req.body.staff_id = req.user.staff_id;
+        if (["AGENCY_SHIPPER", "SHIPPER"].includes(req.user.role)) {
+            req.body.staff_id = req.user.staff_id;
+        }
+
         const resultGettingTasks = await shippersService.getTasks(req.body, postalCode);
         
         return res.status(200).json({
             error: false,
             data: resultGettingTasks,
-            message: `Lấy công việc của bưu tá có mã ${req.user.staff_id} thành công.`,
+            message: `Lấy công việc thành công.`,
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message,
@@ -157,14 +174,30 @@ const getHistory = async (req, res) => {
             });
         }
 
-        req.body.staff_id = req.user.staff_id;
+        if (req.body.staff_id) {
+            const shipperIdSubParts = req.body.staff_id.split('_');
+            const staffIdSubParts = req.user.staff_id.split('_');
+
+            if (staffIdSubParts[0] !== shipperIdSubParts[0] || staffIdSubParts[1] !== shipperIdSubParts[1]) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Nhân viên có mã ${req.body.staff_id} không thuộc quyền kiểm soát của bưu cục ${req.user.agency_id}.`,
+                });
+            }
+        }
+
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
+
+        if (["AGENCY_SHIPPER", "SHIPPER"].includes(req.user.role)) {
+            req.body.staff_id = req.user.staff_id;
+        }
+        
         const resultGettingHistory = await shippersService.getHistory(req.body, postalCode);
 
         return res.status(200).json({
             error: false,
             data: resultGettingHistory,
-            message: `Lấy lịch sử công việc của bưu tá có mã ${req.user.staff_id} thành công.`,
+            message: `Lấy lịch sử công việc thành công.`,
         });
     } catch (error) {
         return res.status(500).json({
