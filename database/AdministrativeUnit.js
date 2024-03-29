@@ -14,6 +14,10 @@ const provinceTable = "province";
 const districtTable = "district";
 const wardTable = "ward";
 
+const checkExistProvince = async (province) => {
+    return (await dbUtils.findOneIntersect(pool, provinceTable, ["province"], [province])).length > 0;
+}
+
 const getUnits = async (level, province, district) => {
     let result;
     switch (level) {
@@ -56,5 +60,6 @@ const getUnits = async (level, province, district) => {
 }
 
 module.exports = {
-    getUnits
+    getUnits,
+    checkExistProvince,
 }

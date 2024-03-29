@@ -1,0 +1,42 @@
+POST http://localhost:5000/api/v1/routes/create
+Content-Type: application/json
+
+{
+    "vehicle_id": "BC_70001_72H124767",
+    "source": "Thành phố Hồ Chí Minh",
+    "destination": "Tỉnh Bà Rịa - Vũng Tàu",
+    "departure_time": "17:00:00"
+}
+
+###
+
+POST http://localhost:5000/api/v1/routes/search
+Content-Type: application/json
+
+{
+    "from_departure_time": "12:59:30",
+    "to_departure_time": "18:27:58"
+}
+
+###
+
+POST http://localhost:5000/api/v1/routes/search
+Content-Type: application/json
+
+{
+    "from_departure_time": "20:59:30",
+    "to_departure_time": "17:27:58"
+}
+
+###
+
+PUT http://localhost:5000/api/v1/routes/update?id=2
+Content-Type: application/json
+
+{
+    "departure_time": "14:56:49"
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/routes/delete?id=1

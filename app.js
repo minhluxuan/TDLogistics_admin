@@ -33,6 +33,7 @@ const ordersRouter = require("./routes/ordersRoute");
 const shippersRouter = require("./routes/shippersRoute");
 const scheduleRouter = require("./routes/scheduleRoute");
 const administrativeRouter = require("./routes/administrativeRoute");
+const routesRouter = require("./routes/routeRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -54,7 +55,7 @@ app.set('view engine', 'jade');
 app.enable('trust proxy');
 
 // Chỉ định danh sách các trang web được phép truy cập
-const allowedOrigins = ['https://admin.tdlogistics.net.vn', 'https://app.tdlogistics.net.vn', 'http://localhost:5000', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', "https://admin-td-logistics-web.vercel.app"];
+const allowedOrigins = ['https://admin.tdlogistics.net.vn', 'https://app.tdlogistics.net.vn', 'https://delivery.tdlogistics.net.vn', 'http://localhost:5000', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'https://customer-merchant-web.vercel.app', 'https://testwebmerchant.vercel.app', "https://admin-td-logistics-web.vercel.app"];
 
 // Sử dụng cors middleware với tùy chọn chỉ cho phép các trang web trong danh sách
 app.use(cors({
@@ -146,6 +147,7 @@ app.use("/api/v1/orders", ordersRouter);
 app.use("/api/v1/shippers", shippersRouter);
 app.use("/api/v1/schedules", scheduleRouter);
 app.use("/api/v1/administrative", administrativeRouter);
+app.use("/api/v1/routes", routesRouter);
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({

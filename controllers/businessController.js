@@ -806,19 +806,20 @@ const getBusinessContract = async (req, res) => {
 		}
 
 		if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.body);
+			const resultGettingOneBusiness = await businessService.getOneBusinessUser(req.query);
 			if (!resultGettingOneBusiness || resultGettingOneBusiness.length <= 0) {
 				return res.status(404).json({
 					error: true,
 					message: `Người dùng doanh nghiệp có mã doanh nghiệp ${req.query.business_id} không tồn tại.`,
 				});
 			}
+
 			const business = resultGettingOneBusiness[0];
-			const contract = business.contract ? business.contract : null;
+			const contract = business.contract || null;console.log(contract);
 
 			if (contract) {
 				const filePath = path.join(__dirname, "..", "storage", "business_user", "document", "contract", contract);
-				if (fs.existsSync(filePath)) {
+				if (fs.existsSync(filePath)) {console.log("exist");
 					return res.status(200).sendFile(filePath);
 				}
 			}

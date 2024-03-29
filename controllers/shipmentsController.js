@@ -210,11 +210,22 @@ const getOrdersFromShipment = async (req, res) => {
                 });
             }
 
-            const result = await shipmentService.getOrdersFromShipment(resultGettingOneShipment[0]);
+            let order_ids;
+            try {
+                order_ids = resultGettingOneShipment[0].order_ids ? JSON.parse(resultGettingOneShipment[0].order_ids) : new Array();
+            } catch (error) {
+                return res.status(200).json({
+                    error: false,
+                    data: new Array(),
+                    message: `Lấy thông tin tất cả đơn hàng từ lô hàng có mã ${req.query.shipment_id} thành công.`,
+                });
+            }
+            console.log(order_ids);
+            const result = await shipmentService.getOrdersFromShipment(order_ids);
             
             return res.status(201).json({
                 error: false,
-                info: result,
+                data: result,
                 message: `Lấy thông tin tất cả đơn hàng từ lô hàng có mã ${req.query.shipment_id} thành công.`,
             });
         }
