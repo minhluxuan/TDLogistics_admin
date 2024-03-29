@@ -101,7 +101,7 @@ const createTablesForAgency = async (postal_code) => {
 		id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		order_id varchar(30) NOT NULL,
 		staff_id varchar(25) NOT NULL,
-		created_at datetime NOT NULL,
+		created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
 		completed_at datetime DEFAULT NULL,
 		completed tinyint(1) NOT NULL
 	  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`

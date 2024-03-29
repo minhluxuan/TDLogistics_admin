@@ -33,8 +33,7 @@ POST http://localhost:5000/api/v1/shippers/get_tasks
 Content-Type: application/json
 
 {
-    "staff_id": "BC_71000_077204005689",
-    "option": 1
+    "option": 0
 }
 
 ###

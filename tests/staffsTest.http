@@ -22,8 +22,8 @@ POST http://localhost:5000/api/v1/staffs/login
 Content-Type: application/json
 
 {
-    "username": "buucucquan1",
-    "password": "Buucucquan1@tdlogistics"
+    "username": "buucucquan11203",
+    "password": "yG9Z7iV5"
 }
 
 ### MANAGER
