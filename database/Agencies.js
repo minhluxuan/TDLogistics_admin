@@ -100,7 +100,7 @@ const createTablesForAgency = async (postal_code) => {
 	const createShipperTasksTable = `CREATE TABLE ${shipperTasksTable} (
 		id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		order_id varchar(30) NOT NULL,
-		shipper varchar(25) NOT NULL,
+		staff_id varchar(25) NOT NULL,
 		created_at datetime NOT NULL,
 		completed_at datetime DEFAULT NULL,
 		completed tinyint(1) NOT NULL
@@ -265,7 +265,7 @@ const locateAgencyInArea = async (choice, province, district, wards, agency_id, 
 		}
 	}
 
-	if (choice === 1) {console.log(province, district, wards);
+	if (choice === 1) {
 		const provinceSelectQuery = `SELECT ?? FROM ?? WHERE ?? = ? LIMIT 1`;
 		const provinceResultSelect = await pool.query(provinceSelectQuery, ["agency_ids", "province", "province", province]);
 
