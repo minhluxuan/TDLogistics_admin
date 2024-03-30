@@ -26,6 +26,13 @@ const createNewTask = async (req, res) => {
             });
         }
 
+        if (!resultGettingOneVehicle[0].transport_partner_id) {
+            return res.status(400).json({
+                error: true,
+                message: `Phương tiện phải thuộc sở hữu của một đối tác vận tải.`,
+            });
+        }
+
         const staff_id = resultGettingOneVehicle[0].staff_id;
         if (!staff_id) {
             return res.status(404).json({
