@@ -46,7 +46,7 @@ Content-Type: application/json
     "bank": "Sacombank",
     "individual_company": true,
     "company_name": "Công ty Cổ phần Bất động sản Tiến Dũng",
-    "tax_number": "0123456789",
+    "tax_number": "0123456789"
 }
 
 ###

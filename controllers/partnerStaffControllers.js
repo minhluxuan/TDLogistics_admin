@@ -45,7 +45,7 @@ const getAuthenticatedStaffInfo = async (req, res) => {
 
 		return res.status(200).json({
 			error: false,
-			info: resultGettingStaffInfo[0],
+			data: resultGettingStaffInfo[0],
 			message: `Lấy thông tin nhân viên có mã ${req.user.staff_id} thành công.`,
 		});
 	} catch (error) {
