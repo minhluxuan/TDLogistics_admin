@@ -660,6 +660,142 @@ const getImages = async (req, res) => {
     }
 }
 
+const updateSignature = async (req, res) => {
+    try {
+        if (!req.file || req.file.length === 0) {
+            return res.status(400).json({
+                error: true,
+                message: "Ảnh không được để trống.",
+            });
+        }
+		const { error } = orderValidation.validateQueryUpdatingOrderImages(req.query);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+
+        const resultGettingOneShipperTasks = await shippersService.getTasks({ order_id: req.query.order_id, staff_id: req.user.staff_id }, postalCode);
+        if (!resultGettingOneShipperTasks || resultGettingOneShipperTasks.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+
+        if (resultGettingOneShipperTasks[0].completed) {
+            return res.status(409).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không còn khả năng cập nhật.`,
+            });
+        }
+
+        const resultGettingOneOrder = await ordersService.getOneOrder({ order_id: req.query.order_id });
+        if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+    
+        const filename = req.file.filename;
+      
+        const updatedImages = new Object();
+        if (req.query.type === "send") {
+            updatedImages.send_signature = filename;
+        }
+        else if (req.query.type === "receive") {
+            updatedImages.receive_signature = filename;
+        }
+        
+        const resultUpdatingOneOrderInAgency = await ordersService.updateOrder(updatedImages, { order_id: req.query.order_id }, postalCode);
+        if (!resultUpdatingOneOrderInAgency || resultUpdatingOneOrderInAgency.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+        await ordersService.updateOrder(updatedImages, { order_id: req.query.order_id });
+        
+        const tempFolderPath = path.join("storage", "order", "image", "signature_temp");
+        if (!fs.existsSync(tempFolderPath)) {
+            fs.mkdirSync(tempFolderPath);
+        }
+        
+        const officialFolderPath = path.join("storage", "order", "image", "signature");
+        if (!fs.existsSync(officialFolderPath)) {
+            fs.mkdirSync(officialFolderPath);
+        }
+
+        const tempFilePath = path.join(tempFolderPath, filename);
+		const officialFilePath = path.join(officialFolderPath, filename);
+        fs.renameSync(tempFilePath, officialFilePath);
+
+		return res.status(201).json({
+			error: false,
+			message: `Cập nhật chữ kí cho đơn hàng ${req.query.order_id} thành công.`,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
+const getSignature = async (req, res) => {
+    try {
+        const { error } = orderValidation.validateQueryUpdatingOrderImages(req.query);
+
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const resultGettingOneOrder = await ordersService.getOneOrder({ order_id: req.query.order_id });
+        if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+
+        const order = resultGettingOneOrder[0];
+        let fileName;
+        if(req.query.type === "send") {
+            fileName = order.send_signature;
+        } else if(req.query.type === "receive") {
+            fileName = order.receive_signature;
+        }
+    
+        if (fileName) {
+            const file = path.join(__dirname, "..", "storage", "order", "image", "signature", fileName);
+            if (fs.existsSync(file)) {
+                    return res.status(200).sendFile(file);
+            }
+        }
+
+        return res.status(404).json({
+            error: true,
+            message: "Không tìm thấy dữ liệu",
+        });
+    } catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+    
+}
+
 module.exports = {
     checkExistOrder,
     getOrders,
@@ -671,4 +807,6 @@ module.exports = {
     calculateServiceFee,
     updateImages,
     getImages,
+    updateSignature,
+    getSignature,
 }
