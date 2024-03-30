@@ -42,7 +42,7 @@ PATCH http://localhost:5000/api/v1/shippers/confirm_completed
 Content-Type: application/json
 
 {
-    "id": 14
+    "id": 1
 }
 
 ###
