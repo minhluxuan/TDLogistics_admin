@@ -33,6 +33,30 @@ const checkExistPartnerStaff = async (req, res) => {
 	}
 };
 
+const getAuthenticatedStaffInfo = async (req, res) => {
+	try {
+		const resultGettingStaffInfo = await partnerStaffsService.getOnePartnerStaff({ staff_id: req.user.staff_id });
+		if (!resultGettingStaffInfo || resultGettingStaffInfo.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã ${req.user.staff_id} không tồn tại.`,
+			});
+		}
+
+		return res.status(200).json({
+			error: false,
+			info: resultGettingStaffInfo[0],
+			message: `Lấy thông tin nhân viên có mã ${req.user.staff_id} thành công.`,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
 const getPartnerStaffs = async (req, res) => {
 	const paginationConditions = { rows: 0, page: 0 };
 
@@ -984,6 +1008,7 @@ const getPartnerLicenseAfter = async (req, res) => {
 module.exports = {
 	checkExistPartnerStaff,
 	createNewPartnerStaff,
+	getAuthenticatedStaffInfo,
 	getPartnerStaffs,
 	updatePartnerStaffInfo,
 	deletePartnerStaff,

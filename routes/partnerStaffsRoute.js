@@ -121,6 +121,7 @@ router.post("/login", passport.authenticate("partnerStaffLogin"), (req, res, nex
     })(req, res, next);
 });
 router.get("/check", partnerStaffsController.checkExistPartnerStaff);
+router.get("/get_info", partnerStaffsController.getAuthenticatedStaffInfo);
 router.post(
     "/create",
     auth.isAuthenticated(),
