@@ -69,7 +69,6 @@ const getAgencies = async (req, res) => {
 			}
 			result.company_name = agencyCompanyInfo[0].company_name;
 			result.tax_number = agencyCompanyInfo[0].tax_number;
-			result.business_number = agencyCompanyInfo[0].business_number;
 			result.license = agencyCompanyInfo[0].license ? JSON.parse(agencyCompanyInfo[0].license) : new Array();
 		}
   
@@ -131,7 +130,6 @@ const getAgencies = async (req, res) => {
 					if (agencyCompanyInfo.length > 0) {
 						agency.company_name = agencyCompanyInfo[0].company_name;
 						agency.tax_number = agencyCompanyInfo[0].tax_number;
-						agency.business_number = agencyCompanyInfo[0].business_number;
 						agency.license = agencyCompanyInfo[0].license ? JSON.parse(agencyCompanyInfo[0].license) : new Array();
 					}
 			  	}
@@ -204,7 +202,6 @@ const createNewAgency = async (req, res) => {
 			const tempAgencyCompany = new Object({
 				company_name: req.body.company_name || undefined,
 				tax_number: req.body.tax_number || undefined,
-				business_number: req.body.business_number || undefined,
 			});
 
 			const { error } = agencyValidation.validateCreatingAgencyCompany(tempAgencyCompany);
@@ -342,7 +339,6 @@ const createNewAgency = async (req, res) => {
 				agency_id: agencyId,
 				company_name: req.body.company_name,
 				tax_number: req.body.tax_number,
-				business_number: req.body.business_number,
 				license: JSON.stringify(licenseseImgs)
 			});
 

@@ -47,7 +47,6 @@ Content-Type: application/json
     "individual_company": true,
     "company_name": "Công ty Cổ phần Bất động sản Tiến Dũng",
     "tax_number": "0123456789",
-    "business_number": "01234"
 }
 
 ###
