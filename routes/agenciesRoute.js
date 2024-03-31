@@ -86,7 +86,7 @@ router.delete(
     auth.isActive(),
     agenciesController.deleteAgency
 );
-router.put(
+router.post(
     "/update_agency_company_license",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"]),
