@@ -101,7 +101,7 @@ router.put(
     auth.isActive(),
     agenciesController.updateAgencyCompany
 );
-router.post(
+router.get(
     "/search_agency_company_license",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "HUMAN_RESOURCE_MANAGER", "MANAGER", "AGENCY_MANAGER"]),

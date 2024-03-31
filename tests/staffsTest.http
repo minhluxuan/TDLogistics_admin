@@ -22,8 +22,8 @@ POST https://api.tdlogistics.net.vn/api/v1/staffs/login
 Content-Type: application/json
 
 {
-    "username": "buucucquan1",
-    "password": "Buucucquan1@tdlogistics"
+    "username": "buucucquan11203",
+    "password": "yG9Z7iV5"
 }
 
 ### MANAGER

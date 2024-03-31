@@ -98,10 +98,10 @@ const createTablesForAgency = async (postal_code) => {
 	const createOrdersTable = `CREATE TABLE ${ordersTable} AS SELECT * FROM orders WHERE 1 = 0`;
 	const createShipmentTable = `CREATE TABLE ${shipmentTable} AS SELECT * FROM shipment WHERE 1 = 0`;
 	const createShipperTasksTable = `CREATE TABLE ${shipperTasksTable} (
-		id int(11) NOT NULL,
+		id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		order_id varchar(30) NOT NULL,
-		shipper varchar(25) NOT NULL,
-		created_at datetime NOT NULL,
+		staff_id varchar(25) NOT NULL,
+		created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
 		completed_at datetime DEFAULT NULL,
 		completed tinyint(1) NOT NULL
 	  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`
@@ -140,10 +140,14 @@ const createTablesForAgency = async (postal_code) => {
 	const addForeignKeyForOrdersTableQuery = `ALTER TABLE ${ordersTable} ADD CONSTRAINT fk_${ordersTable}_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE`;
 	const addPrimaryKeyForShipperTasksTableQuery = `ALTER TABLE ${shipperTasksTable}
 	ADD CONSTRAINT fk_${shipperTasksTable}_order_id_ FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE`
+	const addPrimaryKeyForScheduleTableQuery = `ALTER TABLE ${scheduleTable} ADD PRIMARY KEY (id)`;
+	const addPrimaryKeyForShipmentTableQuery = `ALTER TABLE ${shipmentTable} ADD PRIMARY KEY (shipment_id)`;
 
 	await pool.query(addPrimaryKeyForOrdersTableQuery);
 	await pool.query(addForeignKeyForOrdersTableQuery);
 	await pool.query(addPrimaryKeyForShipperTasksTableQuery);
+	await pool.query(addPrimaryKeyForScheduleTableQuery);
+	await pool.query(addPrimaryKeyForShipmentTableQuery);
 
 	if (successCreatedTable.length < 4) {
 		const missedTable = neccessaryTable.filter(table => !successCreatedTable.includes(table));
@@ -261,7 +265,7 @@ const locateAgencyInArea = async (choice, province, district, wards, agency_id, 
 		}
 	}
 
-	if (choice === 1) {console.log(province, district, wards);
+	if (choice === 1) {
 		const provinceSelectQuery = `SELECT ?? FROM ?? WHERE ?? = ? LIMIT 1`;
 		const provinceResultSelect = await pool.query(provinceSelectQuery, ["agency_ids", "province", "province", province]);
 

@@ -16,11 +16,9 @@ POST http://localhost:5000/api/v1/agencies/create
 Content-Type: application/json
 
 {
-    "username": "buucucquan1",
-    "user_password": "Buucucquan1@tdlogistics",
     "user_fullname": "Lữ Xuân Minh",
     "user_phone_number": "0981430417",
-    "user_email": "minh.luxuanhcmc@hcmut.edu.vn",
+    "user_email": "minh.luxuanhcmut@hcmut.edu.vn",
     "user_date_of_birth": "2004-03-03",
     "user_cccd": "077204005691",
     "user_province": "Tỉnh Bà Rịa - Vũng Tàu",
@@ -42,14 +40,13 @@ Content-Type: application/json
     "longitude": 106.0342813,
     "managed_wards": ["Phường Phạm Ngũ Lão", "Phường Đa Kao"],
     "phone_number": "0981430417",
-    "email": "buucucquan1@tdlogistics.com",
+    "email": "buucucquan1@gmail.com",
     "commission_rate": 0.4,
     "bin": "050138319579",
     "bank": "Sacombank",
     "individual_company": true,
     "company_name": "Công ty Cổ phần Bất động sản Tiến Dũng",
-    "tax_number": "0123456789",
-    "business_number": "01234"
+    "tax_number": "0123456789"
 }
 
 ###

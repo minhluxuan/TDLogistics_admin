@@ -5,6 +5,8 @@ const logger = require("../lib/logger");
 const utils = require("../lib/utils");
 const validation = require("../lib/validation");
 const archiver = require("archiver");
+const randomstring = require("randomstring");
+const mailService = require("../services/mailService");
 const path = require("path");
 const fs = require("fs");
 const agencyValidation = new validation.AgencyValidation();
@@ -68,7 +70,6 @@ const getAgencies = async (req, res) => {
 			}
 			result.company_name = agencyCompanyInfo[0].company_name;
 			result.tax_number = agencyCompanyInfo[0].tax_number;
-			result.business_number = agencyCompanyInfo[0].business_number;
 			result.license = agencyCompanyInfo[0].license ? JSON.parse(agencyCompanyInfo[0].license) : new Array();
 		}
   
@@ -130,7 +131,6 @@ const getAgencies = async (req, res) => {
 					if (agencyCompanyInfo.length > 0) {
 						agency.company_name = agencyCompanyInfo[0].company_name;
 						agency.tax_number = agencyCompanyInfo[0].tax_number;
-						agency.business_number = agencyCompanyInfo[0].business_number;
 						agency.license = agencyCompanyInfo[0].license ? JSON.parse(agencyCompanyInfo[0].license) : new Array();
 					}
 			  	}
@@ -203,7 +203,6 @@ const createNewAgency = async (req, res) => {
 			const tempAgencyCompany = new Object({
 				company_name: req.body.company_name || undefined,
 				tax_number: req.body.tax_number || undefined,
-				business_number: req.body.business_number || undefined,
 			});
 
 			const { error } = agencyValidation.validateCreatingAgencyCompany(tempAgencyCompany);
@@ -228,13 +227,33 @@ const createNewAgency = async (req, res) => {
 
 		const agencyId = req.body.type + "_" + req.body.postal_code + "_" + req.body.user_cccd;
 
-		req.body.user_password = utils.hash(req.body.user_password);
+		const defaultUsername = req.body.email.split('@')[0];
+		let username;
+		while (true) {
+			const randomString = randomstring.generate({
+				length: 4,
+				charset: "numeric",
+				min: 1000,
+				max: 9999,
+			});
+			username = defaultUsername + randomString;
+
+			if (!(await staffsService.checkExistStaff({ username })).existed) {
+				break;
+			}
+		}
+
+		const password = randomstring.generate({
+			length: 8,
+			charset: 'alphanumeric',
+		});
+		const hashedPassword = utils.hash(password);
 
 		const newStaff = new Object({
 			agency_id: agencyId,
 			staff_id: agencyId,
-			username: req.body.username,
-			password: req.body.user_password,
+			username: username,
+			password: hashedPassword,
 			fullname: req.body.user_fullname || null,
 			phone_number: req.body.user_phone_number || null,
 			email: req.body.user_email || null,
@@ -321,7 +340,6 @@ const createNewAgency = async (req, res) => {
 				agency_id: agencyId,
 				company_name: req.body.company_name,
 				tax_number: req.body.tax_number,
-				business_number: req.body.business_number,
 				license: JSON.stringify(licenseseImgs)
 			});
 
@@ -354,6 +372,17 @@ const createNewAgency = async (req, res) => {
 					}
 				});
 		  	}
+
+			mailService.sendMail({
+				from: process.env.MAIL_AUTH_USER,
+				to: req.body.user_email,
+				subject: "Cung cấp thông tin tài khoản đại lý cho ứng dụng TDlogistics",
+				text: "Xin chào " + req.body.user_fullname + ", công ty Chuyển phát nhanh TDlogistics rất hân hạnh được hợp tác với bạn. " + 
+				"Dưới đây là thông tin tài khoản cho đại lý của bạn:\n\n" + 
+				"username: " + username + '\n' +
+				"password: " + password + '\n' +
+				"Lưu ý: Vui lòng đổi mật khẩu để kích hoạt tài khoản."
+			});
 
 			return res.status(200).json({
 				error: false,

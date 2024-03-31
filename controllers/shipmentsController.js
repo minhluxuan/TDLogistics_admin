@@ -103,7 +103,6 @@ const createNewShipment = async (req, res) => {
             message: error.message
         });
     }
-    
 }
 
 const updateShipment = async (req, res) => {

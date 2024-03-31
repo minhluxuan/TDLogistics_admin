@@ -1,0 +1,26 @@
+POST http://localhost:5000/api/v1/drivers/create_task
+Content-Type: application/json
+
+{
+    "shipment_ids": ["BC_78300_202428205350212", "BC_78300_202428205351331"],
+    "vehicle_id": "BC_70001_72H124767"
+}
+
+###
+
+POST http://localhost:5000/api/v1/drivers/get_tasks
+Content-Type: application/json
+
+{
+    "staff_id": "BC_70001_077204005691",
+    "option": 10
+}
+
+###
+
+DELETE http://localhost:5000/api/v1/drivers/confirm_completed
+Content-Type: application/json
+
+{
+    "id": 1
+}

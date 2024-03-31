@@ -15,50 +15,84 @@ const pool = mysql.createPool(dbOptions).promise();
 
 const getTasks = async (conditions, postal_code) => {
     const shipperTasksTable = postal_code + '_' + defaultTasksTable;
-    const queryParams = [conditions.staff_id, false];
 
-    let query = `SELECT s.*, o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ? AND s.completed = ?`;
+    let query = `SELECT * FROM ${shipperTasksTable}`;
+
+    const option = conditions.option;
+
+    delete conditions.option;
+
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    if (fields && values && fields.length > 0 && values.length > 0) {
+        query += ` WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+
+        if (option === 1) {
+            const today = moment(new Date()).format("YYYY-MM-DD");
+            query += " AND DATE(created_at) = ?";
+            values.push(today);
+        }
+        else if (option === 2) {
+            const currentDate = new Date();
     
-    if (conditions.option === 1) {
-        const today = moment(new Date()).format("YYYY-MM-DD");
-        query += ` AND DATE(s.created_at) = ?`;
-        queryParams.push(today);
-    }
-    else if (conditions.option === 2) {
-        const currentDate = new Date();
-
-        const currentDayOfWeek = currentDate.getDay();
-
-        const daysToAddForMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-        const daysToAddForSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
-
-        const mondayOfTheWeek = new Date(currentDate);
-        mondayOfTheWeek.setDate(currentDate.getDate() + daysToAddForMonday);
-        const mondayOfTheWeekFormatted = moment(mondayOfTheWeek).format("YYYY-MM-DD");
-
-        const sundayOfTheWeek = new Date(currentDate);
-        sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
-        const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
-
-        query += ` AND DATE(s.created_at) > ? AND DATE(s.created_at) < ?`
-        queryParams.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
-    }
-    query += ` ORDER BY s.created_at DESC`;
+            const currentDayOfWeek = currentDate.getDay();
     
-    const result = (await pool.query(query, queryParams))[0];
+            const daysToAddForMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+            const daysToAddForSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
+    
+            const mondayOfTheWeek = new Date(currentDate);
+            mondayOfTheWeek.setDate(currentDate.getDate() + daysToAddForMonday);
+            const mondayOfTheWeekFormatted = moment(mondayOfTheWeek).format("YYYY-MM-DD");
+    
+            const sundayOfTheWeek = new Date(currentDate);
+            sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
+            const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
+    
+            query += " AND DATE(created_at) > ? AND DATE(created_at) < ?";
+            values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
+        }
+    }
+    else {
+        if (option === 1) {
+            const today = moment(new Date()).format("YYYY-MM-DD");
+            query += " WHERE DATE(created_at) = ?";
+            values.push(today);
+        }
+        else if (option === 2) {
+            const currentDate = new Date();
+    
+            const currentDayOfWeek = currentDate.getDay();
+    
+            const daysToAddForMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+            const daysToAddForSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
+    
+            const mondayOfTheWeek = new Date(currentDate);
+            mondayOfTheWeek.setDate(currentDate.getDate() + daysToAddForMonday);
+            const mondayOfTheWeekFormatted = moment(mondayOfTheWeek).format("YYYY-MM-DD");
+    
+            const sundayOfTheWeek = new Date(currentDate);
+            sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
+            const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
+    
+            query += " WHERE DATE(created_at) > ? AND DATE(created_at) < ?";
+            values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
+        }
+    }
+    query += ` ORDER BY created_at DESC`;
+    
+    const result = (await pool.query(query, values))[0];
 
     if (!result) {
         throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
     }
 
-    for (const elm of result) {
-        try {
-            if (elm.journey) {
-                elm.journey = JSON.parse(elm.journey);
-            }
-        } catch (error) {
-            // Nothing to do
+    for (const task of result) {
+        const order = (await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [task.order_id]))[0];
+        if (order.journey) {
+            delete order.journey;
         }
+        task.order = order;
     }
 
     return result;
@@ -66,7 +100,6 @@ const getTasks = async (conditions, postal_code) => {
 
 const assignNewTasks = async (order_ids, staff_id, postal_code) => {
     const orderIdsSet = new Set(order_ids);
-    const createdAt = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
     let acceptedNumber = 0;
     const acceptedArray = new Array();
@@ -76,7 +109,7 @@ const assignNewTasks = async (order_ids, staff_id, postal_code) => {
     const tasksTable = postal_code + '_' + defaultTasksTable;
     for (const order_id of orderIdsSet) {
         try {
-            const resultCreatingNewTask = await dbUtils.insert(pool, tasksTable, ["order_id", "shipper", "created_at", "completed"], [order_id, staff_id, createdAt, false]);
+            const resultCreatingNewTask = await dbUtils.insert(pool, tasksTable, ["order_id", "staff_id", "completed"], [order_id, staff_id, false]);
             if (resultCreatingNewTask && resultCreatingNewTask.affectedRows > 0) {
                 acceptedNumber++;
                 acceptedArray.push(order_id);
@@ -100,68 +133,115 @@ const assignNewTasks = async (order_ids, staff_id, postal_code) => {
 }
 
 const confirmCompletedTask = async (id, staff_id, completedTime, postal_code) => {
-    return await dbUtils.updateOne(pool, postal_code + '_' + defaultTasksTable, ["completed_at", "completed"], [completedTime, true], ["id", "shipper", "completed"], [id, staff_id, false]);
+    return await dbUtils.updateOne(pool, postal_code + '_' + defaultTasksTable, ["completed_at", "completed"], [completedTime, true], ["id", "staff_id", "completed"], [id, staff_id, false]);
 }
 
 const getHistory = async (conditions, postal_code) => {
     const shipperTasksTable = postal_code + '_' + defaultTasksTable;
-    const queryParams = [conditions.staff_id];
-
-    let query = `SELECT s.*, o.* FROM orders AS o JOIN ${shipperTasksTable} as s ON o.order_id = s.order_id WHERE s.shipper = ?`;
     
-    if (conditions.option === 1) {
-        const today = moment(new Date()).format("YYYY-MM-DD");
-        query += ` AND DATE(s.created_at) = ?`;
-        queryParams.push(today);
-    }
-    else if (conditions.option === 2) {
-        const currentDate = new Date();
+    let query = `SELECT * FROM ${shipperTasksTable}`;
 
-        const currentDayOfWeek = currentDate.getDay();
+    const option = conditions.option;
 
-        const daysToAddForMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-        const daysToAddForSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
+    delete conditions.option;
 
-        const mondayOfTheWeek = new Date(currentDate);
-        mondayOfTheWeek.setDate(currentDate.getDate() + daysToAddForMonday);
-        const mondayOfTheWeekFormatted = moment(mondayOfTheWeek).format("YYYY-MM-DD");
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
 
-        const sundayOfTheWeek = new Date(currentDate);
-        sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
-        const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
+    if (fields && values && fields.length > 0 && values.length > 0) {
+        query += ` WHERE ${fields.map(field => `${field} = ?`).join(" AND ")}`;
 
-        query += ` AND DATE(s.created_at) > ? AND DATE(s.created_at) < ?`
-        queryParams.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
-    }
-    else if (conditions.option === 3) {
-        const currentDate = new Date();
-        const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-
-        // Lấy ngày cuối tháng của thời điểm hiện tại
-        const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-
-        const firstDayOfMonthFormatted = moment(firstDayOfMonth).format("YYYY-MM-DD");
-        const lastDayOfMonthFormatted = moment(lastDayOfMonth).format("YYYY-MM-DD");
-
-        query += ` AND DATE(s.created_at) > ? AND DATE(s.created_at) < ?`
-        queryParams.push(firstDayOfMonthFormatted, lastDayOfMonthFormatted);
-    }
-    query += ` ORDER BY s.created_at DESC`;
+        if (option === 1) {
+            const today = moment(new Date()).format("YYYY-MM-DD");
+            query += " AND DATE(created_at) = ?";
+            values.push(today);
+        }
+        else if (option === 2) {
+            const currentDate = new Date();
     
-    const result = (await pool.query(query, queryParams))[0];
+            const currentDayOfWeek = currentDate.getDay();
+    
+            const daysToAddForMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+            const daysToAddForSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
+    
+            const mondayOfTheWeek = new Date(currentDate);
+            mondayOfTheWeek.setDate(currentDate.getDate() + daysToAddForMonday);
+            const mondayOfTheWeekFormatted = moment(mondayOfTheWeek).format("YYYY-MM-DD");
+    
+            const sundayOfTheWeek = new Date(currentDate);
+            sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
+            const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
+    
+            query += " AND DATE(created_at) > ? AND DATE(created_at) < ?";
+            values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
+        }
+        else if (option === 3) {
+            const currentDate = new Date();
+            const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    
+            // Lấy ngày cuối tháng của thời điểm hiện tại
+            const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    
+            const firstDayOfMonthFormatted = moment(firstDayOfMonth).format("YYYY-MM-DD");
+            const lastDayOfMonthFormatted = moment(lastDayOfMonth).format("YYYY-MM-DD");
+    
+            query += " AND DATE(created_at) > ? AND DATE(created_at) < ?";
+            values.push(firstDayOfMonthFormatted, lastDayOfMonthFormatted);
+        }
+    }
+    else {
+        if (option === 1) {
+            const today = moment(new Date()).format("YYYY-MM-DD");
+            query += " WHERE DATE(created_at) = ?";
+            values.push(today);
+        }
+        else if (option === 2) {
+            const currentDate = new Date();
+    
+            const currentDayOfWeek = currentDate.getDay();
+    
+            const daysToAddForMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+            const daysToAddForSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
+    
+            const mondayOfTheWeek = new Date(currentDate);
+            mondayOfTheWeek.setDate(currentDate.getDate() + daysToAddForMonday);
+            const mondayOfTheWeekFormatted = moment(mondayOfTheWeek).format("YYYY-MM-DD");
+    
+            const sundayOfTheWeek = new Date(currentDate);
+            sundayOfTheWeek.setDate(currentDate.getDate() + daysToAddForSunday);
+            const sundayOfTheWeekFormatted = moment(sundayOfTheWeek).format("YYYY-MM-DD");
+    
+            query += " WHERE DATE(created_at) > ? AND DATE(created_at) < ?";
+            values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
+        }
+        else if (option === 3) {
+            const currentDate = new Date();
+            const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    
+            // Lấy ngày cuối tháng của thời điểm hiện tại
+            const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    
+            const firstDayOfMonthFormatted = moment(firstDayOfMonth).format("YYYY-MM-DD");
+            const lastDayOfMonthFormatted = moment(lastDayOfMonth).format("YYYY-MM-DD");
+    
+            query += " WHERE DATE(created_at) > ? AND DATE(created_at) < ?";
+            values.push(firstDayOfMonthFormatted, lastDayOfMonthFormatted);
+        }
+    }
+    query += ` ORDER BY created_at DESC`;
+    
+    const result = (await pool.query(query, values))[0];
 
     if (!result) {
         throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
     }
 
-    for (const elm of result) {
-        try {
-            if (elm.journey) {
-                elm.journey = JSON.parse(elm.journey);
-            }
-        } catch (error) {
-            // Nothing to do
+    for (const task of result) {
+        const order = (await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [task.order_id]))[0];
+        if (order.journey) {
+            delete order.journey;
         }
+        task.order = order;
     }
 
     return result;
