@@ -99,7 +99,24 @@ const getTasks = async (req, res) => {
 
 const confirmCompletedTask = async (req, res) => {
     try {
-        const { error } = driversValidation.validateConfirmingCompletedTasks(req.body);
+        try {
+            if (req.query.id) {
+                req.query.id = parseInt(req.query.id);
+            }
+            else {
+                return res.status(400).json({
+                    error: true,
+                    message: "Trường id là bắt buộc."
+                });
+            }
+        } catch (error) {
+            return res.status(400).json({
+                error: true,
+                message: "Trường id phải là một số.",
+            });
+        }
+
+        const { error } = driversValidation.validateConfirmingCompletedTasks(req.query);
 
         if (error) {
             return res.status(400).json({
@@ -108,7 +125,7 @@ const confirmCompletedTask = async (req, res) => {
             });
         }
 
-        const resultConfirmingCompletedTask = await driversService.confirmCompletedTask(req.body);
+        const resultConfirmingCompletedTask = await driversService.confirmCompletedTask(req.query);
         if (!resultConfirmingCompletedTask || resultConfirmingCompletedTask.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
