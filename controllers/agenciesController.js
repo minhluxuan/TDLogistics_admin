@@ -7,7 +7,8 @@ const validation = require("../lib/validation");
 const archiver = require("archiver");
 const randomstring = require("randomstring");
 const mailService = require("../services/mailService");
-
+const path = require("path");
+const fs = require("fs");
 const agencyValidation = new validation.AgencyValidation();
 
 const agencyCannotBeAffected = ["TD_00000_077165007713"];
@@ -741,7 +742,7 @@ const updateLicenseAgencyCompany = async (req, res) => {
 		const folderPath = path.join("storage", "agency_company", "license", `${req.query.agency_id}`)
 		if (fs.existsSync(folderPath))
 		{
-			fs.removeSync(folderPath);
+			fs.rmdirSync(folderPath, { recursive: true });
 		}
 
 		const tempLicenseFolder = path.join("storage", "agency_company", "license_temp");
