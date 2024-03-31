@@ -6,7 +6,7 @@ const transportPartnerService = require("../services/transportPartnerService");
 const shippersService = require("../services/shippersService");
 const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
-
+const agencyService = require("../services/agenciesService");
 const checkExistShipment = async (req, res) => {
     try {
         const { error } = shipmentRequestValidation.validateShipmentID(req.query);
@@ -45,18 +45,33 @@ const createNewShipment = async (req, res) => {
             });
         }
 
-        if (req.body.hasOwnProperty("transport_partner_id")) {
-            if (!(await transportPartnerService.checkExistPartner({ transport_partner_id: req.body.transport_partner_id }))) {
+        if (req.body.hasOwnProperty("agency_destination")) {
+            const agency_destination = await agencyService.getOneAgency({ agency_name: req.body.agency_destination });
+            if(!agency_destination || agency_destination.length === 0) {
                 return res.status(404).json({
                     error: true,
-                    message: `Đối tác vận tải có mã đối tác ${req.body.transport_partner_id} không tồn tại.`,
+                    message: "Không tìm thấy Bưu cục đích."
                 });
             }
+
+            req.body.agency_id_dest = agency_destination[0].agency_id;
+            req.body.lat_destination = agency_destination[0].latitude;
+            req.body.long_destination = agency_destination[0].longitude;
+            delete req.body.agency_destination;
         }
 
+        const agency_source = await agencyService.getOneAgency({ agency_id: req.user.agency_id });
+        if(!agency_source || agency_source.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: "Không tìm thấy Bưu cục phát."
+            });
+        }
         const areaAgencyIdSubParts = req.user.agency_id.split('_');
         req.body.shipment_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + createdTime.getFullYear().toString() + createdTime.getMonth().toString() + createdTime.getDate().toString() + createdTime.getHours().toString() + createdTime.getMinutes().toString() + createdTime.getSeconds().toString() + createdTime.getMilliseconds().toString();
         req.body.agency_id = req.user.agency_id;
+        req.body.lat_source = agency_source[0].latitude;
+        req.body.long_source = agency_source[0].longitude;
 
         if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
             const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
