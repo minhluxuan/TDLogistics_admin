@@ -89,6 +89,47 @@ const orderImagesUpload = multer({
     fileFilter: orderImagesFileFilter,
 });
 
+const ordersSignatureStorage = multer.diskStorage({	
+    destination: async function (req, file, done) {
+        const folderPath = path.join("storage", "order", "image", "signature_temp");
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
+        }
+        
+        return done(null, folderPath);
+    },
+
+    filename: function (req, file, done) {
+        done(null,  Date.now() + "_" + file.originalname);
+    }
+});
+
+const ordersSignatureFilter = (req, file, done) => {
+    if (!file) {
+        return done(new Error("File không tồn tại."));
+    }
+
+    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png") { 
+       return done(new Error("Hình ảnh không hợp lệ."));
+    }
+
+    const maxFileSize = 5 * 1024 * 1024;
+    if (file.size > maxFileSize) {
+        done(new Error("File có kích thước quá lớn. Tối đa 5MB được cho phép"));
+    }
+
+    if (file.originalname.length > 100) {
+        done(new Error("Tên file quá dài. Tối đa 100 ký tự được cho phép."));
+    }
+
+    return done(null, true);
+};
+
+const ordersSignatureUpload = multer({
+    storage: ordersSignatureStorage,
+    fileFilter: ordersSignatureFilter,
+});
+
 router.get(
     "/check",
     ordersController.checkExistOrder
@@ -100,6 +141,12 @@ router.post(
     "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER", 
     "AGENCY_SHIPPER", "PARTNER_SHIPPER", "SHIPPER"]),
     ordersController.getOrders);
+router.post(
+    "/calculatefee",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["USER", "ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
+    ordersController.calculateServiceFee
+)
 router.post(
     "/check_file_format",
     auth.isAuthenticated(),
@@ -140,4 +187,12 @@ router.post("/update_images", auth.isAuthenticated(), auth.isAuthorized(["SHIPPE
 router.get("/get_images", auth.isAuthenticated(), auth.isActive(), ordersController.getImages);
 //router.post("/agency_create", ordersController.createOrderForAgency);
 
+router.post("/signature",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER", "SHIPPER", "AGENCY_SHIPPER"]),
+    auth.isActive(),
+    ordersSignatureUpload.single("signature"),
+    ordersController.updateSignature
+);
+router.get("/signature", auth.isAuthenticated(), auth.isActive(), ordersController.getSignature);
 module.exports = router;

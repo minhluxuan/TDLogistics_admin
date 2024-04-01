@@ -36,7 +36,7 @@ try {
                         
                         info.user_id = socket.request.user.user_id;
                         info.phone_number_sender = socket.request.user.phone_number;
-                        info.name_sender = socket.request.user.fullname;
+                        // info.name_sender = socket.request.user.fullname;
                         info.status_code = servicesStatus.processing.code;
                     }
                     else if (["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
@@ -73,7 +73,7 @@ try {
 const createNewOrder = async (socket, info, orderTime) => {
     try {
         const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);   
-
+        
         info.journey = JSON.stringify(new Array());
         const agencies = resultFindingManagedAgency.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
@@ -93,10 +93,10 @@ const createNewOrder = async (socket, info, orderTime) => {
             optionService = "T60";
             info.service_type = "CPN";
         }
-
         info.fee = servicesFee.calculteFee(info.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         
+        console.log(info.fee, mass, distance);
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
         if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
@@ -120,36 +120,29 @@ const createNewOrder = async (socket, info, orderTime) => {
 }
 
 const calculateServiceFee = async (req, res) => {
-    try {
-        const { error } = orderValidation.validateCalculatingFee(req.body);
+    try{
+        if((["USER", "ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]).includes(req.user.role)) {
+            const provinceSource = req.body.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
+            const provinceDest = req.body.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
 
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: error.message,
+            const mass = (req.body.length * req.body.width * req.body.height) / 6000;
+            const map = new libMap.Map();
+            const addressSoure = utils.getAddressFromComponent(req.body.province_source, req.body.district_source, req.body.ward_source, req.body.detail_source);
+            const addressDest = utils.getAddressFromComponent(req.body.province_dest, req.body.district_dest, req.body.ward_dest, req.body.detail_dest);
+            const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
+            
+            let optionService = null;
+            if(req.body.service_type === "T60") {
+                optionService = "T60";
+                req.body.service_type = "CPN";
+            }
+            const fee = servicesFee.calculteFee(req.body.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
+            return res.status(200).json({
+                error: false,
+                data: fee,
+                message: `Phí vận chuyển là ${fee} VND.`
             });
         }
-
-        const provinceSource = req.body.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
-        const provinceDest = req.body.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
-        const mass = (req.body.length * req.body.width * req.body.height) / 6000;
-        const map = new libMap.Map();
-        const addressSoure = utils.getAddressFromComponent(req.body.province_source, req.body.district_source, req.body.ward_source, req.body.detail_source);
-        const addressDest = utils.getAddressFromComponent(req.body.province_dest, req.body.district_dest, req.body.ward_dest, req.body.detail_dest);
-        const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
-
-        let optionService = null;
-        if(req.body.service_type === "T60") {
-            optionService = "T60";
-            req.body.service_type = "CPN";
-        }
-
-        const fee = servicesFee.calculteFee(req.body.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
-        return res.status(200).json({
-            error: false,
-            data: fee,
-            message: `Phí vận chuyển là ${fee} VND.`
-        });
     } catch (error) {
         return res.status(500).json({
             error: true,
@@ -497,7 +490,6 @@ const updateImages = async (req, res) => {
                 message: "Ảnh không được để trống.",
             });
         }
-
         const { error } = orderValidation.validateQueryUpdatingOrderImages(req.query);
         if (error) {
             return res.status(400).json({
@@ -505,7 +497,6 @@ const updateImages = async (req, res) => {
                 message: error.message,
             });
         }
-
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
 
         const resultGettingOneShipperTasks = await shippersService.getTasks({ order_id: req.query.order_id, staff_id: req.user.staff_id }, postalCode);
@@ -549,6 +540,7 @@ const updateImages = async (req, res) => {
                 message: `Quá số lượng ảnh cho phép. Số lượng ảnh còn lại được cho phép: ${ 2 - images.length > 0 ? 2 - images.length : 0 }.`,
             });
         }
+        
 
         req.files.forEach(file => {
             images.push(file.filename);
@@ -561,7 +553,7 @@ const updateImages = async (req, res) => {
         else if (req.query.type === "receive") {
             updatedImages.receive_images = JSON.stringify(images);
         }
-
+        
         const resultUpdatingOneOrderInAgency = await ordersService.updateOrder(updatedImages, { order_id: req.query.order_id }, postalCode);
         if (!resultUpdatingOneOrderInAgency || resultUpdatingOneOrderInAgency.affectedRows === 0) {
             return res.status(404).json({
@@ -668,6 +660,142 @@ const getImages = async (req, res) => {
     }
 }
 
+const updateSignature = async (req, res) => {
+    try {
+        if (!req.file || req.file.length === 0) {
+            return res.status(400).json({
+                error: true,
+                message: "Ảnh không được để trống.",
+            });
+        }
+		const { error } = orderValidation.validateQueryUpdatingOrderImages(req.query);
+
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+
+        const resultGettingOneShipperTasks = await shippersService.getTasks({ order_id: req.query.order_id, staff_id: req.user.staff_id }, postalCode);
+        if (!resultGettingOneShipperTasks || resultGettingOneShipperTasks.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+
+        if (resultGettingOneShipperTasks[0].completed) {
+            return res.status(409).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không còn khả năng cập nhật.`,
+            });
+        }
+
+        const resultGettingOneOrder = await ordersService.getOneOrder({ order_id: req.query.order_id });
+        if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+    
+        const filename = req.file.filename;
+      
+        const updatedImages = new Object();
+        if (req.query.type === "send") {
+            updatedImages.send_signature = filename;
+        }
+        else if (req.query.type === "receive") {
+            updatedImages.receive_signature = filename;
+        }
+        
+        const resultUpdatingOneOrderInAgency = await ordersService.updateOrder(updatedImages, { order_id: req.query.order_id }, postalCode);
+        if (!resultUpdatingOneOrderInAgency || resultUpdatingOneOrderInAgency.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+        await ordersService.updateOrder(updatedImages, { order_id: req.query.order_id });
+        
+        const tempFolderPath = path.join("storage", "order", "image", "signature_temp");
+        if (!fs.existsSync(tempFolderPath)) {
+            fs.mkdirSync(tempFolderPath);
+        }
+        
+        const officialFolderPath = path.join("storage", "order", "image", "signature");
+        if (!fs.existsSync(officialFolderPath)) {
+            fs.mkdirSync(officialFolderPath);
+        }
+
+        const tempFilePath = path.join(tempFolderPath, filename);
+		const officialFilePath = path.join(officialFolderPath, filename);
+        fs.renameSync(tempFilePath, officialFilePath);
+
+		return res.status(201).json({
+			error: false,
+			message: `Cập nhật chữ kí cho đơn hàng ${req.query.order_id} thành công.`,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
+const getSignature = async (req, res) => {
+    try {
+        const { error } = orderValidation.validateQueryUpdatingOrderImages(req.query);
+
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const resultGettingOneOrder = await ordersService.getOneOrder({ order_id: req.query.order_id });
+        if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Đơn hàng có mã ${req.query.order_id} không tồn tại.`,
+            });
+        }
+
+        const order = resultGettingOneOrder[0];
+        let fileName;
+        if(req.query.type === "send") {
+            fileName = order.send_signature;
+        } else if(req.query.type === "receive") {
+            fileName = order.receive_signature;
+        }
+    
+        if (fileName) {
+            const file = path.join(__dirname, "..", "storage", "order", "image", "signature", fileName);
+            if (fs.existsSync(file)) {
+                    return res.status(200).sendFile(file);
+            }
+        }
+
+        return res.status(404).json({
+            error: true,
+            message: "Không tìm thấy dữ liệu",
+        });
+    } catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+    
+}
+
 module.exports = {
     checkExistOrder,
     getOrders,
@@ -679,4 +807,6 @@ module.exports = {
     calculateServiceFee,
     updateImages,
     getImages,
+    updateSignature,
+    getSignature,
 }
