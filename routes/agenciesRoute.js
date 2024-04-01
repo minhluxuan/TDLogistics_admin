@@ -31,7 +31,7 @@ const fileFilter = (req, file, done) => {
         return done(new Error("File không tồn tại."));
     }
 
-    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype && "image/png"
+    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png"
     && file.mimetype !== "application/pdf") 
     { 
        return done(new Error("File không hợp lệ"));
@@ -101,7 +101,7 @@ router.put(
     auth.isActive(),
     agenciesController.updateAgencyCompany
 );
-router.get(
+router.post(
     "/search_agency_company_license",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "HUMAN_RESOURCE_MANAGER", "MANAGER", "AGENCY_MANAGER"]),

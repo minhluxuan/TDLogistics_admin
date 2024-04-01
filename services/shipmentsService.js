@@ -24,6 +24,10 @@ const updateParentForGlobalOrders = async (order_ids, shipment_id) => {
     return await Shipment.updateParentForGlobalOrders(order_ids, shipment_id);
 }
 
+const updateShipment = async (info, condtions, postal_code = null) => {
+    return await Shipment.updateShipment(info, condtions, postal_code);
+}
+
 const confirmCreateShipment = async (info) => {
     return await Shipment.confirmCreateShipment(info);
 }
@@ -129,4 +133,5 @@ module.exports = {
     addOneShipmentToVehicle,
     updateOrders,
     updateJourney,
+    updateShipment,
 };

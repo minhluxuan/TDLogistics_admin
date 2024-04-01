@@ -463,29 +463,26 @@ const cloneOrdersFromGlobalToAgency = async (order_ids, postalCode) => {
     const acceptedArray = new Array();
     let notAcceptedNumber = 0;
     const notAcceptedArray = new Array();
-
     for (const order_id of order_ids) {
-        try {
+        try {    
             const resultGettingOneOrder = await Orders.getOneOrder({ order_id: order_id });
             if (resultGettingOneOrder && resultGettingOneOrder.length > 0) {
                 const resultCreatingNewOrder = await Orders.createNewOrder(resultGettingOneOrder[0], postalCode);
                 if (resultCreatingNewOrder && resultCreatingNewOrder.affectedRows > 0) {
-                    console.log("aaaaaaaaa");
+                    console.log(order_id);
                     acceptedNumber++;
                     acceptedArray.push(order_id);
                 }
-                else {
+                else {            
                     notAcceptedNumber++;
                     notAcceptedArray.push(order_id);
                 }
             }
             else {
-                console.log("bbbbbbbb");
                 notAcceptedNumber++;
                 notAcceptedArray.push(order_id);
             }
         } catch (error) {
-            throw new Error(error.message);
             notAcceptedNumber++;
             notAcceptedArray.push(order_id);
         }
