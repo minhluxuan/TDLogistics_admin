@@ -6,7 +6,7 @@ const transportPartnerService = require("../services/transportPartnerService");
 const shippersService = require("../services/shippersService");
 const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
-
+const agencyService = require("../services/agenciesService");
 const checkExistShipment = async (req, res) => {
     try {
         const { error } = shipmentRequestValidation.validateShipmentID(req.query);
@@ -672,9 +672,26 @@ const receiveShipment = async (req, res) => {
             });
         }
 
+
         const resultCloningOrdersFromGlobalToAgency = await shipmentService.cloneOrdersFromGlobalToAgency(JSON.parse(resultGettingOneShipment[0].order_ids), postalCode);
         const journeyMessage = `${formattedTime}: Lô hàng được tiếp nhận tại Bưu cục/Đại lý ${req.user.agency_id} bởi nhân viên ${req.user.staff_id}.`
         const updateJourney = await shipmentService.updateJourney( req.body.shipment_id , formattedTime, journeyMessage);
+        const current_agency = await agencyService.getOneAgency({ agency_id: req.user.agency_id });
+        if (!current_agency || current_agency.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Bưu cục mã ${req.user.agency_id} không tồn tại.`,
+            });
+        }
+
+        const trackingShipment = {
+            current_agency_id: current_agency[0].agency_id,
+            current_lat: current_agency[0].latitude,
+            current_long: current_agency[0].longitude
+        }
+        
+        await shipmentService.updateShipment(trackingShipment, { shipment_id: req.body.shipment_id });
+        await shipmentService.updateShipment(trackingShipment, { shipment_id: req.body.shipment_id }, postalCode);
         return res.status(200).json({
             error: false,
             info: resultCloningOrdersFromGlobalToAgency,
