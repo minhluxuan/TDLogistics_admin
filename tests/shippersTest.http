@@ -38,12 +38,8 @@ Content-Type: application/json
 
 ###
 
-PATCH http://localhost:5000/api/v1/shippers/confirm_completed
+PATCH http://localhost:5000/api/v1/shippers/confirm_completed?id=1
 Content-Type: application/json
-
-{
-    "id": "1"
-}
 
 ###
 

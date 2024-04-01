@@ -98,7 +98,7 @@ const getTasks = async (req, res) => {
 }
 
 const confirmCompletedTask = async (req, res) => {
-    try {console.log(req.query);
+    try {
         try {
             if (req.query.id) {
                 req.query.id = parseInt(req.query.id);

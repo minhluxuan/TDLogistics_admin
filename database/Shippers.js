@@ -79,7 +79,7 @@ const getTasks = async (conditions, postal_code) => {
             values.push(mondayOfTheWeekFormatted, sundayOfTheWeekFormatted);
         }
     }
-    query += ` ORDER BY created_at DESC`;
+    query += ` AND completed = false ORDER BY created_at DESC`;
     
     const result = (await pool.query(query, values))[0];
 
