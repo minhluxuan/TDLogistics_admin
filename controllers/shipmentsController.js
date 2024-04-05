@@ -7,6 +7,7 @@ const shippersService = require("../services/shippersService");
 const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
 const agencyService = require("../services/agenciesService");
+
 const checkExistShipment = async (req, res) => {
     try {
         const { error } = shipmentRequestValidation.validateShipmentID(req.query);
@@ -25,6 +26,22 @@ const checkExistShipment = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
+const getAgenciesForShipment = async (req, res) => {
+    try {
+        const resultGettingManyAgencies = await shipmentService.getAgenciesForShipment();
+        return res.status(200).json({
+            error: false,
+            data: resultGettingManyAgencies,
+            message: "Lấy thông tin lô hàng thành công.",
+        });
+    } catch (error) {
         return res.status(500).json({
             error: true,
             message: error.message,
@@ -859,6 +876,7 @@ const getJourney = async (req, res) => {
 
 module.exports = {
     checkExistShipment,
+    getAgenciesForShipment,
     createNewShipment,
     updateShipment,
     getShipments,

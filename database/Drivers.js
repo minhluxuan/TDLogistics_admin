@@ -13,6 +13,19 @@ const tasksTable = "driver_tasks";
 
 const pool = mysql.createPool(dbOptions).promise();
 
+const getObjectsCanHandleTask = async () => {
+    const query = `SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+    v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, t.transport_partner_name, p.fullname 
+    FROM vehicle AS v 
+    LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
+    LEFT JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
+    LEFT JOIN partner_staff AS p ON v.staff_id = p.staff_id
+    WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != ""
+    
+    ORDER BY created_at DESC;`;
+    return (await pool.query(query))[0];
+}
+
 const getTasks = async (conditions) => {
     let query = `SELECT * FROM ${tasksTable}`;
     
@@ -107,7 +120,7 @@ const assignNewTasks = async (shipment_ids, staff_id) => {
 
     for (const shipment_id of shipmentIdsSet) {
         try {
-            const resultCreatingNewTask = await dbUtils.insert(pool, tasksTable, ["shipment_id", "driver"], [shipment_id, staff_id]);
+            const resultCreatingNewTask = await dbUtils.insert(pool, tasksTable, ["shipment_id", "staff_id"], [shipment_id, staff_id]);
             if (resultCreatingNewTask && resultCreatingNewTask.affectedRows > 0) {
                 acceptedNumber++;
                 acceptedArray.push(shipment_id);
@@ -138,8 +151,8 @@ const confirmCompletedTask = async (conditions) => {
 }
 
 module.exports = {
+    getObjectsCanHandleTask,
     getTasks,
     assignNewTasks,
     confirmCompletedTask,
-
 }

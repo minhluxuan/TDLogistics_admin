@@ -1,5 +1,9 @@
 const Shippers = require("../database/Shippers");
 
+const getObjectsCanHandleTask = async () => {
+    return await Shippers.getObjectsCanHandleTask();
+}
+
 const getTasks = async (conditions, postalCode) => {
     return await Shippers.getTasks(conditions, postalCode);
 }
@@ -16,6 +20,7 @@ const getHistory = async (conditions, postal_code) => {
 }
 
 module.exports = {
+    getObjectsCanHandleTask,
     getTasks,
     assignNewTasks,
     confirmCompletedTask,

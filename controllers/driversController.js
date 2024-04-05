@@ -7,6 +7,23 @@ const validation = require("../lib/validation");
 
 const driversValidation = new validation.DriversValidation();
 
+const getObjectsCanHandleTask = async (req, res) => {
+    try {
+        const resultGettingObjectsCanHandleTask = await driversService.getObjectsCanHandleTask();
+        return res.status(200).json({
+            error: false,
+            data: resultGettingObjectsCanHandleTask,
+            message: "Lấy các phương tiện có thể đảm nhận nhiệm vụ thành công.",
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 const createNewTask = async (req, res) => {
     try {
         const { error } = driversValidation.validateCreatingNewTask(req.body);
@@ -48,6 +65,8 @@ const createNewTask = async (req, res) => {
                     message: `Lô hàng có mã ${shipment_id} không tồn tại.`,
                 });
             }
+
+            await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id }, { shipment_id });
         }
 
         const resultCreatingNewTask = await driversService.assignNewTasks(req.body.shipment_ids, staff_id);
@@ -147,6 +166,7 @@ const confirmCompletedTask = async (req, res) => {
 }
 
 module.exports = {
+    getObjectsCanHandleTask,
     getTasks,
     createNewTask,
     confirmCompletedTask,

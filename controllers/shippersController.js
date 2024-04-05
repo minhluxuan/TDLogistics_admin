@@ -7,6 +7,23 @@ const validation = require("../lib/validation");
 
 const shippersValidation = new validation.ShippersValidation();
 
+const getObjectsCanHandleTask = async (req, res) => {
+    try {
+        const resultGettingObjectsCanHandleTask = await driversService.getObjectsCanHandleTask();
+        return res.status(200).json({
+            error: false,
+            data: resultGettingObjectsCanHandleTask,
+            message: "Lấy các phương tiện có thể đảm nhận nhiệm vụ thành công.",
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 const createNewTask = async (req, res) => {
     try {
         const { error } = shippersValidation.validateCreatingNewTask(req.body);
@@ -225,6 +242,7 @@ const getHistory = async (req, res) => {
 }
 
 module.exports = {
+    getObjectsCanHandleTask,
     getTasks,
     createNewTask,
     confirmCompletedTask,

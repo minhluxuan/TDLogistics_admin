@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.get("/check", shipmentController.checkExistShipment);
 
+router.get("/get_agencies", auth.isAuthenticated(), shipmentController.getAgenciesForShipment);
+
 router.post("/create",
     auth.isAuthenticated(), 
     auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER", "MANAGER", "TELLER", "ADMIN"]),   
