@@ -62,12 +62,12 @@ const createNewShipment = async (req, res) => {
             });
         }
 
-        if (req.body.hasOwnProperty("agency_destination")) {
-            const agency_destination = await agencyService.getOneAgency({ agency_name: req.body.agency_destination });
+        if (req.body.hasOwnProperty("agency_id_dest")) {
+            const agency_destination = await agencyService.getOneAgency({ agency_id: req.body.agency_id_destination });
             if(!agency_destination || agency_destination.length === 0) {
                 return res.status(404).json({
                     error: true,
-                    message: "Không tìm thấy Bưu cục đích."
+                    message: `Bưu cục có mã ${req.body.agency_id_dest} không tồn tại.`,
                 });
             }
 
