@@ -17,18 +17,22 @@ const transporter = nodemailer.createTransport({
 const getAuthenticatedUserInfo = async (req, res) => {
 	try {
         const User = await usersService.getOneUser({ user_id: req.user.user_id });
+
         if(!User || User.length === 0) {
             return res.status(404).json({
                 error: true,
                 message: `Người dùng có mã ${req.user.user_id} không tồn tại.`
             });
         }
+
 		const info = new Object({
 			fullname: User[0].fullname,
             phone_number: User[0].phone_number,
             email: User[0].email,
+            address: User[0].address,
             role: "USER"
 		});
+
 		return res.status(200).json(new Object({
 			error: false,
 			info: info,

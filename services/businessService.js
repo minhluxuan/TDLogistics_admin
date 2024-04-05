@@ -20,6 +20,10 @@ const createNewRepresentor = async (info) => {
     return await Business.createNewRepresentor(info);
 }
 
+const getAuthenticatedBusinessInfo = async (business_id) => {
+    return await Business.getAuthenticatedBusinessInfo(business_id);
+}
+
 const getOneBusinessUser = async (conditions) => {
     return await Business.getOneBusinessUser(conditions);
 }
@@ -58,6 +62,7 @@ module.exports = {
     checkExistBusinessRepresentor,
     createNewBusinessUser,
     createNewRepresentor,
+    getAuthenticatedBusinessInfo,
     getOneBusinessUser,
     getManyBusinessUsers,
     getOneRepresentor,

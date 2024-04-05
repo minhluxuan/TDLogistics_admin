@@ -9,6 +9,7 @@ const path = require("path");
 const archiver = require("archiver");
 const servicesStatus = require("../lib/servicesStatus");
 const shippersService = require("../services/shippersService");
+const paymentService = require("../services/paymentService");
 
 const orderValidation = new Validation.OrderValidation();
 
@@ -95,8 +96,16 @@ const createNewOrder = async (socket, info, orderTime) => {
         }
         info.fee = servicesFee.calculteFee(info.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
+
+        const resultCreatingPayment = await paymentService.createPaymentService(info.order_id, amount, `THANH TOAN DON HANG ${info.order_id}`);
+        if (!resultCreatingPayment || resultCreatingPayment.code !== "00" || !resultCreatingPayment.data || !resultCreatingPayment.data.qrcode) {
+            return socket.emit("notifyFailCreateNewOrder", "Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
+        }
+
+        info.qrcode = resultCreatingNewOrder.data.qrcode;
+        info.signature = resultCreatingPayment.signature;
+        info.paid = false;
         
-        console.log(info.fee, mass, distance);
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
         if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
