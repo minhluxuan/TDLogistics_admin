@@ -208,3 +208,7 @@ Content-Type: application/json
     "shipment_id": "BC_78300_202421221351231",
     "status_code": 3
 }
+
+###
+
+GET http://localhost:5000/api/v1/shipments/get_agencies

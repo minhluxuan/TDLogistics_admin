@@ -39,7 +39,7 @@ const getAgenciesForShipment = async (req, res) => {
         return res.status(200).json({
             error: false,
             data: resultGettingManyAgencies,
-            message: "Lấy thông tin lô hàng thành công.",
+            message: "Lấy các bưu cục/đại lý sẵn sàng thành công.",
         });
     } catch (error) {
         return res.status(500).json({

@@ -34,7 +34,7 @@ const checkExistShipment = async (conditions, postal_code = null) => {
 
 const getAgenciesForShipment = async () => {
     const query = "SELECT agency_id, agency_name, province, district, town, detail_address FROM agency";
-    return await (pool.query(query))[0];
+    return (await pool.query(query))[0];
 }
 
 const getDataForShipmentCode = async (staff_id, transport_partner_id = null) => {
