@@ -70,19 +70,15 @@ const createNewTask = async (req, res) => {
         }
 
         const resultAddingShipmentsToVehicle = await vehicleService.addShipmentToVehicle(resultGettingOneVehicle[0], req.body.shipment_ids);
-        if (!resultAddingShipmentsToVehicle) {
-            return req.status(409).json({
-                error: true,
-                message: "Thêm công việc thất bại.",
-            });
-        }
 
         const resultCreatingNewTask = await driversService.assignNewTasks(resultAddingShipmentsToVehicle.acceptedArray, staff_id);
-        
+        resultCreatingNewTask.notAcceptedNumber += resultAddingShipmentsToVehicle.notAcceptedNumber;
+        resultCreatingNewTask.notAcceptedArray = [...resultAddingShipmentsToVehicle.notAcceptedArray, ...resultCreatingNewTask.notAcceptedArray];
+
         return res.status(201).json({
             error: true,
             info: resultCreatingNewTask,
-            message: `Phân việc cho tài xế có mã ${staff_id} thành công.`,
+            message: `Thêm lô hàng vào phương tiện có mã ${req.body.vehicle_id} và phân việc cho tài xế có mã ${staff_id} thành công.`,
         });
     } catch (error) {
         console.log(error);
