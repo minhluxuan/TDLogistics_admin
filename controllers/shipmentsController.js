@@ -964,7 +964,6 @@ const approveNewShipment = async (req, res) => {
     }
 }
 
-
 module.exports = {
     checkExistShipment,
     getAgenciesForShipment,

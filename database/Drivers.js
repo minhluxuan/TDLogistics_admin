@@ -30,14 +30,14 @@ const checkExistTask = async (conditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
-    return (await dbUtils.findOneIntersect(pool, table, fields, values)).length > 0;
+    return (await dbUtils.findOneIntersect(pool, tasksTable, fields, values)).length > 0;
 }
 
 const getOneTask = async (condition) => {
     const fields = Object.keys(condition);
     const values = Object.values(condition);
 
-    return await dbUtils.findOneIntersect(pool, table, fields, values);
+    return await dbUtils.findOneIntersect(pool, tasksTable, fields, values);
 }
 
 const getTasks = async (conditions) => {
