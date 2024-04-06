@@ -14,7 +14,7 @@ POST http://localhost:5000/api/v1/shipments/create
 Content-Type: application/json
 
 {
-    "agency_destination": "Bưu cục quận 5"
+    "agency_id_dest": "TD_00000_077165007713"
 }
 
 ### tạo lô hàng cho shipper giao hàng
@@ -44,7 +44,7 @@ Content-Type: application/json
 ###  BC_78300_202429164715749
 ### order_id BC_78300_20242231694521, BC_78300_202422316114087, BC_78300_2024223161154877
 ### 39 40 41
-POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_2024228225740952
+POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_202436131611787
 Content-Type: application/json
 
 {
@@ -73,7 +73,7 @@ POST http://localhost:5000/api/v1/shipments/confirm_create
 Content-Type: application/json 
 
 {
-    "shipment_id": "BC_71000_2024228225740952"
+    "shipment_id": "BC_71000_202436131611787"
 }
 
 ### Chỉnh sửa database bảng 78300_shipment cột order_ids thêm 1 đơn hàng với 1 order_id đểu vào test chức năng xóa bưu cục 
@@ -276,23 +276,6 @@ Content-Type: application/json
     "vehicle_id": "TD_00000_67H124768"
 }
 
-###
 
-POST http://localhost:5000/api/v1/drivers/get_tasks
-Content-Type: application/json
-
-{
-    "staff_id": "BC_70001_077204005691",
-    "option": 1
-}
-
-###
-
-DELETE http://localhost:5000/api/v1/drivers/confirm_completed
-Content-Type: application/json
-
-{
-    "id": 1
-}
 
 

@@ -100,8 +100,8 @@ const createNewShipment = async (infoShipment, infoJourney, postalCode = null) =
     const fields = Object.keys(infoShipment);
     const values = Object.values(infoShipment);
     
-    const defaultFields = ["mass", "order_ids", "parent", "status", "journey"];
-    const defaultValues = [0, JSON.stringify([]), null, 0, JSON.stringify([infoJourney])];
+    const defaultFields = ["mass", "order_ids", "parent", "journey"];
+    const defaultValues = [0, JSON.stringify([]), null, JSON.stringify([infoJourney])];
 
     const allFields = [...fields, ...defaultFields];
     const allValues = [...values, ...defaultValues];
@@ -447,7 +447,7 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
     const shipmentsQuery = `UPDATE ${agencyShipmentTable} AS q1 JOIN ${table} AS q2
                             ON q1.shipment_id = q2.shipment_id
                             SET q1.status = ?, q2.status = ? WHERE q1.shipment_id = ? `;
-    await pool.query(shipmentsQuery, [true, true, agency_id, agency_id, shipment_id]);
+    await pool.query(shipmentsQuery, [6, 6, agency_id, agency_id, shipment_id]);
 
     return new Object({
         updatedNumber,
