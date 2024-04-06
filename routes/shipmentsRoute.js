@@ -101,4 +101,12 @@ router.get("/get_journey",
     shipmentController.getJourney
 );
 
+router.put(
+    "/approve",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER"]),
+    auth.isActive(),
+    shipmentController.approveNewShipment
+);
+
 module.exports = router;

@@ -96,6 +96,8 @@ const createNewShipment = async (req, res) => {
                 time: formattedTime,
                 message: `Lô hàng được tạo tại Bưu cục/Đại lý ${req.user.agency_id} bởi nhân viên ${req.user.staff_id}.`
             }
+            req.body.status = 0;
+
             const resultCreatingShipmentForAgency = await shipmentService.createNewShipment(req.body, journeyInfo, postalCode);
             
             if (!resultCreatingShipmentForAgency || resultCreatingShipmentForAgency.affectedRows === 0) {
@@ -110,11 +112,12 @@ const createNewShipment = async (req, res) => {
                 message: `Tạo lô hàng có mã lô ${req.body.shipment_id} cho bưu cục ${req.user.agency_id} thành công.`,
             });
         }
-        else if (["ADMIN", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+        else if (["ADMIN", "MANAGER", "TELLER"].includes(req.user.role)) {
             const journeyInfo = {
                 time: formattedTime,
                 message: `Lô hàng được tạo tại Bưu cục/Đại lý ${req.user.agency_id} bởi nhân viên ${req.user.staff_id}.`
             }
+            req.body.status = 2;
             const resultCreatingShipment = await shipmentService.createNewShipment(req.body, journeyInfo);
             
             if (!resultCreatingShipment || resultCreatingShipment.affectedRows === 0) {
@@ -589,7 +592,7 @@ const decomposeShipment = async (req, res) => {
 
         const shipment = resultGettingOneShipment[0];
 
-        if (shipment.status === 1) {
+        if (shipment.status === 6) {
             return res.status(409).json({
                 error: true,
                 message: `Lô hàng có mã ${req.query.shipment_id} đã được rã từ trước.`,
@@ -622,7 +625,7 @@ const decomposeShipment = async (req, res) => {
         const updatedArray = resultDecomposingShipment.updatedArray;
 
         const journeyMessage = `${formattedTime}: Lô hàng được phân rã tại Bưu cục/Đại lý ${req.user.agency_id} bởi nhân viên ${req.user.staff_id}.`
-        const updateJourney = await shipmentService.updateJourney( req.query.shipment_id , formattedTime, journeyMessage);
+        await shipmentService.updateJourney( req.query.shipment_id , formattedTime, journeyMessage);
         
         return res.status(201).json({
             error: false,
@@ -705,6 +708,7 @@ const receiveShipment = async (req, res) => {
         }
 
         const trackingShipment = {
+            status: 5,
             parent: null,
             current_agency_id: current_agency[0].agency_id,
             current_lat: current_agency[0].latitude,
@@ -790,7 +794,7 @@ const undertakeShipment = async (req, res) => {
         const failAssignedTasksArray = resultAssignNewTaskForShipper.notAcceptedArray;
 
         const journeyMessage = `${formattedTime}: Lô hàng được yêu cầu giao/nhận bởi Bưu cục/Đại lý ${req.user.agency_id} cho nhân viên ${req.user.staff_id}.`
-        const updateJourney = await shipmentService.updateJourney( req.body.shipment_id , formattedTime, journeyMessage);
+        await shipmentService.updateJourney( req.body.shipment_id , formattedTime, journeyMessage);
         
         return res.status(201).json({
             error: false,
@@ -879,7 +883,40 @@ const getJourney = async (req, res) => {
             message: error.message,
         });
     }
- 
+}
+
+const approveNewShipment = async (req, res) => {
+    try {
+        const { error } = shipmentRequestValidation.validateShipmentID(req.query);
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const resultGettingOneShipment = await shipmentService.getOneShipment(req.query);
+        if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã ${req.query.shipment_id} không tồn tại.`,
+            });
+        }
+
+        await shipmentService.updateShipment({ status: 2 }, req.query);
+        await shipmentService.updateShipment({ status: 2}, req.query, utils.getPostalCodeFromAgencyID(resultGettingOneShipment[0].agency_id));
+
+        return res.status(201).json({
+            error: false,
+            message: `Tiếp nhận lô hàng có mã ${req.query.shipment_id} thành công.`,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
 }
 
 module.exports = {
@@ -897,5 +934,6 @@ module.exports = {
     decomposeShipment,
     undertakeShipment,
     updateJourney,
-    getJourney
+    getJourney,
+    approveNewShipment,
 };

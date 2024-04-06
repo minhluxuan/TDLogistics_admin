@@ -68,7 +68,11 @@ const createNewTask = async (req, res) => {
                 });
             }
 
-            await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id }, { shipment_id });
+            await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id, status: 3 }, { shipment_id });
+            const shipmentIdSubParts = shipment_id.split('_');
+            if (shipmentIdSubParts[0] === "BC" || shipmentIdSubParts[0] === "DL") {
+                await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id, status: 3 }, { shipment_id }, shipmentIdSubParts[1]);
+            }
         }
 
         const resultAddingShipmentsToVehicle = await vehicleService.addShipmentToVehicle(resultGettingOneVehicle[0], req.body.shipment_ids);
