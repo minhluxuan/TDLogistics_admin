@@ -89,7 +89,7 @@ const createNewRepresentor = async (info) => {
 };
 
 const getAuthenticatedBusinessInfo = async (business_id) => {
-	const query = "SELECT business_id, username, business_name, phone_number, email, tax_number, province, district, town, detail_address, bin, bank, debit, active, approved FROM business WHERE business_id = ? LIMIT 1";
+	const query = "SELECT business_id, username, business_name, phone_number, email, tax_number, province, district, town, detail_address, bin, bank, debit, active, approved FROM business_user WHERE business_id = ? LIMIT 1";
 	return (await pool.query(query, [business_id]))[0];
 }
 
