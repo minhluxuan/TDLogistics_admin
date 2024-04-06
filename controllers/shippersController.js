@@ -131,8 +131,25 @@ const getTasks = async (req, res) => {
 
 const confirmCompletedTask = async (req, res) => {
     try {
+        try {
+            if (req.query.id) {
+                req.query.id = parseInt(req.query.id);
+            }
+            else {
+                return res.status(400).json({
+                    error: true,
+                    message: "Trường id là bắt buộc."
+                });
+            }
+        } catch (error) {
+            return res.status(400).json({
+                error: true,
+                message: "Trường id phải là một số.",
+            });
+        }
+
         const completedTime = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-        const { error } = shippersValidation.validateConfirmingCompletedTasks(req.body);
+        const { error } = shippersValidation.validateConfirmingCompletedTasks(req.query);
 
         if (error) {
             return res.status(400).json({
@@ -142,7 +159,7 @@ const confirmCompletedTask = async (req, res) => {
         }
 
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
-        const resultConfirmingCompletedTask = await shippersService.confirmCompletedTask(req.body.id, req.user.staff_id, completedTime, postalCode);
+        const resultConfirmingCompletedTask = await shippersService.confirmCompletedTask(req.query.id, req.user.staff_id, completedTime, postalCode);
         if (!resultConfirmingCompletedTask || resultConfirmingCompletedTask.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
