@@ -4,6 +4,10 @@ const getObjectsCanHandleTask = async () => {
     return await Drivers.getObjectsCanHandleTask();
 }
 
+const checkExistTask = async (condition) => {
+    return await Drivers.checkExistTask(condition);
+}
+
 const getTasks = async (conditions) => {
     return await Drivers.getTasks(conditions);
 }
@@ -18,6 +22,7 @@ const confirmCompletedTask = async (conditions) => {
 
 module.exports = {
     getObjectsCanHandleTask,
+    checkExistTask,
     getTasks,
     assignNewTasks,
     confirmCompletedTask,

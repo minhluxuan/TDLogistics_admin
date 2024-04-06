@@ -26,6 +26,13 @@ const getObjectsCanHandleTask = async () => {
     return (await pool.query(query))[0];
 }
 
+const checkExistTask = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    return (await dbUtils.findOneIntersect(pool, table, fields, values)).length > 0;
+}
+
 const getTasks = async (conditions) => {
     let query = `SELECT * FROM ${tasksTable}`;
     
@@ -152,6 +159,7 @@ const confirmCompletedTask = async (conditions) => {
 
 module.exports = {
     getObjectsCanHandleTask,
+    checkExistTask,
     getTasks,
     assignNewTasks,
     confirmCompletedTask,

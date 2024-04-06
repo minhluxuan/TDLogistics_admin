@@ -2,6 +2,7 @@ const vehicleService = require("../services/vehicleService");
 const partnerStaffService = require("../services/partnerStaffsService");
 const agenciesService = require("../services/agenciesService");
 const staffsService = require("../services/staffsService");
+const driversService = require("../services/driversService");
 const validation = require("../lib/validation");
 const fs = require("fs");
 const path = require("path");
@@ -456,6 +457,22 @@ const deleteShipmentFromVehicle = async (req, res) => {
 
 const undertakeShipment = async (req, res) => {
     try {
+        const { error } = vehicleValidation.validateUndertakingShipment(req.query);
+
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        if (!(await driversService.checkExistTask({ shipment_id: req.query.shipment_id, staff_id: req.user.staff_id }))) {
+            return res.status(404).json({
+                error: true,
+                message: `Nhân viên có mã ${req.user.staff_id} không được phép tiếp nhận lô hàng có mã ${req.query.shipment_id}.`,
+            });
+        }
+
         
     } catch (error) {
         

@@ -74,6 +74,10 @@ const createNewTask = async (req, res) => {
         const resultCreatingNewTask = await driversService.assignNewTasks(resultAddingShipmentsToVehicle.acceptedArray, staff_id);
         resultCreatingNewTask.notAcceptedNumber += resultAddingShipmentsToVehicle.notAcceptedNumber;
         resultCreatingNewTask.notAcceptedArray = [...resultAddingShipmentsToVehicle.notAcceptedArray, ...resultCreatingNewTask.notAcceptedArray];
+        for(const shipment_id of resultCreatingNewTask.acceptedArray) {
+            const journeyMessage = `${formattedTime}: Lô hàng được tạo mới và giao cho nhân viên ${req.user.agency_id} cho nhân viên ${staff_id} thuộc đối tác ${resultGettingOneVehicle[0].transport_partner_id} trên xe biển ${resultGettingOneVehicle[0].license_plate}.`;
+            await shipmentService.updateJourney(shipment_id, formattedTime, journeyMessage)
+        }
 
         return res.status(201).json({
             error: true,
