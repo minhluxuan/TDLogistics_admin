@@ -63,7 +63,7 @@ const createNewShipment = async (req, res) => {
         }
 
         if (req.body.hasOwnProperty("agency_id_dest")) {
-            const agency_destination = await agencyService.getOneAgency({ agency_id: req.body.agency_id_destination });
+            const agency_destination = await agencyService.getOneAgency({ agency_id: req.body.agency_id_dest });
             if(!agency_destination || agency_destination.length === 0) {
                 return res.status(404).json({
                     error: true,
@@ -416,6 +416,13 @@ const confirmCreateShipment = async (req, res) => {
             });
         }
 
+        if (resultGettingOneShipment[0].status !== 0) {
+            return res.status(409).json({
+                error: true,
+                message: `Lô hàng có mã ${req.body.shipment_id} đã được xác nhận tạo trên tổng cục từ trước. Vui lòng tạo lô hàng mới.`,
+            });
+        }
+
         if (await shipmentService.checkExistShipment(req.body)) {
             return res.status(409).json({
                 error: true,
@@ -425,12 +432,13 @@ const confirmCreateShipment = async (req, res) => {
 
         const shipment = resultGettingOneShipment[0];
         if (!shipment.order_ids) {
-            return res.status(201).json({
-                error: false,
-                message: `Tạo lô hàng có mã lô hàng ${req.body.shipment} trên tổng cục thành công.`,
+            return res.status(409).json({
+                error: true,
+                message: `Xác nhận tạo lô hàng trên tổng cục không thành công. Lô hàng có mã ${req.body.shipment} phải chứa ít nhất một đơn hàng.`,
             });
         }
 
+        shipment.status = 1;
         const resultCloneShipmentFromAgencyToGlobal = await shipmentService.confirmCreateShipment(shipment);
         if (!resultCloneShipmentFromAgencyToGlobal || resultCloneShipmentFromAgencyToGlobal.affectedRows === 0) {
             return res.status(409).json({
@@ -439,6 +447,7 @@ const confirmCreateShipment = async (req, res) => {
             });
         }
 
+        await shipmentService.updateShipment({ status: 1 }, { shipment_id: req.body.shipment_id }, postalCode);
         const resultUpdatingParentForGlobalOrders = await shipmentService.updateParentForGlobalOrders(JSON.parse(shipment.order_ids), shipment.shipment_id);   
 
         return res.status(201).json({
@@ -530,9 +539,24 @@ const deleteShipment = async (req, res) => {
         }
 
         if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
-            const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+            const resultGettingOneShipmentInAgency = await shipmentService.getOneShipment(req.query);
+            if (!resultGettingOneShipmentInAgency || resultGettingOneShipmentInAgency.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng có mã ${req.query.shipment_id} không tồn tại.`,
+                });
+            }
 
+            if (resultGettingOneShipmentInAgency[0].status > 0) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Lô hàng có mã ${req.query.shipment_id} không còn khả năng để xóa. Vui lòng liên hệ lên tổng cục để được hỗ trợ.`,
+                });
+            }
+
+            const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
             const resultDeletingShipment = await shipmentService.deleteShipment(req.query.shipment_id, postalCode);
+            await shipmentService.deleteShipment(req.query.shipment_id);
 
             if (!resultDeletingShipment || resultDeletingShipment.affetedRows === 0) {
                 return res.status(404).json({
@@ -548,6 +572,11 @@ const deleteShipment = async (req, res) => {
         }
         else if (["ADMIN", "MANAGER", "TELLER"].includes(req.user.role)) {
             const resultDeletingShipment = await shipmentService.deleteShipment(req.query.shipment_id);
+
+            const shipmentIdSubParts = req.query.shipment_id.split('_');
+            if (shipmentIdSubParts[0] === "BC" || shipmentIdSubParts[0] === "DL") {
+                await shipmentService.updateShipment({ status: 0 }, { shipment_id: req.query.shipment_id }, shipmentIdSubParts[1]);
+            }
 
             if (!resultDeletingShipment || resultDeletingShipment.affetedRows === 0) {
                 return res.status(404).json({
@@ -918,6 +947,7 @@ const approveNewShipment = async (req, res) => {
         });
     }
 }
+
 
 module.exports = {
     checkExistShipment,
