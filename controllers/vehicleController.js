@@ -7,6 +7,7 @@ const shipmentsService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
 const fs = require("fs");
 const path = require("path");
+const { dir } = require("console");
 
 const vehicleValidation = new validation.VehicleValidation();
 
