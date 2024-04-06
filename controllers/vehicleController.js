@@ -454,6 +454,14 @@ const deleteShipmentFromVehicle = async (req, res) => {
     }
 }
 
+const undertakeShipment = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
 module.exports = {
     checkExistVehicle,
     createNewVehicle,
@@ -463,4 +471,5 @@ module.exports = {
     deleteVehicle,
     addShipmentToVehicle,
     deleteShipmentFromVehicle,
+    undertakeShipment,
 };
