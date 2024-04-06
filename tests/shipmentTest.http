@@ -44,7 +44,7 @@ Content-Type: application/json
 ###  BC_78300_202429164715749
 ### order_id BC_78300_20242231694521, BC_78300_202422316114087, BC_78300_2024223161154877
 ### 39 40 41
-POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_202436131611787
+POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_202436142811594
 Content-Type: application/json
 
 {
@@ -73,7 +73,15 @@ POST http://localhost:5000/api/v1/shipments/confirm_create
 Content-Type: application/json 
 
 {
-    "shipment_id": "BC_71000_202436131611787"
+    "shipment_id": "BC_71000_202436142811594"
+}
+
+###
+PUT http://localhost:5000/api/v1/shipments/approve?shipment_id=BC_71000_202436142811594
+Content-Type: application/json 
+
+{
+    
 }
 
 ### Chỉnh sửa database bảng 78300_shipment cột order_ids thêm 1 đơn hàng với 1 order_id đểu vào test chức năng xóa bưu cục 
@@ -94,7 +102,7 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:5000/api/v1/shipments/get_orders?shipment_id=BC_71000_202422723127299
+GET http://localhost:5000/api/v1/shipments/get_orders?shipment_id=BC_71000_202436142811594
 
 ###
 
@@ -261,6 +269,14 @@ Content-Type: application/json
     "username": "ntdung@tdlogistics",
     "password": "NTDung@tdlogistics2k24"
 }
+### vehicle test
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhxuanlu",
+    "password": "MinhLuXuan@TDlogistics2k24"
+}
 ###
 
 GET http://localhost:5000/api/v1/drivers/get_objects
@@ -272,8 +288,17 @@ POST http://localhost:5000/api/v1/drivers/create_tasks
 Content-Type: application/json
 
 {
-    "shipment_ids": ["BC_71000_2024210161498", "BC_71000_202422224138948"],
+    "shipment_ids": ["BC_71000_202436142811594", "BC_71000_202422224138948"],
     "vehicle_id": "TD_00000_67H124768"
+}
+
+###
+
+POST http://localhost:5000/api/v1/vehicles/undertake?shipment_id=BC_71000_202436142811594
+Content-Type: application/json
+
+{
+    
 }
 
 

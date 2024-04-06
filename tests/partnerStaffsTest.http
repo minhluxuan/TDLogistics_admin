@@ -16,8 +16,8 @@ PATCH http://localhost:5000/api/v1/partner_staffs/update_password
 Content-Type: application/json
 
 {
-    "new_password": "MinhLuXuan@TDlogistics2k24",
-    "confirm_password": "MinhLuXuan@TDlogistics2k24"
+    "new_password": "tranthenhan",
+    "confirm_password": "Nhaanpartner@123"
 }
 
 ###

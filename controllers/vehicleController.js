@@ -522,6 +522,7 @@ const undertakeShipment = async (req, res) => {
         }
 
         await shipmentsService.updateShipment({ status: 4, parent: resultGettingOneTask[0].vehicle_id }, { shipment_id: req.query.shipment_id });
+        
         return res.status(200).json({
             error: false,
             message: `Tiếp nhận đơn hàng có mã ${req.query.shipment_id} thành công.`,
