@@ -173,7 +173,7 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
     const prevShipmentIds = JSON.parse(vehicle.shipment_ids);
 
     for (let i = 0; i < shipment_ids.length; i++) {
-        const getShipmentQuery = `SELECT mass, order_ids FROM shipment WHERE shipment_id = ?`;
+        const getShipmentQuery = `SELECT mass FROM shipment WHERE shipment_id = ?`;
         const [shipmentRow] = await pool.query(getShipmentQuery, [shipment_ids[i]]);
         const shipmentMass  = shipmentRow[0].mass;
     
@@ -184,15 +184,6 @@ const addShipmentToVehicle = async (vehicle, shipment_ids) => {
             prevShipmentIds.push(shipment_ids[i]);
             currentMass = currentMass + shipmentMass;
             acceptedArray.push(shipment_ids[i]);
-            const order_ids = JSON.parse(shipmentRow[0].order_ids);
-            for (const order_id of order_ids) {
-                const orderInfo = new Object({
-                    order_id: order_id,
-                    // shipment_id: shipment_ids[i],
-                    // managed_by: vehicle.vehicle_id
-                });
-                await setStatusToOrder(orderInfo, servicesStatus.leave_agency, false);
-            }
         }
     }
 

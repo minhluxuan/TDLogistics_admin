@@ -69,7 +69,15 @@ const createNewTask = async (req, res) => {
             await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id }, { shipment_id });
         }
 
-        const resultCreatingNewTask = await driversService.assignNewTasks(req.body.shipment_ids, staff_id);
+        const resultAddingShipmentsToVehicle = await vehicleService.addShipmentToVehicle(resultGettingOneVehicle[0], req.body.shipment_ids);
+        if (!resultAddingShipmentsToVehicle) {
+            return req.status(409).json({
+                error: true,
+                message: "Thêm công việc thất bại.",
+            });
+        }
+
+        const resultCreatingNewTask = await driversService.assignNewTasks(resultAddingShipmentsToVehicle.acceptedArray, staff_id);
         
         return res.status(201).json({
             error: true,
