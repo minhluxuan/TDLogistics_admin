@@ -2,6 +2,13 @@ const router = require("express").Router();
 const shippersController = require("../controllers/shippersController");
 const auth = require("../lib/auth");
 
+router.get(
+    "/get_objects",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isActive(),
+    shippersController.getObjectsCanHandleTask
+);
 router.post(
     "/create_tasks",
     auth.isAuthenticated(),

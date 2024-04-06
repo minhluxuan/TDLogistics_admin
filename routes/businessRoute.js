@@ -102,6 +102,7 @@ router.post("/login", passport.authenticate("businessLogin"), (req, res, next) =
 });
 router.get("/check", businessController.checkExistBusiness);
 router.post("/signup", businessController.signup);
+router.get("/get_info", auth.isAuthenticated(), auth.isAuthorized(["BUSINESS"]), businessController.getAuthenticatedBusinessInfo);
 router.post(
     "/create",
     auth.isAuthenticated(),

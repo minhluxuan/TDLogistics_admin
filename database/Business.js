@@ -32,10 +32,10 @@ const checkExistBusinessUnion = async (conditions) => {
 
 	for (let i = 0; i < fields.length; i++) {
 		if (result[0][fields[i]] === values[i]) {
-		return new Object({
-			existed: true,
-			message: `Người dùng có ${fields[i]}: ${values[i]} đã tồn tại.`,
-		});
+			return new Object({
+				existed: true,
+				message: `Người dùng có ${fields[i]}: ${values[i]} đã tồn tại.`,
+			});
 		}
 	}
 }
@@ -87,6 +87,11 @@ const createNewRepresentor = async (info) => {
 
 	return await dbUtils.insert(pool, businessRepresentorTable, fields, values);
 };
+
+const getAuthenticatedBusinessInfo = async (business_id) => {
+	const query = "SELECT business_id, username, business_name, phone_number, email, tax_number, province, district, town, detail_address, bin, bank, debit, active, approved FROM business WHERE business_id = ? LIMIT 1";
+	return (await pool.query(query, [business_id]))[0];
+}
 
 const getManyBussinessUsers = async (info, paginationConditions) => {
 	const fields = Object.keys(info);
@@ -179,6 +184,7 @@ module.exports = {
 	checkExistBusinessRepresentor,
 	createNewBusinessUser,
 	createNewRepresentor,
+	getAuthenticatedBusinessInfo,
 	getManyBussinessUsers,
 	getOneBusinessUser,
 	getOneRepresentor,

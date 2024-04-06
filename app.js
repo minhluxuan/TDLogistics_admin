@@ -35,6 +35,7 @@ const driversRouter = require("./routes/driversRoute");
 const scheduleRouter = require("./routes/scheduleRoute");
 const administrativeRouter = require("./routes/administrativeRoute");
 const routesRouter = require("./routes/routeRoute");
+const paymentRouter = require("./routes/paymentRoute");
 
 const dbOptions = {
 	host: process.env.HOST,
@@ -131,7 +132,6 @@ app.use(passport.session());
 
 app.use('/', indexRouter);
 
-
 app.use("/api/v1/staffs", staffsRouter);
 app.use("/api/v1/otp", otpRouter);
 app.use("/api/v1/business", businessRouter);
@@ -150,6 +150,8 @@ app.use("/api/v1/drivers", driversRouter);
 app.use("/api/v1/schedules", scheduleRouter);
 app.use("/api/v1/administrative", administrativeRouter);
 app.use("/api/v1/routes", routesRouter);
+app.use("/api/v1/payment", paymentRouter);
+
 app.use("/get_session", (req, res) => {
 	console.log(req.user);
 	res.status(200).json({

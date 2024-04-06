@@ -248,3 +248,7 @@ Content-Type: application/json
 {
     "message": "Lô hàng được vận chuyển bởi Phương Trang trên tuyến đường từ TP.HCM đến Hà Nội"
 }
+
+###
+
+GET http://localhost:5000/api/v1/shipments/get_agencies

@@ -7,6 +7,7 @@ const shippersService = require("../services/shippersService");
 const servicesStatus = require("../lib/servicesStatus");
 const shipmentRequestValidation = new validation.ShipmentValidation();
 const agencyService = require("../services/agenciesService");
+
 const checkExistShipment = async (req, res) => {
     try {
         const { error } = shipmentRequestValidation.validateShipmentID(req.query);
@@ -32,6 +33,22 @@ const checkExistShipment = async (req, res) => {
     }
 }
 
+const getAgenciesForShipment = async (req, res) => {
+    try {
+        const resultGettingManyAgencies = await shipmentService.getAgenciesForShipment();
+        return res.status(200).json({
+            error: false,
+            data: resultGettingManyAgencies,
+            message: "Lấy các bưu cục/đại lý sẵn sàng thành công.",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 const createNewShipment = async (req, res) => {
     try {
         const createdTime = new Date();
@@ -45,12 +62,12 @@ const createNewShipment = async (req, res) => {
             });
         }
 
-        if (req.body.hasOwnProperty("agency_destination")) {
-            const agency_destination = await agencyService.getOneAgency({ agency_name: req.body.agency_destination });
+        if (req.body.hasOwnProperty("agency_id_dest")) {
+            const agency_destination = await agencyService.getOneAgency({ agency_id: req.body.agency_id_destination });
             if(!agency_destination || agency_destination.length === 0) {
                 return res.status(404).json({
                     error: true,
-                    message: "Không tìm thấy Bưu cục đích."
+                    message: `Bưu cục có mã ${req.body.agency_id_dest} không tồn tại.`,
                 });
             }
 
@@ -859,6 +876,7 @@ const getJourney = async (req, res) => {
 
 module.exports = {
     checkExistShipment,
+    getAgenciesForShipment,
     createNewShipment,
     updateShipment,
     getShipments,

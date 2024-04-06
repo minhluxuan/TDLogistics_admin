@@ -35,6 +35,40 @@ const checkExistBusiness = async (req, res) => {
 	}
 }
 
+const getAuthenticatedBusinessInfo = async (req, res) => {
+	try {
+		const resultGettingAuthenticatedBusinessInfo = await businessService.getAuthenticatedBusinessInfo(req.user.business_id);
+		if (!resultGettingAuthenticatedBusinessInfo || resultGettingAuthenticatedBusinessInfo.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Khách hàng doanh nghiệp có mã ${req.user.business_id} không tồn tại.`,
+			});
+		}
+
+		const resultGettingRepresentorOfAuthenticatedBusiness = await businessService.getOneRepresentor({ business_id: req.user.business_id });
+		if (!resultGettingRepresentorOfAuthenticatedBusiness || resultGettingRepresentorOfAuthenticatedBusiness.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Khách hàng doanh nghiệp có mã ${req.user.business_id} không tồn tại.`,
+			});
+		}
+
+		resultGettingAuthenticatedBusinessInfo[0].representor = resultGettingRepresentorOfAuthenticatedBusiness[0];
+
+		return res.status(200).json({
+			error: false,
+			info: resultGettingAuthenticatedBusinessInfo,
+			message: `Lấy thông tin khách hàng doanh nghiệp có mã ${req.user.business_id} thành công.`,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: false,
+			message: error.message,
+		});
+	}
+}
+
 const getBusiness = async (req, res) => {
 	try {
 		const paginationConditions = { rows: 0, page: 0 };
@@ -935,6 +969,7 @@ const updatePassword = async (req, res) => {
 
 module.exports = {
 	createNewBusinessUser,
+	getAuthenticatedBusinessInfo,
 	getBusiness,
 	getRepresentor,
 	checkExistBusiness,

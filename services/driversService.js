@@ -1,5 +1,9 @@
 const Drivers = require("../database/Drivers");
 
+const getObjectsCanHandleTask = async () => {
+    return await Drivers.getObjectsCanHandleTask();
+}
+
 const getTasks = async (conditions) => {
     return await Drivers.getTasks(conditions);
 }
@@ -13,6 +17,7 @@ const confirmCompletedTask = async (conditions) => {
 }
 
 module.exports = {
+    getObjectsCanHandleTask,
     getTasks,
     assignNewTasks,
     confirmCompletedTask,

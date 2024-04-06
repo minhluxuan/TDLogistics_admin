@@ -1,8 +1,13 @@
-POST http://localhost:5000/api/v1/drivers/create_task
+GET http://localhost:5000/api/v1/drivers/get_objects
+Content-Type: application/json
+
+###
+
+POST http://localhost:5000/api/v1/drivers/create_tasks
 Content-Type: application/json
 
 {
-    "shipment_ids": ["BC_78300_202428205350212", "BC_78300_202428205351331"],
+    "shipment_ids": ["BC_71000_2024228225740952"],
     "vehicle_id": "BC_70001_72H124767"
 }
 
@@ -13,7 +18,7 @@ Content-Type: application/json
 
 {
     "staff_id": "BC_70001_077204005691",
-    "option": 10
+    "option": 1
 }
 
 ###

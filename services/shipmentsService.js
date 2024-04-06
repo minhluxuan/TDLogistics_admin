@@ -4,6 +4,10 @@ const checkExistShipment = async (conditions, postalCode = null) => {
     return await Shipment.checkExistShipment(conditions, postalCode);
 }
 
+const getAgenciesForShipment = async () => {
+    return await Shipment.getAgenciesForShipment();
+}
+
 const createNewShipment = async (shipmentInfo, journeyInfo, postalCode = null) => {
     return await Shipment.createNewShipment(shipmentInfo, journeyInfo, postalCode);
 }
@@ -113,6 +117,7 @@ const updateJourney = async (shipment_id, updatedTime, message) => {
 
 module.exports = {
     checkExistShipment,
+    getAgenciesForShipment,
     createNewShipment,
     getDataForShipmentCode,
     getShipments,
