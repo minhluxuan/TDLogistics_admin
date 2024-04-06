@@ -33,6 +33,13 @@ const checkExistTask = async (conditions) => {
     return (await dbUtils.findOneIntersect(pool, table, fields, values)).length > 0;
 }
 
+const getOneTask = async (condition) => {
+    const fields = Object.keys(condition);
+    const values = Object.values(condition);
+
+    return await dbUtils.findOneIntersect(pool, table, fields, values);
+}
+
 const getTasks = async (conditions) => {
     let query = `SELECT * FROM ${tasksTable}`;
     
@@ -117,7 +124,7 @@ const getTasks = async (conditions) => {
     return result;
 }
 
-const assignNewTasks = async (shipment_ids, staff_id) => {
+const assignNewTasks = async (shipment_ids, staff_id, vehicle_id) => {
     const shipmentIdsSet = new Set(shipment_ids);
 
     let acceptedNumber = 0;
@@ -127,7 +134,7 @@ const assignNewTasks = async (shipment_ids, staff_id) => {
 
     for (const shipment_id of shipmentIdsSet) {
         try {
-            const resultCreatingNewTask = await dbUtils.insert(pool, tasksTable, ["shipment_id", "staff_id"], [shipment_id, staff_id]);
+            const resultCreatingNewTask = await dbUtils.insert(pool, tasksTable, ["shipment_id", "staff_id", "vehicle_id"], [shipment_id, staff_id, vehicle_id]);
             if (resultCreatingNewTask && resultCreatingNewTask.affectedRows > 0) {
                 acceptedNumber++;
                 acceptedArray.push(shipment_id);
@@ -160,6 +167,7 @@ const confirmCompletedTask = async (conditions) => {
 module.exports = {
     getObjectsCanHandleTask,
     checkExistTask,
+    getOneTask,
     getTasks,
     assignNewTasks,
     confirmCompletedTask,

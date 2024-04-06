@@ -3,6 +3,7 @@ const partnerStaffService = require("../services/partnerStaffsService");
 const agenciesService = require("../services/agenciesService");
 const staffsService = require("../services/staffsService");
 const driversService = require("../services/driversService");
+const shipmentsService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
 const fs = require("fs");
 const path = require("path");
@@ -466,16 +467,25 @@ const undertakeShipment = async (req, res) => {
             });
         }
 
-        if (!(await driversService.checkExistTask({ shipment_id: req.query.shipment_id, staff_id: req.user.staff_id }))) {
+        const resultGettingOneTask = await driversService.getOneTask({ shipment_id: req.query.shipment_id, staff_id: req.user.staff_id });
+        if (!resultGettingOneTask || resultGettingOneTask.length === 0) {
             return res.status(404).json({
                 error: true,
                 message: `Nhân viên có mã ${req.user.staff_id} không được phép tiếp nhận lô hàng có mã ${req.query.shipment_id}.`,
             });
         }
 
-        
+        await shipmentsService.updateShipment({ parent: resultGettingOneTask[0].vehicle_id }, { shipment_id: req.query.shipment_id });
+        return res.status(200).json({
+            error: false,
+            message: `Tiếp nhận đơn hàng có mã ${req.query.shipment_id} thành công.`,
+        });
     } catch (error) {
-        
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
     }
 }
 
