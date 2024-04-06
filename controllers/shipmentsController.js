@@ -650,7 +650,6 @@ const receiveShipment = async (req, res) => {
         const receiveTime = new Date();
         const formattedTime = moment(receiveTime).format("DD-MM-YYYY HH:mm:ss")
 
-        const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
         const { error } = shipmentRequestValidation.validateShipmentID(req.body);
         if (error) {
             return res.status(400).json({
@@ -667,31 +666,36 @@ const receiveShipment = async (req, res) => {
             });
         }
 
-        if (await shipmentService.checkExistShipment({ shipment_id: req.body.shipment_id }, postalCode)) {
-            return res.status(409).json({
-                error: true,
-                message: `Lô hàng có mã ${req.body.shipment_id} đã tồn tại trong bưu cục có mã ${req.user.agency_id}.`,
-            });
-        }
+        let resultCloneShipmentFromGlobalToAgency = null;
+        if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+            if (await shipmentService.checkExistShipment({ shipment_id: req.body.shipment_id }, postalCode)) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Lô hàng có mã ${req.body.shipment_id} đã tồn tại trong bưu cục có mã ${req.user.agency_id}.`,
+                });
+            }
 
-        const resultPastingShipmentToAgency = await shipmentService.pasteShipmentToAgency(resultGettingOneShipment[0], postalCode);
-        if (!resultPastingShipmentToAgency || resultPastingShipmentToAgency.affectedRows === 0) {
-            return res.status(409).json({
-                error: true,
-                message: `Sao chép lô hàng có mã ${req.body.shipment_id} từ cơ sở dữ liệu tổng cục sang cơ sở dữ liệu bưu cục thất bại.`
-            });
-        }
+            const resultPastingShipmentToAgency = await shipmentService.pasteShipmentToAgency(resultGettingOneShipment[0], postalCode);
+            if (!resultPastingShipmentToAgency || resultPastingShipmentToAgency.affectedRows === 0) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Sao chép lô hàng có mã ${req.body.shipment_id} từ cơ sở dữ liệu tổng cục sang cơ sở dữ liệu bưu cục thất bại.`
+                });
+            }
 
-        if (!resultGettingOneShipment[0].order_ids) {
-            return res.status(201).json({
-                error: true,
-                message: `Tiếp nhận lô hàng có mã ${req.body.shipment_id} thành công.`,
-            });
-        }
+            if (!resultGettingOneShipment[0].order_ids) {
+                return res.status(201).json({
+                    error: true,
+                    message: `Tiếp nhận lô hàng có mã ${req.body.shipment_id} thành công.`,
+                });
+            }
 
-        const resultCloningOrdersFromGlobalToAgency = await shipmentService.cloneOrdersFromGlobalToAgency(JSON.parse(resultGettingOneShipment[0].order_ids), postalCode);
+            resultCloneShipmentFromGlobalToAgency = await shipmentService.cloneOrdersFromGlobalToAgency(JSON.parse(resultGettingOneShipment[0].order_ids), postalCode);
+        }
+        
         const journeyMessage = `${formattedTime}: Lô hàng được tiếp nhận tại Bưu cục/Đại lý ${req.user.agency_id} bởi nhân viên ${req.user.staff_id}.`
-        const updateJourney = await shipmentService.updateJourney( req.body.shipment_id , formattedTime, journeyMessage);
+        await shipmentService.updateJourney( req.body.shipment_id , formattedTime, journeyMessage);
         const current_agency = await agencyService.getOneAgency({ agency_id: req.user.agency_id });
         if (!current_agency || current_agency.length === 0) {
             return res.status(404).json({
@@ -708,11 +712,14 @@ const receiveShipment = async (req, res) => {
         }
         
         await shipmentService.updateShipment(trackingShipment, { shipment_id: req.body.shipment_id });
-        await shipmentService.updateShipment(trackingShipment, { shipment_id: req.body.shipment_id }, postalCode);
+        if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+            await shipmentService.updateShipment(trackingShipment, { shipment_id: req.body.shipment_id }, postalCode);
+        }
 
         return res.status(200).json({
             error: false,
-            info: resultCloningOrdersFromGlobalToAgency,
+            info: resultCloneShipmentFromGlobalToAgency,
             message: `Tiếp nhận lô hàng có mã ${req.body.shipment_id} thành công.`,
         });
     } catch(error) {
