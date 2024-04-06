@@ -5,6 +5,7 @@ const staffsService = require("../services/staffsService");
 const driversService = require("../services/driversService");
 const shipmentsService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
+const moment = require("moment");
 const fs = require("fs");
 const path = require("path");
 const { dir } = require("console");
@@ -504,7 +505,9 @@ const deleteShipmentFromVehicle = async (req, res) => {
 
 const undertakeShipment = async (req, res) => {
     try {
-        const { error } = vehicleValidation.validateUndertakingShipment(req.query);
+        const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+
+        const { error } = vehicleValidation.validateUndertakeShipment(req.query);
 
         if (error) {
             return res.status(400).json({
@@ -522,7 +525,8 @@ const undertakeShipment = async (req, res) => {
         }
 
         await shipmentsService.updateShipment({ status: 4, parent: resultGettingOneTask[0].vehicle_id }, { shipment_id: req.query.shipment_id });
-        
+        const message = `${formattedTime}: Lô hàng đã được tiếp nhận bởi nhân viên có mã ${req.user.staff_id} thuộc đối tác vận tải có mã ${req.user.partner_id} và đang được vận chuyển trên phương tiện có mã ${resultGettingOneTask[0].vehicle_id}.`;
+        shipmentsService.updateJourney(req.query.shipment_id, formattedTime, message);
         return res.status(200).json({
             error: false,
             message: `Tiếp nhận đơn hàng có mã ${req.query.shipment_id} thành công.`,

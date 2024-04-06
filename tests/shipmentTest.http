@@ -14,7 +14,7 @@ POST http://localhost:5000/api/v1/shipments/create
 Content-Type: application/json
 
 {
-    "agency_id_dest": "TD_00000_077165007713"
+    "agency_id_dest": "BC_71000_077204005691"
 }
 
 ### tạo lô hàng cho shipper giao hàng
@@ -44,7 +44,7 @@ Content-Type: application/json
 ###  BC_78300_202429164715749
 ### order_id BC_78300_20242231694521, BC_78300_202422316114087, BC_78300_2024223161154877
 ### 39 40 41
-POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_202436142811594
+POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_20243615313903
 Content-Type: application/json
 
 {
@@ -73,11 +73,11 @@ POST http://localhost:5000/api/v1/shipments/confirm_create
 Content-Type: application/json 
 
 {
-    "shipment_id": "BC_71000_202436142811594"
+    "shipment_id": "BC_71000_20243615313903"
 }
 
 ###
-PUT http://localhost:5000/api/v1/shipments/approve?shipment_id=BC_71000_202436142811594
+PUT http://localhost:5000/api/v1/shipments/approve?shipment_id=BC_71000_20243615313903
 Content-Type: application/json 
 
 {
@@ -133,12 +133,12 @@ POST http://localhost:5000/api/v1/shipments/receive
 Content-Type: application/json
 
 {
-    "shipment_id": "BC_71000_202422722835855"
+    "shipment_id": "BC_71000_20243615313903"
 }
 
 ###
 
-POST http://localhost:5000/api/v1/shipments/decompose?shipment_id=BC_71000_2024228225740952
+POST http://localhost:5000/api/v1/shipments/decompose?shipment_id=BC_71000_20243615313903
 Content-Type: application/json
 
 {
@@ -270,11 +270,11 @@ Content-Type: application/json
     "password": "NTDung@tdlogistics2k24"
 }
 ### vehicle test
-POST http://localhost:5000/api/v1/staffs/login
+POST http://localhost:5000/api/v1/partner_staffs/login
 Content-Type: application/json
 
 {
-    "username": "minhxuanlu",
+    "username": "tranthenhan",
     "password": "MinhLuXuan@TDlogistics2k24"
 }
 ###
@@ -294,7 +294,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:5000/api/v1/vehicles/undertake?shipment_id=BC_71000_202436142811594
+GET http://localhost:5000/api/v1/vehicles/undertake?shipment_id=BC_71000_202436142811594
 Content-Type: application/json
 
 {

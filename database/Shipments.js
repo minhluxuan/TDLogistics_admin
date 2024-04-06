@@ -424,7 +424,8 @@ const receiveShipment = async (shipment_id, postal_code) => {
 
 const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
     let updatedNumber = 0;
-    const agencyShipmentTable = utils.getPostalCodeFromAgencyID(agency_id) + suffix;
+    const agencyIdSubParts = agency_id.split("_");
+    const shipmentTable = agencyIdSubParts[0] === "TD" ? table : agencyIdSubParts[1] + suffix;
     const updatedArray = new Array();
     const orderIdsSet = new Set(order_ids);
 
@@ -443,11 +444,17 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
             updatedArray.push(order_id);
         }
     }
-
-    const shipmentsQuery = `UPDATE ${agencyShipmentTable} AS q1 JOIN ${table} AS q2
+    
+    if (agencyIdSubParts[0] === "TD") {
+        const shipmentsQuery = `UPDATE ${shipmentTable} SET status = ? WHERE shipment_id = ?`;
+        await pool.query(shipmentsQuery, [6, shipment_id]);
+    }
+    else {
+        const shipmentsQuery = `UPDATE ${shipmentTable} AS q1 JOIN ${table} AS q2
                             ON q1.shipment_id = q2.shipment_id
                             SET q1.status = ?, q2.status = ? WHERE q1.shipment_id = ? `;
-    await pool.query(shipmentsQuery, [6, 6, agency_id, agency_id, shipment_id]);
+        await pool.query(shipmentsQuery, [6, 6, shipment_id]);
+    }
 
     return new Object({
         updatedNumber,

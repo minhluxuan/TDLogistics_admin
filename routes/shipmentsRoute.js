@@ -61,7 +61,7 @@ router.post("/search",
 
 router.post("/receive", 
     auth.isAuthenticated(), 
-    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_TELLER"]),
+    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER" ,"AGENCY_MANAGER", "AGENCY_TELLER"]),
     auth.isActive(),
     shipmentController.receiveShipment
 );
