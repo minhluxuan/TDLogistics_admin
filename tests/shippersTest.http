@@ -23,7 +23,7 @@ POST http://localhost:5000/api/v1/shippers/create_tasks
 Content-Type: application/json
 
 {
-    "shipment_id": "BC_71000_202422224138948",
+    "shipment_id": "BC_71000_2024228225740952",
     "vehicle_id": "BC_71000_42H124768"
 }
 

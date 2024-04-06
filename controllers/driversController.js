@@ -26,6 +26,7 @@ const getObjectsCanHandleTask = async (req, res) => {
 
 const createNewTask = async (req, res) => {
     try {
+        const formattedTime = moment(new Date).format("HH:mm:ss DD-MM-YYYY");
         const { error } = driversValidation.validateCreatingNewTask(req.body);
 
         if (error) {
@@ -75,10 +76,16 @@ const createNewTask = async (req, res) => {
                 error: true,
                 message: "Thêm công việc thất bại.",
             });
+        }    
+        const resultCreatingNewTask = await driversService.assignNewTasks(resultAddingShipmentsToVehicle.acceptedArray, staff_id);
+        resultCreatingNewTask.notAcceptedNumber += resultAddingShipmentsToVehicle.notAcceptedNumber;
+        resultCreatingNewTask.notAcceptedArray = [...resultAddingShipmentsToVehicle.notAcceptedArray, ...resultCreatingNewTask.notAcceptedArray];
+        
+        for(const shipment_id of resultCreatingNewTask.acceptedArray) {
+            const journeyMessage = `${formattedTime}: Lô hàng được tạo mới và giao cho nhân viên ${staff_id} thuộc đối tác ${resultGettingOneVehicle[0].transport_partner_id} trên xe biển ${resultGettingOneVehicle[0].license_plate}.`;
+            await shipmentService.updateJourney(shipment_id, formattedTime, journeyMessage)
         }
 
-        const resultCreatingNewTask = await driversService.assignNewTasks(resultAddingShipmentsToVehicle.acceptedArray, staff_id);
-        
         return res.status(201).json({
             error: true,
             info: resultCreatingNewTask,

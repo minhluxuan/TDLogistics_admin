@@ -69,6 +69,15 @@ const createNewTask = async (req, res) => {
             });
         }
 
+        const resultAddingShipmentsToVehicle = await vehicleService.addShipmentToVehicle(resultGettingOneVehicle[0], [req.body.shipment_id]);
+
+        if (resultAddingShipmentsToVehicle.acceptedNumber === 0) {
+            return res.status(409).json({
+                error: true,
+                message: `Lô hàng có mã ${req.body.shipment_id} đã tồn tại trong phương tiện có mã ${req.body.vehicle_id}.`,
+            });
+        }
+
         let orderIds;
         try {
             orderIds = resultGettingOneShipment[0].order_ids ? JSON.parse(resultGettingOneShipment[0].order_ids) : new Array();
@@ -90,7 +99,7 @@ const createNewTask = async (req, res) => {
         return res.status(201).json({
             error: true,
             info: resultCreatingNewTask,
-            message: `Phân việc cho shipper có mã ${staff_id} thành công.`,
+            message: `Thêm lô hàng có mã ${req.body.shipment_id} vào phương tiện có mã ${req.body.vehicle_id} và phân việc cho shipper có mã ${staff_id} thành công.`,
         });
     } catch (error) {
         console.log(error);
