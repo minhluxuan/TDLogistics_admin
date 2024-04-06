@@ -52,7 +52,7 @@ const getAgenciesForShipment = async (req, res) => {
 const createNewShipment = async (req, res) => {
     try {
         const createdTime = new Date();
-        const formattedTime = moment(createdTime).format("HH:mm:ss DD-MM-YYYY");
+        const formattedTime = moment(createdTime).format("DD-MM-YYYY HH:mm:ss");
         const { error } = shipmentRequestValidation.validateCreatingShipment(req.body);
 
         if (error) {
@@ -569,7 +569,7 @@ const deleteShipment = async (req, res) => {
 const decomposeShipment = async (req, res) => {
     try {  
         const decomposeTime = new Date();
-        const formattedTime = moment(decomposeTime).format("HH:mm:ss DD-MM-YYYY");
+        const formattedTime = moment(decomposeTime).format("DD-MM-YYYY HH:mm:ss");
         const { error } = shipmentRequestValidation.validateShipmentID(req.query) && shipmentRequestValidation.validateDecomposingShipment(req.body);
 
         if (error) {
@@ -648,7 +648,7 @@ const decomposeShipment = async (req, res) => {
 const receiveShipment = async (req, res) => {
     try {
         const receiveTime = new Date();
-        const formattedTime = moment(receiveTime).format("HH:mm:ss DD-MM-YYYY");
+        const formattedTime = moment(receiveTime).format("DD-MM-YYYY HH:mm:ss");
 
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
         const { error } = shipmentRequestValidation.validateShipmentID(req.body);
@@ -702,6 +702,7 @@ const receiveShipment = async (req, res) => {
         }
 
         const trackingShipment = {
+            parent: null,
             current_agency_id: current_agency[0].agency_id,
             current_lat: current_agency[0].latitude,
             current_long: current_agency[0].longitude
@@ -725,7 +726,7 @@ const receiveShipment = async (req, res) => {
 const undertakeShipment = async (req, res) => {
     try {
         const undertakeTime = new Date();
-        const formattedTime = moment(undertakeTime).format("HH:mm:ss DD-MM-YYYY");
+        const formattedTime = moment(undertakeTime).format("DD-MM-YYYY HH:mm:ss");
         const { error } = shipmentRequestValidation.validateUndertakeShipment(req.body);
         if(error) {
             return res.status(400).json({
@@ -810,7 +811,7 @@ const undertakeShipment = async (req, res) => {
 const updateJourney = async (req, res) => {
     try {
         const createdTime = new Date();
-        const formattedTime = moment(createdTime).format("HH:mm:ss DD-MM-YYYY");
+        const formattedTime = moment(createdTime).format("DD-MM-YYYY HH:mm:ss");
         const { conditionError } = shipmentRequestValidation.validateShipmentID(req.query);
         if(conditionError) {
             return res.status(400).json({

@@ -2,7 +2,7 @@ const vehicleService = require("../services/vehicleService");
 const partnerStaffService = require("../services/partnerStaffsService");
 const agenciesService = require("../services/agenciesService");
 const staffsService = require("../services/staffsService");
-const moment = require("moment");
+const driversService = require("../services/driversService");
 const shipmentsService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
 const fs = require("fs");
@@ -393,7 +393,7 @@ const deleteVehicle = async (req, res) => {
 
 const addShipmentToVehicle = async (req, res) => {
     try {
-        const formattedTime = moment(new Date()).format("HH:mm:ss DD-MM-YYYY");
+        const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
         const { error: error1 } = vehicleValidation.validateCheckingExistVehicle(req.query);
         if (error1) {
             return res.status(400).json({
@@ -448,7 +448,7 @@ const addShipmentToVehicle = async (req, res) => {
 
 const deleteShipmentFromVehicle = async (req, res) => {
     try {
-        const formattedTime = moment(new Date()).format("HH:mm:ss DD-MM-YYYY");
+        const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
         const { error: error1 } = vehicleValidation.validateCheckingExistVehicle(req.query);
         if (error1) {
             return res.status(400).json({
@@ -502,6 +502,39 @@ const deleteShipmentFromVehicle = async (req, res) => {
     }
 }
 
+const undertakeShipment = async (req, res) => {
+    try {
+        const { error } = vehicleValidation.validateUndertakingShipment(req.query);
+
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const resultGettingOneTask = await driversService.getOneTask({ shipment_id: req.query.shipment_id, staff_id: req.user.staff_id });
+        if (!resultGettingOneTask || resultGettingOneTask.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Nhân viên có mã ${req.user.staff_id} không được phép tiếp nhận lô hàng có mã ${req.query.shipment_id}.`,
+            });
+        }
+
+        await shipmentsService.updateShipment({ parent: resultGettingOneTask[0].vehicle_id }, { shipment_id: req.query.shipment_id });
+        return res.status(200).json({
+            error: false,
+            message: `Tiếp nhận đơn hàng có mã ${req.query.shipment_id} thành công.`,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 module.exports = {
     checkExistVehicle,
     createNewVehicle,
@@ -511,4 +544,5 @@ module.exports = {
     deleteVehicle,
     addShipmentToVehicle,
     deleteShipmentFromVehicle,
+    undertakeShipment,
 };
