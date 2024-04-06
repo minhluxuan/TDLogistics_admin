@@ -26,6 +26,8 @@ const getObjectsCanHandleTask = async (req, res) => {
 
 const createNewTask = async (req, res) => {
     try {
+        const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+
         const { error } = driversValidation.validateCreatingNewTask(req.body);
 
         if (error) {
