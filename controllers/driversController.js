@@ -1,5 +1,5 @@
 const moment = require("moment");
-const driversService = require("../services/driversService");
+const shippersService = require("../services/shippersService");
 const vehicleService = require("../services/vehicleService");
 const shipmentService = require("../services/shipmentsService");
 const utils = require("../lib/utils");
@@ -9,7 +9,7 @@ const driversValidation = new validation.DriversValidation();
 
 const getObjectsCanHandleTask = async (req, res) => {
     try {
-        const resultGettingObjectsCanHandleTask = await driversService.getObjectsCanHandleTask();
+        const resultGettingObjectsCanHandleTask = await shippersService.getObjectsCanHandleTask();
         return res.status(200).json({
             error: false,
             data: resultGettingObjectsCanHandleTask,

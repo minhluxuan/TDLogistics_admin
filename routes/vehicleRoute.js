@@ -45,7 +45,7 @@ router.delete(
     auth.isActive(),
     vehicleController.deleteVehicle
 );
-
+router.get("/undertake", auth.is)
 router.patch(
     "/add_shipments",
     auth.isAuthenticated(),
