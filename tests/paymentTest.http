@@ -1,0 +1,34 @@
+GET http://localhost:5000/api/v1/payment/payment_successful
+Content-Type: application/json
+
+{
+    "code": "00",
+    "desc": "Success - Thành công",
+    "data": {
+        "id": "10b79503da974af09761be84fd0664232",
+        "orderCode": "BC_78300_202422316414160",
+        "amount": 100000,
+        "amountPaid": 100000,
+        "amountRemaining": 0,
+        "status": "PAID",
+        "createdAt": "2023-07-31T15:33:31.000Z",
+        "transactions": [
+        {
+            "reference": "FT23212323232323",
+            "amount": 3000,
+            "accountNumber": "113366668888",
+            "description": "TTY23V15",
+            "transactionDateTime": "2023-08-01T19:44:15.000Z",
+            "virtualAccountName": "NGUYEN VAN A",
+            "virtualAccountNumber": null,
+            "counterAccountBankId": null,
+            "counterAccountBankName": null,
+            "counterAccountName": null,
+            "counterAccountNumber": null
+        }
+        ],
+        "cancellationReason": null,
+        "canceledAt": null
+    },
+    "signature": "64319f6c98c01e5cb254f4304b95c8f3339bfcbb30c8b6e5831902f98c03b094"
+}

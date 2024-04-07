@@ -37,6 +37,8 @@ const createNewTask = async (req, res) => {
             });
         }
 
+        console.log(req.body.shipment_ids);
+
         const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.body.vehicle_id });
         if (!resultGettingOneVehicle || resultGettingOneVehicle.length === 0) {
             return res.status(404).json({
