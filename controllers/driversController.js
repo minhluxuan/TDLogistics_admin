@@ -86,7 +86,7 @@ const createNewTask = async (req, res) => {
         }
 
         return res.status(201).json({
-            error: true,
+            error: false,
             info: resultCreatingNewTask,
             message: `Thêm lô hàng vào phương tiện có mã ${req.body.vehicle_id} và phân việc cho tài xế có mã ${staff_id} thành công.`,
         });
