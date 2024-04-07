@@ -3,9 +3,11 @@ require('dotenv').config();
 
 const router = express.Router();
 
+// const 
+
 router.get("/payment_successful", (req, res) => {
 	try {
-        if (!req)
+        // const { error } = 
 
 		return res.status(200).json({
 			error: false,

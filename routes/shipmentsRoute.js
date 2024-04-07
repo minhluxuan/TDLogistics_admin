@@ -102,7 +102,7 @@ router.get("/get_journey",
 );
 
 router.put(
-    "/approve",
+    "/accept",
     auth.isAuthenticated(),
     auth.isAuthorized(["ADMIN", "MANAGER", "TELLER"]),
     auth.isActive(),
