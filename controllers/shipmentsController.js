@@ -949,7 +949,10 @@ const approveNewShipment = async (req, res) => {
         }
 
         await shipmentService.updateShipment({ status: 2 }, req.query);
-        await shipmentService.updateShipment({ status: 2}, req.query, utils.getPostalCodeFromAgencyID(resultGettingOneShipment[0].agency_id));
+        const agencyIdSubParts = resultGettingOneShipment[0].agency_id.split('_');
+        if (agencyIdSubParts[0] === "DL" || agencyIdSubParts[0] === "BC") {
+            await shipmentService.updateShipment({ status: 2}, req.query, utils.getPostalCodeFromAgencyID(resultGettingOneShipment[0].agency_id));
+        }
 
         return res.status(201).json({
             error: false,

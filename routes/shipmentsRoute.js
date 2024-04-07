@@ -103,9 +103,9 @@ router.get("/get_journey",
 
 router.put(
     "/accept",
-    auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "TELLER"]),
-    auth.isActive(),
+    // auth.isAuthenticated(),
+    // auth.isAuthorized(["ADMIN", "MANAGER", "TELLER"]),
+    // auth.isActive(),
     shipmentController.approveNewShipment
 );
 
