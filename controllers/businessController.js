@@ -53,6 +53,7 @@ const getAuthenticatedBusinessInfo = async (req, res) => {
 			});
 		}
 
+		resultGettingAuthenticatedBusinessInfo[0].role = "BUSINESS";
 		resultGettingAuthenticatedBusinessInfo[0].representor = resultGettingRepresentorOfAuthenticatedBusiness[0];
 
 		return res.status(200).json({
