@@ -82,7 +82,7 @@ router.post("/remove_orders",
 
 router.post("/undertake", 
     auth.isAuthenticated(), 
-    auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER", "PARTNER_SHIPPER"]),
+    auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER", "PARTNER_DRIVER", "DRIVER"]),
     auth.isActive(),
     shipmentController.undertakeShipment
 );
