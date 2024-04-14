@@ -9,7 +9,7 @@ const shippersValidation = new validation.ShippersValidation();
 
 const getObjectsCanHandleTask = async (req, res) => {
     try {
-        const resultGettingObjectsCanHandleTask = await shippersService.getObjectsCanHandleTask();
+        const resultGettingObjectsCanHandleTask = await shippersService.getObjectsCanHandleTask(req.user.agency_id);
         return res.status(200).json({
             error: false,
             data: resultGettingObjectsCanHandleTask,

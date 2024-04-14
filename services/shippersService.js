@@ -4,8 +4,8 @@ const checkExistTask = async (conditions, postalCode) => {
     return await Shippers.checkExistTask(conditions, postalCode);
 }
 
-const getObjectsCanHandleTask = async () => {
-    return await Shippers.getObjectsCanHandleTask();
+const getObjectsCanHandleTask = async (postalCode) => {
+    return await Shippers.getObjectsCanHandleTask(postalCode);
 }
 
 const getTasks = async (conditions, postalCode) => {

@@ -20,17 +20,16 @@ const checkExistTask = async (conditions, postalCode) => {
     return (await dbUtils.findOneIntersect(pool, postalCode + '_' + defaultTasksTable, fields, values)).length > 0;
 }
 
-const getObjectsCanHandleTask = async () => {
+const getObjectsCanHandleTask = async (agency_id) => {
     const query = `SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
     v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, NULL AS transport_partner_name, s.fullname 
     FROM vehicle AS v 
     LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
     LEFT JOIN staff AS s ON v.staff_id = s.staff_id 
-    WHERE v.transport_partner_id IS NULL OR v.transport_partner_id = ""
-    
+    WHERE v.agency_id = ?
     ORDER BY created_at DESC;`
 
-    return (await pool.query(query))[0];
+    return (await pool.query(query, [agency_id]))[0];
 }
 
 const getTasks = async (conditions, postal_code) => {
