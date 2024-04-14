@@ -319,7 +319,8 @@ const createOrdersByFile = async (req, res) => {
             const areaAgencyIdSubParts = req.user.agency_id.split('_');
             order.agency_id = req.user.agency_id;
             order.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
-            
+            order.fee = servicesFee.calculateFee(order.service_type, order.province_source, order.province_dest, order.mass * 1000, 0.15, false);
+
             const stt = order.STT;
             delete order.STT;
 
@@ -400,18 +401,8 @@ const updateOrder = async (req, res) => {
         const updatedRow = resultGettingOneOrder[0];
 
         const mass = (updatedRow.length * updatedRow.width * updatedRow.height) / 6000;
-        const map = new libMap.Map();
-        const addressSoure = utils.getAddressFromComponent(updatedRow.province_source, updatedRow.district_source, updatedRow.ward_source, updatedRow.detail_source);
-        const addressDest = utils.getAddressFromComponent(updatedRow.province_dest, updatedRow.district_dest, updatedRow.ward_dest, updatedRow.detail_dest);
-        const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
         
-        let optionService = null;
-        if(updatedRow.service_type === "T60") {
-            optionService = "T60";
-            updatedRow.service_type = "CPN";
-        }
-        
-        updatedRow.fee = servicesFee.calculteFee(updatedRow.service_type, updatedRow.province_source, updatedRow.province_dest, distance.distance, mass * 1000, 0.15, optionService, false);
+        updatedRow.fee = servicesFee.calculateFee(updatedRow.service_type, updatedRow.province_source, updatedRow.province_dest, mass * 1000, 0.15, false);
         
         const resultUpdatingOneOrder = await ordersService.updateOrder({ fee: updatedRow.fee }, req.query);
         if (!resultUpdatingOneOrder || resultUpdatingOneOrder.affectedRows === 0) {
@@ -423,6 +414,9 @@ const updateOrder = async (req, res) => {
 
         return res.status(200).json({
             error: false,
+            data: {
+                fee: updatedRow.fee,
+            },
             message: `Cập nhật đơn hàng có mã đơn hàng ${req.query.order_id} thành công.`,
         });
     } catch (error) {

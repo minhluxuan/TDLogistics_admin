@@ -25,8 +25,8 @@ router.post(
 );
 router.patch(
     "/confirm_completed",
-    auth.isAuthenticated(),
-    auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER"]),
+    // auth.isAuthenticated(),
+    // auth.isAuthorized(["SHIPPER", "AGENCY_SHIPPER"]),
     auth.isActive(),
     shippersController.confirmCompletedTask
 );
