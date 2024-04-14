@@ -2,11 +2,21 @@ GET http://localhost:5000/api/v1/partner_staffs/check?cccd=077204005691
 
 ###
 
-POST https://api.tdlogistics.net.vn/api/v1/partner_staffs/login
+POST http://localhost:5000/api/v1/partner_staffs/login
 Content-Type: application/json
 
 {
     "username": "minhluxuan",
+    "password": "MinhLuXuan@TDlogistics2k24"
+}
+
+###
+
+POST http://localhost:5000/api/v1/partner_staffs/login
+Content-Type: application/json
+
+{
+    "username": "phuongtrang",
     "password": "MinhLuXuan@TDlogistics2k24"
 }
 

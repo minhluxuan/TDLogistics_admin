@@ -7,7 +7,36 @@ Content-Type: application/json
 
 ###
 
-POST https://tdlogistics.govt.hu/api/v1/orders/search
+POST http://localhost:5000/api/v1/orders/create
+Content-Type: application/json
+
+{
+    "name_sender": "Lữ Xuân Minh",
+    "name_receiver": "Trần Hữu Anh",
+    "phone_number_receiver": "0981430418",
+    "mass": 12,
+    "height": 35,
+    "width": 12,
+    "length": 12,
+    "province_source": "Thành phố Hồ Chí Minh",
+    "district_source": "Quận 1",
+    "ward_source": "Phường Đa Kao",
+    "detail_source": "đường Võ Thị Sáu",
+    "province_dest": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district_dest": "Thành phố Bà Rịa",
+    "ward_dest": "Phường Phước Trung",
+    "detail_dest": "đường Cách mạng tháng tám",
+    "long_source": 10.38239932,
+    "lat_source": 10.90237823,
+    "long_destination": 10.3782238,
+    "lat_destination": 10.38274242,
+    "COD": 20000,
+    "service_type": "CPN"
+}
+
+###
+
+POST http://localhost:5000/api/v1/orders/search
 Content-Type: application/json
 
 {

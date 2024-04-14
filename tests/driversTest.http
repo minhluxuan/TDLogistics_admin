@@ -7,8 +7,8 @@ POST http://localhost:5000/api/v1/drivers/create_tasks
 Content-Type: application/json
 
 {
-    "shipment_ids": ["BC_71000_2024228225740951"],
-    "vehicle_id": "BC_71000_42H124768"
+    "shipment_ids": ["BC_71000_202431213130926"],
+    "vehicle_id": "TD_00001_42H124768"
 }
 
 ###

@@ -32,11 +32,11 @@ Content-Type: application/json
 }
 ### TD202410161859226 
 ### order_id BC_78300_20242231634518, BC_78300_2024224111043787, BC_78300_2024223163246472
-POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_202422224138948
+POST http://localhost:5000/api/v1/shipments/add_orders?shipment_id=BC_71000_202431213130926
 Content-Type: application/json
 
 {
-    "order_ids": ["BC_78300_2024223163234692","BC_78300_2024223163234271", "BC_78300_2024223162829291"]
+    "order_ids": ["BC_71000_2024489444929"]
 }
 
 ###
@@ -57,11 +57,12 @@ Content-Type: application/json
 }
 
 ###
+
 POST http://localhost:5000/api/v1/shipments/confirm_create
 Content-Type: application/json 
 
 {
-    "shipment_id": "BC_78300_202421221351231"
+    "shipment_id": "BC_71000_202431213130926"
 }
 
 ### Chỉnh sửa database bảng 78300_shipment cột order_ids thêm 1 đơn hàng với 1 order_id đểu vào test chức năng xóa bưu cục 
@@ -82,11 +83,11 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:5000/api/v1/shipments/get_orders?shipment_id=BC_71000_202422224138948
+GET http://localhost:5000/api/v1/shipments/get_orders?shipment_id=BC_71000_202431213130926
 
 ###
 
-DELETE http://localhost:5000/api/v1/shipments/delete?shipment_id=BC_71000_202422224138948
+DELETE http://localhost:5000/api/v1/shipments/delete?shipment_id=BC_71000_202431213130926
 Content-Type: application/json 
 
 ###
@@ -103,12 +104,12 @@ POST http://localhost:5000/api/v1/shipments/receive
 Content-Type: application/json
 
 {
-    "shipment_id": "BC_71000_202422224138948"
+    "shipment_id": "BC_71000_202431213130926"
 }
 
 ###
 
-POST http://localhost:5000/api/v1/shipments/decompose?shipment_id=BC_71000_202422224138948
+POST http://localhost:5000/api/v1/shipments/decompose?shipment_id=BC_71000_202431213130926
 Content-Type: application/json
 
 {
@@ -211,7 +212,7 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:5000/api/v1/shipments/approve?shipment_id=BC_71000_2024228225740951
+PUT http://localhost:5000/api/v1/shipments/accept?shipment_id=BC_71000_202431213130926
 
 ###
 

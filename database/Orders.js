@@ -28,6 +28,17 @@ const getOrdersOfAgency = async (postalCode, conditions) => {
     const values = Object.values(conditions);
 
     const result = await SQLutils.find(pool, postalCode + '_' + table, fields, values, true);
+
+    for (const elm of result) {
+        try {
+            if (elm.journey) {
+                elm.journey = JSON.parse(elm.journey);
+            }   
+        } catch (error) {
+            // Nothing to do
+        }
+    }
+
     return result;
 }
 
@@ -36,6 +47,17 @@ const getOneOrder = async (conditions) => {
     const values = Object.values(conditions);
 
     const result = await SQLutils.findOneIntersect(pool, table, fields, values);
+
+    for (const elm of result) {
+        try {
+            if (elm.journey) {
+                elm.journey = JSON.parse(elm.journey);
+            }   
+        } catch (error) {
+            // Nothing to do
+        }
+    }
+
     return result;
 }
 

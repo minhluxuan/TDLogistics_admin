@@ -80,7 +80,7 @@ const createNewTask = async (req, res) => {
         }
 
         await shipmentService.updateShipment({ status: 3 }, { shipment_id: req.body.shipment_id });
-        const shipmentIdSubParts = shipment_id.split('_');
+        const shipmentIdSubParts = req.body.shipment_id.split('_');
         if (shipmentIdSubParts[0] === "BC" || shipmentIdSubParts[0] === "DL") {
             await shipmentService.updateShipment({ status: 3 }, { shipment_id: req.body.shipment_id }, shipmentIdSubParts[1]);
         }
@@ -100,7 +100,7 @@ const createNewTask = async (req, res) => {
         }
 
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
-        
+        console.log(req.body);
         const resultCreatingNewTask = await shippersService.assignNewTasks(orderIds, staff_id, postalCode);
         for(const shipment_id of resultCreatingNewTask.acceptedArray) {
             const journeyMessage = `${formattedTime}: Lô hàng được tạo mới và giao cho nhân viên ${staff_id} thuộc đối tác ${resultGettingOneVehicle[0].transport_partner_id} trên xe biển ${resultGettingOneVehicle[0].license_plate}.`;

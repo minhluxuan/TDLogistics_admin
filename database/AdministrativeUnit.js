@@ -18,6 +18,16 @@ const checkExistProvince = async (province) => {
     return (await dbUtils.findOneIntersect(pool, provinceTable, ["province"], [province])).length > 0;
 }
 
+const getOneDistributionCenter = async (province) => {
+    const query = "SELECT managed_by FROM ?? WHERE ?? = ?";
+    const result = (await pool.query(query, [provinceTable, "province", province]))[0];
+    if (!result || result.length === 0) {
+        return null;
+    }
+
+    return result[0].managed_by;
+}
+
 const getUnits = async (level, province, district) => {
     let result;
     switch (level) {
@@ -61,5 +71,6 @@ const getUnits = async (level, province, district) => {
 
 module.exports = {
     getUnits,
+    getOneDistributionCenter,
     checkExistProvince,
 }

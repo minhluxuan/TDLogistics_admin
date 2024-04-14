@@ -2,7 +2,7 @@ POST http://localhost:5000/api/v1/routes/create
 Content-Type: application/json
 
 {
-    "vehicle_id": "BC_70001_72H124767",
+    "vehicle_id": "BC_71000_72H124767",
     "source": "Thành phố Hồ Chí Minh",
     "destination": "Tỉnh Bà Rịa - Vũng Tàu",
     "departure_time": "17:00:00"

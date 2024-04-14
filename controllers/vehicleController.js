@@ -5,6 +5,7 @@ const staffsService = require("../services/staffsService");
 const driversService = require("../services/driversService");
 const shipmentsService = require("../services/shipmentsService");
 const validation = require("../lib/validation");
+const utils = require("../lib/utils");
 const moment = require("moment");
 
 const vehicleValidation = new validation.VehicleValidation();
@@ -475,9 +476,37 @@ const undertakeShipment = async (req, res) => {
             });
         }
 
+        const resultGettingOneShipment = await shipmentsService.getOneShipment({ shipment_id: req.query.shipment_id });
+        if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng ${req.query.shipment_id} không tồn tại để có thể tiếp nhận.`,
+            });
+        }
+
+        if (resultGettingOneShipment[0].status < 3) {
+            return res.status(409).json({
+                error: true,
+                message: `Lô hàng có mã ${req.query.shipment_id} không khả thi để tiếp nhận vào thời điểm này.
+                Yêu cầu trạng thái trước đó: "Đã phân công".`,
+            });
+        }
+
+        if (resultGettingOneShipment[0].status >= 4) {
+            return res.status(409).json({
+                error: true,
+                message: `Lô hàng có mã ${req.query.shipment_id} đã được tiếp nhận trước đó.`,
+            });
+        }
+
         await shipmentsService.updateShipment({ status: 4, parent: resultGettingOneTask[0].vehicle_id }, { shipment_id: req.query.shipment_id });
-        const message = `${formattedTime}: Lô hàng đã được tiếp nhận bởi nhân viên có mã ${req.user.staff_id} thuộc đối tác vận tải có mã ${req.user.partner_id} và đang được vận chuyển trên phương tiện có mã ${resultGettingOneTask[0].vehicle_id}.`;
-        shipmentsService.updateJourney(req.query.shipment_id, formattedTime, message);
+        const message = `${formattedTime}: Lô hàng được tiếp nhận bởi nhân viên có mã ${req.user.staff_id} thuộc đối tác vận tải có mã ${req.user.partner_id} và đang được vận chuyển trên phương tiện có mã ${resultGettingOneTask[0].vehicle_id}.`;
+        await shipmentsService.updateJourney(req.query.shipment_id, formattedTime, message);
+        await shipmentsService.updateJourney(req.query.shipment_id, formattedTime, message, utils.getPostalCodeFromAgencyID(resultGettingOneShipment[0].agency_id));
+        if (resultGettingOneShipment[0].agency_id_dest) {
+            await shipmentsService.updateJourney(req.query.shipment_id, formattedTime, message, utils.getPostalCodeFromAgencyID(resultGettingOneShipment[0].agency_id_dest));
+        }
+        
         return res.status(200).json({
             error: false,
             message: `Tiếp nhận đơn hàng có mã ${req.query.shipment_id} thành công.`,

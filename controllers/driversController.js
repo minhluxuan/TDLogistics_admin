@@ -37,8 +37,6 @@ const createNewTask = async (req, res) => {
             });
         }
 
-        console.log(req.body.shipment_ids);
-
         const resultGettingOneVehicle = await vehicleService.getOneVehicle({ vehicle_id: req.body.vehicle_id });
         if (!resultGettingOneVehicle || resultGettingOneVehicle.length === 0) {
             return res.status(404).json({
@@ -47,10 +45,11 @@ const createNewTask = async (req, res) => {
             });
         }
 
-        if (!resultGettingOneVehicle[0].transport_partner_id) {
-            return res.status(400).json({
+        const vehicleIdSubParts = req.body.vehicle_id.split('_');
+        if (vehicleIdSubParts[0] !== "TD") {
+            return res.status(409).json({
                 error: true,
-                message: `Phương tiện phải thuộc sở hữu của một đối tác vận tải.`,
+                message: `Phương tiện ${req.body.vehicle_id} không thuộc quyền quản lý của tổng công ty.`,
             });
         }
 
@@ -62,19 +61,30 @@ const createNewTask = async (req, res) => {
             });
         }
         
+        const shipmentsInfo = new Array();
         for (const shipment_id of req.body.shipment_ids) {
-            if (!(await shipmentService.checkExistShipment({ shipment_id }))) {
+            const resultGettingOneShipment = await shipmentService.getOneShipment({ shipment_id });
+            if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
                 return res.status(404).json({
                     error: true,
                     message: `Lô hàng có mã ${shipment_id} không tồn tại.`,
                 });
             }
 
-            console.log(await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id, status: 3 }, { shipment_id }));
-            const shipmentIdSubParts = shipment_id.split('_');
-            if (shipmentIdSubParts[0] === "BC" || shipmentIdSubParts[0] === "DL") {
-                await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id, status: 3 }, { shipment_id }, shipmentIdSubParts[1]);
+            if (resultGettingOneShipment[0].status > 3) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Lô hàng có mã ${shipment_id} không còn khả thi để phân việc.`,
+                });
             }
+
+            shipmentsInfo.push({ shipment_id: shipment_id, agency_id: resultGettingOneShipment[0].agency_id });
+        }
+
+        for (const shipment of shipmentsInfo) {
+            await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id, status: 3 }, { shipment_id: shipment.shipment_id });
+            await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id, status: 3 }, { shipment_id: shipment.shipment_id }, utils.getPostalCodeFromAgencyID(req.user.agency_id));
+            await shipmentService.updateShipment({ transport_partner_id: resultGettingOneVehicle[0].transport_partner_id, status: 3 }, { shipment_id: shipment.shipment_id }, utils.getPostalCodeFromAgencyID(shipment.agency_id));
         }
 
         const resultAddingShipmentsToVehicle = await vehicleService.addShipmentToVehicle(resultGettingOneVehicle[0], req.body.shipment_ids);
@@ -82,9 +92,19 @@ const createNewTask = async (req, res) => {
         const resultCreatingNewTask = await driversService.assignNewTasks(resultAddingShipmentsToVehicle.acceptedArray, staff_id, resultGettingOneVehicle[0].vehicle_id);
         resultCreatingNewTask.notAcceptedNumber += resultAddingShipmentsToVehicle.notAcceptedNumber;
         resultCreatingNewTask.notAcceptedArray = [...resultAddingShipmentsToVehicle.notAcceptedArray, ...resultCreatingNewTask.notAcceptedArray];
-        for(const shipment_id of resultCreatingNewTask.acceptedArray) {
-            const journeyMessage = `${formattedTime}: Lô hàng được tạo mới và giao cho nhân viên ${staff_id} thuộc đối tác ${resultGettingOneVehicle[0].transport_partner_id} trên xe biển ${resultGettingOneVehicle[0].license_plate}.`;
-            await shipmentService.updateJourney(shipment_id, formattedTime, journeyMessage)
+        
+        const acceptedShipmentsInfo = new Array();
+        for (const shipment of shipmentsInfo) {
+            if (resultAddingShipmentsToVehicle.acceptedArray.includes(shipment.shipment_id)) {
+                acceptedShipmentsInfo.push(shipment);
+            }
+        }
+
+        for (const shipment of acceptedShipmentsInfo) {
+            const journeyMessage = `${formattedTime}: Lô hàng được giao cho nhân viên ${staff_id} ` + resultGettingOneVehicle[0].transport_partner_id ? `thuộc đối tác ${resultGettingOneVehicle[0].transport_partner_id} ` : "" + `trên xe có biển ${resultGettingOneVehicle[0].license_plate}.`;
+            await shipmentService.updateJourney(shipment.shipment_id, formattedTime, journeyMessage);
+            await shipmentService.updateJourney(shipment.shipment_id, formattedTime, journeyMessage, utils.getPostalCodeFromAgencyID(req.user.agency_id));
+            await shipmentService.updateJourney(shipment.shipment_id, formattedTime, journeyMessage, utils.getPostalCodeFromAgencyID(shipment.agency_id));
         }
 
         return res.status(201).json({

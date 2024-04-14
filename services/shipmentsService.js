@@ -32,8 +32,8 @@ const updateShipment = async (info, condtions, postal_code = null) => {
     return await Shipment.updateShipment(info, condtions, postal_code);
 }
 
-const confirmCreateShipment = async (info) => {
-    return await Shipment.confirmCreateShipment(info);
+const confirmCreateShipment = async (info, postalCode) => {
+    return await Shipment.confirmCreateShipment(info, postalCode);
 }
 
 const deleteShipment = async (shipment_id, postal_code = null) => {
@@ -46,6 +46,10 @@ const deleteGlobalShipment = async (shipment_id) => {
 
 const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
     return await Shipment.decomposeShipment(order_ids, shipment_id, agency_id);
+}
+
+const decomposeShipmentInAgency = async (order_ids, shipment_id, agency_id, postalCode) => {
+    return await Shipment.decomposeShipmentInAgency(order_ids, shipment_id, agency_id, postalCode);
 }
 
 const compareOrdersInRequestWithOrdersInShipment = async (requestOrderIds, shipmentOrderIds) => {
@@ -111,8 +115,8 @@ const updateOrders = async (order_ids, staff_ids, postal_code) => {
     return await Shipment.updateOrders(order_ids, staff_ids, postal_code);
 }
 
-const updateJourney = async (shipment_id, updatedTime, message) => {
-    return await Shipment.updateJourney(shipment_id, updatedTime, message);
+const updateJourney = async (shipment_id, updatedTime, message, postalCode) => {
+    return await Shipment.updateJourney(shipment_id, updatedTime, message, postalCode);
 }
 
 module.exports = {
@@ -132,6 +136,7 @@ module.exports = {
     deleteGlobalShipment,
     updateShipmentToDatabase,
     decomposeShipment,
+    decomposeShipmentInAgency,
     pasteShipmentToAgency,
     cloneOrdersFromGlobalToAgency,
     compareOrdersInRequestWithOrdersInShipment,

@@ -43,10 +43,10 @@ const getOneRoute = async (conditions) => {
         const fields = Object.keys(conditions);
         const values = Object.values(conditions);
 
-        let query = `SELECT * FROM ${table} WHERE departure_time >= ? AND departure_time <= ?`;
+        let query = `SELECT r.*, v.transport_partner_id, v.agency_id, v.staff_id, v.type, v.license_plate, v.mass, v.max_load, v.busy, v.created_at, v.last_update FROM ${table} AS r INNER JOIN vehicle AS v ON r.vehicle_id = v.vehicle_id WHERE r.departure_time >= ? AND r.departure_time <= ?`;
 
         if (fields && values && fields.length > 0 && values.length > 0) {
-            query += ` AND ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+            query += ` AND ${fields.map(field => `r.${field} = ?`).join(" AND ")}`;
         }
 
         query += " LIMIT 1";
@@ -56,8 +56,13 @@ const getOneRoute = async (conditions) => {
 
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
+    if (fields && values && fields.length > 0 && values.length > 0) {
+        const query = `SELECT r.*, v.transport_partner_id, v.agency_id, v.staff_id, v.type, v.license_plate, v.mass, v.max_load, v.busy, v.created_at, v.last_update FROM ${table} AS r INNER JOIN vehicle AS v ON r.vehicle_id = v.vehicle_id WHERE ${fields.map(field => `r.${field} = ?`).join(" AND ")} LIMIT 1`;
+        return (await pool.query(query, values))[0];
+    }
 
-    return await dbUtils.findOneIntersect(pool, table, fields, values);
+    const query = `SELECT r.*, v.transport_partner_id, v.agency_id, v.staff_id, v.type, v.license_plate, v.mass, v.max_load, v.busy, v.created_at, v.last_update FROM ${table} AS r INNER JOIN vehicle AS v ON r.vehicle_id = v.vehicle_id LIMIT 1`;
+    return (await pool.query(query, values))[0];
 }
 
 const getRoutes = async (conditions) => {
@@ -75,21 +80,24 @@ const getRoutes = async (conditions) => {
         const fields = Object.keys(conditions);
         const values = Object.values(conditions);
 
-        let query = `SELECT * FROM ${table} WHERE departure_time >= ? AND departure_time <= ?`;
+        let query = `SELECT r.*, v.transport_partner_id, v.agency_id, v.staff_id, v.type, v.license_plate, v.mass, v.max_load, v.busy, v.created_at, v.last_update FROM ${table} AS r INNER JOIN vehicle AS v ON r.vehicle_id = v.vehicle_id WHERE r.departure_time >= ? AND r.departure_time <= ?`;
 
         if (fields && values && fields.length > 0 && values.length > 0) {
-            query += ` AND ${fields.map(field => `${field} = ?`).join(" AND ")}`;
+            query += ` AND ${fields.map(field => `r.${field} = ?`).join(" AND ")}`;
         }
-
-        query += " LIMIT 1";
 
         return (await pool.query(query, [from_departure_time, to_departure_time, ...values]))[0];
     }
 
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
+    if (fields && values && fields.length > 0 && values.length > 0) {
+        const query = `SELECT r.*, v.transport_partner_id, v.agency_id, v.staff_id, v.type, v.license_plate, v.mass, v.max_load, v.busy, v.created_at, v.last_update FROM ${table} AS r INNER JOIN vehicle AS v ON r.vehicle_id = v.vehicle_id WHERE ${fields.map(field => `r.${field} = ?`).join(" AND ")}`;
+        return (await pool.query(query, values))[0];
+    }
 
-    return await dbUtils.findOneIntersect(pool, table, fields, values);
+    const query = `SELECT r.*, v.transport_partner_id, v.agency_id, v.staff_id, v.type, v.license_plate, v.mass, v.max_load, v.busy, v.created_at, v.last_update FROM ${table} AS r INNER JOIN vehicle AS v ON r.vehicle_id = v.vehicle_id`;
+    return (await pool.query(query, values))[0];
 }
 
 const updateRoute = async (info, condition) => {

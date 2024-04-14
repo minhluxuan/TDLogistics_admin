@@ -10,10 +10,11 @@ const createPaymentService = async (orderId, total, script) => {
         amount: total,          // tổng số tiền thanh toán
         description: script,    // thông tin chuyển khoản 
         cancelUrl: "https://api.tdlogistics.net.vn/api/v1/payment/cancel_payment",
-        returnUrl: "https://api.tdlogistics.net.vn/api/v1/payment/payment_successful"
+        returnUrl: "https://api.tdlogistics.net.vn/api/v1/payment/payment_successful",
+        signature: "abcdef"
     };
-
-    return await paymentService.createPaymentService(body);
+    const result = await payOS.createPaymentLink(body)
+    return result ;
 };
  
 // lấy thông tin thanh toán đơn hàng bằng mã đơn hàng từ trang PayOS

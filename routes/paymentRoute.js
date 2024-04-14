@@ -2,12 +2,39 @@ const express = require("express");
 require('dotenv').config();
 const validation = require("../lib/validation");
 const ordersService = require("../services/ordersService");
+const paymentService = require("../services/paymentService");
 
 const router = express.Router();
 
 const paymentValidation = new validation.PaymentValidation();
 
-router.get("/payment_successful", async (req, res) => {
+router.post("/payment_successful", async (req, res) => {
+	try {
+		console.log(req.body);
+		console.log(req);
+
+		// const resultCreatingNewOrder = await ordersService.updateOrder({ qrcode: req.body.data.qrcode, signature: req.body.signature }, { order_code: req.body.data.orderCode });
+		// if (!resultCreatingNewOrder || resultCreatingNewOrder.affectedRows === 0) {
+		// 	return res.status(404).json({
+		// 		error: true,
+		// 		message: `Đơn hàng có mã ${req.body.data.orderCode} không tồn tại.`,
+		// 	});
+		// }
+
+		return res.status(200).json({
+			error: false,
+			message: "Tạo đơn thành công.",
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+})
+
+router.get("/confirm_webhook", async (req, res) => {
 	try {
         const { error } = paymentValidation.validatePaymentResult(req.body);
 
@@ -76,5 +103,20 @@ router.get("/cancel_payment", (req, res) => {
 		});
 	}
 });
+
+router.post("/create_payment", async (req, res) => {
+	try {
+		const infoPayment = await paymentService.createPaymentService(req.body.order_id, 100000, "Thanh toán đơn hàng");
+		console.log(infoPayment);
+		return res.status(200).json({
+			message: infoPayment
+		})
+	}
+	catch (error) {
+		return res.status(400).json({
+			message: error.message
+		})
+	}
+})
 
 module.exports = router;

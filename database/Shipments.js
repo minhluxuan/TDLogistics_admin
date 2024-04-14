@@ -276,16 +276,6 @@ const deleteGlobalShipment = async (shipment_id) => {
     return await dbUtils.deleteOne(pool, table, ["shipment_id"], [shipment_id]);
 }
 
-const updateShipmentForAgency = async (info, conditions, postal_code) => {
-    const fields = Object.keys(info);
-    const values = Object.values(info);
-
-    const conditionFields = Object.keys(conditions);
-    const conditionValues = Object.values(conditions);
-
-    return dbUtils.updateOne(pool, postal_code + '_' + table, fields, values, conditionFields, conditionValues);
-};
-
 const updateShipment = async (info, conditions, postalCode) => {
     const fields = Object.keys(info);
     const values = Object.values(info);
@@ -378,11 +368,13 @@ const updateParentForGlobalOrders = async (order_ids, shipment_id) => {
     });
 }
 
-const confirmCreateShipment = async (info) => {
+const confirmCreateShipment = async (info, postalCode) => {
+    const agencyTable = postalCode ? postalCode + '_' + table : table; 
+
     const fields = Object.keys(info);
     const values = Object.values(info);
 
-    return await dbUtils.insert(pool, table, fields, values);
+    return await dbUtils.insert(pool, agencyTable, fields, values);
 }
 
 const updateShipmentToDatabase = async (fields, values, shipment_id) => {
@@ -424,8 +416,6 @@ const receiveShipment = async (shipment_id, postal_code) => {
 
 const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
     let updatedNumber = 0;
-    const agencyIdSubParts = agency_id.split('_');
-    const shipmentTable = agencyIdSubParts[0] === "TD" ? table : agencyIdSubParts[1] + suffix;
     const updatedArray = new Array();
     const orderIdsSet = new Set(order_ids);
 
@@ -445,16 +435,39 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
         }
     }
 
-    if (agencyIdSubParts[0] === "TD") {
-        const shipmentsQuery = `UPDATE ${shipmentTable} SET status = ? WHERE shipment_id = ?`;
-        await pool.query(shipmentsQuery, [6, shipment_id]);
+    const shipmentsQuery = `UPDATE ${table} SET status = ? WHERE shipment_id = ?`;
+    await pool.query(shipmentsQuery, [6, shipment_id]);
+
+    return new Object({
+        updatedNumber,
+        updatedArray,
+    });
+}
+
+const decomposeShipmentInAgency = async (order_ids, shipment_id, agency_id, postalCode) => {
+    let updatedNumber = 0;
+    const updatedArray = new Array();
+    const orderIdsSet = new Set(order_ids);
+
+    for (const order_id of orderIdsSet) {
+        const resultUpdatingOneOrder = await dbUtils.updateOne(pool, postalCode + '_' + "orders", ["parent"], [null], ["order_id"], [order_id]);
+        const orderInfo = new Object({
+            order_id: order_id,
+            shipment_id: shipment_id,
+            managed_by: agency_id
+        });
+
+        const resultUpdatingOneOrderStatus = await setStatusToOrder(orderInfo, servicesStatus.enter_agency, true);
+
+        if (resultUpdatingOneOrder && resultUpdatingOneOrder.affectedRows > 0 && resultUpdatingOneOrderStatus.success) {
+            updatedNumber++;
+            updatedArray.push(order_id);
+        }
     }
-    else {
-        const shipmentsQuery = `UPDATE ${shipmentTable} AS q1 JOIN ${table} AS q2
-                            ON q1.shipment_id = q2.shipment_id
-                            SET q1.status = ?, q2.status = ? WHERE q1.shipment_id = ? `;
-        await pool.query(shipmentsQuery, [6, 6, shipment_id]);
-    }
+
+    const shipmentTable = postalCode + '_' + table;
+    const shipmentsQuery = `UPDATE ${shipmentTable} SET status = ? WHERE shipment_id = ?`;
+    await pool.query(shipmentsQuery, [6, shipment_id]);
 
     return new Object({
         updatedNumber,
@@ -546,7 +559,7 @@ const updateOrders = async (order_ids, staff_id, postal_code) => {
     });
 }
 
-const updateJourney = async (shipment_id, updatedTime, message) => {
+const updateJourney = async (shipment_id, updatedTime, message, postalCode) => {
     const shipment = await getOneShipment({ shipment_id: shipment_id }, null);
     if(!shipment || shipment.length <= 0) {
         return {
@@ -562,7 +575,13 @@ const updateJourney = async (shipment_id, updatedTime, message) => {
     });
     
     const stringifyJourney = JSON.stringify(journey);
-    await updateShipment({ journey : stringifyJourney }, { shipment_id: shipment_id }, null);
+    if (postalCode) {
+        await updateShipment({ journey : stringifyJourney }, { shipment_id: shipment_id }, postalCode);
+    }
+    else {
+        await updateShipment({ journey : stringifyJourney }, { shipment_id: shipment_id }, null);
+    }
+    
     return {
         success: true,
         message: `Cập nhật hành trình cho lô hàng mã ${shipment_id} thành công!`
@@ -585,6 +604,7 @@ module.exports = {
     getShipments,
     getOneShipment,
     decomposeShipment,
+    decomposeShipmentInAgency,
     pasteShipmentToAgency,
     cloneOrdersFromGlobalToAgency,
     updateShipmentToDatabase,

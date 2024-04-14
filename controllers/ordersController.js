@@ -1,6 +1,6 @@
 const ordersService = require("../services/ordersService");
 const Validation = require("../lib/validation");
-const servicesFee = require("../lib/servicesFee");
+const servicesFee = require("../lib/serviceFeev2");
 const libMap = require("../lib/map");
 const utils = require("../lib/utils");
 const eventManager = require("../lib/eventManager");
@@ -10,13 +10,14 @@ const archiver = require("archiver");
 const servicesStatus = require("../lib/servicesStatus");
 const shippersService = require("../services/shippersService");
 const paymentService = require("../services/paymentService");
+const randomstring = require("randomstring");
 
 const orderValidation = new Validation.OrderValidation();
 
 try {
     eventManager.once("ioInitialize", io => {
         io.sockets.on("connection", (socket) => {
-            socket.on("notifyNewOrder", (info) => {
+            socket.on("notifyNewOrder", async (info) => {
                 try {
                     const orderTime = new Date();
                     
@@ -43,7 +44,7 @@ try {
                     else if (["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(socket.request.user.role)) {
                         const { error } = orderValidation.validateCreatingOrderByAdmin(info);
         
-                        if (error) {console.log(error.message);
+                        if (error) {
                             return socket.emit("notifyError", error.message);
                         }
                         
@@ -56,10 +57,8 @@ try {
                             return socket.emit("notifyError", errorMessage);
                         }
                     }
-                    
-                    console.log(info);
 
-                    createNewOrder(socket, info, orderTime);
+                    await createNewOrder(socket, info, orderTime);
                 } catch (error) {
                     return eventManager.emit("notifyError", error.message);
                 }    
@@ -79,33 +78,37 @@ const createNewOrder = async (socket, info, orderTime) => {
         const agencies = resultFindingManagedAgency.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
         info.agency_id = agencies;
-        info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
+        const orderCode = orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
+        info.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderCode;
+        
         const provinceSource = info.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
         const provinceDest = info.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
 
         const mass = (info.length * info.width * info.height) / 6000;
-        const map = new libMap.Map();
-        const addressSoure = utils.getAddressFromComponent(info.province_source, info.district_source, info.ward_source, info.detail_source);
-        const addressDest = utils.getAddressFromComponent(info.province_dest, info.district_dest, info.ward_dest, info.detail_dest);
-        const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
 
-        let optionService = null;
-        if(info.service_type === "T60") {
-            optionService = "T60";
-            info.service_type = "CPN";
-        }
-        info.fee = servicesFee.calculteFee(info.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
+        info.fee = servicesFee.calculateFee(info.service_type, provinceSource, provinceDest, mass * 1000, 0.15, false);
+        // info.order_code = orderCode;
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
+        info.paid = false;
 
-        const resultCreatingPayment = await paymentService.createPaymentService(info.order_id, amount, `THANH TOAN DON HANG ${info.order_id}`);
-        if (!resultCreatingPayment || resultCreatingPayment.code !== "00" || !resultCreatingPayment.data || !resultCreatingPayment.data.qrcode) {
+        const orderCodeRandom = randomstring.generate({
+            length: 7,
+            charset: "numeric",
+            min: 1000000,
+            max: 9999999,
+        });
+
+        info.order_code = orderCodeRandom;
+        const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), info.fee, `THANH TOAN DON HANG`);
+        if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
             return socket.emit("notifyFailCreateNewOrder", "Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
         }
 
-        info.qrcode = resultCreatingNewOrder.data.qrcode;
-        info.signature = resultCreatingPayment.signature;
-        info.paid = false;
-        
+        const resultGettingPaymentLinkInfo = await paymentService.getPaymentInformation(orderCodeRandom);
+        console.log(resultGettingPaymentLinkInfo);
+
+        info.qrcode = resultCreatingNewPayment.qrCode;
+
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
         if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
@@ -135,17 +138,13 @@ const calculateServiceFee = async (req, res) => {
             const provinceDest = req.body.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
 
             const mass = (req.body.length * req.body.width * req.body.height) / 6000;
-            const map = new libMap.Map();
-            const addressSoure = utils.getAddressFromComponent(req.body.province_source, req.body.district_source, req.body.ward_source, req.body.detail_source);
-            const addressDest = utils.getAddressFromComponent(req.body.province_dest, req.body.district_dest, req.body.ward_dest, req.body.detail_dest);
-            const distance = await map.calculateDistance(await map.convertAddressToCoordinate(addressSoure), await map.convertAddressToCoordinate(addressDest));
             
             let optionService = null;
             if(req.body.service_type === "T60") {
                 optionService = "T60";
                 req.body.service_type = "CPN";
             }
-            const fee = servicesFee.calculteFee(req.body.service_type, provinceSource, provinceDest, distance.distance, mass * 1000, 0.15, optionService, false);
+            const fee = servicesFee.calculateFee(req.body.service_type, provinceSource, provinceDest, mass * 1000, 0.15, optionService, false);
             return res.status(200).json({
                 error: false,
                 data: fee,

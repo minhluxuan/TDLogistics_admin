@@ -137,7 +137,7 @@ router.get(
 router.post(
     "/search",
     auth.isAuthenticated(),
-    auth.isAuthorized(["USER", "BUSINESS", "ADMIN", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER", 
+    auth.isAuthorized(["USER", "BUSINESS", "ADMIN", "MANAGER", "TELLER", "COMPLAINTS_SOLVER", "HUMAN_RESOURCE_MANAGER", 
     "AGENCY_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER", "AGENCY_HUMAN_RESOURCE_MANAGER", 
     "AGENCY_SHIPPER", "PARTNER_SHIPPER", "SHIPPER"]),
     ordersController.getOrders);

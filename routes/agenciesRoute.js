@@ -60,14 +60,14 @@ router.get("/check", agenciesController.checkExistAgency);
 router.post(
     "/create",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"]),
+    auth.isAuthorized(["ADMIN"]),
     auth.isActive(),
     agenciesController.createNewAgency
 );
 router.put(
     "/update",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"]),
+    auth.isAuthorized(["ADMIN"]),
     auth.isActive(),
     agenciesController.updateAgency
 );
@@ -89,7 +89,7 @@ router.delete(
 router.post(
     "/update_agency_company_license",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"]),
+    auth.isAuthorized(["ADMIN"]),
     auth.isActive(),
     upload.array("files"),
     agenciesController.updateLicenseAgencyCompany
@@ -97,14 +97,14 @@ router.post(
 router.put(
     "/update_agency_company",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"]),
+    auth.isAuthorized(["ADMIN"]),
     auth.isActive(),
     agenciesController.updateAgencyCompany
 );
 router.get(
     "/search_agency_company_license",
     auth.isAuthenticated(),
-    auth.isAuthorized(["ADMIN", "HUMAN_RESOURCE_MANAGER", "MANAGER", "AGENCY_MANAGER"]),
+    auth.isAuthorized(["ADMIN", "HUMAN_RESOURCE_MANAGER", "MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
     auth.isActive(),
     agenciesController.getLicenseAgencyCompany
 );

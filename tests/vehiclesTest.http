@@ -148,3 +148,7 @@ Content-Type: application/json
 ###
 
 GET http://localhost:5000/api/v1/vehicles/get_shipments?vehicle_id=BC_71000_42H124768
+
+###
+
+GET http://localhost:5000/api/v1/vehicles/undertake?shipment_id=BC_71000_202431213130926

@@ -20,8 +20,7 @@ const getObjectsCanHandleTask = async () => {
     LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
     LEFT JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
     LEFT JOIN partner_staff AS p ON v.staff_id = p.staff_id
-    WHERE v.transport_partner_id IS NOT NULL AND v.transport_partner_id != ""
-    
+    WHERE v.agency_id LIKE "TD%"
     ORDER BY created_at DESC;`;
     return (await pool.query(query))[0];
 }

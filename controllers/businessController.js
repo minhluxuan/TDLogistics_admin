@@ -58,7 +58,7 @@ const getAuthenticatedBusinessInfo = async (req, res) => {
 
 		return res.status(200).json({
 			error: false,
-			info: resultGettingAuthenticatedBusinessInfo,
+			info: resultGettingAuthenticatedBusinessInfo[0],
 			message: `Lấy thông tin khách hàng doanh nghiệp có mã ${req.user.business_id} thành công.`,
 		});
 	} catch (error) {
