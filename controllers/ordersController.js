@@ -378,7 +378,14 @@ const updateOrder = async (req, res) => {
             req.query.agency_id = req.user.agency_id;
         }
         else if (["SHIPPER", "AGENCY_SHIPPER", "PARTNER_SHIPPER"].includes(req.user.role)) {
-            req.query.shipper = req.user.staff_id;
+            const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
+            if (!(await shippersService.checkExistTask({ order_id: req.query.order_id }, postalCode))) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Đơn hàng ${req.query.order_id} không tồn tại.`,
+                });
+            }
+            req.query.agency_id = req.user.agency_id;
         }
 
         const result = await ordersService.updateOrder(req.body, req.query);
