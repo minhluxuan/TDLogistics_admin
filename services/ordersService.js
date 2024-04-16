@@ -171,8 +171,12 @@ const distributeOrder = async (agency_id, address_source) => {
     return await Orders.distributeOrder(agency_id, address_source);
 }
 
-const  setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false) => {
-    return await Orders.setStatusToOrder(orderInfo, orderStatus, isUpdateJourney);
+const  setJourney = async (order_id, orderMessage, orderStatus) => {
+    return await Orders.setJourney(order_id, orderMessage, orderStatus);
+}
+
+const  setOrderStatus = async (order_id, orderStatus) => {
+    return await Orders.setOrderStatus(order_id, orderStatus);
 }
 
 module.exports = {
@@ -193,5 +197,6 @@ module.exports = {
     createOrderInAgencyTable,
     getOrderStatus,
     distributeOrder,
-    setStatusToOrder
+    setJourney,
+    setOrderStatus
 };

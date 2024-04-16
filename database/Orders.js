@@ -256,72 +256,25 @@ const getOrderStatus = async (order_id) => {
         status_message: statusMessage
     }
 }
-const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false) => {
-
-    if(isUpdateJourney) {
-        if(!orderInfo.managed_by) {
-            return new Object({
-                success: false,
-                data: null,
-                message: "Không đủ thông tin để thực hiện thao tác trên!"
-            });
-        }        
-        const currentTime = new Date();
-        const settingTime = moment(currentTime).format("DD-MM-YYYY ss:mm:HH");
+const setJourney = async (order_id, orderMessage, orderStatus) => {
     
-        const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ?`;
-        const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
-        let journey;
-        try {
-            journey = getJourneyResult[0].journey ? JSON.parse(getJourneyResult[0].journey) : new Array();
-        } catch (error) {
-            journey = new Array();
-        }
-        
-        const newOrderLocation = new Object({
-            shipment_id: orderInfo.shipment_id,   
-            managed_by: orderInfo.managed_by,
-            date: settingTime
-        });
-
-        journey.push(newOrderLocation);
-
-        const result = await SQLutils.updateOne(pool, table, ["journey", "status_code"], [JSON.stringify(journey), orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result.affectedRows === 0) {
-            return new Object({
-                success: false,
-                data: null,
-                message: "Cập nhật thất bại!"
-            });
-        }
-
-        return new Object({
-            success: true,
-            data: {
-                newOrderLocation: newOrderLocation,
-                newStatus: orderStatus
-            },
-            message: `${newOrderLocation.date}: Đơn hàng mã ${orderInfo.order_id} được tiếp nhận bởi ${newOrderLocation.managed_by}`
-        });
-
-    } else {
-        const result = await SQLutils.updateOne(pool, table, ["status_code"], [orderStatus.code], ["order_id"], [orderInfo.order_id]);
-        if(result.affectedRows <= 0) {
-            return new Object({
-                success: false,
-                data: null,
-                message: "Cập nhật thất bại!"
-            });
-        }
-
-        return new Object({
-            success: true,
-            data: {
-                newStatus: orderStatus
-            },
-            message: `Trạng thái ${orderStatus.message} được cập nhật cho đơn hàng mã ${orderInfo.order_id}`
-        });
+    const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ?`;
+    const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
+    let journey;
+    try {
+        journey = getJourneyResult[0].journey ? JSON.parse(getJourneyResult[0].journey) : new Array();
+    } catch (error) {
+        journey = new Array();
     }
+
+    journey.push(orderMessage);
+
+    return await SQLutils.updateOne(pool, table, ["journey", "status_code"], [JSON.stringify(journey), orderStatus.code], ["order_id"], [order_id]);
+
+}
+
+const setOrderStatus = async (order_id, orderStatus) => {
+    return await SQLutils.updateOne(pool, table, ["status_code"], [orderStatus.code], ["order_id"], [order_id]);
 }
 
 module.exports = {
@@ -338,5 +291,6 @@ module.exports = {
     findingManagedAgency,
     createOrderInAgencyTable,
     getOrderStatus,
-    setStatusToOrder,
+    setJourney,
+    setOrderStatus
 };

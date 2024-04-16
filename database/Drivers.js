@@ -1,6 +1,8 @@
 const dbUtils = require("../lib/dbUtils");
 const moment = require("moment");
 const mysql = require("mysql2");
+const { setJourney } = require("./Orders");
+const servicesStatus = require("../lib/servicesStatus");
 const dbOptions = {
     host: process.env.HOST,
     port: process.env.DBPOST,
@@ -145,6 +147,22 @@ const assignNewTasks = async (shipment_ids, staff_id, vehicle_id) => {
         } catch (error) {
             notAcceptedNumber++;
             notAcceptedArray.push(shipment_id);
+        }
+    }
+
+    // update order journey
+    const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+    const orderMessage = `${formattedTime}: Đơn hàng đã được giao cho nhân viên vận chuyển ${staff_id}`;
+    for(const shipment_id of acceptedArray) {
+        const shipment = await dbUtils.findOneIntersect(pool, "shipments", ["shipment_id"], [shipment_id]);
+        try {
+            const order_ids = JSON.parse(shipment[0].order_ids);
+            for(const order_id of order_ids) {
+                await setJourney(order_id, orderMessage, servicesStatus.leave_agency);
+            }
+        } catch(error) {
+            console.log(error);
+            // do nothing
         }
     }
 

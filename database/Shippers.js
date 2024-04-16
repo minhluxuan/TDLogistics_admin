@@ -1,6 +1,8 @@
 const dbUtils = require("../lib/dbUtils");
 const moment = require("moment");
 const mysql = require("mysql2");
+const serviceStatus = require("../lib/servicesStatus");
+const Orders = require("./Orders");
 const dbOptions = {
     host: process.env.HOST,
     port: process.env.DBPOST,
@@ -130,7 +132,9 @@ const assignNewTasks = async (order_ids, staff_id, postal_code) => {
     const acceptedArray = new Array();
     let notAcceptedNumber = 0;
     const notAcceptedArray = new Array();
-
+    const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+    let orderMessage = "";
+    let orderStatus = 0;
     const tasksTable = postal_code + '_' + defaultTasksTable;
     for (const order_id of orderIdsSet) {
         try {
@@ -138,6 +142,19 @@ const assignNewTasks = async (order_ids, staff_id, postal_code) => {
             if (resultCreatingNewTask && resultCreatingNewTask.affectedRows > 0) {
                 acceptedNumber++;
                 acceptedArray.push(order_id);
+
+                const order = await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [order_id])[0];
+                
+                // update order journey
+                if(order.status_code === serviceStatus.processing.code) {
+                    orderMessage = `${formattedTime}: Đơn hàng đang được bưu tá đến nhận`;
+                    orderStatus = serviceStatus.taking;
+                } 
+                else if (order.status_code === serviceStatus.enter_agency.code) {
+                    orderMessage = `${formattedTime}: Đơn hàng đang được giao đến người nhận`;
+                    orderStatus = serviceStatus.delivering;
+                }
+                await Orders.setJourney(order_id, orderMessage, orderStatus);
             }
             else {
                 notAcceptedNumber++;
@@ -158,6 +175,21 @@ const assignNewTasks = async (order_ids, staff_id, postal_code) => {
 }
 
 const confirmCompletedTask = async (id, staff_id, completedTime, postal_code) => {
+    // update order journey
+    const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+    let orderMessage = "";
+    let orderStatus = 0;
+    const Task = await dbUtils.findOneIntersect(pool, postal_code + '_' + defaultTasksTable, ["id"], [id])[0];
+    const orderId = Task.order_id;
+    const order = await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [orderId])[0];
+    if(order.status_code === serviceStatus.taking.code) {
+        orderMessage = `${formattedTime}: Lấy hàng thành công bởi bưu tá`;
+        orderStatus = serviceStatus.taken_success;
+    } else if (order.status_code === serviceStatus.delivering.code) {
+        orderMessage = `${formattedTime}: Giao hàng thành công`;
+        orderStatus = serviceStatus.delivering;
+    }
+    await Orders.setJourney(order_id, orderMessage, orderStatus);
     return await dbUtils.updateOne(pool, postal_code + '_' + defaultTasksTable, ["completed_at", "completed"], [completedTime, true], ["id", "staff_id", "completed"], [id, staff_id, false]);
 }
 

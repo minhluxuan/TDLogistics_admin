@@ -3,7 +3,6 @@ const moment = require("moment");
 const dbUtils = require("../lib/dbUtils");
 const Orders = require("./Orders");
 const utils = require("../lib/utils");
-const { setStatusToOrder } = require("./Orders");
 const servicesStatus = require("../lib/servicesStatus");
 const Vehicles = require("./Vehicles");
 require("dotenv").config();
@@ -418,16 +417,14 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
     let updatedNumber = 0;
     const updatedArray = new Array();
     const orderIdsSet = new Set(order_ids);
-
+    // update order journey
+    const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+    const agency = await dbUtils.findOneIntersect(pool, "agency", ["agency_id"], [agency_id])[0];
+    const orderMessage = `${formattedTime}: Đơn hàng đã đến ${agency.agency_name}`;
     for (const order_id of orderIdsSet) {
         const resultUpdatingOneOrder = await dbUtils.updateOne(pool, "orders", ["parent"], [null], ["order_id"], [order_id]);
-        const orderInfo = new Object({
-            order_id: order_id,
-            shipment_id: shipment_id,
-            managed_by: agency_id
-        });
-
-        const resultUpdatingOneOrderStatus = await setStatusToOrder(orderInfo, servicesStatus.enter_agency, true);
+        
+        const resultUpdatingOneOrderStatus = await Orders.setJourney(order_id, orderMessage, servicesStatus.enter_agency);
 
         if (resultUpdatingOneOrder && resultUpdatingOneOrder.affectedRows > 0 && resultUpdatingOneOrderStatus.success) {
             updatedNumber++;
@@ -448,16 +445,12 @@ const decomposeShipmentInAgency = async (order_ids, shipment_id, agency_id, post
     let updatedNumber = 0;
     const updatedArray = new Array();
     const orderIdsSet = new Set(order_ids);
-
+    const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+    const orderMessage = `${formattedTime}: Đơn hàng đã đến bưu cục ${agency_id}`;
     for (const order_id of orderIdsSet) {
         const resultUpdatingOneOrder = await dbUtils.updateOne(pool, postalCode + '_' + "orders", ["parent"], [null], ["order_id"], [order_id]);
-        const orderInfo = new Object({
-            order_id: order_id,
-            shipment_id: shipment_id,
-            managed_by: agency_id
-        });
 
-        const resultUpdatingOneOrderStatus = await setStatusToOrder(orderInfo, servicesStatus.enter_agency, true);
+        const resultUpdatingOneOrderStatus = await Orders.setJourney(order_id, orderMessage, servicesStatus.enter_agency);
 
         if (resultUpdatingOneOrder && resultUpdatingOneOrder.affectedRows > 0 && resultUpdatingOneOrderStatus.success) {
             updatedNumber++;

@@ -1,5 +1,6 @@
 const moment = require("moment");
 const shipmentService = require("../services/shipmentsService");
+const orderService = require("../services/ordersService");
 const validation = require("../lib/validation");
 const utils = require("../lib/utils");
 const shippersService = require("../services/shippersService");

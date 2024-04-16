@@ -1,5 +1,6 @@
 const ordersService = require("../services/ordersService");
 const Validation = require("../lib/validation");
+const moment = require("moment");
 const servicesFee = require("../lib/serviceFeev2");
 const libMap = require("../lib/map");
 const utils = require("../lib/utils");
@@ -73,8 +74,9 @@ try {
 const createNewOrder = async (socket, info, orderTime) => {
     try {
         const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);   
-        
-        info.journey = JSON.stringify(new Array());
+        const formattedTime = moment(orderTime).format("DD-MM-YYYY HH:mm:ss");
+        info.journey = new Array();
+
         const agencies = resultFindingManagedAgency.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
         info.agency_id = agencies;
@@ -108,6 +110,8 @@ const createNewOrder = async (socket, info, orderTime) => {
         console.log(resultGettingPaymentLinkInfo);
 
         info.qrcode = resultCreatingNewPayment.qrCode;
+        info.journey.push(`${formattedTime}: Đơn hàng được tạo thành công!`);
+        info.journey = JSON.stringify(info.journey);
 
         const resultCreatingNewOrder = await ordersService.createNewOrder(info);
         if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
@@ -118,7 +122,7 @@ const createNewOrder = async (socket, info, orderTime) => {
         if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
-
+        
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
 
         eventManager.emit("notifyNewOrderToAgency", {
@@ -312,15 +316,15 @@ const createOrdersByFile = async (req, res) => {
         const successArray = new Array();
         let failNumber = 0;
         const failArray = new Array();
-        
+        const orderTime = new Date();
+        const formattedTime = moment(orderTime).format("DD-MM-YYYY HH:mm:ss");
         for (const order of orders) {
-            const orderTime = new Date();
-            
             const areaAgencyIdSubParts = req.user.agency_id.split('_');
             order.agency_id = req.user.agency_id;
             order.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
             order.fee = servicesFee.calculateFee(order.service_type, order.province_source, order.province_dest, order.mass * 1000, 0.15, false);
-
+            order.journey = new Array();
+            order.journey.push(`${formattedTime}: Đơn hàng được tạo thành công!`);
             const stt = order.STT;
             delete order.STT;
 
@@ -436,7 +440,7 @@ const updateOrder = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const { error } = OrderValidation.validateCancelingOrder(req.query);
+        const { error } = orderValidation.validateCancelingOrder(req.query);
 
         if (error) {
             return res.status(404).json({
