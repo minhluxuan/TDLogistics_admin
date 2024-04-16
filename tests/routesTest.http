@@ -14,7 +14,7 @@ POST http://localhost:5000/api/v1/routes/search
 Content-Type: application/json
 
 {
-    "from_departure_time": "12:59:30",
+    "from_departure_time": "2:2:2",
     "to_departure_time": "18:27:58"
 }
 
