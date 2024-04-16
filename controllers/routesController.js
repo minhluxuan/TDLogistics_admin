@@ -127,7 +127,7 @@ const updateRoute = async (req, res) => {
             });
         }
 
-        if (req.body.vehicle_id && !(await vehicleService.checkExistVehicle(req.body.vehicle_id))) {
+        if (req.body.vehicle_id && !(await vehicleService.checkExistVehicle({ vehicle_id: req.body.vehicle_id }))) {
             return res.status(404).json({
                 error: true,
                 message: `Phương tiện có mã ${req.body.vehicle_id} không tồn tại.`,
