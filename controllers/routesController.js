@@ -142,7 +142,7 @@ const updateRoute = async (req, res) => {
             });
         }
         
-        const tempUpdatedInfo = resultGettingOneRoute[0];
+        const tempUpdatedInfo = new Object();
         for (const prop in req.body) {
             tempUpdatedInfo[prop] = req.body[prop];
         }
