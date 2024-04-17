@@ -37,5 +37,12 @@ router.post(
     auth.isActive(),
     shippersController.getHistory
 );
+router.post(
+    "/delete",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isActive(),
+    shippersController.deleteTask
+);
 
 module.exports = router;

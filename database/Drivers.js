@@ -13,7 +13,7 @@ const tasksTable = "driver_tasks";
 
 const pool = mysql.createPool(dbOptions).promise();
 
-const getObjectsCanHandleTask = async () => {
+const getObjectsCanHandleTaskByAdmin = async () => {
     const query = `SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
     v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, t.transport_partner_name, p.fullname 
     FROM vehicle AS v 
@@ -23,6 +23,18 @@ const getObjectsCanHandleTask = async () => {
     WHERE v.agency_id LIKE "TD%"
     ORDER BY created_at DESC;`;
     return (await pool.query(query))[0];
+}
+
+const getObjectsCanHandleTaskByAgency = async (agencyId) => {
+    const query = `SELECT v.transport_partner_id, v.agency_id, v.staff_id, v.vehicle_id, v.type, v.license_plate, 
+    v.max_load, v.mass, v.busy, v.created_at, v.last_update, a.agency_name, t.transport_partner_name, p.fullname 
+    FROM vehicle AS v 
+    LEFT JOIN agency AS a ON v.agency_id = a.agency_id 
+    LEFT JOIN transport_partner AS t ON v.transport_partner_id = t.transport_partner_id
+    LEFT JOIN partner_staff AS p ON v.staff_id = p.staff_id
+    WHERE v.agency_id = ?
+    ORDER BY created_at DESC;`;
+    return (await pool.query(query, [agencyId]))[0];
 }
 
 const checkExistTask = async (conditions) => {
@@ -39,8 +51,9 @@ const getOneTask = async (condition) => {
     return await dbUtils.findOneIntersect(pool, tasksTable, fields, values);
 }
 
-const getTasks = async (conditions) => {
-    let query = `SELECT * FROM ${tasksTable}`;
+const getTasks = async (conditions, postalCode) => {
+    const specifiedTasksTable = postalCode ? postalCode + '_' + tasksTable : tasksTable;
+    let query = `SELECT * FROM ${specifiedTasksTable}`;
     
     const option = conditions.option;
 
@@ -123,7 +136,7 @@ const getTasks = async (conditions) => {
     return result;
 }
 
-const assignNewTasks = async (shipment_ids, staff_id, vehicle_id) => {
+const assignNewTasks = async (shipment_ids, staff_id, vehicle_id, postalCode = null) => {
     const shipmentIdsSet = new Set(shipment_ids);
 
     let acceptedNumber = 0;
@@ -131,9 +144,10 @@ const assignNewTasks = async (shipment_ids, staff_id, vehicle_id) => {
     let notAcceptedNumber = 0;
     const notAcceptedArray = new Array();
 
+    const specifiedTasksTable = postalCode ? postalCode + '_' + tasksTable : tasksTable;
     for (const shipment_id of shipmentIdsSet) {
         try {
-            const resultCreatingNewTask = await dbUtils.insert(pool, tasksTable, ["shipment_id", "staff_id", "vehicle_id"], [shipment_id, staff_id, vehicle_id]);
+            const resultCreatingNewTask = await dbUtils.insert(pool, specifiedTasksTable, ["shipment_id", "staff_id", "vehicle_id"], [shipment_id, staff_id, vehicle_id]);
             if (resultCreatingNewTask && resultCreatingNewTask.affectedRows > 0) {
                 acceptedNumber++;
                 acceptedArray.push(shipment_id);
@@ -156,18 +170,27 @@ const assignNewTasks = async (shipment_ids, staff_id, vehicle_id) => {
     });
 }
 
-const confirmCompletedTask = async (conditions) => {
+const confirmCompletedTask = async (conditions, postalCode = null) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
-    return await dbUtils.deleteOne(pool, tasksTable, fields, values);
+    const specifiedTasksTable = postalCode ? postalCode + '_' + tasksTable : tasksTable;
+
+    return await dbUtils.deleteOne(pool, specifiedTasksTable, fields, values);
+}
+
+const deleteTask = async (id, postalCode = null) => {
+    const specifiedTasksTable = postalCode ? postalCode + '_' + tasksTable : tasksTable;
+    return await dbUtils.deleteOne(pool, specifiedTasksTable, ["id"], [id]);
 }
 
 module.exports = {
-    getObjectsCanHandleTask,
+    getObjectsCanHandleTaskByAdmin,
+    getObjectsCanHandleTaskByAgency,
     checkExistTask,
     getOneTask,
     getTasks,
     assignNewTasks,
     confirmCompletedTask,
+    deleteTask,
 }

@@ -93,6 +93,7 @@ const createTablesForAgency = async (postal_code) => {
 	const ordersTable = postal_code + "_orders";
 	const shipmentTable = postal_code + "_shipment";
 	const shipperTasksTable = postal_code + "_shipper_tasks";
+	const driverTasksTable = postal_code + "_driver_tasks";
 	const scheduleTable = postal_code + "_schedule";
 
 	const createOrdersTable = `CREATE TABLE ${ordersTable} AS SELECT * FROM orders WHERE 1 = 0`;
@@ -105,16 +106,19 @@ const createTablesForAgency = async (postal_code) => {
 		completed_at datetime DEFAULT NULL,
 		completed tinyint(1) NOT NULL
 	  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`
+	const createDriverTasksTable = `CREATE TABLE ${driverTasksTable} AS SELECT * FROM driver_tasks WHERE 1 = 0`;
 	const createScheduleTable = `CREATE TABLE ${scheduleTable} AS SELECT * FROM schedule WHERE 1 = 0`;
 
 	await pool.query(createOrdersTable);
 	await pool.query(createShipmentTable);
 	await pool.query(createShipperTasksTable);
 	await pool.query(createScheduleTable);
+	await pool.query(createDriverTasksTable);
 
 	const checkingExistOrdersTable = await dbUtils.checkExistTable(pool, ordersTable);
 	const checkingExistShipmentTable = await dbUtils.checkExistTable(pool, shipmentTable);
 	const checkingExistShipperTasksTable = await dbUtils.checkExistTable(pool, shipperTasksTable);
+	const checkingExistDriverTasksTable = await dbUtils.checkExistTable(pool, driverTasksTable);
 	const checkingExistScheduleTable = await dbUtils.checkExistTable(pool, scheduleTable);
 
 	const neccessaryTable = [ordersTable, shipmentTable, shipperTasksTable, scheduleTable];
@@ -132,6 +136,10 @@ const createTablesForAgency = async (postal_code) => {
 		successCreatedTable.push(shipperTasksTable);
 	}
 
+	if (checkingExistDriverTasksTable.existed) {
+		successCreatedTable.push(driverTasksTable);
+	}
+
 	if (checkingExistScheduleTable.existed) {
 		successCreatedTable.push(scheduleTable);
 	}
@@ -142,14 +150,16 @@ const createTablesForAgency = async (postal_code) => {
 	ADD CONSTRAINT fk_${shipperTasksTable}_order_id_ FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE`
 	const addPrimaryKeyForScheduleTableQuery = `ALTER TABLE ${scheduleTable} ADD PRIMARY KEY (id)`;
 	const addPrimaryKeyForShipmentTableQuery = `ALTER TABLE ${shipmentTable} ADD PRIMARY KEY (shipment_id)`;
+	const addPrimaryKeyForDriverTasksTableQuery = `ALTER TABLE ${driverTasksTable} ADD PRIMARY KEY (id)`;
 
 	await pool.query(addPrimaryKeyForOrdersTableQuery);
 	await pool.query(addForeignKeyForOrdersTableQuery);
 	await pool.query(addPrimaryKeyForShipperTasksTableQuery);
 	await pool.query(addPrimaryKeyForScheduleTableQuery);
 	await pool.query(addPrimaryKeyForShipmentTableQuery);
+	await pool.query(addPrimaryKeyForDriverTasksTableQuery);
 
-	if (successCreatedTable.length < 4) {
+	if (successCreatedTable.length < 5) {
 		const missedTable = neccessaryTable.filter(table => !successCreatedTable.includes(table));
 
 		return new Object({
@@ -170,11 +180,13 @@ const dropTableForAgency = async (postal_code) => {
 	const ordersTable = postal_code + "_orders";
 	const shipmentTable = postal_code + "_shipment";
 	const shipperTasksTable = postal_code + "_shipper_tasks";
+	const driverTasksTable = postal_code + "_driver_tasks";
 	const scheduleTable = postal_code + "_schedule";
 
 	const resultDroppingOrdersTable = await dbUtils.dropTable(pool, ordersTable);
 	const resultDroppingShipmentTable = await dbUtils.dropTable(pool, shipmentTable);
 	const resultDroppingShippersTasksTable = await dbUtils.dropTable(pool, shipperTasksTable);
+	const resultDroppingDriverTasksTable = await dbUtils.dropTable(pool, driverTasksTable);
 	const resultDroppingScheduleTable = await dbUtils.dropTable(pool, scheduleTable);
 
 	const neccessaryToDropTable = [ordersTable, shipmentTable, shipperTasksTable, scheduleTable];
@@ -192,11 +204,15 @@ const dropTableForAgency = async (postal_code) => {
 		successDroppedTable.push(shipperTasksTable);
 	}
 
+	if (resultDroppingDriverTasksTable.success) {
+		successDroppedTable.push(driverTasksTable);
+	}
+
 	if (resultDroppingScheduleTable.success) {
 		successDroppedTable.push(scheduleTable);
 	}
 
-	if (successDroppedTable.length < 4) {
+	if (successDroppedTable.length < 5) {
 		const missedTable = neccessaryToDropTable.filter(table => !successDroppedTable.includes(table));
 		return new Object({
 			success: false,

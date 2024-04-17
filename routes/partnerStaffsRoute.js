@@ -32,12 +32,14 @@ const sessionStrategy = new LocalStrategy({
 
     const partner_id = partnerStaff.partner_id;
     const staff_id = partnerStaff.staff_id;
+    const agency_id = partnerStaff.agency_id;
     const role = partnerStaff.role;
     const active = partnerStaff.active;
 
     return done(null, {
         staff_id,
         partner_id,
+        agency_id,
         role,
         active,
     });

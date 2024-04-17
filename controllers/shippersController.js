@@ -261,10 +261,43 @@ const getHistory = async (req, res) => {
     }
 }
 
+const deleteTask = async (req, res) => {
+    try {
+        const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+        const { error } = shippersValidation.validateConfirmingCompletedTasks(req.body);
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        const resultDeletingTask = await shippersService.deleteTask(req.body.id, postalCode);
+        if (!resultDeletingTask || resultDeletingTask.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: `Công việc có id = ${req.body.id} không tồn tại.`,
+            });
+        }
+
+        return res.status(200).json({
+            error: false,
+            message: `Xóa công việc có id = ${req.body.id} thành công.`,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 module.exports = {
     getObjectsCanHandleTask,
     getTasks,
     createNewTask,
     confirmCompletedTask,
     getHistory,
+    deleteTask,
 }

@@ -9,7 +9,14 @@ const driversValidation = new validation.DriversValidation();
 
 const getObjectsCanHandleTask = async (req, res) => {
     try {
-        const resultGettingObjectsCanHandleTask = await driversService.getObjectsCanHandleTask();
+        let resultGettingObjectsCanHandleTask = null;
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+            resultGettingObjectsCanHandleTask = await driversService.getObjectsCanHandleTaskByAdmin();
+        }
+        else {
+            resultGettingObjectsCanHandleTask = await driversService.getObjectsCanHandleTaskByAgency(req.user.agency_id);
+        }
+
         return res.status(200).json({
             error: false,
             data: resultGettingObjectsCanHandleTask,
@@ -89,7 +96,18 @@ const createNewTask = async (req, res) => {
 
         const resultAddingShipmentsToVehicle = await vehicleService.addShipmentToVehicle(resultGettingOneVehicle[0], req.body.shipment_ids);
 
-        const resultCreatingNewTask = await driversService.assignNewTasks(resultAddingShipmentsToVehicle.acceptedArray, staff_id, resultGettingOneVehicle[0].vehicle_id);
+        let resultCreatingNewTask = null;
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+            resultCreatingNewTask = await driversService.assignNewTasks(resultAddingShipmentsToVehicle.acceptedArray, staff_id, resultGettingOneVehicle[0].vehicle_id);
+        }
+        else {
+            resultCreatingNewTask = await driversService.assignNewTasks(resultAddingShipmentsToVehicle.acceptedArray, staff_id, resultGettingOneVehicle[0].vehicle_id, utils.getPostalCodeFromAgencyID(req.user.agency_id));
+        }
+        
+        if (!resultCreatingNewTask) {
+            throw new Error("Đã xảy ra lỗi. Vui lòng thử lại.");
+        }
+
         resultCreatingNewTask.notAcceptedNumber += resultAddingShipmentsToVehicle.notAcceptedNumber;
         resultCreatingNewTask.notAcceptedArray = [...resultAddingShipmentsToVehicle.notAcceptedArray, ...resultCreatingNewTask.notAcceptedArray];
         
@@ -132,11 +150,22 @@ const getTasks = async (req, res) => {
             });
         }
 
-        if (["PARTNER_DRIVER"].includes(req.user.role)) {
-            req.body.staff_id = req.user.staff_id;
+        let resultGettingTasks = new Array();
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+            resultGettingTasks = await driversService.getTasks(req.body);
         }
-
-        const resultGettingTasks = await driversService.getTasks(req.body);
+        else if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+            resultGettingTasks = await driversService.getTasks(req.body, postalCode);
+        }
+        else {
+            const staffIdSubParts = req.user.staff_id.split('_');
+            if (staffIdSubParts[0] === "TD") {
+                resultGettingTasks = await driversService.getTasks(req.body);
+            }
+            else {
+                resultGettingTasks = await driversService.getTasks(req.body, staffIdSubParts[1]);
+            }
+        }
         
         return res.status(200).json({
             error: false,
@@ -180,7 +209,15 @@ const confirmCompletedTask = async (req, res) => {
             });
         }
 
-        const resultConfirmingCompletedTask = await driversService.confirmCompletedTask(req.query);
+        let resultConfirmingCompletedTask = null;
+        const staffIdSubParts = req.user.staff_id.split('_');
+        if (staffIdSubParts[0] === "TD") {
+            resultConfirmingCompletedTask = await driversService.confirmCompletedTask(req.query);
+        }
+        else {
+            resultConfirmingCompletedTask = await driversService.confirmCompletedTask(req.query, staffIdSubParts[1]);
+        }
+        
         if (!resultConfirmingCompletedTask || resultConfirmingCompletedTask.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
@@ -201,9 +238,55 @@ const confirmCompletedTask = async (req, res) => {
     }
 }
 
+const deleteTask = async (req, res) => {
+    try {
+        const { error } = driversValidation.validateConfirmingCompletedTasks(req.body);
+
+        if (error) {
+            return res.status(400).json({
+                error: true,
+                message: error.message,
+            });
+        }
+
+        if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
+            const resultDeletingTask = await driversService.deleteTask(req.body.id);
+            if (!resultDeletingTask || resultDeletingTask.affectedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Công việc có id = ${req.body.id} không tồn tại.`,
+                });
+            }
+        }
+
+        else {
+            const postalCode = utils.getPostalCodeFromAgencyID(req.user.agency_id);
+            const resultDeletingTask = await driversService.deleteTask(req.body.id, postalCode);
+            if (!resultDeletingTask || resultDeletingTask.affectedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Công việc có id = ${req.body.id} không tồn tại.`,
+                });
+            }
+        }
+
+        return res.status(200).json({
+            error: false,
+            message: `Xoá công việc có id = ${req.body.id} thành công.`,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
+}
+
 module.exports = {
     getObjectsCanHandleTask,
     getTasks,
     createNewTask,
     confirmCompletedTask,
+    deleteTask,
 }

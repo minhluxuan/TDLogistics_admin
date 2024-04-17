@@ -23,6 +23,10 @@ const getHistory = async (conditions, postal_code) => {
     return await Shippers.getHistory(conditions, postal_code);
 }
 
+const deleteTask = async (id, postalCode) => {
+    return await Shippers.deleteTask(id, postalCode);
+}
+
 module.exports = {
     checkExistTask,
     getObjectsCanHandleTask,
@@ -30,4 +34,5 @@ module.exports = {
     assignNewTasks,
     confirmCompletedTask,
     getHistory,
+    deleteTask,
 }

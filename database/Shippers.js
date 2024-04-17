@@ -272,6 +272,11 @@ const getHistory = async (conditions, postal_code) => {
     return result;
 }
 
+const deleteTask = async (id, postalCode) => {
+    const shipperTasksTable = postalCode + '_' + defaultTasksTable;
+    return await dbUtils.deleteOne(pool, shipperTasksTable, ["id"], [id]);
+}
+
 module.exports = {
     checkExistTask,
     getObjectsCanHandleTask,
@@ -279,4 +284,5 @@ module.exports = {
     assignNewTasks,
     confirmCompletedTask,
     getHistory,
+    deleteTask,
 }
