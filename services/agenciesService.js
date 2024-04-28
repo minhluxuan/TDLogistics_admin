@@ -52,6 +52,10 @@ const updatePassword = async (fields, values, conditionFields, conditionValues) 
     return await Agencies.updatePassword(fields, values, conditionFields, conditionValues);
 }
 
+const getAgencyManagedWards = async (agency_id) => {
+    return await Agencies.getAgencyManagedWards(agency_id);
+}
+
 module.exports = {
     checkPostalCode,
     checkWardsOccupation,
@@ -66,4 +70,5 @@ module.exports = {
     updatePassword,
     deleteAgency,
     createNewAgency,
+    getAgencyManagedWards,
 };

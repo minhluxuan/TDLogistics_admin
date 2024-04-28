@@ -155,7 +155,7 @@ const getManyStaffs = async (info, paginationConditions, postal_code) => {
 
 const getOneStaff = async (info) => {
 	const fields = Object.keys(info);
-	const values = Object.values(info);
+	const values = Object.values(info);console.log(fields, values);
 
   	return await dbUtils.findOneIntersect(pool, table, fields, values);
 };

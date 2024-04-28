@@ -11,7 +11,6 @@ const createPaymentService = async (orderId, total, script) => {
         description: script,    // thông tin chuyển khoản 
         cancelUrl: "https://api.tdlogistics.net.vn/api/v1/payment/cancel_payment",
         returnUrl: "https://api.tdlogistics.net.vn/api/v1/payment/payment_successful",
-        signature: "abcdef"
     };
     const result = await payOS.createPaymentLink(body)
     return result ;

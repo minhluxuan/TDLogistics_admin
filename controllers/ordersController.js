@@ -10,6 +10,7 @@ const archiver = require("archiver");
 const servicesStatus = require("../lib/servicesStatus");
 const shippersService = require("../services/shippersService");
 const paymentService = require("../services/paymentService");
+const usersService = require("../services/usersService");
 const randomstring = require("randomstring");
 
 const orderValidation = new Validation.OrderValidation();
@@ -87,15 +88,14 @@ const createNewOrder = async (socket, info, orderTime) => {
         const mass = (info.length * info.width * info.height) / 6000;
 
         info.fee = servicesFee.calculateFee(info.service_type, provinceSource, provinceDest, mass * 1000, 0.15, false);
-        // info.order_code = orderCode;
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         info.paid = false;
 
         const orderCodeRandom = randomstring.generate({
             length: 7,
             charset: "numeric",
-            min: 1000000,
-            max: 9999999,
+            min: 0,
+            max: 999_999_999_999,
         });
 
         info.order_code = orderCodeRandom;
@@ -118,6 +118,10 @@ const createNewOrder = async (socket, info, orderTime) => {
         if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
+
+        console.log(info.province_source, info.district_source, info.ward_source);
+        const resultUpdatingUserInfo = await usersService.updateUserInfo({ province: info.province_source, district: info.district_source, ward: info.ward_source, detail_address: info.detail_source }, { phone_number: socket.request.user.phone_number });
+        console.log(resultUpdatingUserInfo);
 
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
 
@@ -411,7 +415,24 @@ const updateOrder = async (req, res) => {
         
         updatedRow.fee = servicesFee.calculateFee(updatedRow.service_type, updatedRow.province_source, updatedRow.province_dest, mass * 1000, 0.15, false);
         
-        const resultUpdatingOneOrder = await ordersService.updateOrder({ fee: updatedRow.fee }, req.query);
+        const orderCodeRandom = randomstring.generate({
+            charset: "numeric",
+            min: 0,
+            max: 999_999_999_999,
+        });
+
+        updatedRow.order_code = orderCodeRandom;
+        const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), updatedRow.fee, `THANH TOAN DON HANG`);
+        if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
+            return socket.emit("notifyFailCreateNewOrder", "Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
+        }
+
+        // const resultGettingPaymentLinkInfo = await paymentService.getPaymentInformation(orderCodeRandom);
+        // console.log(resultGettingPaymentLinkInfo);
+
+        updatedRow.qrcode = resultCreatingNewPayment.qrCode;
+
+        const resultUpdatingOneOrder = await ordersService.updateOrder({ order_code: updatedRow.orderCode, fee: updatedRow.fee, qrcode: updatedRow.qrcode }, req.query);
         if (!resultUpdatingOneOrder || resultUpdatingOneOrder.affectedRows === 0) {
             return res.status(404).json({
                 error: true,

@@ -69,8 +69,26 @@ const getUnits = async (level, province, district) => {
     }
 }
 
+const getOneAdministrativeUnit = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    return await dbUtils.findOneIntersect(pool, wardTable, fields, values);
+}
+
+const updateOneAdministrativeUnit = async (condition, info) => {
+    const conditionFields = Object.keys(condition);
+    const conditionValues = Object.values(condition);
+    const fields = Object.keys(info);
+    const values = Object.values(info);
+
+    return await dbUtils.updateOne(pool, wardTable, fields, values, conditionFields, conditionValues);
+}
+
 module.exports = {
     getUnits,
     getOneDistributionCenter,
     checkExistProvince,
+    getOneAdministrativeUnit,
+    updateOneAdministrativeUnit,
 }

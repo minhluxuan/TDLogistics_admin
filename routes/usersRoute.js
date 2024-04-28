@@ -1,6 +1,8 @@
 const express = require("express");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const multer = require("multer");
+const path = require("path");
 const usersController = require("../controllers/usersController");
 const Users = require("../database/Users");
 const auth = require("../lib/auth");
@@ -66,6 +68,52 @@ const sessionStrategy = new LocalStrategy({
 
 passport.use("otpLogin", sessionStrategy);
 
+const storage = multer.diskStorage({
+    destination: function (req, file, done) {
+        if (file.fieldname !== "avatar") {
+            return done(new Error('Yêu cầu tên trường phải là "avatar".'));
+        }
+
+        const folderPath = path.join("storage", "user", "img", "avatar_temp");
+
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
+        }
+
+        return done(null, folderPath);
+    },
+
+    filename: function (req, file, done) {
+        done(null,  Date.now() + "_" + file.originalname);
+    }
+});
+   
+const fileFilter = (req, file, done) => {
+    if (!file) {
+        return done(new Error("File không tồn tại."));
+    }
+
+    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png") { 
+       return done(new Error("Hình ảnh không hợp lệ. Chỉ các file .jpg, .jpeg, .png được cho phép."));
+    }
+
+    const maxFileSize = 5 * 1024 * 1024;
+    if (file.size > maxFileSize) {
+        done(new Error("File có kích thước quá lớn. Tối đa 5MB được cho phép."));
+    }
+
+    if (file.originalname.length > 100) {
+        done(new Error("Tên file quá dài. Tối đa 100 ký tự được cho phép."));
+    }
+
+    return done(null, true);
+};
+
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+});
+
 router.get("/login", (req, res) => {
     res.render("userLogin");
 });
@@ -95,5 +143,18 @@ router.get("/get_info",
     "DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER", "USER"]),
     usersController.getAuthenticatedUserInfo
 );
+router.put(
+    "/update_avatar",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["USER"]),
+    upload.single("avatar"),
+    usersController.updateAvatar
+);
+router.get(
+    "get_avatar",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["USER"]),
+    usersController.getAvatar
+)
 
 module.exports = router;

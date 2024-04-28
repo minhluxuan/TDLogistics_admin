@@ -371,6 +371,10 @@ const updatePassword = async (fields, values, conditionFields, conditionValues) 
   await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
+const getAgencyManagedWards = async (agency_id) => {
+	const query = "SELECT managed_wards FROM ?? WHERE ?? = ?";
+	return (await pool.query(query, [table, "agency_id", agency_id]))[0];
+}
 
 module.exports = { 
 	checkExistAgency,
@@ -385,4 +389,5 @@ module.exports = {
 	deleteAgency,
 	updatePassword,
 	updateAgency,
+	getAgencyManagedWards,
 };

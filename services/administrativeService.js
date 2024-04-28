@@ -12,8 +12,18 @@ const getUnits = async (level, province = null, district = null) => {
     return await Administrative.getUnits(level, province, district);
 }
 
+const getOneAdministrativeUnit = async (condition) => {
+    return await Administrative.getOneAdministrativeUnit(condition);
+}
+
+const updateOneAdministrativeUnit = async (condition, info) => {
+    return await Administrative.updateOneAdministrativeUnit(condition, info);
+}
+
 module.exports = {
     getUnits,
     getOneDistributionCenter,
     checkExistProvince,
+    getOneAdministrativeUnit,
+    updateOneAdministrativeUnit,
 }

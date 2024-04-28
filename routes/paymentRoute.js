@@ -8,19 +8,8 @@ const router = express.Router();
 
 const paymentValidation = new validation.PaymentValidation();
 
-router.post("/payment_successful", async (req, res) => {
+router.get("/payment_successful", async (req, res) => {
 	try {
-		console.log(req.body);
-		console.log(req);
-
-		// const resultCreatingNewOrder = await ordersService.updateOrder({ qrcode: req.body.data.qrcode, signature: req.body.signature }, { order_code: req.body.data.orderCode });
-		// if (!resultCreatingNewOrder || resultCreatingNewOrder.affectedRows === 0) {
-		// 	return res.status(404).json({
-		// 		error: true,
-		// 		message: `Đơn hàng có mã ${req.body.data.orderCode} không tồn tại.`,
-		// 	});
-		// }
-
 		return res.status(200).json({
 			error: false,
 			message: "Tạo đơn thành công.",
@@ -34,7 +23,7 @@ router.post("/payment_successful", async (req, res) => {
 	}
 })
 
-router.get("/confirm_webhook", async (req, res) => {
+router.post("/confirm_webhook", async (req, res) => {
 	try {
         const { error } = paymentValidation.validatePaymentResult(req.body);
 
@@ -44,6 +33,7 @@ router.get("/confirm_webhook", async (req, res) => {
 				message: error.message,
 			});
 		}
+		console.log(req.body);
 
 		const resultGettingOneOrder = await ordersService.getOneOrder({ order_id: req.body.data.orderCode });
 		if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
@@ -106,7 +96,7 @@ router.get("/cancel_payment", (req, res) => {
 
 router.post("/create_payment", async (req, res) => {
 	try {
-		const infoPayment = await paymentService.createPaymentService(req.body.order_id, 100000, "Thanh toán đơn hàng");
+		const infoPayment = await paymentService.createPaymentService(req.body.order_id, 5000, "Thanh toán đơn hàng");
 		console.log(infoPayment);
 		return res.status(200).json({
 			message: infoPayment

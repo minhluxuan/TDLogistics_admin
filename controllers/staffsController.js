@@ -1,5 +1,6 @@
 const staffsService = require ("../services/staffsService");
 const agencyService = require("../services/agenciesService");
+const administrativeService = require("../services/administrativeService");
 const utils = require("../lib/utils");
 const validation = require("../lib/validation");
 const fs = require("fs");
@@ -173,7 +174,23 @@ const createNewStaff = async (req, res) => {
 				});
 			}
 
-			if (!(await agencyService.checkExistAgency({ agency_id: req.body.agency_id }))) {
+			if (["SHIPPER", "AGENCY_SHIPPER"].includes(req.body.role) && (!req.body.hasOwnProperty("managed_wards") || req.body.managed_wards.length === 0)) {
+				return res.status(400).json({
+					error: true,
+					message: `Trường managed_wards không được để trống.`,
+				});
+			}
+
+			if (!["SHIPPER", "AGENCY_SHIPPER"].includes(req.body.role) && req.body.hasOwnProperty("managed_wards")) {
+				return res.status(400).json({
+					error: true,
+					message: `Trường managed_wards không được cho phép.`,
+				});
+			}
+
+			const resultGettingOneAgency = await agencyService.getOneAgency({ agency_id: req.body.agency_id });
+
+			if (!resultGettingOneAgency || resultGettingOneAgency.length === 0) {
 				return res.status(404).json({
 					error: true,
 					message: `Bưu cục có mã bưu cục ${req.body.agency_id} không tồn tại.`,
@@ -204,6 +221,46 @@ const createNewStaff = async (req, res) => {
 				req.body.avatar = req.file.filename;
 			}
 
+			const managedWards = req.body.managed_wards;
+			if (["SHIPPER", "AGENCY_SHIPPER"].includes(req.body.role)) {
+				let possibleManagedWard;
+				try {
+					possibleManagedWard = JSON.parse(resultGettingOneAgency[0].managed_wards);
+					if (possibleManagedWard.length === 0) {
+						return res.status(404).json({
+							error: true,
+							message: `Bưu cục/Đại lý ${req.body.agency_id} chưa quản lý phường/xã/thị trấn nào để để có thể phân vùng cho shipper.`,
+						});
+					}
+				} catch (error) {
+					return res.status(404).json({
+						error: true,
+						message: `Bưu cục/Đại lý ${req.body.agency_id} chưa quản lý phường/xã/thị trấn nào để để có thể phân vùng cho shipper.`,
+					});
+				}
+				
+				for (const ward of req.body.managed_wards) {
+					if (!possibleManagedWard.includes(ward)) {
+						return res.status(400).json({
+							error: true,
+							message: `${ward}, ${resultGettingOneAgency[0].district}, ${resultGettingOneAgency[0].province} không thuộc quyền quản lý của bưu bưu cục ${req.body.agency_id}.`,
+						});
+					}
+				}
+
+				for (const ward of req.body.managed_wards) {
+					const resultGettingWardsManagedByShipper = await administrativeService.getOneAdministrativeUnit({ province: resultGettingOneAgency[0].province, district: resultGettingOneAgency[0].district, ward: ward });
+					if (resultGettingWardsManagedByShipper.length > 0 && resultGettingWardsManagedByShipper[0].shipper) {
+						return res.status(409).json({
+							error: true,
+							message: `${ward} đã được đảm nhận bởi shipper ${resultGettingWardsManagedByShipper[0].shipper}.`,
+						});
+					} 
+				}
+
+				delete req.body.managed_wards;
+			}
+
 			const resultCreatingNewStaff = await staffsService.createNewStaff(req.body);
 
 			if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
@@ -211,6 +268,12 @@ const createNewStaff = async (req, res) => {
 					error: false,
 					message: `Tạo tài khoản nhân viên bưu cục có mã nhân viên ${req.body.staff_id} thất bại.`,
 				});
+			}
+
+			if (["SHIPPER", "AGENCY_SHIPPER"].includes(req.body.role) && managedWards) {
+				for (const ward of managedWards) {
+					console.log(await administrativeService.updateOneAdministrativeUnit({ province: resultGettingOneAgency[0].province, district: resultGettingOneAgency[0].district, ward: ward }, {shipper: req.body.staff_id }));
+				}
 			}
 
 			if (req.file) {
@@ -246,6 +309,20 @@ const createNewStaff = async (req, res) => {
 				});
 			}
 
+			if (["SHIPPER", "AGENCY_SHIPPER"].includes(req.body.role) && (!req.body.hasOwnProperty("managed_wards") || req.body.managed_wards.length === 0)) {
+				return res.status(400).json({
+					error: true,
+					message: `Trường managed_wards không được để trống.`,
+				});
+			}
+
+			if (!["SHIPPER", "AGENCY_SHIPPER"].includes(req.body.role) && req.body.hasOwnProperty("managed_wards")) {
+				return res.status(400).json({
+					error: true,
+					message: `Trường managed_wards không được cho phép.`,
+				});
+			}
+
 			if (!(await agencyService.checkExistAgency({ agency_id: req.user.agency_id }))) {
 				return res.status(404).json({
 					error: true,
@@ -278,6 +355,46 @@ const createNewStaff = async (req, res) => {
 				req.body.avatar = req.file.filename;
 			}
 
+			const managedWards = req.body.managed_wards;
+			if (["SHIPPER", "AGENCY_SHIPPER"].includes(req.body.role)) {
+				let possibleManagedWard;
+				try {
+					possibleManagedWard = JSON.parse(resultGettingOneAgency[0].managed_wards);
+					if (possibleManagedWard.length === 0) {
+						return res.status(404).json({
+							error: true,
+							message: `Bưu cục/Đại lý ${req.body.agency_id} chưa quản lý phường/xã/thị trấn nào để để có thể phân vùng cho shipper.`,
+						});
+					}
+				} catch (error) {
+					return res.status(404).json({
+						error: true,
+						message: `Bưu cục/Đại lý ${req.body.agency_id} chưa quản lý phường/xã/thị trấn nào để để có thể phân vùng cho shipper.`,
+					});
+				}
+
+				for (const ward of req.body.managed_wards) {
+					if (!possibleManagedWard.includes(ward)) {
+						return res.status(400).json({
+							error: true,
+							message: `${ward}, ${resultGettingOneAgency[0].district}, ${resultGettingOneAgency[0].province} không thuộc quyền quản lý của bưu bưu cục ${req.body.agency_id}.`,
+						});
+					}
+				}
+
+				for (const ward of req.body.managed_wards) {
+					const resultGettingWardsManagedByShipper = await administrativeService.getOneAdministrativeUnit({ province: resultGettingOneAgency[0].province, district: resultGettingOneAgency[0].district, ward: ward });
+					if (resultGettingWardsManagedByShipper.length > 0 && resultGettingWardsManagedByShipper[0].shipper) {
+						return res.status(409).json({
+							error: true,
+							message: `${ward} đã được đảm nhận bởi shipper ${resultGettingWardsManagedByShipper[0].shipper}.`,
+						});
+					} 
+				}
+
+				delete req.body.managed_wards;
+			}
+
 			const resultCreatingNewStaff = await staffsService.createNewStaff(req.body);
 
 			if (!resultCreatingNewStaff || resultCreatingNewStaff.affectedRows <= 0) {
@@ -287,11 +404,17 @@ const createNewStaff = async (req, res) => {
 				});
 			}
 
+			if (["SHIPPER", "AGENCY_SHIPPER"].includes(req.body.role) && managedWards) {
+				for (const ward of managedWards) {
+					await administrativeService.updateOneAdministrativeUnit({ province: resultGettingOneAgency[0].province, district: resultGettingOneAgency[0].district, ward: ward }, {shipper: req.body.staff_id });
+				}
+			}
+
 			if (req.file) {
 				const tempFolderPath = path.join("storage", "staff", "img", "avatar_temp");
 				if (!fs.existsSync(tempFolderPath)) {
 					fs.mkdirSync(tempFolderPath);
-				}
+				}s
 
 				const officialFolderPath = path.join("storage", "staff", "img", "avatar");
 				if (!fs.existsSync(officialFolderPath)) {
@@ -320,14 +443,14 @@ const createNewStaff = async (req, res) => {
 
 const updateStaffInfo = async (req, res) => {
 	try {
-		const { error } = staffValidation.validateQueryUpdatingStaff(req.query) || staffValidation.validateUpdatingStaff(req.body);
+		// const { error } = staffValidation.validateQueryUpdatingStaff(req.query) || staffValidation.validateUpdatingStaff(req.body);
 
-		if (error) {
-			return res.status(400).json({
-				error: true,
-				message: error.message,
-			});
-		}
+		// if (error) {
+		// 	return res.status(400).json({
+		// 		error: true,
+		// 		message: error.message,
+		// 	});
+		// }
 
 		if (userCannotBeAffected.includes(req.query.staff_id)) {
 			return res.status(400).json({
@@ -368,25 +491,93 @@ const updateStaffInfo = async (req, res) => {
 			}
 		}
 
-		if (req.body.hasOwnProperty("paid_salary")) {
+		let managedWards = null;
+		let agencyInfo = null;
+		if (req.body.hasOwnProperty("paid_salary") || req.body.hasOwnProperty("managed_wards")) {
 			const resultGettingOneStaff = await staffsService.getOneStaff({ staff_id: req.query.staff_id });
 			if (!resultGettingOneStaff || resultGettingOneStaff.length === 0) {
 				return res.status(404).json({
 					error: true,
 					message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`
-				})
+				});
 			}
 
-			const staff = resultGettingOneStaff[0];
-			req.body.paid_salary += parseInt(staff.paid_salary || 0);
+			if (!["SHIPPER", "AGENCY_SHIPPER"].includes(resultGettingOneStaff[0].role) && req.body.hasOwnProperty("managed_wards")) {
+				return res.status(404).json({
+					error: true,
+					message: `Trường managed_wards không được cho phép.`,
+				});
+			}
+
+			if (["SHIPPER", "AGENCY_SHIPPER"].includes(resultGettingOneStaff[0].role) && req.body.hasOwnProperty("managed_wards")) {
+				managedWards = req.body.managed_wards;
+				const resultGettingOneAgency = await agencyService.getOneAgency({ agency_id: resultGettingOneStaff[0].agency_id });
+				if (!resultGettingOneAgency || resultGettingOneAgency[0].length === 0) {
+					return res.status(404).json({
+						error: true,
+						message: `Bưu cục ${resultGettingOneStaff[0].agency_id} của nhân viên ${resultGettingOneStaff[0].staff_id} không tồn tại. Hãy thử kiểm tra lại.`,
+					});
+				}
+				
+				agencyInfo = resultGettingOneAgency[0];
+				let possibleManagedWard;
+				try {
+					possibleManagedWard = JSON.parse(resultGettingOneAgency[0].managed_wards);
+					if (possibleManagedWard.length === 0) {
+						return res.status(404).json({
+							error: true,
+							message: `Bưu cục/Đại lý ${req.body.agency_id} chưa quản lý phường/xã/thị trấn nào để để có thể phân vùng cho shipper.`,
+						});
+					}
+				} catch (error) {
+					return res.status(404).json({
+						error: true,
+						message: `Bưu cục/Đại lý ${req.body.agency_id} chưa quản lý phường/xã/thị trấn nào để để có thể phân vùng cho shipper.`,
+					});
+				}
+
+				for (const ward of req.body.managed_wards) {
+					if (!possibleManagedWard.includes(ward)) {
+						return res.status(400).json({
+							error: true,
+							message: `${ward}, ${resultGettingOneAgency[0].district}, ${resultGettingOneAgency[0].province} không thuộc quyền quản lý của bưu bưu cục ${resultGettingOneAgency[0].agency_id}.`,
+						});
+					}
+				}
+
+				for (const ward of req.body.managed_wards) {
+					const resultGettingWardsManagedByShipper = await administrativeService.getOneAdministrativeUnit({ province: resultGettingOneAgency[0].province, district: resultGettingOneAgency[0].district, ward: ward });
+					if (resultGettingWardsManagedByShipper.length > 0 && resultGettingWardsManagedByShipper[0].shipper && resultGettingWardsManagedByShipper[0].shipper !== req.query.staff_id) {
+						return res.status(409).json({
+							error: true,
+							message: `${ward} đã được đảm nhận bởi shipper ${resultGettingWardsManagedByShipper[0].shipper}.`,
+						});
+					} 
+				}
+
+				delete req.body.managed_wards;
+			}
+
+			if (req.body.hasOwnProperty("paid_salary")) {
+				const staff = resultGettingOneStaff[0];
+				req.body.paid_salary += parseInt(staff.paid_salary || 0);
+			}
 		}
 
-		const resultUpdatingStaff = await staffsService.updateStaff(req.body, { staff_id: req.query.staff_id });
-		if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows === 0) {
-			return res.status(404).json({
-				error: false,
-				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`,
-			});
+		if (Object.keys(req.body).length > 0) {
+			const resultUpdatingStaff = await staffsService.updateStaff(req.body, { staff_id: req.query.staff_id });
+			if (!resultUpdatingStaff || resultUpdatingStaff.affectedRows === 0) {
+				return res.status(404).json({
+					error: false,
+					message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại.`,
+				});
+			}
+		}
+
+		if (managedWards && managedWards.length > 0) {
+			for (const ward of managedWards) {
+				await administrativeService.updateOneAdministrativeUnit({ province: agencyInfo.province, district: agencyInfo.district, ward: ward }, {shipper: req.query.staff_id });
+			}
 		}
 
 		return res.status(201).json({
@@ -704,6 +895,92 @@ const getStaffAvatar = async (req, res) => {
 	}
 };
 
+const removeManagedWards = async (req, res) => {
+	try {
+		const { error: error1 } = staffValidation.validateDeletingStaff(req.query);
+		if (error1) {
+			return res.status(400).json({
+				error: true,
+				message: error1.message,
+			});
+		}
+
+		const { error: error2 } = staffValidation.validateRemovingManagedWards(req.body);
+		if (error2) {
+			return res.status(400).json({
+				error: true,
+				message: error2.message,
+			});
+		}
+
+		const updatorIdSubParts = req.user.staff_id.split('_');
+		const staffIdSubParts = req.query.staff_id.split('_');
+
+		if (["AGENCY_MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)
+			&& (updatorIdSubParts[0] !== staffIdSubParts[0]
+			|| updatorIdSubParts[1] !== staffIdSubParts[1])) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên có mã nhân viên ${req.query.staff_id} không tồn tại trong bưu cục có mã bưu chính ${updatorIdSubParts[1]}.`
+			});
+		}
+
+		const resultGettingOneStaff = await staffsService.getOneStaff({ staff_id: req.query.staff_id });
+		if (!resultGettingOneStaff || resultGettingOneStaff.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên ${req.query.staff_id} không tồn tại.`,
+			});
+		}
+
+		if (!["SHIPPER", "AGENCY_SHIPPER"].includes(resultGettingOneStaff[0].role)) {
+			return res.status(400).json({
+				error: true,
+				message: `Thao tác không thể thực hiện với nhân viên ${req.query.staff_id}.`,
+			});
+		}
+
+		const resultGettingOneAgency = await agencyService.getOneAgency({ agency_id: resultGettingOneStaff[0].agency_id });
+		if (!resultGettingOneAgency || resultGettingOneAgency.length === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Bưu cục ${resultGettingOneStaff[0].agency_id} của nhân viên ${req.query.staff_id} không tồn tại. Vui lòng kiểm tra lại.`,
+			});
+		}
+
+		const uniqueRemovedWards = Array.from(new Set(req.body.removed_wards));console.log(uniqueRemovedWards);
+
+		const filteredWards = [];
+		for (const ward of uniqueRemovedWards) {
+			const resultGettingOneAdministrativeUnit = await administrativeService.getOneAdministrativeUnit({
+				province: resultGettingOneAgency[0].province,
+				district: resultGettingOneAgency[0].district,
+				ward: ward,
+				shipper: req.query.staff_id
+			});
+
+			if (resultGettingOneAdministrativeUnit && resultGettingOneAdministrativeUnit.length > 0) {
+				filteredWards.push(ward);
+			}
+		}console.log(filteredWards);
+
+		for (const ward of filteredWards) {
+			await administrativeService.updateOneAdministrativeUnit({ province: resultGettingOneAgency[0].province, district: resultGettingOneAgency[0].district, ward: ward, shipper: req.query.staff_id }, { shipper: null });
+		}
+
+		return res.status(200).json({
+			error: true,
+			message: `Xoá các khu vực đã được đảm nhận bởi shipper ${req.query.staff_id} thành công.`,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
 module.exports = {
 	checkExistStaff,
 	createNewStaff,
@@ -715,4 +992,5 @@ module.exports = {
 	updatePassword,
 	updateAvatar,
 	getStaffAvatar,
+	removeManagedWards,
 };

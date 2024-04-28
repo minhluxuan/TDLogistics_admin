@@ -178,7 +178,6 @@ router.get("/logout",
     "DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER"]),
     staffsController.logout
 );
-
 router.get(
     "/get_avatar",
     auth.isAuthenticated(),
@@ -186,6 +185,13 @@ router.get(
     "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER", "AGENCY_TELLER", "AGENCY_COMPLAINTS_SOLVER",
     "DRIVER", "SHIPPER", "AGENCY_DRIVER", "AGENCY_SHIPPER"]),
     staffsController.getStaffAvatar
+);
+router.patch(
+    "/remove_managed_wards",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isActive(),
+    staffsController.removeManagedWards
 );
 
 router.get("/login", (req, res) => {

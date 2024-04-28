@@ -26,10 +26,14 @@ const getAuthenticatedUserInfo = async (req, res) => {
         }
 
 		const info = new Object({
+            user_id: User[0].user_id,
 			fullname: User[0].fullname,
             phone_number: User[0].phone_number,
             email: User[0].email,
-            address: User[0].address,
+            province: User[0].province,
+            district: User[0].district,
+            ward: User[0].ward,
+            detail_address: User[0].detail_address,
             role: "USER"
 		});
 
@@ -236,6 +240,98 @@ const logout = async (req, res) => {
     }
 };
 
+const updateAvatar = async (req, res) => {
+	try {
+        if (!req.file) {
+            return res.status(400).json({
+                error: true,
+                message: "Ảnh không được để trống.",
+            });
+        }
+
+		const resultGettingOneUser = await usersService.getOneUser({ phone_number: req.user.phone_number });
+		
+		if (!resultGettingOneUser || resultGettingOneUser.length <= 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Thao tác không thành công. Vui lòng đăng nhập lại.`,
+			});
+		}
+
+		const user = resultGettingOneUser[0];
+		const fileName = user.avatar;
+
+        console.log(req.file);
+
+		const resultUpdatingUser = await usersService.updateUserInfo({ avatar: req.file.filename }, { phone_number: req.user.phone_number });
+		if (!resultUpdatingUser || resultUpdatingUser.affectedRows === 0) {
+			return res.status(404).json({
+				error: true,
+				message: `Thao tác không thành công. Vui lòng đăng nhập lại.`,
+			});
+		}
+
+		const tempFolderPath = path.join("storage", "user", "img", "avatar_temp");
+		if (!fs.existsSync(tempFolderPath)) {
+			fs.mkdirSync(tempFolderPath);
+		}
+
+		const officialFolderPath = path.join("storage", "user", "img", "avatar");
+		if (!fs.existsSync(officialFolderPath)) {
+			fs.mkdirSync(officialFolderPath);
+		}
+
+		if (fileName) {
+			const oldFilePath = path.join(officialFolderPath, fileName);
+			if (fs.existsSync(oldFilePath)) {
+				fs.unlinkSync(oldFilePath);
+			}
+		}
+
+		const tempFilePath = path.join(tempFolderPath, req.file.filename);
+		const officialFilePath = path.join(officialFolderPath, req.file.filename);
+
+		fs.renameSync(tempFilePath, officialFilePath);
+
+		return res.status(201).json({
+			error: false,
+			message: `Cập nhật ảnh đại diện thành công.`,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
+const getAvatar = async (req, res) => {
+	try {
+		const resultGettingOneUser = await usersService.getOneUser({ phone_number: req.user.phone_number }); 
+		const user = resultGettingOneUser[0];
+		const fileName = user.avatar ? user.avatar : null;
+	
+		if (fileName) {
+			const file = path.join(__dirname, "..", "storage", "user", "img", "avatar", fileName);
+			if (fs.existsSync(file)) {
+					return res.status(200).sendFile(file);
+			}
+		}
+			
+		return res.status(404).json({
+			error: true,
+			message: "Không tìm thấy dữ liệu",
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+};
+
 module.exports = {
     getAuthenticatedUserInfo,
     createOTP,
@@ -245,4 +341,6 @@ module.exports = {
     createNewUser,
     updateUserInfo,
     logout,
+    updateAvatar,
+    getAvatar,
 }
