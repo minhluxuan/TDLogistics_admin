@@ -12,7 +12,7 @@ const cors = require("cors");
 const flash = require("express-flash");
 const passport = require("passport");
 const auth = require("./lib/auth");
-const dotenv = require("dotenv");
+const dotenv = require("dotenv");const randomstring = require("randomstring");
 dotenv.config();
 
 const indexRouter = require("./routes/index");

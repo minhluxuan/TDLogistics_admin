@@ -98,9 +98,8 @@ const createNewOrder = async (socket, info, orderTime) => {
         info.paid = false;
 
         const orderCodeRandom = randomstring.generate({
+            length: 15,
             charset: "numeric",
-            min: 0,
-            max: 999_999_999_999,
         });
 
         info.order_code = orderCodeRandom;
@@ -124,7 +123,8 @@ const createNewOrder = async (socket, info, orderTime) => {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
 
-        const resultAssigningTaskForShipper = await 
+        const postalCode = utils.getPostalCodeFromAgencyId(resultFindingManagedAgency.shipper);
+        const resultAssigningTaskForShipper = await shippersService.assignNewTasks([info.order_id], resultFindingManagedAgency.shipper, postalCode);
 
         await usersService.updateUserInfo({ province: info.province_source, district: info.district_source, ward: info.ward_source, detail_address: info.detail_source }, { phone_number: socket.request.user.phone_number });
 
@@ -421,12 +421,11 @@ const updateOrder = async (req, res) => {
         updatedRow.fee = servicesFee.calculateFee(updatedRow.service_type, updatedRow.province_source, updatedRow.province_dest, mass * 1000, 0.15, false);
         
         const orderCodeRandom = randomstring.generate({
+            length: 15,
             charset: "numeric",
-            min: 0,
-            max: 999_999_999_999,
         });
 
-        updatedRow.order_code = parseInt(orderCodeRandom);
+        updatedRow.order_code = orderCodeRandom;
         console.log(updatedRow.order_code);
         const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), updatedRow.fee, `THANH TOAN DON HANG`);
         if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
