@@ -427,7 +427,7 @@ const updateOrder = async (req, res) => {
         });
 
         updatedRow.order_code = parseInt(orderCodeRandom);
-        console.log(order_code);
+        console.log(updatedRow.order_code);
         const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), updatedRow.fee, `THANH TOAN DON HANG`);
         if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
             throw new Error("Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
