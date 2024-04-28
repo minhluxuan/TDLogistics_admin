@@ -123,9 +123,8 @@ const createNewOrder = async (socket, info, orderTime) => {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
 
-        const postalCode = utils.getPostalCodeFromAgencyId(resultFindingManagedAgency.shipper);
-        const resultAssigningTaskForShipper = await shippersService.assignNewTasks([info.order_id], resultFindingManagedAgency.shipper, postalCode);
-
+        const postalCode = utils.getPostalCodeFromAgencyID(resultFindingManagedAgency.shipper);
+        await shippersService.assignNewTasks([info.order_id], resultFindingManagedAgency.shipper, postalCode);
         await usersService.updateUserInfo({ province: info.province_source, district: info.district_source, ward: info.ward_source, detail_address: info.detail_source }, { phone_number: socket.request.user.phone_number });
 
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
@@ -437,7 +436,7 @@ const updateOrder = async (req, res) => {
 
         updatedRow.qrcode = resultCreatingNewPayment.qrCode;
 
-        const resultUpdatingOneOrder = await ordersService.updateOrder({ order_code: updatedRow.order_code, fee: updatedRow.fee, qrcode: updatedRow.qrcode }, req.query);
+        const resultUpdatingOneOrder = await ordersService.updateOrder(updatedRow, req.query);
         if (!resultUpdatingOneOrder || resultUpdatingOneOrder.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
