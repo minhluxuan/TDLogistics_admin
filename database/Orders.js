@@ -149,10 +149,15 @@ const findingManagedAgency = async (ward, district, province) => {
     if(!result[0][0].agency_id || !result[0][0].postal_code) {
         throw new Error(`Xin lỗi quý khách. Dịch vụ chúng tôi chưa có mặt ở ${ward}, ${district}, ${province}.`);
     }
+
+    if (!result[0][0].shipper) {
+        throw new Error("Xin lỗi quý khách. Khu vực của quý khách hiện chưa có shipper nào phục vụ.");
+    }
     
     return {
         postal_code: result[0][0].postal_code,
         agency_id: result[0][0].agency_id,
+        shipper: result[0][0].shipper,
     }
 }
 

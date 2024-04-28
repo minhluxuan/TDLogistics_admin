@@ -11,6 +11,7 @@ const servicesStatus = require("../lib/servicesStatus");
 const shippersService = require("../services/shippersService");
 const paymentService = require("../services/paymentService");
 const usersService = require("../services/usersService");
+const staffsService = require("../services/staffsService");
 const randomstring = require("randomstring");
 
 const orderValidation = new Validation.OrderValidation();
@@ -75,6 +76,11 @@ const createNewOrder = async (socket, info, orderTime) => {
     try {
         const resultFindingManagedAgency = await ordersService.findingManagedAgency(info.ward_source, info.district_source, info.province_source);   
         
+        const resultGettingShipperWillServe = await staffsService.getOneStaff({ staff_id: resultFindingManagedAgency.shipper });
+        if (!resultGettingShipperWillServe || resultGettingShipperWillServe.length === 0) {
+            return socket.emit("notifyFailCreatedNewOrder", "Xin lỗi quý khách. Khu vực của quý khách hiện chưa có shipper nào phục vụ.");
+        }
+
         info.journey = JSON.stringify(new Array());
         const agencies = resultFindingManagedAgency.agency_id;
         const areaAgencyIdSubParts = agencies.split('_');
@@ -92,7 +98,6 @@ const createNewOrder = async (socket, info, orderTime) => {
         info.paid = false;
 
         const orderCodeRandom = randomstring.generate({
-            length: 7,
             charset: "numeric",
             min: 0,
             max: 999_999_999_999,
@@ -119,7 +124,6 @@ const createNewOrder = async (socket, info, orderTime) => {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
 
-        console.log(info.province_source, info.district_source, info.ward_source);
         const resultUpdatingUserInfo = await usersService.updateUserInfo({ province: info.province_source, district: info.district_source, ward: info.ward_source, detail_address: info.detail_source }, { phone_number: socket.request.user.phone_number });
         console.log(resultUpdatingUserInfo);
 
@@ -421,7 +425,7 @@ const updateOrder = async (req, res) => {
             max: 999_999_999_999,
         });
 
-        updatedRow.order_code = orderCodeRandom;
+        updatedRow.order_code = parseInt(orderCodeRandom);
         const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), updatedRow.fee, `THANH TOAN DON HANG`);
         if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
             return socket.emit("notifyFailCreateNewOrder", "Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
@@ -432,7 +436,7 @@ const updateOrder = async (req, res) => {
 
         updatedRow.qrcode = resultCreatingNewPayment.qrCode;
 
-        const resultUpdatingOneOrder = await ordersService.updateOrder({ order_code: updatedRow.orderCode, fee: updatedRow.fee, qrcode: updatedRow.qrcode }, req.query);
+        const resultUpdatingOneOrder = await ordersService.updateOrder({ order_code: updatedRow.order_code, fee: updatedRow.fee, qrcode: updatedRow.qrcode }, req.query);
         if (!resultUpdatingOneOrder || resultUpdatingOneOrder.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
@@ -448,6 +452,7 @@ const updateOrder = async (req, res) => {
             message: `Cập nhật đơn hàng có mã đơn hàng ${req.query.order_id} thành công.`,
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             error: true,
             message: error.message,
