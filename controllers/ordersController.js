@@ -124,8 +124,9 @@ const createNewOrder = async (socket, info, orderTime) => {
             return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
         }
 
-        const resultUpdatingUserInfo = await usersService.updateUserInfo({ province: info.province_source, district: info.district_source, ward: info.ward_source, detail_address: info.detail_source }, { phone_number: socket.request.user.phone_number });
-        console.log(resultUpdatingUserInfo);
+        const resultAssigningTaskForShipper = await 
+
+        await usersService.updateUserInfo({ province: info.province_source, district: info.district_source, ward: info.ward_source, detail_address: info.detail_source }, { phone_number: socket.request.user.phone_number });
 
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
 
@@ -426,9 +427,10 @@ const updateOrder = async (req, res) => {
         });
 
         updatedRow.order_code = parseInt(orderCodeRandom);
+        console.log(order_code);
         const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), updatedRow.fee, `THANH TOAN DON HANG`);
         if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
-            return socket.emit("notifyFailCreateNewOrder", "Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
+            throw new Error("Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
         }
 
         // const resultGettingPaymentLinkInfo = await paymentService.getPaymentInformation(orderCodeRandom);
