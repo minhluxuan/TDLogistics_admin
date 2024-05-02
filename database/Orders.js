@@ -46,9 +46,17 @@ const getOneOrder = async (conditions) => {
     const fields = Object.keys(conditions);
     const values = Object.values(conditions);
 
-    const result = await SQLutils.findOneIntersect(pool, table, fields, values);
+    let query;
+    if (!fields || !values || fields.length === 0 || values.length === 0) {
+        query = `SELECT order_id, user_id, agency_id, service_type, name_sender, phone_number_sender, name_receiver, phone_number_receiver, mass, height, width, length, province_source, district_source, ward_source, detail_source, province_dest, district_dest, ward_dest, detail_dest, long_source, lat_source, long_destination, lat_destination, fee, journey, COD, shipper, status_code, miss, qrcode, paid, created_at, last_update FROM ${table} LIMIT 1`;
+    }
+    else {
+        query = `SELECT order_id, user_id, agency_id, service_type, name_sender, phone_number_sender, name_receiver, phone_number_receiver, mass, height, width, length, province_source, district_source, ward_source, detail_source, province_dest, district_dest, ward_dest, detail_dest, long_source, lat_source, long_destination, lat_destination, fee, journey, COD, shipper, status_code, miss, qrcode, paid, created_at, last_update FROM ${table} WHERE ${fields.map(field => `${field} = ?`).join(" AND ")} LIMIT 1`;
+    }
 
-    for (const elm of result) {
+    const result = await pool.query(query, values);
+
+    for (const elm of result[0]) {
         try {
             if (elm.journey) {
                 elm.journey = JSON.parse(elm.journey);
@@ -58,7 +66,7 @@ const getOneOrder = async (conditions) => {
         }
     }
 
-    return result;
+    return result[0];
 }
 
 const getOrders = async (conditions, paginationConditions) => {
@@ -68,9 +76,43 @@ const getOrders = async (conditions, paginationConditions) => {
     const limit = paginationConditions.rows || 0;
     const offset = paginationConditions.page ? paginationConditions.page * limit : 0;
 
-    const result = await SQLutils.find(pool, table, fields, values, true, limit, offset);
+        if (fields !== null && values !== null && fields.length > 0 && values.length > 0) {
+            const whereClause =  fields.map(field => `${field} = ? `).join(' AND ');
+            query = `SELECT order_id, user_id, agency_id, service_type, name_sender, phone_number_sender, name_receiver, phone_number_receiver, mass, height, width, length, province_source, district_source, ward_source, detail_source, province_dest, district_dest, ward_dest, detail_dest, long_source, lat_source, long_destination, lat_destination, fee, journey, COD, shipper, status_code, miss, qrcode, paid, created_at, last_update FROM ${table} WHERE ${whereClause} ORDER BY created_at DESC`;
+    
+            if (offset && typeof offset === "number") {
+                if (limit && typeof limit === "number" && limit > 0) {
+                    query += ` LIMIT ?, ?`;
+                    values.push(offset, limit);
+                }
+            }
+            else {
+                if (limit && typeof limit === "number" && limit > 0) {
+                    query += ` LIMIT ?`;
+                    values.push(limit);
+                }
+            }
+        }
+        else {
+            query = `SELECT order_id, user_id, agency_id, service_type, name_sender, phone_number_sender, name_receiver, phone_number_receiver, mass, height, width, length, province_source, district_source, ward_source, detail_source, province_dest, district_dest, ward_dest, detail_dest, long_source, lat_source, long_destination, lat_destination, fee, journey, COD, shipper, status_code, miss, qrcode, paid, created_at, last_update FROM ${table}`;
+    
+            if (offset && typeof offset === "number") {
+                if (limit && typeof limit === "number" && limit > 0) {
+                    query += ` LIMIT ?, ?`;
+                    values.push(offset, limit);
+                }
+            }
+            else {
+                if (limit && typeof limit === "number" && limit > 0) {
+                    query += ` LIMIT ?`;
+                    values.push(limit);
+                }
+            }
+        }
 
-    for (const elm of result) {
+    const result = await pool.query(query, values);
+
+    for (const elm of result[0]) {
         try {
             if (elm.journey) {
                 elm.journey = JSON.parse(elm.journey);
@@ -80,7 +122,7 @@ const getOrders = async (conditions, paginationConditions) => {
         }
     }
 
-    return result;
+    return result[0];
 }
 
 const getOrderForUpdating = async (order_id) => {
@@ -139,7 +181,7 @@ const getProvincePostalCode = async (province) => {
 
 const findingManagedAgency = async (ward, district, province) => {
     const table = "ward";
-    const query = `SELECT agency_id, postal_code FROM ${table} WHERE ward = ? AND district = ? AND province = ? LIMIT 1`;
+    const query = `SELECT agency_id, postal_code, shipper FROM ${table} WHERE ward = ? AND district = ? AND province = ? LIMIT 1`;
     const result = await pool.query(query, [ward, district, province]);
 
     if (!result || !result[0] || result[0].length === 0) {

@@ -837,6 +837,31 @@ const getLicenseAgencyCompany = async (req, res) => {
     }
 };
 
+const getManagedWards = async (req, res) => {
+	try {
+		const { error } = agencyValidation.validateCheckingExistAgency(req.query);
+		if (error) {
+			return res.status(404).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		const resultGettingManagedWards = await agenciesService.getManagedWards(req.query.agency_id);
+		return res.status(200).json({
+			error: false,
+			data: resultGettingManagedWards.managed_wards,
+			message: "Lấy thông tin các phường/xã/thị trấn được đảm nhận thành công.",
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
 module.exports = {
 	checkExistAgency,
 	getAgencies,
@@ -845,5 +870,6 @@ module.exports = {
 	deleteAgency,
 	updateLicenseAgencyCompany,
 	updateAgencyCompany,
-	getLicenseAgencyCompany
+	getLicenseAgencyCompany,
+	getManagedWards,
 };

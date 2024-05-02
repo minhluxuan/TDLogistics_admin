@@ -25,28 +25,11 @@ router.get("/payment_successful", async (req, res) => {
 
 router.post("/confirm_webhook", async (req, res) => {
 	try {
-        const { error } = paymentValidation.validatePaymentResult(req.body);
-
-		if (error) {
-			return res.status(400).json({
-				error: true,
-				message: error.message,
-			});
-		}
-		console.log(req.body);
-
-		const resultGettingOneOrder = await ordersService.getOneOrder({ order_id: req.body.data.orderCode });
+		const resultGettingOneOrder = await ordersService.getOneOrder({ order_code: req.body.data.orderCode });
 		if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
 			return res.status(404).json({
 				error: true,
 				message: `Lô hàng có mã ${req.body.data.orderCode} không tồn tại.`,
-			});
-		}
-
-		if (req.body.signature !== resultGettingOneOrder[0].signature) {
-			return res.status(400).json({
-				error: true,
-				message: "Chữ ký không khớp.",
 			});
 		}
 
@@ -64,7 +47,7 @@ router.post("/confirm_webhook", async (req, res) => {
 			});
 		}
 
-		await ordersService.updateOrder({ paid: true }, { order_id: req.body.data.orderCode });
+		await ordersService.updateOrder({ paid: true }, { order_code: req.body.data.orderCode });
 
 		return res.status(200).json({
 			error: false,

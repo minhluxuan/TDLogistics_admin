@@ -3,6 +3,8 @@ const randomstring = require("randomstring");
 const otpService = require("../services/otpService");
 const usersService = require("../services/usersService");
 const Validation = require("../lib/validation");
+const path = require("path");
+const fs = require("fs");
 
 const OTPValidation = new Validation.OTPValidation();
 const UserValidation = new Validation.UserValidation();
@@ -14,6 +16,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.MAIL_AUTH_PASSWORD,
     }
 });
+
 const getAuthenticatedUserInfo = async (req, res) => {
 	try {
         const User = await usersService.getOneUser({ user_id: req.user.user_id });

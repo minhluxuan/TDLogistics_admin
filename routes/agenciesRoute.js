@@ -108,5 +108,12 @@ router.get(
     auth.isActive(),
     agenciesController.getLicenseAgencyCompany
 );
+router.get(
+    "/get_managed_wards",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "HUMAN_RESOURCE_MANAGER", "MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isActive(),
+    agenciesController.getManagedWards
+);
 
 module.exports = router;

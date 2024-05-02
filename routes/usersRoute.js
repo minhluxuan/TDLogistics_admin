@@ -2,6 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const multer = require("multer");
+const fs = require("fs");
 const path = require("path");
 const usersController = require("../controllers/usersController");
 const Users = require("../database/Users");
@@ -74,8 +75,8 @@ const storage = multer.diskStorage({
             return done(new Error('Yêu cầu tên trường phải là "avatar".'));
         }
 
-        const folderPath = path.join("storage", "user", "img", "avatar_temp");
-
+        const folderPath = path.join(__dirname, "..", "storage", "user", "img", "avatar_temp");
+        
         if (!fs.existsSync(folderPath)) {
             fs.mkdirSync(folderPath, { recursive: true });
         }
@@ -151,7 +152,7 @@ router.put(
     usersController.updateAvatar
 );
 router.get(
-    "get_avatar",
+    "/get_avatar",
     auth.isAuthenticated(),
     auth.isAuthorized(["USER"]),
     usersController.getAvatar

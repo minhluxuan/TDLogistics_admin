@@ -23,13 +23,13 @@ try {
                 try {
                     const orderTime = new Date();
                     
-                    if (info.service_type === "T60") {
-                        if (info.length && info.width && info.height
-                            && (info.length * info.width * info.height) / 6000 < 5) {
-                                return socket.emit("notifyError", `Đơn hàng với kích thước ${info.length} x ${info.width} x ${info.height} không phù hợp với dịch vụ T60.
-                                Yêu cầu: (chiều dài x chiều rộng x chiều cao)/6000 >= 5.`);
-                            }
-                    }
+                    // if (info.service_type === "T60") {
+                    //     if (info.length && info.width && info.height
+                    //         && (info.length * info.width * info.height) / 6000 < 5) {
+                    //             return socket.emit("notifyError", `Đơn hàng với kích thước ${info.length} x ${info.width} x ${info.height} không phù hợp với dịch vụ T60.
+                    //             Yêu cầu: (chiều dài x chiều rộng x chiều cao)/6000 >= 5.`);
+                    //         }
+                    // }
 
                     if (["USER"].includes(socket.request.user.role)) {
                         const { error } = orderValidation.validateCreatingOrder(info);
@@ -91,9 +91,7 @@ const createNewOrder = async (socket, info, orderTime) => {
         const provinceSource = info.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
         const provinceDest = info.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
 
-        const mass = (info.length * info.width * info.height) / 6000;
-
-        info.fee = servicesFee.calculateFee(info.service_type, provinceSource, provinceDest, mass * 1000, 0.15, false);
+        info.fee = servicesFee.calculateFee(info.service_type, provinceSource, provinceDest, req.body.mass, 0.15, false);
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         info.paid = false;
 
@@ -414,19 +412,18 @@ const updateOrder = async (req, res) => {
         }
 
         const updatedRow = resultGettingOneOrder[0];
+        req.body.mass = req.body.mass ? req.body.mass : updatedRow.mass;
+        
+        req.body.fee = servicesFee.calculateFee(updatedRow.service_type, updatedRow.province_source, updatedRow.province_dest, req.body.mass, 0.15, false);
 
-        const mass = (updatedRow.length * updatedRow.width * updatedRow.height) / 6000;
-        
-        updatedRow.fee = servicesFee.calculateFee(updatedRow.service_type, updatedRow.province_source, updatedRow.province_dest, mass * 1000, 0.15, false);
-        
         const orderCodeRandom = randomstring.generate({
             length: 15,
             charset: "numeric",
         });
 
-        updatedRow.order_code = orderCodeRandom;
+        req.body.order_code = orderCodeRandom;
         console.log(updatedRow.order_code);
-        const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), updatedRow.fee, `THANH TOAN DON HANG`);
+        const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), req.body.fee, `THANH TOAN DON HANG`);
         if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
             throw new Error("Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
         }
@@ -434,9 +431,9 @@ const updateOrder = async (req, res) => {
         // const resultGettingPaymentLinkInfo = await paymentService.getPaymentInformation(orderCodeRandom);
         // console.log(resultGettingPaymentLinkInfo);
 
-        updatedRow.qrcode = resultCreatingNewPayment.qrCode;
+        req.body.qrcode = resultCreatingNewPayment.qrCode;
 
-        const resultUpdatingOneOrder = await ordersService.updateOrder(updatedRow, req.query);
+        const resultUpdatingOneOrder = await ordersService.updateOrder(req.body, req.query);
         if (!resultUpdatingOneOrder || resultUpdatingOneOrder.affectedRows === 0) {
             return res.status(404).json({
                 error: true,
@@ -462,7 +459,7 @@ const updateOrder = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const { error } = OrderValidation.validateCancelingOrder(req.query);
+        const { error } = orderValidation.validateCancelingOrder(req.query);
 
         if (error) {
             return res.status(404).json({
