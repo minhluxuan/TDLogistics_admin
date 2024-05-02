@@ -200,6 +200,11 @@ const updatePassword = async (info, conditions) => {
 	return await dbUtils.update(pool, table, fields, values, conditionFields, conditionValues);
 };
 
+const getShipperManagedWards = async (staff_id) => {
+	const query = `SELECT ?? FROM ?? WHERE ?? = ?`;
+	return (await pool.query(query, ["ward", "ward", "shipper", staff_id]))[0];
+}
+
 module.exports = {
     checkExistStaff,
 	checkExistStaffIntersect,
@@ -209,4 +214,5 @@ module.exports = {
     updateStaff,
     deleteStaff,
 	updatePassword,
+	getShipperManagedWards,
 };

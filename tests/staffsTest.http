@@ -469,6 +469,10 @@ Content-Type: application/json
 
 ###
 
+GET http://localhost:5000/api/v1/staffs/get_shipper_managed_wards?staff_id=BC_71000_077204004567
+
+###
+
 DELETE http://localhost:5000/api/v1/staffs/delete?staff_id=TD_00000_077204005692
 Content-Type: application/json
 

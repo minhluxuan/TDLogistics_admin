@@ -36,6 +36,10 @@ const updatePassword = async (info, conditions) => {
    return await Staffs.updatePassword(info, conditions);
 }
 
+const getShipperManagedWards = async (staff_id) => {
+    return await Staffs.getShipperManagedWards(staff_id);
+}
+
 module.exports = {
     checkExistStaff,
     checkExistStaffIntersect,
@@ -45,4 +49,5 @@ module.exports = {
     updateStaff,
     deleteStaff,
     updatePassword,
+    getShipperManagedWards,
 }

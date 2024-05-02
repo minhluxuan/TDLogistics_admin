@@ -192,6 +192,13 @@ router.patch(
     auth.isActive(),
     staffsController.removeManagedWards
 );
+router.get(
+    "/get_shipper_managed_wards",
+    auth.isAuthenticated(),
+    auth.isAuthorized(["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER", "AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"]),
+    auth.isActive(),
+    staffsController.getShipperManagedWards
+)
 
 router.get("/login", (req, res) => {
     res.render("staffLogin");

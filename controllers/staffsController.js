@@ -981,6 +981,44 @@ const removeManagedWards = async (req, res) => {
 	}
 }
 
+const getShipperManagedWards = async (req, res) => {
+	try {
+		const { error } = staffValidation.validateFindingStaffByStaff(req.query);
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
+
+		if (!(await staffsService.checkExistStaff(req.query))) {
+			return res.status(404).json({
+				error: true,
+				message: `Nhân viên ${req.query.staff_id} không tồn tại.`,
+			});
+		}
+
+		const resultGettingShipperManagedWards = await staffsService.getShipperManagedWards(req.query.staff_id);
+
+		const managedWards = new Array();
+		for (const elm of resultGettingShipperManagedWards) {
+			managedWards.push(elm.ward);
+		}
+
+		return res.status(200).json({
+			error: false,
+			data: managedWards,
+			message: "Lấy các phường/xã/thị trấn được đảm nhận bởi shipper thành công",
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: true,
+			message: error.message,
+		});
+	}
+}
+
 module.exports = {
 	checkExistStaff,
 	createNewStaff,
@@ -993,4 +1031,5 @@ module.exports = {
 	updateAvatar,
 	getStaffAvatar,
 	removeManagedWards,
+	getShipperManagedWards,
 };
