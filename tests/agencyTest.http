@@ -70,4 +70,8 @@ Content-Type: application/json
 
 ###
 
+GET http://localhost:5000/api/v1/agencies/get_managed_wards?agency_id=BC_71000_077204005691
+
+###
+
 DELETE http://localhost:5000/api/v1/agencies/delete?agency_id=BC_71000_077204005691

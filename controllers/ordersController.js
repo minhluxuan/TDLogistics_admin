@@ -91,7 +91,7 @@ const createNewOrder = async (socket, info, orderTime) => {
         const provinceSource = info.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
         const provinceDest = info.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
 
-        info.fee = servicesFee.calculateFee(info.service_type, provinceSource, provinceDest, req.body.mass, 0.15, false);
+        info.fee = servicesFee.calculateFee(info.service_type, provinceSource, provinceDest, info.mass, 0.15, false);
         info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         info.paid = false;
 
@@ -139,18 +139,13 @@ const createNewOrder = async (socket, info, orderTime) => {
 
 const calculateServiceFee = async (req, res) => {
     try{
+        console.table(req.body);
         if((["USER", "ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]).includes(req.user.role)) {
             const provinceSource = req.body.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
             const provinceDest = req.body.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
-
-            const mass = (req.body.length * req.body.width * req.body.height) / 6000;
             
-            let optionService = null;
-            if(req.body.service_type === "T60") {
-                optionService = "T60";
-                req.body.service_type = "CPN";
-            }
-            const fee = servicesFee.calculateFee(req.body.service_type, provinceSource, provinceDest, mass * 1000, 0.15, optionService, false);
+            const fee = servicesFee.calculateFee(req.body.service_type, provinceSource, provinceDest, req.body.mass, 0.15, false);
+            console.log(fee);
             return res.status(200).json({
                 error: false,
                 data: fee,

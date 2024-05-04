@@ -847,10 +847,10 @@ const getManagedWards = async (req, res) => {
 			});
 		}
 
-		const resultGettingManagedWards = await agenciesService.getManagedWards(req.query.agency_id);
+		const resultGettingManagedWards = await agenciesService.getAgencyManagedWards(req.query.agency_id);
 		return res.status(200).json({
 			error: false,
-			data: resultGettingManagedWards.managed_wards,
+			data: resultGettingManagedWards[0].managed_wards,
 			message: "Lấy thông tin các phường/xã/thị trấn được đảm nhận thành công.",
 		});
 	} catch (error) {

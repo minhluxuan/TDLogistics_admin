@@ -373,7 +373,19 @@ const updatePassword = async (fields, values, conditionFields, conditionValues) 
 
 const getAgencyManagedWards = async (agency_id) => {
 	const query = "SELECT managed_wards FROM ?? WHERE ?? = ?";
-	return (await pool.query(query, [table, "agency_id", agency_id]))[0];
+	const result = (await pool.query(query, [table, "agency_id", agency_id]))[0];
+
+	for (const elm of result) {
+		if (elm.managed_wards) {
+			try {
+				elm.managed_wards = JSON.parse(elm.managed_wards);
+			} catch (error) {
+				elm.managed_wards = new Array();
+			}
+		}
+	}
+
+	return result;
 }
 
 module.exports = { 
