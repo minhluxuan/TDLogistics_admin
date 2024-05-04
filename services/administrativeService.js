@@ -16,6 +16,10 @@ const getOneAdministrativeUnit = async (condition) => {
     return await Administrative.getOneAdministrativeUnit(condition);
 }
 
+const getAdministrativeUnit = async (condition) => {
+    return await Administrative.getAdministrativeUnit(condition);
+}
+
 const updateOneAdministrativeUnit = async (condition, info) => {
     return await Administrative.updateOneAdministrativeUnit(condition, info);
 }
@@ -26,4 +30,5 @@ module.exports = {
     checkExistProvince,
     getOneAdministrativeUnit,
     updateOneAdministrativeUnit,
+    getAdministrativeUnit,
 }

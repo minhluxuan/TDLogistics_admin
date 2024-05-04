@@ -32,6 +32,14 @@ const getObjectsCanHandleTask = async (agency_id) => {
     return (await pool.query(query, [agency_id]))[0];
 }
 
+const getOneTask = async (condition, postalCode) => {
+    const tasksTable = postalCode + '_' + "shipper_tasks";
+    const fields = Object.keys(condition);
+    const values = Object.values(condition);
+
+    return await dbUtils.findOneIntersect(pool, tasksTable, fields, values);
+}
+
 const getTasks = async (conditions, postal_code) => {
     const shipperTasksTable = postal_code + '_' + defaultTasksTable;
 
@@ -280,6 +288,7 @@ const deleteTask = async (id, postalCode) => {
 module.exports = {
     checkExistTask,
     getObjectsCanHandleTask,
+    getOneTask,
     getTasks,
     assignNewTasks,
     confirmCompletedTask,

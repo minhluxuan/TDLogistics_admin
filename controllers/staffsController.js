@@ -443,14 +443,14 @@ const createNewStaff = async (req, res) => {
 
 const updateStaffInfo = async (req, res) => {
 	try {
-		// const { error } = staffValidation.validateQueryUpdatingStaff(req.query) || staffValidation.validateUpdatingStaff(req.body);
+		const { error } = staffValidation.validateQueryUpdatingStaff(req.query) || staffValidation.validateUpdatingStaff(req.body);
 
-		// if (error) {
-		// 	return res.status(400).json({
-		// 		error: true,
-		// 		message: error.message,
-		// 	});
-		// }
+		if (error) {
+			return res.status(400).json({
+				error: true,
+				message: error.message,
+			});
+		}
 
 		if (userCannotBeAffected.includes(req.query.staff_id)) {
 			return res.status(400).json({
@@ -577,6 +577,14 @@ const updateStaffInfo = async (req, res) => {
 		if (managedWards && managedWards.length > 0) {
 			for (const ward of managedWards) {
 				await administrativeService.updateOneAdministrativeUnit({ province: agencyInfo.province, district: agencyInfo.district, ward: ward }, {shipper: req.query.staff_id });
+			}
+
+			const resultGettingAdministrativeUnit = await administrativeService.getAdministrativeUnit({ shipper: req.query.staff_id });
+			const previousManagedWards = resultGettingAdministrativeUnit.map(elm => elm.ward);
+			const removedWards = previousManagedWards.filter(ward => !managedWards.includes(ward));
+			
+			for (const ward of removedWards) {
+				await administrativeService.updateOneAdministrativeUnit({ province: agencyInfo.province, district: agencyInfo.district, ward: ward }, {shipper: null });
 			}
 		}
 
@@ -948,7 +956,7 @@ const removeManagedWards = async (req, res) => {
 			});
 		}
 
-		const uniqueRemovedWards = Array.from(new Set(req.body.removed_wards));console.log(uniqueRemovedWards);
+		const uniqueRemovedWards = Array.from(new Set(req.body.removed_wards));
 
 		const filteredWards = [];
 		for (const ward of uniqueRemovedWards) {
@@ -962,7 +970,7 @@ const removeManagedWards = async (req, res) => {
 			if (resultGettingOneAdministrativeUnit && resultGettingOneAdministrativeUnit.length > 0) {
 				filteredWards.push(ward);
 			}
-		}console.log(filteredWards);
+		}
 
 		for (const ward of filteredWards) {
 			await administrativeService.updateOneAdministrativeUnit({ province: resultGettingOneAgency[0].province, district: resultGettingOneAgency[0].district, ward: ward, shipper: req.query.staff_id }, { shipper: null });

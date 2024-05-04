@@ -2,6 +2,8 @@ const moment = require("moment");
 const shippersService = require("../services/shippersService");
 const vehicleService = require("../services/vehicleService");
 const shipmentService = require("../services/shipmentsService");
+const ordersService = require("../services/ordersService");
+const servicesStatus = require("../lib/servicesStatus");
 const utils = require("../lib/utils");
 const validation = require("../lib/validation");
 
@@ -100,13 +102,23 @@ const createNewTask = async (req, res) => {
         }
 
         const postalCode = utils.getPostalCodeFromAgencyID(req.user.staff_id);
-        console.log(req.body);
         const resultCreatingNewTask = await shippersService.assignNewTasks(orderIds, staff_id, postalCode);
-        for(const shipment_id of resultCreatingNewTask.acceptedArray) {
-            const journeyMessage = `${formattedTime}: Lô hàng được tạo mới và giao cho nhân viên ${staff_id} thuộc đối tác ${resultGettingOneVehicle[0].transport_partner_id} trên xe biển ${resultGettingOneVehicle[0].license_plate}.`;
-            await shipmentService.updateJourney(shipment_id, formattedTime, journeyMessage)
+        for (const order_id of resultCreatingNewTask.acceptedArray) {
+            let orderMessage;
+            let orderStatus;
+            const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+            const order = (await ordersService.getOneOrder({ order_id }))[0];
+            if(order.status_code === serviceStatus.processing.code) {
+                orderMessage = `${formattedTime}: Đơn hàng đang được bưu tá đến nhận`;
+                orderStatus = serviceStatus.taking;
+            } 
+            else if (order.status_code === serviceStatus.enter_agency.code) {
+                orderMessage = `${formattedTime}: Đơn hàng đang được giao đến người nhận`;
+                orderStatus = serviceStatus.delivering;
+            }
+            await ordersService.setJourney(order_id, orderMessage, orderStatus);
         }
-        
+
         return res.status(201).json({
             error: false,
             info: resultCreatingNewTask,
@@ -168,6 +180,7 @@ const getTasks = async (req, res) => {
 
 const confirmCompletedTask = async (req, res) => {
     try {
+        const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
         try {
             if (req.query.id) {
                 req.query.id = parseInt(req.query.id);
@@ -204,6 +217,19 @@ const confirmCompletedTask = async (req, res) => {
             });
         }
 
+        let orderMessage = "";
+        let orderStatus = 0;
+        const resultGettingOneTask = await shippersService.getOneTask(req.query, postalCode);
+        const order = await ordersService.getOneOrder({ order_id: resultGettingOneTask[0].order_id });
+        if(order.status_code === servicesStatus.taking.code) {
+            orderMessage = `${formattedTime}: Lấy hàng thành công bởi bưu tá`;
+            orderStatus = servicesStatus.taken_success;
+        } else if (order.status_code === servicesStatus.delivering.code) {
+            orderMessage = `${formattedTime}: Giao hàng thành công`;
+            orderStatus = servicesStatus.delivering;
+        }
+        await ordersService.setJourney(order_id, orderMessage, orderStatus);
+        
         return res.status(201).json({
             error: false,
             message: "Xác nhận hoàn thành công việc thành công.",

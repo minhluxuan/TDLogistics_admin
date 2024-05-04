@@ -8,6 +8,10 @@ const getObjectsCanHandleTask = async (postalCode) => {
     return await Shippers.getObjectsCanHandleTask(postalCode);
 }
 
+const getOneTask = async (conditions, postalCode) => {
+    return await Shippers.getOneTask(conditions, postalCode);
+}
+
 const getTasks = async (conditions, postalCode) => {
     return await Shippers.getTasks(conditions, postalCode);
 }
@@ -30,6 +34,7 @@ const deleteTask = async (id, postalCode) => {
 module.exports = {
     checkExistTask,
     getObjectsCanHandleTask,
+    getOneTask,
     getTasks,
     assignNewTasks,
     confirmCompletedTask,

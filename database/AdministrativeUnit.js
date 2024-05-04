@@ -76,6 +76,13 @@ const getOneAdministrativeUnit = async (conditions) => {
     return await dbUtils.findOneIntersect(pool, wardTable, fields, values);
 }
 
+const getAdministrativeUnit = async (conditions) => {
+    const fields = Object.keys(conditions);
+    const values = Object.values(conditions);
+
+    return await dbUtils.find(pool, wardTable, fields, values);
+}
+
 const updateOneAdministrativeUnit = async (condition, info) => {
     const conditionFields = Object.keys(condition);
     const conditionValues = Object.values(condition);
@@ -90,5 +97,6 @@ module.exports = {
     getOneDistributionCenter,
     checkExistProvince,
     getOneAdministrativeUnit,
+    getAdministrativeUnit,
     updateOneAdministrativeUnit,
 }

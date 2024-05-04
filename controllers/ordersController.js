@@ -122,7 +122,22 @@ const createNewOrder = async (socket, info, orderTime) => {
         }
 
         const postalCode = utils.getPostalCodeFromAgencyID(resultFindingManagedAgency.shipper);
-        await shippersService.assignNewTasks([info.order_id], resultFindingManagedAgency.shipper, postalCode);
+        const resultAssigningTaskForShipper = await shippersService.assignNewTasks([info.order_id], resultFindingManagedAgency.shipper, postalCode);
+        for (const order_id of resultAssigningTaskForShipper.acceptedArray) {
+            let orderMessage;
+            let orderStatus;
+            const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+            const order = (await ordersService.getOneOrder({ order_id }))[0];
+            if(order.status_code === servicesStatus.processing.code) {
+                orderMessage = `${formattedTime}: Đơn hàng đang được bưu tá đến nhận`;
+                orderStatus = servicesStatus.taking;
+            } 
+            else if (order.status_code === servicesStatus.enter_agency.code) {
+                orderMessage = `${formattedTime}: Đơn hàng đang được giao đến người nhận`;
+                orderStatus = servicesStatus.delivering;
+            }
+            await ordersService.setJourney(order_id, orderMessage, orderStatus);
+        }
         await usersService.updateUserInfo({ province: info.province_source, district: info.district_source, ward: info.ward_source, detail_address: info.detail_source }, { phone_number: socket.request.user.phone_number });
 
         eventManager.emit("notifySuccessCreatedNewOrder", "Tạo đơn hàng thành công.");
@@ -422,9 +437,6 @@ const updateOrder = async (req, res) => {
         if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
             throw new Error("Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
         }
-
-        // const resultGettingPaymentLinkInfo = await paymentService.getPaymentInformation(orderCodeRandom);
-        // console.log(resultGettingPaymentLinkInfo);
 
         req.body.qrcode = resultCreatingNewPayment.qrCode;
 

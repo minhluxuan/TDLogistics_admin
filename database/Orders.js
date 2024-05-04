@@ -371,6 +371,23 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
     }
 }
 
+const setJourney = async (order_id, orderMessage, orderStatus) => {
+    
+    const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ?`;
+    const [getJourneyResult] = await pool.query(getJourneyQuery, orderInfo.order_id);
+    let journey;
+    try {
+        journey = getJourneyResult[0].journey ? JSON.parse(getJourneyResult[0].journey) : new Array();
+    } catch (error) {
+        journey = new Array();
+    }
+
+    journey.push(orderMessage);
+
+    return await SQLutils.updateOne(pool, table, ["journey", "status_code"], [JSON.stringify(journey), orderStatus.code], ["order_id"], [order_id]);
+
+}
+
 module.exports = {
     checkExistOrder,
     getOrderForUpdating,
@@ -386,4 +403,5 @@ module.exports = {
     createOrderInAgencyTable,
     getOrderStatus,
     setStatusToOrder,
+    setJourney,
 };

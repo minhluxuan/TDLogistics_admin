@@ -2,7 +2,9 @@ const moment = require("moment");
 const driversService = require("../services/driversService");
 const vehicleService = require("../services/vehicleService");
 const shipmentService = require("../services/shipmentsService");
+const ordersService = require("../services/ordersService");
 const utils = require("../lib/utils");
+const servicesStatus = require("../lib/servicesStatus");
 const validation = require("../lib/validation");
 
 const driversValidation = new validation.DriversValidation();
@@ -123,6 +125,21 @@ const createNewTask = async (req, res) => {
             await shipmentService.updateJourney(shipment.shipment_id, formattedTime, journeyMessage);
             await shipmentService.updateJourney(shipment.shipment_id, formattedTime, journeyMessage, utils.getPostalCodeFromAgencyID(req.user.agency_id));
             await shipmentService.updateJourney(shipment.shipment_id, formattedTime, journeyMessage, utils.getPostalCodeFromAgencyID(shipment.agency_id));
+        }
+
+        const formattedTimeForJourney = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+        const orderMessage = `${formattedTimeForJourney}: Đơn hàng đã được giao cho nhân viên vận chuyển ${staff_id}`;
+        for(const shipment_id of acceptedShipmentsInfo) {
+            const resultGettingOneShipment = await shipmentService.getOneShipment({ shipment_id });
+            try {
+                const order_ids = JSON.parse(resultGettingOneShipment[0].order_ids);
+                for(const order_id of order_ids) {
+                    await ordersService.setJourney(order_id, orderMessage, servicesStatus.leave_agency);
+                }
+            } catch(error) {
+                console.log(error);
+                // do nothing
+            }
         }
 
         return res.status(201).json({

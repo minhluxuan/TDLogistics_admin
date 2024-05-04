@@ -175,6 +175,10 @@ const  setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false
     return await Orders.setStatusToOrder(orderInfo, orderStatus, isUpdateJourney);
 }
 
+const setJourney = async (order_id, order_message, order_status) => {
+    return await Orders.setJourney(order_id, order_message, order_status);
+}
+
 module.exports = {
     checkExistOrder,
     getOrderForUpdating,
@@ -193,5 +197,6 @@ module.exports = {
     createOrderInAgencyTable,
     getOrderStatus,
     distributeOrder,
-    setStatusToOrder
+    setStatusToOrder,
+    setJourney,
 };
