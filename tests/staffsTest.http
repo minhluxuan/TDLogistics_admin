@@ -455,7 +455,7 @@ PUT http://localhost:5000/api/v1/staffs/update?staff_id=BC_71000_077204004567
 Content-Type: application/json
 
 {
-    "managed_wards": ["Phường Phạm Ngũ Lão"]
+    "managed_wards": []
 }
 
 ###

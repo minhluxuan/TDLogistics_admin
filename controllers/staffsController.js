@@ -581,14 +581,14 @@ const updateStaffInfo = async (req, res) => {
 			for (const ward of managedWards) {
 				await administrativeService.updateOneAdministrativeUnit({ province: agencyInfo.province, district: agencyInfo.district, ward: ward }, {shipper: req.query.staff_id });
 			}
+		}
 
-			const resultGettingAdministrativeUnit = await administrativeService.getAdministrativeUnit({ shipper: req.query.staff_id });
-			const previousManagedWards = resultGettingAdministrativeUnit.map(elm => elm.ward);
-			const removedWards = previousManagedWards.filter(ward => !managedWards.includes(ward));
-			
-			for (const ward of removedWards) {
-				await administrativeService.updateOneAdministrativeUnit({ province: agencyInfo.province, district: agencyInfo.district, ward: ward }, {shipper: null });
-			}
+		const resultGettingAdministrativeUnit = await administrativeService.getAdministrativeUnit({ shipper: req.query.staff_id });
+		const previousManagedWards = resultGettingAdministrativeUnit.map(elm => elm.ward);
+		const removedWards = previousManagedWards.filter(ward => !managedWards.includes(ward));
+
+		for (const ward of removedWards) {
+			await administrativeService.updateOneAdministrativeUnit({ province: agencyInfo.province, district: agencyInfo.district, ward: ward }, {shipper: null });
 		}
 
 		return res.status(201).json({
