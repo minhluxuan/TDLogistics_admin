@@ -4,6 +4,10 @@ const checkExistStaff = async (info) => {
     return await Staffs.checkExistStaff(info);
 }
 
+const checkExistStaffWithDifferentStaffId = async (info, staff_id) => {
+    return await Staffs.checkExistStaffWithDifferentStaffId(info, staff_id);
+}
+
 const checkExistStaffIntersect = async (info) => {
     return await Staffs.checkExistStaffIntersect(info);
 }
@@ -42,6 +46,7 @@ const getShipperManagedWards = async (staff_id) => {
 
 module.exports = {
     checkExistStaff,
+    checkExistStaffWithDifferentStaffId,
     checkExistStaffIntersect,
     createNewStaff,
     getOneStaff,

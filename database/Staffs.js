@@ -39,6 +39,36 @@ const checkExistStaff = async (info) => {
 	}
 };
 
+const checkExistStaffWithDifferentStaffId = async (info, staff_id) => {
+	const fields = Object.keys(info);
+	const values = Object.values(info);
+	let query;
+    if (!fields || !values || fields.length === 0 || values.length === 0) {
+        query = `SELECT * FROM ${table} WHERE ?? <> ? LIMIT 1`;
+    }
+    else {
+        query = `SELECT * FROM ${table} WHERE ${fields.map(field => `${field} = ?`).join(" AND ")} AND ?? <> ? LIMIT 1`;
+    }
+
+    const result = (await pool.query(query, [...values, "staff_id", staff_id]))[0];
+
+	if (result.length <= 0) {
+		return new Object({
+			existed: false,
+			message: "Người dùng chưa tồn tại.",
+		});
+	}
+
+	for (let i = 0; i < fields.length; i++) {
+		if (result[0][fields[i]] === values[i]) {
+			return new Object({
+				existed: true,
+				message: `Người dùng có ${fields[i]}: ${values[i]} đã tồn tại.`,
+			});
+		}
+	}
+}
+
 const checkExistStaffIntersect = async (info) => {
 	const fields = Object.keys(info);
 	const values = Object.values(info);
@@ -207,6 +237,7 @@ const getShipperManagedWards = async (staff_id) => {
 
 module.exports = {
     checkExistStaff,
+	checkExistStaffWithDifferentStaffId,
 	checkExistStaffIntersect,
     createNewStaff,
     getOneStaff,

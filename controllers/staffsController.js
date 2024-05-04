@@ -478,10 +478,13 @@ const updateStaffInfo = async (req, res) => {
 			if (req.body.hasOwnProperty(prop) && req.body[prop]) {
 				tempUser[prop] = req.body[prop];
 			}
+			else {
+				tempUser[prop] = null;
+			}
 		}
 
 		if (Object.keys(tempUser).length > 0) {
-			const resultCheckingExistStaff = await staffsService.checkExistStaff(tempUser);
+			const resultCheckingExistStaff = await staffsService.checkExistStaffWithDifferentStaffId(tempUser, req.query.staff_id);
 			
 			if (resultCheckingExistStaff.existed) {
 				return res.status(409).json({
