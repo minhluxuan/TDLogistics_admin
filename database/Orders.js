@@ -371,7 +371,8 @@ const setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false)
     }
 }
 
-const setJourney = async (order_id, orderMessage, orderStatus) => {
+const setJourney = async (order_id, orderMessage, orderStatus, postalCode) => {
+    const orderTable = postalCode ? postalCode + '_orders' : table;
     const getJourneyQuery = `SELECT journey FROM ${table} WHERE order_id = ?`;
     const [getJourneyResult] = await pool.query(getJourneyQuery, order_id);
     let journey;
@@ -383,7 +384,7 @@ const setJourney = async (order_id, orderMessage, orderStatus) => {
 
     journey.push(orderMessage);
 
-    return await SQLutils.updateOne(pool, table, ["journey", "status_code"], [JSON.stringify(journey), orderStatus.code], ["order_id"], [order_id]);
+    return await SQLutils.updateOne(pool, orderTable, ["journey", "status_code"], [JSON.stringify(journey), orderStatus.code], ["order_id"], [order_id]);
 
 }
 

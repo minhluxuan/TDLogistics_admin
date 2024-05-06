@@ -93,7 +93,6 @@ const createNewOrder = async (socket, info, orderTime) => {
         const provinceDest = info.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
 
         info.fee = servicesFee.calculateFee(info.service_type, provinceSource, provinceDest, info.mass, 0.15, false);
-        info.status_code = servicesStatus.processing.code; //Trạng thái đang được xử lí
         info.paid = false;
 
         const orderCodeRandom = randomstring.generate({
@@ -132,12 +131,13 @@ const createNewOrder = async (socket, info, orderTime) => {
             if(order.status_code === servicesStatus.processing.code) {
                 orderMessage = `${formattedTime}: Đơn hàng đang được bưu tá đến nhận`;
                 orderStatus = servicesStatus.taking;
+                await ordersService.setJourney(order_id, orderMessage, orderStatus);
             } 
-            else if (order.status_code === servicesStatus.enter_agency.code) {
-                orderMessage = `${formattedTime}: Đơn hàng đang được giao đến người nhận`;
-                orderStatus = servicesStatus.delivering;
-            }
-            await ordersService.setJourney(order_id, orderMessage, orderStatus);
+            else if (order.status_code === servicesStatus.received.code) {
+                orderMessage = `${formattedTime}: Đơn hàng đã được bưu cục tiếp nhận`;
+                orderStatus = servicesStatus.enter_agency;
+                await ordersService.setJourney(order_id, orderMessage, orderStatus);
+            }         
         }
         await usersService.updateUserInfo({ province: info.province_source, district: info.district_source, ward: info.ward_source, detail_address: info.detail_source }, { phone_number: socket.request.user.phone_number });
 
@@ -433,7 +433,6 @@ const updateOrder = async (req, res) => {
         });
 
         req.body.order_code = orderCodeRandom;
-        console.log(updatedRow.order_code);
         const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), req.body.fee, `THANH TOAN DON HANG`);
         if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
             throw new Error("Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
@@ -448,6 +447,8 @@ const updateOrder = async (req, res) => {
                 message: `Đơn hàng có mã đơn hàng ${req.query.order_id} không tồn tại.`,
             });
         }
+
+        await ordersService.updateOrder(req.body, req.query, req.query.order_id.split('_')[1]);
 
         return res.status(200).json({
             error: false,

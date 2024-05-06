@@ -175,8 +175,8 @@ const  setStatusToOrder = async (orderInfo, orderStatus, isUpdateJourney = false
     return await Orders.setStatusToOrder(orderInfo, orderStatus, isUpdateJourney);
 }
 
-const setJourney = async (order_id, order_message, order_status) => {
-    return await Orders.setJourney(order_id, order_message, order_status);
+const setJourney = async (order_id, order_message, order_status, postalCode) => {
+    return await Orders.setJourney(order_id, order_message, order_status, postalCode);
 }
 
 module.exports = {

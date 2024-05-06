@@ -211,9 +211,11 @@ const updateShipment = async (req, res) => {
                 message: `Cập nhật lô hàng có mã lô ${req.query.shipment_id} thành công.`,
             });
         }
-        else if (["ADMIN"].includes(req.user.role)) {
+
+        const postalCode = req.query.shipment_id.split('_')[1];
+        try {
             const resultUpdateShipment = await shipmentService.updateShipment(req.body, req.query, postalCode);
-            
+        
             if (!resultUpdateShipment || resultUpdateShipment.affectedRows === 0) {
                 return res.status(404).json({
                     error: true,
@@ -224,6 +226,11 @@ const updateShipment = async (req, res) => {
             return res.status(201).json({
                 error: false,
                 message: `Cập nhật lô hàng có mã lô ${req.query.shipment_id} thành công.`,
+            });   
+        } catch (error) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã lô ${req.query.shipment_id} không tồn tại.`,
             });
         }
     } catch(error) {
@@ -305,6 +312,41 @@ const getOrdersFromShipment = async (req, res) => {
                 message: `Lấy thông tin tất cả đơn hàng từ lô hàng có mã ${req.query.shipment_id} thành công.`,
             });
         }
+
+        const postalCode = req.query.shipment_id.split('_')[1];
+        try {
+            const resultGettingOneShipment = await shipmentService.getOneShipment(req.query, postalCode);
+            if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng có mã ${req.query.shipment_id} không tồn tại.`,
+                });
+            }
+
+            let order_ids;
+            try {
+                order_ids = resultGettingOneShipment[0].order_ids ? JSON.parse(resultGettingOneShipment[0].order_ids) : new Array();
+            } catch (error) {
+                return res.status(200).json({
+                    error: false,
+                    data: new Array(),
+                    message: `Lấy thông tin tất cả đơn hàng từ lô hàng có mã ${req.query.shipment_id} thành công.`,
+                });
+            }
+
+            const result = await shipmentService.getOrdersFromShipment(order_ids);
+            
+            return res.status(201).json({
+                error: false,
+                data: result,
+                message: `Lấy thông tin tất cả đơn hàng từ lô hàng có mã ${req.query.shipment_id} thành công.`,
+            });
+        } catch (error) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã lô ${req.query.shipment_id} không tồn tại.`,
+            });
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -364,6 +406,32 @@ const addOrderToShipment = async (req, res) => {
                 message: `Thêm đơn hàng vào lô hàng ${req.query.shipment_id} thành công.`,
             });
         }
+
+        const postalCode = req.query.shipment_id.split('_')[1];
+        try {
+            const resultGettingOneShipment = await shipmentService.getOneShipment(req.query, postalCode);
+            if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng ${req.query.shipment_id} không tồn tại.`,
+                });
+            }
+
+            const result = await shipmentService.addOrdersToShipment(resultGettingOneShipment[0], req.body.order_ids, postalCode);
+            await addOrdersToShipment(resultGettingOneShipment[0], req.body.order_ids);
+
+            return res.status(201).json({
+                error: false,
+                info: result,
+                message: `Thêm đơn hàng vào lô hàng ${req.query.shipment_id} thành công.`,
+            });
+        } catch (error) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã lô ${req.query.shipment_id} không tồn tại.`,
+            });
+        }
+        
     } catch(error) {
         console.log(error);
         return res.status(500).json({
@@ -430,6 +498,31 @@ const deleteOrderFromShipment = async (req, res) => {
                 error: false,
                 info: result,
                 message: `Xóa đơn hàng khỏi lô hàng có mã ${req.query.shipment_id} thành công.`,
+            });
+        }
+
+        const postalCode = req.query.shipment_id.split('_')[1];
+        try {
+            const resultGettingOneShipment = await shipmentService.getOneShipment(req.query, postalCode);
+            if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng ${req.query.shipment_id} không tồn tại trong trung tâm chia chọn ${req.user.agency_id}.`,
+                });
+            }
+
+            const result = await shipmentService.deleteOrdersFromShipment(resultGettingOneShipment[0], req.body.order_ids, postalCode);
+            await shipmentService.deleteOrdersFromShipment(resultGettingOneShipment[0], req.body.order_ids);
+            
+            return res.status(201).json({
+                error: false,
+                info: result,
+                message: `Xóa đơn hàng khỏi lô hàng có mã ${req.query.shipment_id} thành công.`,
+            });
+        } catch (error) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã lô ${req.query.shipment_id} không tồn tại.`,
             });
         }
     } catch(error) {
@@ -690,6 +783,49 @@ const deleteShipment = async (req, res) => {
                 message: `Xóa lô hàng có mã ${req.query.shipment_id} thành công.`,
             });
         }
+
+        const postalCode = req.query.shipment_id.split('_')[1];
+        try {
+            const resultGettingOneShipment = await shipmentService.getOneShipment(req.query, postalCode);
+            if (!resultGettingOneShipment || resultGettingOneShipment.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng ${req.query.shipment} không tồn tại.`,
+                });
+            }
+
+            if (resultGettingOneShipment[0].status > 3) {
+                return res.status(409).json({
+                    error: true,
+                    message: `Lô hàng ${req.query.shipment_id} không còn khả năng để xóa.`,
+                });
+            }
+
+            const resultDeletingShipment = await shipmentService.deleteShipment(req.query.shipment_id);
+
+            if (!resultDeletingShipment || resultDeletingShipment.affetedRows === 0) {
+                return res.status(404).json({
+                    error: true,
+                    message: `Lô hàng có mã ${req.query.shipment} không tồn tại.`,
+                });
+            }
+
+            const shipmentIdSubParts = req.query.shipment_id.split('_');
+            if (shipmentIdSubParts[0] === "BC" || shipmentIdSubParts[0] === "DL") {
+                await shipmentService.updateShipment({ status: 0 }, { shipment_id: req.query.shipment_id }, shipmentIdSubParts[1]);
+            }
+
+            return res.status(200).json({
+                error: false,
+                message: `Xóa lô hàng có mã ${req.query.shipment_id} thành công.`,
+            });
+        } catch (error) {
+            return res.status(404).json({
+                error: true,
+                message: `Lô hàng có mã lô ${req.query.shipment_id} không tồn tại.`,
+            });
+        }
+        
     } catch (error) {
         return res.status(500).json({
             error: true,

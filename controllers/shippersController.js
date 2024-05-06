@@ -108,15 +108,17 @@ const createNewTask = async (req, res) => {
             let orderStatus;
             const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
             const order = (await ordersService.getOneOrder({ order_id }))[0];
-            if(order.status_code === serviceStatus.processing.code) {
+            if(order.status_code === servicesStatus.processing.code) {
                 orderMessage = `${formattedTime}: Đơn hàng đang được bưu tá đến nhận`;
-                orderStatus = serviceStatus.taking;
+                orderStatus = servicesStatus.taking;
+                await ordersService.setJourney(order_id, orderMessage, orderStatus);
             } 
-            else if (order.status_code === serviceStatus.enter_agency.code) {
+            else if (order.status_code === servicesStatus.enter_agency.code) {
                 orderMessage = `${formattedTime}: Đơn hàng đang được giao đến người nhận`;
-                orderStatus = serviceStatus.delivering;
+                orderStatus = servicesStatus.delivering;
+                await ordersService.setJourney(order_id, orderMessage, orderStatus);
             }
-            await ordersService.setJourney(order_id, orderMessage, orderStatus);
+            
         }
 
         return res.status(201).json({
@@ -218,17 +220,21 @@ const confirmCompletedTask = async (req, res) => {
         }
 
         let orderMessage = "";
-        let orderStatus = 0;
+        let orderStatus = null;
         const resultGettingOneTask = await shippersService.getOneTask(req.query, postalCode);
-        const order = await ordersService.getOneOrder({ order_id: resultGettingOneTask[0].order_id });
-        if(order.status_code === servicesStatus.taking.code) {
+        const order = (await ordersService.getOneOrder({ order_id: resultGettingOneTask[0].order_id }))[0];
+        if (order.status_code === servicesStatus.taking.code || order.status_code === servicesStatus.processing.code) {
             orderMessage = `${formattedTime}: Lấy hàng thành công bởi bưu tá`;
             orderStatus = servicesStatus.taken_success;
+            await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus);
+        await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus, resultGettingOneTask[0].order_id.split('_')[1]);
         } else if (order.status_code === servicesStatus.delivering.code) {
             orderMessage = `${formattedTime}: Giao hàng thành công`;
-            orderStatus = servicesStatus.delivering;
+            orderStatus = servicesStatus.delivered_success;
+            await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus);
+        await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus, resultGettingOneTask[0].order_id.split('_')[1]);
         }
-        await ordersService.setJourney(order_id, orderMessage, orderStatus);
+        
         
         return res.status(201).json({
             error: false,

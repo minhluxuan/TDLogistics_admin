@@ -512,7 +512,7 @@ const decomposeShipmentInAgency = async (order_ids, shipment_id, agency_id, post
     for (const order_id of orderIdsSet) {
         const resultUpdatingOneOrder = await dbUtils.updateOne(pool, postalCode + '_' + "orders", ["parent"], [null], ["order_id"], [order_id]);
 
-        const resultUpdatingOneOrderStatus = await Orders.setJourney(order_id, orderMessage, servicesStatus.enter_agency);
+        const resultUpdatingOneOrderStatus = await Orders.setJourney(order_id, orderMessage,servicesStatus.enter_agency);
 
         if (resultUpdatingOneOrder && resultUpdatingOneOrder.affectedRows > 0 && resultUpdatingOneOrderStatus.success) {
             updatedNumber++;

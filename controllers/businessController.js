@@ -4,6 +4,7 @@ const validation = require("../lib/validation");
 const fs = require("fs");
 const path = require('path');
 const utils = require("../lib/utils");
+const { v4: uuidv4 } = require("uuid");
 
 const businessValidation = new validation.BusinessValidation();
 
@@ -264,7 +265,7 @@ const signup = async (req, res) => {
 		});
 
 		const representor = new Object({
-			business_id: "TD_00000_" + req.body.user_cccd,
+			business_id: uuidv4(),
 			fullname: req.body.user_fullname,
 			phone_number: req.body.user_phone_number,
 			email: req.body.user_email,

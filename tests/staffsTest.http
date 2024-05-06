@@ -158,6 +158,16 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:5000/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "minhluxuan2k21",
+    "password": "minhluxuan@TDlogistics2k24"
+}
+
+###
+
 POST http://localhost:5000/api/v1/staffs/get_info
 Content-Type: application/json
 
@@ -451,11 +461,34 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:5000/api/v1/staffs/create
+Content-Type: application/json
+
+{
+    "agency_id": "TD_00003_077165007713",
+    "username": "minhluxuan2k21",
+    "password": "minhluxuan@TDlogistics2k24",
+    "fullname": "Lữ Xuân Minh",
+    "phone_number": "0981430219",
+    "email": "minh.luxuanpsu@psu.edu",
+    "date_of_birth": "2004-03-03",
+    "cccd": "077204004413",
+    "province": "Tỉnh Bà Rịa - Vũng Tàu",
+    "district": "Huyện Đất Đỏ",
+    "town": "Thị trấn Đất Đỏ",
+    "detail_address": "326, ĐT44A",
+    "position": "Quản lý bưu cục",
+    "role": "MANAGER",
+    "salary": 40000000
+}
+
+###
+
 PUT http://localhost:5000/api/v1/staffs/update?staff_id=BC_71000_077204004567
 Content-Type: application/json
 
 {
-    "managed_wards": []
+    "managed_wards": ["Phường Phạm Ngũ Lão", "Phường Đa Kao"]
 }
 
 ###
