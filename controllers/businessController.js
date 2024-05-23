@@ -244,8 +244,11 @@ const signup = async (req, res) => {
 			});
 		}
 
+		const businessId = uuidv4();
+		req.body.password = utils.hash(req.body.password);
+		
 		const business = new Object({
-			business_id: "TD_00000_" + req.body.user_cccd,
+			business_id: businessId,
 			agency_id: "TD_00000_077165007713",
 			username: req.body.username,
 			password: req.body.password,
@@ -265,7 +268,7 @@ const signup = async (req, res) => {
 		});
 
 		const representor = new Object({
-			business_id: uuidv4(),
+			business_id: businessId,
 			fullname: req.body.user_fullname,
 			phone_number: req.body.user_phone_number,
 			email: req.body.user_email,
@@ -358,10 +361,9 @@ const createNewBusinessUser = async (req, res) => {
 			}
 		}
 
-		const agencyIdSubParts = req.body.agency_id.split('_');
 		req.body.password = utils.hash(req.body.password);
 
-		const businessId = agencyIdSubParts[0] + '_' + agencyIdSubParts[1] + '_' + req.body.user_cccd;
+		const businessId = uuidv4();
 
 		const business = new Object({
 			business_id: businessId,

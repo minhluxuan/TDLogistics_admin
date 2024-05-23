@@ -132,11 +132,13 @@ const createNewOrder = async (socket, info, orderTime) => {
                 orderMessage = `${formattedTime}: Đơn hàng đang được bưu tá đến nhận`;
                 orderStatus = servicesStatus.taking;
                 await ordersService.setJourney(order_id, orderMessage, orderStatus);
+                await ordersService.setJourney(order_id, orderMessage, orderStatus, info.order_id.split('_')[1]);
             } 
             else if (order.status_code === servicesStatus.received.code) {
                 orderMessage = `${formattedTime}: Đơn hàng đã được bưu cục tiếp nhận`;
                 orderStatus = servicesStatus.enter_agency;
                 await ordersService.setJourney(order_id, orderMessage, orderStatus);
+                await ordersService.setJourney(order_id, orderMessage, orderStatus, info.order_id.split('_')[1]);
             }         
         }
         await usersService.updateUserInfo({ province: info.province_source, district: info.district_source, ward: info.ward_source, detail_address: info.detail_source }, { phone_number: socket.request.user.phone_number });

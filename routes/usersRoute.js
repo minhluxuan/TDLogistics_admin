@@ -156,6 +156,6 @@ router.get(
     auth.isAuthenticated(),
     auth.isAuthorized(["USER"]),
     usersController.getAvatar
-)
+);
 
 module.exports = router;

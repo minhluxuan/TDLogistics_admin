@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  database_container:
+    build:
+      context: ./database_container/
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      MYSQL_ROOT_PASSWORD: "new_password"
+      MYSQL_DATABASE: "localtdlogistics"
+    restart: always
+  web:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      MYSQL_HOST: database_container
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database_container
+    restart: on-failure

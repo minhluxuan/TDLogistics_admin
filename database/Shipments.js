@@ -109,6 +109,34 @@ const createNewShipment = async (infoShipment, infoJourney, postalCode = null) =
 }
 
 const updateParentAndIncreaseMass = async (shipment_id, order_id, postal_code = null) => {
+    if (postal_code && postal_code.substring(0, 4) === "0000") {
+        const resultGettingOneOrder = await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [order_id]);
+
+        if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
+            console.log("Order does not exist.");
+            return false;
+        }
+
+        const order = resultGettingOneOrder[0];
+        const orderMass = order.mass ? order.mass : 0;
+
+        if (order.parent === shipment_id) {
+            console.log("Order was added to shipment before.");
+            return false;
+        }
+
+        const shipmentQuery = 'UPDATE ?? SET ?? = ?? + ? WHERE ?? = ?';
+        const shipmentTable = postal_code ? postal_code + '_' + table : table; 
+        const result = await pool.query(shipmentQuery, [shipmentTable, "mass", "mass", orderMass, "shipment_id", shipment_id]);
+
+        if (!result || result.length === 0) {
+            console.log("Shipment does not exist.");
+            throw new Error(`Lô hàng có mã ${shipment_id} không tồn tại.`);
+        }
+
+        return true;
+    }
+
     const ordersTable = postal_code ? postal_code + '_' + "orders" : "orders";
     const resultGettingOneOrder = await dbUtils.findOneIntersect(pool, ordersTable, ["order_id"], [order_id]);
 
@@ -142,6 +170,29 @@ const updateParentAndIncreaseMass = async (shipment_id, order_id, postal_code = 
 
 
 const updateParentAndDecreaseMass = async (shipment_id, order_id, postal_code = null) => {
+    if (postal_code && postal_code.substring(0, 4) === "0000") {
+        const resultGettingOneOrder = await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [order_id]);
+
+        if (!resultGettingOneOrder || resultGettingOneOrder.length === 0) {
+            console.log("Order does not exist.");
+            return false;
+        }
+
+        const order = resultGettingOneOrder[0];
+        const orderMass = order.mass ? order.mass : 0;
+
+        const shipmentQuery = 'UPDATE ?? SET ?? = ?? - ? WHERE ?? = ?';
+        const shipmentTable = postal_code ? postal_code + '_' + table : table; 
+        const result = await pool.query(shipmentQuery, [shipmentTable, "mass", "mass", orderMass, "shipment_id", shipment_id]);
+
+        if (!result || result.length <= 0) {
+            console.log("Shipment does not exist.");
+            throw new Error(`Lô hàng có mã ${shipment_id} không tồn tại.`);
+        }
+
+        return true;
+    }
+
     const ordersTable = postal_code ? postal_code + '_' + "orders" : "orders";
     const resultGettingOneOrder = await dbUtils.findOneIntersect(pool, ordersTable, ["order_id"], [order_id]);
 
@@ -481,7 +532,7 @@ const decomposeShipment = async (order_ids, shipment_id, agency_id) => {
     const orderIdsSet = new Set(order_ids);
     // update order journey
     const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
-    const agency = await dbUtils.findOneIntersect(pool, "agency", ["agency_id"], [agency_id])[0];
+    const agency = (await dbUtils.findOneIntersect(pool, "agency", ["agency_id"], [agency_id]))[0];
     const orderMessage = `${formattedTime}: Đơn hàng đã đến ${agency.agency_name}`;
     for (const order_id of orderIdsSet) {
         const resultUpdatingOneOrder = await dbUtils.updateOne(pool, "orders", ["parent"], [null], ["order_id"], [order_id]);
@@ -508,13 +559,17 @@ const decomposeShipmentInAgency = async (order_ids, shipment_id, agency_id, post
     const updatedArray = new Array();
     const orderIdsSet = new Set(order_ids);
     const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
-    const orderMessage = `${formattedTime}: Đơn hàng đã đến bưu cục ${agency_id}`;
+
     for (const order_id of orderIdsSet) {
-        const resultUpdatingOneOrder = await dbUtils.updateOne(pool, postalCode + '_' + "orders", ["parent"], [null], ["order_id"], [order_id]);
-
-        const resultUpdatingOneOrderStatus = await Orders.setJourney(order_id, orderMessage,servicesStatus.enter_agency);
-
-        if (resultUpdatingOneOrder && resultUpdatingOneOrder.affectedRows > 0 && resultUpdatingOneOrderStatus.success) {
+        let resultUpdatingOneOrder;
+        const getOneOrder = (await dbUtils.findOneIntersect(pool, "orders", ["order_id"], [order_id]))[0];
+        try {
+            const orderJourney = JSON.parse(getOneOrder.journey);
+            resultUpdatingOneOrder = await dbUtils.updateOne(pool, postalCode + '_' + "orders", ["parent", "journey"], [null, JSON.stringify(orderJourney)], ["order_id"], [order_id]);
+        } catch (error) {
+            continue;
+        }
+        if (resultUpdatingOneOrder && resultUpdatingOneOrder.affectedRows > 0) {
             updatedNumber++;
             updatedArray.push(order_id);
         }

@@ -467,8 +467,9 @@ const undertakeShipment = async (req, res) => {
                 message: error.message,
             });
         }
-
+        console.log(req.query.shipment_id, req.user.staff_id);
         const resultGettingOneTask = await driversService.getOneTask({ shipment_id: req.query.shipment_id, staff_id: req.user.staff_id });
+        console.log(resultGettingOneTask);
         if (!resultGettingOneTask || resultGettingOneTask.length === 0) {
             return res.status(404).json({
                 error: true,

@@ -1,8 +1,17 @@
-POST http://localhost:5000/api/v1/staffs/login
+POST https://api.tdlogistics.net.vn/api/v1/staffs/login
 Content-Type: application/json
 
 {
     "username": "ntdung@tdlogistics",
+    "password": "NTDung@tdlogistics2k24"
+}
+
+###
+POST https://api.tdlogistics.net.vn/api/v1/staffs/login
+Content-Type: application/json
+
+{
+    "username": "nhan.tranthek22cs1765",
     "password": "NTDung@tdlogistics2k24"
 }
 

@@ -396,6 +396,17 @@ const createNewAgency = async (req, res) => {
 			});
 		}
 
+		mailService.sendMail({
+			from: process.env.MAIL_AUTH_USER,
+			to: req.body.user_email,
+			subject: "Cung cấp thông tin tài khoản đại lý cho ứng dụng TDlogistics",
+			text: "Xin chào " + req.body.user_fullname + ", công ty Chuyển phát nhanh TDlogistics rất hân hạnh được hợp tác với bạn. " + 
+			"Dưới đây là thông tin tài khoản cho đại lý của bạn:\n\n" + 
+			"username: " + username + '\n' +
+			"password: " + password + '\n' +
+			"Lưu ý: Vui lòng đổi mật khẩu để kích hoạt tài khoản."
+		});
+
 		return res.status(200).json({
 			error: false,
 			message: `

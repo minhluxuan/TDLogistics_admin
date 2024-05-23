@@ -171,17 +171,9 @@ const getTasks = async (req, res) => {
         if (["ADMIN", "MANAGER", "HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
             resultGettingTasks = await driversService.getTasks(req.body);
         }
-        else if (["AGENCY_MANAGER", "AGENCY_HUMAN_RESOURCE_MANAGER"].includes(req.user.role)) {
-            resultGettingTasks = await driversService.getTasks(req.body, postalCode);
-        }
         else {
-            const staffIdSubParts = req.user.staff_id.split('_');
-            if (staffIdSubParts[0] === "TD") {
-                resultGettingTasks = await driversService.getTasks(req.body);
-            }
-            else {
-                resultGettingTasks = await driversService.getTasks(req.body, staffIdSubParts[1]);
-            }
+            req.body.staff_id = req.user.staff_id;
+            resultGettingTasks = await driversService.getTasks(req.body);
         }
         
         return res.status(200).json({

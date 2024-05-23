@@ -39,7 +39,6 @@ Content-Type: application/json
     "user_phone_number": "0981430418",
     "user_email": "minh.luxuanhcmut@hcmut.edu.vn",
     "user_date_of_birth": "2004-03-03",
-    "user_cccd": "077204005692",
     "user_province": "Bà Rịa - Vũng Tàu",
     "user_district": "Đất Đỏ",
     "user_town": "Đất Đỏ",
@@ -62,7 +61,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:5000/api/v1/business/approve?business_id=BC_71000_077204005692
+POST http://localhost:5000/api/v1/business/approve?business_id=c3b98b78-289f-48ac-accf-420ae3da3e71
 Content-Type: application/json
 
 {
@@ -75,7 +74,7 @@ POST http://localhost:5000/api/v1/business/create
 Content-Type: application/json
 
 {
-    "agency_id": "BC_70001_077204005691",
+    "agency_id": "BC_71000_077204005691",
     "user_fullname": "Lữ Xuân Minh",
     "user_phone_number": "0981430418",
     "user_email": "minh.luxuanhcmut@hcmut.edu.vn",
@@ -92,7 +91,7 @@ Content-Type: application/json
     "business_name": "Alpha Solutions",
     "email": "alphasolutions@alphasolutions.com",
     "phone_number": "0981430418",
-    "tax_number": "1234567890",
+    "tax_number": "1234567891",
     "province": "Bà Rịa - Vũng Tàu",
     "district": "Đất Đỏ",
     "town": "Đất Đỏ",

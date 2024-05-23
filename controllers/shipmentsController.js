@@ -920,11 +920,17 @@ const decomposeShipment = async (req, res) => {
         let resultDecomposingShipment;
         if (["MANAGER", "TELLER"].includes(req.user.role)) {
             resultDecomposingShipment = await shipmentService.decomposeShipment(JSON.parse(shipment.order_ids), shipment.shipment_id, req.user.agency_id);
+
+            const sourcePostalCode = shipment.shipment_id.split("_")[1];
+            if(!(sourcePostalCode.substring(0, 4) === "0000")) {
+                await shipmentService.decomposeShipmentInAgency(JSON.parse(shipment.order_ids), shipment.shipment_id, shipment.agency_id, sourcePostalCode);
+            }
+            
             await shipmentService.updateShipment({ status: 6}, { shipment_id: req.query.shipment_id }, postalCode);
         }
         else if (["AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
             resultDecomposingShipment = await shipmentService.decomposeShipment(JSON.parse(shipment.order_ids), shipment.shipment_id, req.user.agency_id);
-            await shipmentService.decomposeShipmentInAgency(JSON.parse(shipment.order_ids), shipment.shipment_id, postalCode);
+            await shipmentService.decomposeShipmentInAgency(JSON.parse(shipment.order_ids), shipment.shipment_id, req.user.agency_id, postalCode);
         }
 
         if (resultGettingOneShipment[0].agency_id) {
@@ -1253,6 +1259,7 @@ const approveNewShipment = async (req, res) => {
         }
 
         await shipmentService.updateShipment({ status: 2 }, req.query);
+        await shipmentService.updateShipment({ status: 2 }, req.query, utils.getPostalCodeFromAgencyID(req.user.agency_id));
         const agencyIdSubParts = resultGettingOneShipment[0].agency_id.split('_');
         if (agencyIdSubParts[0] === "DL" || agencyIdSubParts[0] === "BC") {
             await shipmentService.updateShipment({ status: 2}, req.query, utils.getPostalCodeFromAgencyID(resultGettingOneShipment[0].agency_id));

@@ -39,11 +39,11 @@ const paymentRouter = require("./routes/paymentRoute");
 const zaloRoute = require("./routes/zaloRoute");
 
 const dbOptions = {
-    host: process.env.HOST,
-    port: process.env.DBPORT,
-    user: process.env.USER,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE,
+    host: "localhost",
+    port: "3306",
+    user: "root",
+    password: "new_password",
+    database: "localtdlogistics",
 };
 
 const pool = mysql.createPool(dbOptions);

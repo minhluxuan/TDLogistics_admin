@@ -226,13 +226,14 @@ const confirmCompletedTask = async (req, res) => {
         if (order.status_code === servicesStatus.taking.code || order.status_code === servicesStatus.processing.code) {
             orderMessage = `${formattedTime}: Lấy hàng thành công bởi bưu tá`;
             orderStatus = servicesStatus.taken_success;
+            await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus, resultGettingOneTask[0].order_id.split('_')[1]);
             await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus);
-        await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus, resultGettingOneTask[0].order_id.split('_')[1]);
+
         } else if (order.status_code === servicesStatus.delivering.code) {
             orderMessage = `${formattedTime}: Giao hàng thành công`;
             orderStatus = servicesStatus.delivered_success;
-            await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus);
-        await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus, resultGettingOneTask[0].order_id.split('_')[1]);
+            await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus, resultGettingOneTask[0].order_id.split('_')[1]);
+            await ordersService.setJourney(resultGettingOneTask[0].order_id, orderMessage, orderStatus);           
         }
         
         
