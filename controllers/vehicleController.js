@@ -510,7 +510,7 @@ const undertakeShipment = async (req, res) => {
         
         return res.status(200).json({
             error: false,
-            message: `Tiếp nhận đơn hàng có mã ${req.query.shipment_id} thành công.`,
+            message: `Tiếp nhận lô hàng có mã ${req.query.shipment_id} thành công.`,
         });
     } catch (error) {
         console.log(error);

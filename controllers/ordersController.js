@@ -155,6 +155,127 @@ const createNewOrder = async (socket, info, orderTime) => {
     }
 }
 
+//HTTP request
+const restCreateNewOrder = async (req, res) => {
+    try {
+        const orderTime = new Date();
+
+        if (["USER"].includes(req.user.role)) {
+            const { error } = orderValidation.validateCreatingOrder(req.body);
+
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
+            req.body.user_id = req.user.user_id;
+            req.body.phone_number_sender = req.user.phone_number;
+            req.body.status_code = servicesStatus.processing.code;
+        }
+        else if (["ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"].includes(req.user.role)) {
+            const { error } = orderValidation.validateCreatingOrderByAdmin(req.body);
+
+            if (error) {
+                return res.status(400).json({
+                    error: true,
+                    message: error.message,
+                });
+            }
+            
+            req.body.status_code = servicesStatus.received.code;
+        }
+
+        if (req.body.service_type === "NNT") {
+            if(req.body.province_source !== req.body.province_dest) {
+                return res.status(409).json({
+                    error: true,
+                    message: "Đơn hàng phải được giao nội tỉnh!"
+                });
+            }
+        }
+
+        const resultFindingManagedAgency = await ordersService.findingManagedAgency(req.body.ward_source, req.body.district_source, req.body.province_source);   
+        
+        const resultGettingShipperWillServe = await staffsService.getOneStaff({ staff_id: resultFindingManagedAgency.shipper });
+        if (!resultGettingShipperWillServe || resultGettingShipperWillServe.length === 0) {
+            return res.status(400).json({
+                error: true,
+                message: "Xin lỗi quý khách. Khu vực của quý khách hiện chưa có shipper nào phục vụ."
+            });
+        }
+
+        req.body.journey = JSON.stringify(new Array());
+        const agencies = resultFindingManagedAgency.agency_id;
+        const areaAgencyIdSubParts = agencies.split('_');
+        req.body.agency_id = agencies;
+        const orderCode = orderTime.getFullYear().toString() + (orderTime.getMonth() + 1).toString() + orderTime.getDate().toString() + orderTime.getHours().toString() + orderTime.getMinutes().toString() + orderTime.getSeconds().toString() + orderTime.getMilliseconds().toString();
+        req.body.order_id = areaAgencyIdSubParts[0] + '_' + areaAgencyIdSubParts[1] + '_' + orderCode;
+        
+        const provinceSource = req.body.province_source.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
+        const provinceDest = req.body.province_dest.replace(/^(Thành phố\s*|Tỉnh\s*)/i, '').trim();
+
+        req.body.fee = servicesFee.calculateFee(req.body.service_type, provinceSource, provinceDest, req.body.mass, 0.15, false);
+        req.body.paid = false;
+
+        const orderCodeRandom = randomstring.generate({
+            length: 15,
+            charset: "numeric",
+        });
+
+        req.body.order_code = orderCodeRandom;
+        const resultCreatingNewPayment = await paymentService.createPaymentService(parseInt(orderCodeRandom), req.body.fee, `THANH TOAN DON HANG`);
+        if (!resultCreatingNewPayment || !resultCreatingNewPayment.qrCode) {
+            return socket.emit("notifyFailCreateNewOrder", "Lỗi khi tạo hóa đơn thanh toán. Vui lòng thử lại.");
+        }
+
+        const resultGettingPaymentLinkInfo = await paymentService.getPaymentInformation(orderCodeRandom);
+        req.body.qrcode = resultCreatingNewPayment.qrCode;
+
+        const resultCreatingNewOrder = await ordersService.createNewOrder(req.body);
+        if (!resultCreatingNewOrder || resultCreatingNewOrder.length === 0) {
+            return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
+        }
+
+        const resultCreatingNewOrderInAgency = await ordersService.createOrderInAgencyTable(req.body, resultFindingManagedAgency.postal_code);
+        if (!resultCreatingNewOrderInAgency || resultCreatingNewOrderInAgency.length === 0) {
+            return socket.emit("notifyFailCreatedNewOrder", "Tạo đơn hàng thất bại.");
+        }
+
+        const postalCode = utils.getPostalCodeFromAgencyID(resultFindingManagedAgency.shipper);
+        const resultAssigningTaskForShipper = await shippersService.assignNewTasks([req.body.order_id], resultFindingManagedAgency.shipper, postalCode);
+        for (const order_id of resultAssigningTaskForShipper.acceptedArray) {
+            let orderMessage;
+            let orderStatus;
+            const formattedTime = moment(new Date()).format("DD-MM-YYYY HH:mm:ss");
+            const order = (await ordersService.getOneOrder({ order_id }))[0];
+            if(order.status_code === servicesStatus.processing.code) {
+                orderMessage = `${formattedTime}: Đơn hàng đang được bưu tá đến nhận`;
+                orderStatus = servicesStatus.taking;
+                await ordersService.setJourney(order_id, orderMessage, orderStatus);
+                await ordersService.setJourney(order_id, orderMessage, orderStatus, req.body.order_id.split('_')[1]);
+            } 
+            else if (order.status_code === servicesStatus.received.code) {
+                orderMessage = `${formattedTime}: Đơn hàng đã được bưu cục tiếp nhận`;
+                orderStatus = servicesStatus.enter_agency;
+                await ordersService.setJourney(order_id, orderMessage, orderStatus);
+                await ordersService.setJourney(order_id, orderMessage, orderStatus, req.body.order_id.split('_')[1]);
+            }         
+        }
+        await usersService.updateUserInfo({ province: req.body.province_source, district: req.body.district_source, ward: req.body.ward_source, detail_address: req.body.detail_source }, { phone_number: req.user.phone_number });
+
+        return res.status(201).json({
+            error: false,
+            message: "Tạo đơn hàng thành công."
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        }); 
+    }
+}
+
 const calculateServiceFee = async (req, res) => {
     try{
         console.table(req.body);
@@ -844,6 +965,7 @@ module.exports = {
     getOrders,
     checkFileFormat,
     createNewOrder,
+    restCreateNewOrder,
     createOrdersByFile,
     updateOrder,
     cancelOrder,

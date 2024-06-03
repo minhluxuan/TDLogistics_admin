@@ -87,6 +87,7 @@ const createOTP = async (req, res) => {
             Xin cảm ơn quý khách,<br>
             Đội ngũ kỹ thuật TDLogistics.
             </p>`,
+            
         };
 
         transporter.sendMail(mailOptions, (err, info) => {

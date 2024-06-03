@@ -32,7 +32,7 @@ const fileFilter = (req, file, done) => {
     }
 
     if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png"
-    && file.mimetype !== "application/pdf") 
+    && file.mimetype !== "application/pdf" && file.mimetype !== "image/heic") 
     { 
        return done(new Error("File không hợp lệ"));
     }

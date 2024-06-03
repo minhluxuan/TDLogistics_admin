@@ -30,7 +30,7 @@ const fileFilter = (req, file, done) => {
         return done(new Error("Kiểu file không hợp lệ. Chỉ cho phép file PDF."));
     }
 
-    const maxFileSize = 5 * 1024 * 1024;
+    const maxFileSize = 10 * 1024 * 1024;
     if (file.size > maxFileSize) {
         done(new Error("File có kích thước quá lớn. Tối đa 5MB được cho phép"));
     }

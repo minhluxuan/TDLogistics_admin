@@ -81,11 +81,11 @@ const fileFilter = (req, file, done) => {
         return done(new Error("File không tồn tại."));
     }
 
-    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png") { 
+    if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png" && file.mimetype !== "image/heic") { 
        return done(new Error("Hình ảnh không hợp lệ. Chỉ các file .jpg, .jpeg, .png được cho phép."));
     }
 
-    const maxFileSize = 5 * 1024 * 1024;
+    const maxFileSize = 10 * 1024 * 1024;
     if (file.size > maxFileSize) {
         done(new Error("File có kích thước quá lớn. Tối đa 5MB được cho phép."));
     }
@@ -100,6 +100,7 @@ const fileFilter = (req, file, done) => {
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
+
 });
 
 router.post("/login", passport.authenticate("normalLogin"), (req, res, next) => {

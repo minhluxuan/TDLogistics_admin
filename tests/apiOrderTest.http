@@ -1,7 +1,7 @@
 ### "username": "buucucdatdo",
 ### "password": "Buucucquan1@tdlogistics"
 
-POST http://localhost:5000/api/v1/orders/create
+POST http://localhost:5000/api/v1/orders/rest_create
 content-type: application/json
 
 {

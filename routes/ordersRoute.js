@@ -31,7 +31,7 @@ const fileFilter = (req, file, done) => {
        return done(new Error("File không hợp lệ. Chỉ cho phép file .xlsx"));
     }
 
-    const maxFileSize = 5 * 1024 * 1024;
+    const maxFileSize = 10 * 1024 * 1024;
     if (file.size > maxFileSize) {
         done(new Error("File có kích thước quá lớn. Tối đa 5MB được cho phép"));
     }
@@ -154,11 +154,12 @@ router.post(
     upload.single("file"),
     ordersController.checkFileFormat
 );
+//HTTP request
 router.post(
     "/create",
     auth.isAuthenticated(),
     auth.isAuthorized(["USER", "ADMIN", "MANAGER", "TELLER", "AGENCY_MANAGER", "AGENCY_TELLER"]),
-    ordersController.createNewOrder
+    ordersController.restCreateNewOrder
 );
 router.post(
     "/create_by_file",

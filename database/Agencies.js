@@ -65,7 +65,7 @@ const checkPostalCode = async (province, district, postal_code) => {
 
 const checkWardsOccupation = async (province, district, wards) => {
 	for (const ward of wards) {
-		const resultFindingWard = await dbUtils.findOneIntersect(pool, "ward", ["province", "district", "ward"], [province, district, ward]);
+		const resultFindingWard = await dbUtils.findOneIntersect(pool, "ward", ["province", "district", "ward"], [province, district, ward]); //tai sao lai intersect o day???xd
 		if (!resultFindingWard || resultFindingWard.length <= 0) {
 			return new Object({
 				success: false,
